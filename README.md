@@ -65,8 +65,8 @@ cargo build --release --target i686-pc-windows-msvc
 ##### Linux
 Install the targets:
 ```bash
-rustup add target x86_84-unknown-linux-gnu
-rustup add target i686-unknown-linux-gnu
+rustup target add x86_84-unknown-linux-gnu
+rustup target add i686-unknown-linux-gnu
 ```
 Then, navigate to `devolutionscrypto/` and run: 
 ```batch
