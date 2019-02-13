@@ -1,3 +1,10 @@
 /target
 **/*.rs.bk
 Cargo.lock
+*.suo
+*.user
+_ReSharper.*
+bin
+obj
+packages
+.DS_Store
