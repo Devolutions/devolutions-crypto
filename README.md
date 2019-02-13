@@ -54,8 +54,8 @@ To build for release, you need to install rustup and add the required targets an
 ##### Windows
 Install the targets:
 ```batch
-rustup add target x86_64-pc-windows-msvc
-rustup add target i686-pc-windows-msvc
+rustup target add x86_64-pc-windows-msvc
+rustup target add i686-pc-windows-msvc
 ```
 Then, navigate to `devolutionscrypto/` and run: 
 ```batch
@@ -65,8 +65,8 @@ cargo build --release --target i686-pc-windows-msvc
 ##### Linux
 Install the targets:
 ```bash
-rustup add target x86_64-unknown-linux-gnu
-rustup add target i686-unknown-linux-gnu
+rustup target add x86_64-unknown-linux-gnu
+rustup target add i686-unknown-linux-gnu
 ```
 Then, navigate to `devolutionscrypto/` and run: 
 ```batch
@@ -78,7 +78,7 @@ cargo build --release --target i686-pc-windows-msvc
 TODO
 
 #### Use the Library
-TODO
+View the examples.md file in the wrappers folder
 
 ### WebAssembly
 #### Build the Library
