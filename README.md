@@ -54,23 +54,23 @@ To build for release, you need to install rustup and add the required targets an
 ##### Windows
 Install the targets:
 ```batch
-rustup add target x86_84-pc-windows-msvc
+rustup add target x86_64-pc-windows-msvc
 rustup add target i686-pc-windows-msvc
 ```
 Then, navigate to `devolutionscrypto/` and run: 
 ```batch
-cargo build --release --target x86_84-pc-windows-msvc
+cargo build --release --target x86_64-pc-windows-msvc
 cargo build --release --target i686-pc-windows-msvc
 ```
 ##### Linux
 Install the targets:
 ```bash
-rustup target add x86_84-unknown-linux-gnu
-rustup target add i686-unknown-linux-gnu
+rustup add target x86_64-unknown-linux-gnu
+rustup add target i686-unknown-linux-gnu
 ```
 Then, navigate to `devolutionscrypto/` and run: 
 ```batch
-cargo build --release --target x86_84-pc-windows-msvc
+cargo build --release --target x86_64-pc-windows-msvc
 cargo build --release --target i686-pc-windows-msvc
 ```
 
