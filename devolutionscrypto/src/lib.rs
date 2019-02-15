@@ -1,3 +1,5 @@
+#![feature(try_from)]
+
 #[macro_use]
 extern crate cfg_if;
 
@@ -10,6 +12,7 @@ extern crate rand;
 extern crate sha2;
 extern crate x25519_dalek;
 
+mod dc_data_blob;
 pub mod devocrypto;
 mod devocrypto_errors;
 

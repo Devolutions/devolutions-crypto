@@ -3,7 +3,7 @@ use std::io::Cursor;
 use aes::Aes256;
 use block_modes::{block_padding::Pkcs7, BlockMode, Cbc};
 
-use x25519_dalek::{ x25519, X25519_BASEPOINT_BYTES };
+use x25519_dalek::{x25519, X25519_BASEPOINT_BYTES};
 
 use rand::{rngs::OsRng, RngCore};
 
@@ -143,11 +143,11 @@ pub fn generate_key_exchange() -> Result<(Vec<u8>, Vec<u8>)> {
 }
 
 pub fn mix_key_exchange(public: &[u8], private: &[u8]) -> Vec<u8> {
-    let mut public_sized = [0u8;32];
-    let mut private_sized = [0u8;32];
+    let mut public_sized = [0u8; 32];
+    let mut private_sized = [0u8; 32];
 
     public_sized.copy_from_slice(&public[0..32]);
-    private_sized .copy_from_slice(&private[0..32]);
+    private_sized.copy_from_slice(&private[0..32]);
 
     let shared = x25519(private_sized, public_sized);
     shared.to_vec()
