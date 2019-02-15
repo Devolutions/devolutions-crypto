@@ -26,7 +26,7 @@ impl Into<Vec<u8>> for DcHash {
     fn into(mut self) -> Vec<u8> {
         let iterations = self.iterations;
         let mut data = Vec::with_capacity(4);
-        data.write_u32::<LittleEndian>(iterations);
+        data.write_u32::<LittleEndian>(iterations).unwrap();
 
         data.append(&mut self.salt);
         data.append(&mut self.hash);
@@ -36,7 +36,7 @@ impl Into<Vec<u8>> for DcHash {
 }
 
 impl DcHash {
-    pub fn try_from_header(data: &[u8], header: &DcHeader) -> Result<DcHash> {
+    pub fn try_from_header(data: &[u8], _header: &DcHeader) -> Result<DcHash> {
         let mut vec_iterations = Cursor::new(&data[0..4]);
         let mut salt = Vec::with_capacity(32);
         let mut hash = Vec::with_capacity(32);

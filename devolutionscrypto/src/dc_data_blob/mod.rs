@@ -1,17 +1,20 @@
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use std;
 use std::convert::TryFrom;
-use std::io::Cursor;
 
 use super::Result;
 
+use super::hash_from_version;
+use super::HashImpl;
+
 mod dc_ciphertext;
 mod dc_hash;
+mod dc_header;
 mod dc_key;
 
-use self::dc_ciphertext::DcCiphertext;
-use self::dc_hash::DcHash;
-use self::dc_key::DcKey;
+pub use self::dc_ciphertext::DcCiphertext;
+pub use self::dc_hash::DcHash;
+pub use self::dc_header::DcHeader;
+pub use self::dc_key::DcKey;
 
 const KEY: u16 = 1;
 const CIPHERTEXT: u16 = 2;
@@ -22,17 +25,10 @@ pub struct DcDataBlob {
     payload: DcPayload,
 }
 
-pub struct DcHeader {
-    signature: u16,
-    data_type: u16,
-    data_subtype: u16,
-    version: u16,
-}
-
 pub enum DcPayload {
-    Key(DcKey),
-    Ciphertext(DcCiphertext),
-    Hash(DcHash),
+    Key(Box<HashImpl>),
+    Ciphertext(Box<HashImpl>),
+    Hash(Box<HashImpl>),
 }
 
 impl TryFrom<&[u8]> for DcDataBlob {
@@ -44,37 +40,19 @@ impl TryFrom<&[u8]> for DcDataBlob {
     }
 }
 
-impl TryFrom<&[u8]> for DcHeader {
-    type Error = super::devocrypto_errors::DevoCryptoError;
-    fn try_from(data: &[u8]) -> Result<DcHeader> {
-        let mut data_cursor = Cursor::new(data);
-        let signature = data_cursor.read_u16::<LittleEndian>()?;
-        let data_type = data_cursor.read_u16::<LittleEndian>()?;
-        let data_subtype = data_cursor.read_u16::<LittleEndian>()?;
-        let version = data_cursor.read_u16::<LittleEndian>()?;
-
-        Ok(DcHeader {
-            signature,
-            data_type,
-            data_subtype,
-            version,
-        })
-    }
-}
-
 impl DcPayload {
     fn try_from_header(data: &[u8], header: &DcHeader) -> Result<DcPayload> {
         match header.data_type {
             KEY => {
-                let key = DcKey::try_from_header(data, header)?;
-                Ok(DcPayload::Key(key))
+                let hash = hash_from_version(data, header)?;
+                Ok(DcPayload::Hash(hash))
             }
             CIPHERTEXT => {
-                let ciphertext = DcCiphertext::try_from_header(data, header)?;
-                Ok(DcPayload::Ciphertext(ciphertext))
+                let hash = hash_from_version(data, header)?;
+                Ok(DcPayload::Hash(hash))
             }
             HASH => {
-                let hash = DcHash::try_from_header(data, header)?;
+                let hash = hash_from_version(data, header)?;
                 Ok(DcPayload::Hash(hash))
             }
             _ => panic!(),
@@ -99,23 +77,12 @@ impl Into<Vec<u8>> for DcDataBlob {
     }
 }
 
-impl Into<Vec<u8>> for DcHeader {
-    fn into(self) -> Vec<u8> {
-        let mut data = Vec::with_capacity(8);
-        data.write_u16::<LittleEndian>(self.signature);
-        data.write_u16::<LittleEndian>(self.data_type);
-        data.write_u16::<LittleEndian>(self.data_subtype);
-        data.write_u16::<LittleEndian>(self.version);
-        data
-    }
-}
-
 impl Into<Vec<u8>> for DcPayload {
-    fn into(self) -> Vec<u8> {
+    fn into(mut self) -> Vec<u8> {
         match self {
-            DcPayload::Key(x) => x.into(),
-            DcPayload::Ciphertext(x) => x.into(),
-            DcPayload::Hash(x) => x.into(),
+            DcPayload::Key(ref mut x) => x.into_vec(),
+            DcPayload::Ciphertext(ref mut x) => x.into_vec(),
+            DcPayload::Hash(ref mut x) => x.into_vec(),
         }
     }
 }

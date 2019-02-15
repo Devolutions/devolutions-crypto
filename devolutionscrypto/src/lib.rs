@@ -13,6 +13,7 @@ extern crate sha2;
 extern crate x25519_dalek;
 
 mod dc_data_blob;
+mod dc_versions_impl;
 pub mod devocrypto;
 mod devocrypto_errors;
 
@@ -28,3 +29,8 @@ cfg_if! {
 }
 
 pub type Result<T> = std::result::Result<T, devocrypto_errors::DevoCryptoError>;
+use devocrypto_errors::DevoCryptoError;
+
+use dc_data_blob::DcHeader;
+use dc_versions_impl::hash_from_version;
+use dc_versions_impl::HashImpl;

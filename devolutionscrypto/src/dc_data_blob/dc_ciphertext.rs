@@ -32,7 +32,7 @@ impl Into<Vec<u8>> for DcCiphertext {
 }
 
 impl DcCiphertext {
-    pub fn try_from_header(data: &[u8], header: &DcHeader) -> Result<DcCiphertext> {
+    pub fn try_from_header(data: &[u8], _header: &DcHeader) -> Result<DcCiphertext> {
         let mut iv = Vec::with_capacity(16);
         let mut ciphertext = Vec::new();
         let mut hmac = Vec::with_capacity(32);
