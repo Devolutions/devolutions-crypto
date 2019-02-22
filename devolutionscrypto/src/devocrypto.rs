@@ -41,7 +41,7 @@ pub fn encrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
     let mut result = cipher.encrypt_vec(data);
 
     // Append data
-    let mut final_result = vec![0x0D, 0x0C, 0x01, 0x00];
+    let mut final_result = vec![0x0D, 0x0C, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00];
     final_result.append(&mut iv);
     final_result.append(&mut result);
 
@@ -63,9 +63,9 @@ pub fn decrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
     split_key(key, &mut encryption_key, &mut signature_key);
 
     // Verify signature
-    let signature = &data[0..4];
+    let signature = &data[0..8];
 
-    if signature != [0x0D, 0x0C, 0x01, 0x00] {
+    if signature != [0x0D, 0x0C, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00] {
         return Err(DevoCryptoError::InvalidSignature);
     }
 
@@ -76,8 +76,8 @@ pub fn decrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
     mac.input(&data[0..data.len() - 32]);
     mac.verify(&data_mac)?;
 
-    let iv = &data[4..20];
-    let data = &data[20..data.len() - 32];
+    let iv = &data[8..24];
+    let data = &data[24..data.len() - 32];
 
     let cipher = Cbc::<Aes256, Pkcs7>::new_var(&encryption_key, &iv)?;
     let result = cipher.decrypt_vec(data)?;
@@ -92,7 +92,7 @@ pub fn hash_password(pass: &[u8], niterations: u32) -> Result<Vec<u8>> {
     rng.fill_bytes(&mut salt);
 
     // Prepare data
-    let mut signature = vec![0x0d, 0x0d, 0x01, 0x00];
+    let mut signature = vec![0x0D, 0x0C, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00];
     let mut vec_iterations = Vec::new();
     vec_iterations.write_u32::<LittleEndian>(niterations)?;
 
@@ -112,45 +112,63 @@ pub fn hash_password(pass: &[u8], niterations: u32) -> Result<Vec<u8>> {
 
 pub fn verify_password(pass: &[u8], hash: &[u8]) -> Result<bool> {
     // Verify signature
-    let signature = &hash[0..4];
+    let signature = &hash[0..8];
 
-    if signature != [0x0D, 0x0D, 0x01, 0x00] {
+    if signature != [0x0D, 0x0C, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00] {
         return Err(DevoCryptoError::InvalidSignature);
     }
 
     // Get metadata
-    let mut vec_iterations = Cursor::new(&hash[4..8]);
+    let mut vec_iterations = Cursor::new(&hash[8..12]);
     let niterations = vec_iterations.read_u32::<LittleEndian>()?;
-    let salt = &hash[8..40];
+    let salt = &hash[12..44];
 
     let mut res = vec![0u8; 32];
 
     pbkdf2::<Hmac<Sha256>>(pass, salt, niterations as usize, &mut res);
 
-    Ok(res == &hash[40..])
+    Ok(res == &hash[44..])
 }
 
 pub fn generate_key_exchange() -> Result<(Vec<u8>, Vec<u8>)> {
+    let mut signature_pub = vec![0x0D, 0x0C, 0x01, 0x00];
+    let mut signature_priv = signature_pub.clone();
+
+    signature_pub.append(&mut vec![0x01, 0x00, 0x01, 0x00]);
+    signature_priv.append(&mut vec![0x02, 0x00, 0x01, 0x00]);
+
     let mut rng = OsRng::new()?;
     let mut private = [0u8; 32];
 
     rng.fill_bytes(&mut private);
 
-    let private_vec = private.to_vec();
+    let mut private_vec = private.to_vec();
 
     let public = x25519(private, X25519_BASEPOINT_BYTES);
-    Ok((public.to_vec(), private_vec))
+
+    signature_pub.append(&mut public.to_vec());
+    signature_priv.append(&mut private_vec);
+    Ok((signature_pub, signature_priv))
 }
 
-pub fn mix_key_exchange(public: &[u8], private: &[u8]) -> Vec<u8> {
+pub fn mix_key_exchange(public: &[u8], private: &[u8]) -> Result<Vec<u8>> {
+    let signature_pub = &public[0..8];
+    let signature_priv = &private[0..8];
+
+    if signature_pub != [0xD, 0xC, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00]
+        || signature_priv != [0x0D, 0x0C, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00]
+    {
+        return Err(DevoCryptoError::InvalidSignature);
+    }
+
     let mut public_sized = [0u8; 32];
     let mut private_sized = [0u8; 32];
 
-    public_sized.copy_from_slice(&public[0..32]);
-    private_sized.copy_from_slice(&private[0..32]);
+    public_sized.copy_from_slice(&public[8..40]);
+    private_sized.copy_from_slice(&private[8..40]);
 
     let shared = x25519(private_sized, public_sized);
-    shared.to_vec()
+    Ok(shared.to_vec())
 }
 
 pub fn generate_key(length: usize) -> Result<Vec<u8>> {
@@ -207,8 +225,8 @@ fn ecdh_test() {
     let (bob_pub, bob_priv) = generate_key_exchange().unwrap();
     let (alice_pub, alice_priv) = generate_key_exchange().unwrap();
 
-    let bob_shared = mix_key_exchange(&alice_pub, &bob_priv);
-    let alice_shared = mix_key_exchange(&bob_pub, &alice_priv);
+    let bob_shared = mix_key_exchange(&alice_pub, &bob_priv).unwrap();
+    let alice_shared = mix_key_exchange(&bob_pub, &alice_priv).unwrap();
 
     assert_eq!(bob_shared, alice_shared);
 }

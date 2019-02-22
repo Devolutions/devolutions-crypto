@@ -3,17 +3,9 @@
 #[macro_use]
 extern crate cfg_if;
 
-extern crate aes;
-extern crate block_modes;
-extern crate byteorder;
-extern crate hmac;
-extern crate pbkdf2;
-extern crate rand;
-extern crate sha2;
-extern crate x25519_dalek;
+//mod dc_data_blob;
+//mod dc_versions_impl;
 
-mod dc_data_blob;
-mod dc_versions_impl;
 pub mod devocrypto;
 mod devocrypto_errors;
 
@@ -29,8 +21,8 @@ cfg_if! {
 }
 
 pub type Result<T> = std::result::Result<T, devocrypto_errors::DevoCryptoError>;
-use devocrypto_errors::DevoCryptoError;
+//use devocrypto_errors::DevoCryptoError;
 
-use dc_data_blob::DcHeader;
-use dc_versions_impl::hash_from_version;
-use dc_versions_impl::HashImpl;
+//use dc_data_blob::DcHeader;
+//use dc_versions_impl::hash_from_version;
+//use dc_versions_impl::HashImpl;

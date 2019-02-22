@@ -36,7 +36,7 @@ pub unsafe extern "C" fn Encrypt(
 
 #[no_mangle]
 pub extern "C" fn EncryptSize(data_length: size_t) -> i64 {
-    (4 + 16 + (data_length / 16 + 1) * 16 + 32) as i64 // Version + IV + data(padded to 16) + HMAC
+    (8 + 16 + (data_length / 16 + 1) * 16 + 32) as i64 // Header + IV + data(padded to 16) + HMAC
 }
 
 #[no_mangle]
@@ -98,7 +98,7 @@ pub unsafe extern "C" fn HashPassword(
 
 #[no_mangle]
 pub extern "C" fn HashPasswordLength() -> i64 {
-    4 + 4 + 32 + 32 // Signature + iterations + salt + hash
+    8 + 4 + 32 + 32 // Header + iterations + salt + hash
 }
 
 #[no_mangle]
@@ -169,15 +169,15 @@ pub unsafe extern "C" fn MixKeyExchange(
     assert!(!public.is_null());
     assert!(!private.is_null());
     assert!(!shared.is_null());
-    assert_eq!(public_size, 32);
-    assert_eq!(private_size, 32);
+    assert_eq!(public_size, 32 + 8);
+    assert_eq!(private_size, 32 + 8);
     assert_eq!(shared_size, 32);
 
     let public = slice::from_raw_parts(public, public_size);
     let private = slice::from_raw_parts(private, private_size);
     let shared = slice::from_raw_parts_mut(shared, shared_size);
 
-    let shared_vec = devocrypto::mix_key_exchange(&public, &private);
+    let shared_vec = devocrypto::mix_key_exchange(&public, &private).unwrap();
     shared[0..shared_vec.len()].copy_from_slice(&shared_vec);
     0
 }
