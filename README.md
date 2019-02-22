@@ -42,6 +42,19 @@ The encryption key(salt="\x00") and the signature key(salt="\x01").
 #### KeyExchange
 The key exchanges uses x25519 protocol, which uses Diffie-Hellman based on elliptic curves.
 
+## Headers
+The current data header works as the following:  
+1. 2 bytes signature: [ 0x0D, 0x0C ], stands for Devocultions Crypto.  
+2. 2 bytes type in Little Endian. The following types are implemented:  
+    - Key = 1
+    - Ciphertext = 2
+    - Hash = 3
+3. 2 bytes subtype in little endian.
+    - Key
+        - Public = 1
+        - Private = 2
+4. 2 bytes version in Little Endian. Currently, everything is at version 1.
+
 ## Wrappers and How To Build
 Wrappers currently supported are for C# and WebAssembly. Since the C# bindings uses FFI, the same 
 .dll should work for most languages bindings.
