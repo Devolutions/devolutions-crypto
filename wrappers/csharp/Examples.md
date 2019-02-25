@@ -3,8 +3,10 @@
 
 ```csharp
 
+// With strings
 string encrypted_string = Devolutions.Cryptography.Encrypt("mysupersecretdata", "mysecretpassword");
 
+// With bytes
 byte[] data = new byte[] { 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
 byte[] key = new byte[] { 0x40, 0x40, 0x70, 0x20, 0x80, 0x30, 0x50 };
 
@@ -16,10 +18,10 @@ byte[] encrypted_data = Devolutions.Cryptography.Encrypt(data, key);
 ###
 
 ```csharp
-
+// With strings
 string decrypted_string = Devolutions.Cryptography.Decrypt(encrypted_string, "mysecretpassword");
 
-
+//With bytes
 byte[] key = new byte[] { 0x40, 0x40, 0x70, 0x20, 0x80, 0x30, 0x50 };
 
 byte[] dencrypted_data = Devolutions.Cryptography.Decrypt(encrypted_data, key);
