@@ -135,8 +135,8 @@ pub unsafe extern "C" fn GenerateKeyExchange(
 ) -> i64 {
     assert!(!public.is_null());
     assert!(!private.is_null());
-    assert_eq!(public_size, 32);
-    assert_eq!(private_size, 32);
+    assert_eq!(public_size, 32 + 8);
+    assert_eq!(private_size, 32 + 8);
 
     let public = slice::from_raw_parts_mut(public, public_size);
     let private = slice::from_raw_parts_mut(private, private_size);
@@ -154,7 +154,7 @@ pub unsafe extern "C" fn GenerateKeyExchange(
 
 #[no_mangle]
 pub extern "C" fn GenerateKeyExchangeSize() -> i64 {
-    32
+    8 + 32 // header + key lenght
 }
 
 #[no_mangle]

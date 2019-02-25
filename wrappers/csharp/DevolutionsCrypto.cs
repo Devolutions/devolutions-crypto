@@ -3,6 +3,7 @@ namespace Devolutions
     using System;
     using System.Runtime.InteropServices;
     using System.Text;
+    using System.Linq;
 
     public class KeyExchange
     {
@@ -278,9 +279,19 @@ namespace Devolutions
 
             var john = Decrypt(bobresult, "12345678901234561234567890123456");
 
+            if (john != "Johny")
+            {
+                throw new Exception();
+            }
+
             string hashresult = HashPassword("bob", 10000);
 
             bool hashverify = VerifyPassword("bob", hashresult);
+
+            if (!hashverify)
+            {
+                throw new Exception();
+            }
 
             byte[] generateKey = GenerateKey();
 
@@ -292,17 +303,25 @@ namespace Devolutions
             byte[] sharedAlice = MixKeyExchange(bob.PublicKey, alice.PrivateKey);
             byte[] sharedBob = MixKeyExchange(alice.PublicKey, bob.PrivateKey);
 
-            if(sharedAlice == sharedBob)
+            if (sharedAlice.SequenceEqual(sharedBob))
             {
                 Console.WriteLine("Youhouu");
+            }
+            else
+            {
+                throw new Exception();
             }
 
             string sharedString1 = MixKeyExchange(bob.PublicKeyString, alice.PrivateKeyString);
             string sharedString2 = MixKeyExchange(alice.PublicKeyString, bob.PrivateKeyString);
 
-            if(sharedString1 == sharedString2)
+            if (sharedString1 == sharedString2)
             {
                 Console.WriteLine("Youhouu");
+            }
+            else
+            {
+                throw new Exception();
             }
         }
 
