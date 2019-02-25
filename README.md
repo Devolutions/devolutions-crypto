@@ -70,6 +70,11 @@ Install the targets:
 rustup target add x86_64-pc-windows-msvc
 rustup target add i686-pc-windows-msvc
 ```
+
+```batch
+rustup target add x86_64-pc-windows-msvc --toolchain nightly
+rustup target add i686-pc-windows-msvc --toolchain nightly
+```
 Then, navigate to `devolutionscrypto/` and run: 
 ```batch
 cargo build --release --target x86_64-pc-windows-msvc
