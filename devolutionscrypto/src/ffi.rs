@@ -218,7 +218,7 @@ pub unsafe extern "C" fn DeriveKey(
         b""
     }
     else {
-        slice::from_raw_parts(salt, salt_length);
+        slice::from_raw_parts(salt, salt_length)
     };
 
     let key = slice::from_raw_parts(key, key_length);

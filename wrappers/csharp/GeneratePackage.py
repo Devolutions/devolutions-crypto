@@ -76,25 +76,30 @@ with open("./bin/AssemblyInfo.cs","w+") as filee:
 for arch in architectures["arch"]:
     print("Starting build for " + arch["name"])
 
-    if not os.path.exists("../../devolutionscrypto/target/" + arch["value"] + "/release/devolutionscrypto.dll"):
-        print("Building Native Libraries...")
+    try:
+        shutil.rmtree("../../devolutionscrypto/target/" + arch["value"] + "/release")
+    except:
+        pass
 
-        command= subprocess.Popen(["cargo", "+nightly", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
-        output = command.stdout.read().decode('utf-8')
 
-        print(output)
+    print("Building Native Libraries...")
 
-    os.mkdir("./bin/" + arch["name"])
-
-    shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/devolutionscrypto.dll", "./bin/" + arch["name"] + "/DevolutionsCryptoNative.dll")
-
-    print("Building Managed Library...")
-
-    command= subprocess.Popen([csc_path,"-out:./bin/" + arch["name"] + "/DevolutionsCrypto.dll", "-target:library","-linkresource:./bin/" + arch["name"] + "/DevolutionsCryptoNative.dll", "-platform:" + arch["name"] ,"DevolutionsCrypto.cs", "./bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["cargo", "+nightly", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
 
-    print("Done")              
+    os.mkdir("./bin/" + arch["name"])
+
+    shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/devolutionscrypto.dll", "./bin/" + arch["name"] + "/DevolutionsCrypto.dll")
+
+print("Building Managed Library...")
+
+command= subprocess.Popen([csc_path,"-out:./bin/Devolutions.Crypto.dll", "-target:library","-linkresource:./bin/" + arch["name"] + "/DevolutionsCrypto.dll", "-platform:anycpu" ,"DevolutionsCrypto.cs", "KeyExchange.cs", "DevolutionsCryptoNative.cs", "./bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+output = command.stdout.read().decode('utf-8')
+
+print(output)
+
+print("Done")              
 
 
