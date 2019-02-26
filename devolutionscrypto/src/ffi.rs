@@ -212,11 +212,16 @@ pub unsafe extern "C" fn DeriveKey(
     result_length: size_t,
 ) -> i64 {
     assert!(!key.is_null());
-    assert!(!salt.is_null());
     assert!(!result.is_null());
 
+    let salt = if salt.is_null() {
+        b""
+    }
+    else {
+        slice::from_raw_parts(salt, salt_length);
+    };
+
     let key = slice::from_raw_parts(key, key_length);
-    let salt = slice::from_raw_parts(salt, salt_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
     result.copy_from_slice(&devocrypto::derive_key(&key, &salt, niterations, result_length));
