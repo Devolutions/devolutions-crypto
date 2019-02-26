@@ -10,4 +10,4 @@
 
 ```csharp
   string decrypt = Cryptography.DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
-``
+```
