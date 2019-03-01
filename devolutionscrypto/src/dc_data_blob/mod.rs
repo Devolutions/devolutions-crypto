@@ -2,9 +2,7 @@ use std;
 use std::convert::TryFrom;
 
 use super::Result;
-
-use super::hash_from_version;
-use super::HashImpl;
+use super::DevoCryptoError;
 
 mod dc_ciphertext;
 mod dc_hash;
@@ -26,13 +24,13 @@ pub struct DcDataBlob {
 }
 
 pub enum DcPayload {
-    Key(Box<HashImpl>),
-    Ciphertext(Box<HashImpl>),
-    Hash(Box<HashImpl>),
+    Key(DcKey),
+    Ciphertext(DcCiphertext),
+    Hash(DcHash),
 }
 
 impl TryFrom<&[u8]> for DcDataBlob {
-    type Error = super::devocrypto_errors::DevoCryptoError;
+    type Error = DevoCryptoError;
     fn try_from(data: &[u8]) -> Result<DcDataBlob> {
         let header = DcHeader::try_from(&data[0..8])?;
         let payload = DcPayload::try_from_header(&data[8..], &header)?;
@@ -44,16 +42,13 @@ impl DcPayload {
     fn try_from_header(data: &[u8], header: &DcHeader) -> Result<DcPayload> {
         match header.data_type {
             KEY => {
-                let hash = hash_from_version(data, header)?;
-                Ok(DcPayload::Hash(hash))
+                Ok(DcPayload::Key(DcKey::try_from_header(data, header)?))
             }
             CIPHERTEXT => {
-                let hash = hash_from_version(data, header)?;
-                Ok(DcPayload::Hash(hash))
+                Ok(DcPayload::Ciphertext(DcCiphertext::try_from_header(data, header)?))
             }
             HASH => {
-                let hash = hash_from_version(data, header)?;
-                Ok(DcPayload::Hash(hash))
+                Ok(DcPayload::Hash(DcHash::try_from_header(data, header)?))
             }
             _ => panic!(),
         }
@@ -80,9 +75,9 @@ impl Into<Vec<u8>> for DcDataBlob {
 impl Into<Vec<u8>> for DcPayload {
     fn into(mut self) -> Vec<u8> {
         match self {
-            DcPayload::Key(ref mut x) => x.into_vec(),
-            DcPayload::Ciphertext(ref mut x) => x.into_vec(),
-            DcPayload::Hash(ref mut x) => x.into_vec(),
+            DcPayload::Key(x) => x.into(),
+            DcPayload::Ciphertext(x) => x.into(),
+            DcPayload::Hash(x) => x.into(),
         }
     }
 }
