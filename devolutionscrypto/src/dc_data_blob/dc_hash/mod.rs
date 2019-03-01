@@ -5,10 +5,7 @@ use super::DcHeader;
 use super::Result;
 use super::DevoCryptoError;
 
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use std::convert::TryFrom as _;
-use std::io::Cursor;
-
 
 const V1: u16 = 1;
 

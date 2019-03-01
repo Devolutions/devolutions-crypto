@@ -4,6 +4,7 @@ use std::io::Cursor;
 
 use super::Result;
 
+#[derive(Clone)]
 pub struct DcHeader {
     pub signature: u16,
     pub data_type: u16,
