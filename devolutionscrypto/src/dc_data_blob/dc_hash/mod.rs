@@ -31,3 +31,17 @@ impl Into<Vec<u8>> for DcHash {
         }
     }
 }
+
+impl DcHash {
+    pub fn hash_password(pass: &[u8], iterations: u32, header: &mut DcHeader) -> Result<DcHash> {
+        header.data_type = HASH;
+        header.version = V1;
+        Ok(DcHash::V1(DcHashV1::hash_password(pass, iterations)?))
+    }
+
+    pub fn verify_password(&self, pass: &[u8]) -> Result<bool> {
+        match self {
+            DcHash::V1(x) => x.verify_password(pass),
+        }
+    }
+}

@@ -34,8 +34,8 @@ impl TryFrom<&[u8]> for DcHashV1 {
 
     fn try_from(data: &[u8]) -> Result<DcHashV1> {
         let mut vec_iterations = Cursor::new(&data[0..4]);
-        let mut salt = Vec::with_capacity(32);
-        let mut hash = Vec::with_capacity(32);
+        let mut salt = vec![0u8; 32];
+        let mut hash = vec![0u8; 32];
 
         let iterations = vec_iterations.read_u32::<LittleEndian>()?;
         salt.copy_from_slice(&data[4..36]);

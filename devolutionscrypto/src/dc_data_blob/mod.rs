@@ -14,10 +14,9 @@ mod dc_key;
 pub use self::dc_header::DcHeader;
 pub use self::dc_payload::DcPayload;
 
-pub use self::dc_key::{DcKey, KEY};
 pub use self::dc_ciphertext::{DcCiphertext, CIPHERTEXT};
 pub use self::dc_hash::{DcHash, HASH};
-
+pub use self::dc_key::{DcKey, KEY};
 
 pub struct DcDataBlob {
     header: DcHeader,
@@ -45,11 +44,21 @@ impl Into<Vec<u8>> for DcDataBlob {
 impl DcDataBlob {
     pub fn encrypt(data: &[u8], key: &[u8]) -> Result<DcDataBlob> {
         let mut header = DcHeader::new();
-        let payload = DcPayload::new_ciphertext(data, key, &mut header)?;
+        let payload = DcPayload::encrypt(data, key, &mut header)?;
         Ok(DcDataBlob { header, payload })
     }
 
     pub fn decrypt(&self, key: &[u8]) -> Result<Vec<u8>> {
         self.payload.decrypt(key, &self.header)
+    }
+
+    pub fn hash_password(pass: &[u8], iterations: u32) -> Result<DcDataBlob> {
+        let mut header = DcHeader::new();
+        let payload = DcPayload::hash_password(pass, iterations, &mut header)?;
+        Ok(DcDataBlob { header, payload })
+    }
+
+    pub fn verify_password(&self, pass: &[u8]) -> Result<bool> {
+        self.payload.verify_password(pass)
     }
 }

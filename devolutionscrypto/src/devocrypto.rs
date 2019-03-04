@@ -11,7 +11,7 @@ use sha2::Sha256;
 
 use pbkdf2::pbkdf2;
 
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
+use byteorder::{LittleEndian, ReadBytesExt};
 
 use super::dc_data_blob::DcDataBlob;
 use super::devocrypto_errors::DevoCryptoError;
@@ -27,49 +27,14 @@ pub fn decrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
     blob.decrypt(key)
 }
 
-pub fn hash_password(pass: &[u8], niterations: u32) -> Result<Vec<u8>> {
-    // Generate salt
-    let mut rng = OsRng::new()?;
-    let mut salt = vec![0u8; 32];
-    rng.fill_bytes(&mut salt);
-
-    // Prepare data
-    let mut signature = vec![0x0D, 0x0C, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00];
-    let mut vec_iterations = Vec::new();
-    vec_iterations.write_u32::<LittleEndian>(niterations)?;
-
-    // Generate hash
-    let mut res = vec![0u8; 32];
-    pbkdf2::<Hmac<Sha256>>(pass, &salt, niterations as usize, &mut res);
-
-    // Put all information together
-    let mut final_result = Vec::new();
-    final_result.append(&mut signature);
-    final_result.append(&mut vec_iterations);
-    final_result.append(&mut salt);
-    final_result.append(&mut res);
-
-    Ok(final_result)
+pub fn hash_password(pass: &[u8], iterations: u32) -> Result<Vec<u8>> {
+    let blob = DcDataBlob::hash_password(pass, iterations)?;
+    Ok(blob.into())
 }
 
-pub fn verify_password(pass: &[u8], hash: &[u8]) -> Result<bool> {
-    // Verify signature
-    let signature = &hash[0..8];
-
-    if signature != [0x0D, 0x0C, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00] {
-        return Err(DevoCryptoError::InvalidSignature);
-    }
-
-    // Get metadata
-    let mut vec_iterations = Cursor::new(&hash[8..12]);
-    let niterations = vec_iterations.read_u32::<LittleEndian>()?;
-    let salt = &hash[12..44];
-
-    let mut res = vec![0u8; 32];
-
-    pbkdf2::<Hmac<Sha256>>(pass, salt, niterations as usize, &mut res);
-
-    Ok(res == &hash[44..])
+pub fn verify_password(pass: &[u8], data: &[u8]) -> Result<bool> {
+    let blob = DcDataBlob::try_from(data)?;
+    blob.verify_password(pass)
 }
 
 pub fn generate_key_exchange() -> Result<(Vec<u8>, Vec<u8>)> {
