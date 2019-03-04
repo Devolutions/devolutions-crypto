@@ -1,88 +1,30 @@
-use std::io::Cursor;
+use std::convert::TryFrom as _;
 
-use aes::Aes256;
-use block_modes::{block_padding::Pkcs7, BlockMode, Cbc};
+use std::io::Cursor;
 
 use x25519_dalek::{x25519, X25519_BASEPOINT_BYTES};
 
 use rand::{rngs::OsRng, RngCore};
 
-use hmac::{Hmac, Mac};
+use hmac::Hmac;
 use sha2::Sha256;
 
 use pbkdf2::pbkdf2;
 
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
+use super::dc_data_blob::DcDataBlob;
 use super::devocrypto_errors::DevoCryptoError;
 use super::Result;
 
-pub fn split_key(secret: &[u8], encryption_key: &mut [u8], signature_key: &mut [u8]) {
-    let salt = b"\x00";
-    pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, encryption_key);
-
-    let salt = b"\x01";
-    pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, signature_key);
-}
-
 pub fn encrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
-    // Split keys
-    let mut encryption_key = vec![0u8; 32];
-    let mut signature_key = vec![0u8; 32];
-    split_key(key, &mut encryption_key, &mut signature_key);
-
-    // Generate IV
-    let mut rng = OsRng::new()?;
-    let mut iv = vec![0u8; 16];
-    rng.fill_bytes(&mut iv);
-
-    // Create cipher object
-    let cipher = Cbc::<Aes256, Pkcs7>::new_var(&encryption_key, &iv)?;
-    let mut result = cipher.encrypt_vec(data);
-
-    // Append data
-    let mut final_result = vec![0x0D, 0x0C, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00];
-    final_result.append(&mut iv);
-    final_result.append(&mut result);
-
-    // HMAC
-    let mut mac = Hmac::<Sha256>::new_varkey(&signature_key)?;
-    mac.input(&final_result);
-
-    let mut mac_result = mac.result().code().to_vec();
-
-    final_result.append(&mut mac_result);
-
-    Ok(final_result)
+    let blob = DcDataBlob::encrypt(data, key)?;
+    Ok(blob.into())
 }
 
 pub fn decrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
-    // Split keys
-    let mut encryption_key = vec![0u8; 32];
-    let mut signature_key = vec![0u8; 32];
-    split_key(key, &mut encryption_key, &mut signature_key);
-
-    // Verify signature
-    let signature = &data[0..8];
-
-    if signature != [0x0D, 0x0C, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00] {
-        return Err(DevoCryptoError::InvalidSignature);
-    }
-
-    // Verify HMAC
-    let data_mac = &data[data.len() - 32..];
-
-    let mut mac = Hmac::<Sha256>::new_varkey(&signature_key)?;
-    mac.input(&data[0..data.len() - 32]);
-    mac.verify(&data_mac)?;
-
-    let iv = &data[8..24];
-    let data = &data[24..data.len() - 32];
-
-    let cipher = Cbc::<Aes256, Pkcs7>::new_var(&encryption_key, &iv)?;
-    let result = cipher.decrypt_vec(data)?;
-
-    Ok(result)
+    let blob = DcDataBlob::try_from(data)?;
+    blob.decrypt(key)
 }
 
 pub fn hash_password(pass: &[u8], niterations: u32) -> Result<Vec<u8>> {
@@ -186,12 +128,14 @@ pub fn derive_key(key: &[u8], salt: &[u8], niterations: usize, size: usize) -> V
 
 #[test]
 fn crypto_test() {
-    let key = "01234567".as_bytes();
-    let data = "Hello world!".as_bytes();
+    let key = "012345678".as_bytes();
+    let data = "Hello worldasass!!".as_bytes();
 
     let encrypted = encrypt(data, key).expect("Cannot encrypt");
     let decrypted = decrypt(&encrypted, key).expect("Cannot decrypt");
 
+    println!("{:?}", data);
+    println!("{:?}", decrypted);
     assert_eq!(decrypted, data);
 }
 
@@ -204,20 +148,6 @@ fn password_test() {
 
     assert!(verify_password(pass, &hash).unwrap());
     assert!(!verify_password("averybadpassword".as_bytes(), &hash).unwrap())
-}
-
-#[test]
-fn split_key_test() {
-    let secret = "averystrongpassword".as_bytes();
-
-    let mut crypto_key = vec![0u8; 32];
-    let mut signature_key = vec![0u8; 32];
-
-    split_key(&secret, &mut crypto_key, &mut signature_key);
-
-    assert_eq!(crypto_key.len(), 32);
-    assert_eq!(signature_key.len(), 32);
-    assert_ne!(crypto_key, signature_key);
 }
 
 #[test]

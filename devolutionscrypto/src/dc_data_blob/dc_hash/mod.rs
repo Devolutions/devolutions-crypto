@@ -7,6 +7,8 @@ use super::Result;
 
 use std::convert::TryFrom as _;
 
+pub const HASH: u16 = 3;
+
 const V1: u16 = 1;
 
 pub enum DcHash {

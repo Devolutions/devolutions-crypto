@@ -4,6 +4,8 @@ use std::io::Cursor;
 
 use super::Result;
 
+const SIGNATURE: u16 = 0x0C0D;
+
 #[derive(Clone)]
 pub struct DcHeader {
     pub signature: u16,
@@ -38,5 +40,16 @@ impl Into<Vec<u8>> for DcHeader {
         data.write_u16::<LittleEndian>(self.data_subtype).unwrap();
         data.write_u16::<LittleEndian>(self.version).unwrap();
         data
+    }
+}
+
+impl DcHeader {
+    pub fn new() -> DcHeader {
+        DcHeader {
+            signature: SIGNATURE,
+            data_type: 0,
+            data_subtype: 0,
+            version: 0,
+        }
     }
 }
