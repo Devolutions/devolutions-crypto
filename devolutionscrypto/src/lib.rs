@@ -9,8 +9,6 @@ mod devocrypto_errors;
 pub type Result<T> = std::result::Result<T, devocrypto_errors::DevoCryptoError>;
 use devocrypto_errors::DevoCryptoError;
 
-use dc_data_blob::DcHeader;
-
 cfg_if! {
     if #[cfg(target_arch = "wasm32")] {
         extern crate wasm_bindgen;

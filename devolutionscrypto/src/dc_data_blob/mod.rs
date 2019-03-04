@@ -73,7 +73,7 @@ impl Into<Vec<u8>> for DcDataBlob {
 }
 
 impl Into<Vec<u8>> for DcPayload {
-    fn into(mut self) -> Vec<u8> {
+    fn into(self) -> Vec<u8> {
         match self {
             DcPayload::Key(x) => x.into(),
             DcPayload::Ciphertext(x) => x.into(),

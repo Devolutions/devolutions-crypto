@@ -24,7 +24,7 @@ impl DcHash {
 
 
 impl Into<Vec<u8>> for DcHash {
-    fn into(mut self) -> Vec<u8> {
+    fn into(self) -> Vec<u8> {
         match self {
             DcHash::V1(x) => x.into()
         }
