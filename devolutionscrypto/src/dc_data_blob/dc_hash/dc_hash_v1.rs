@@ -1,15 +1,14 @@
 use std::convert::TryFrom;
 
-use rand::{rngs::OsRng, RngCore};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use std::io::Cursor;
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
+use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
+use std::io::Cursor;
 
-
-use super::Result;
 use super::DevoCryptoError;
+use super::Result;
 
 pub struct DcHashV1 {
     iterations: u32,
