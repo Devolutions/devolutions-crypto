@@ -61,4 +61,12 @@ impl DcDataBlob {
     pub fn verify_password(&self, pass: &[u8]) -> Result<bool> {
         self.payload.verify_password(pass)
     }
+
+    pub fn generate_key_exchange() -> Result<(DcDataBlob, DcDataBlob)> {
+        let mut header_public = DcHeader::new();
+        let mut header_private = DcHeader::new();
+        let (payload_public, payload_private) = DcPayload::generate_key_exchange(&mut header_public, &mut header_private)?;
+        Ok((DcDataBlob{header: header_public, payload: payload_public},
+            DcDataBlob{header:header_private, payload: payload_private}))
+    }
 }

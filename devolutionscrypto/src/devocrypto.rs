@@ -1,7 +1,5 @@
 use std::convert::TryFrom as _;
 
-use std::io::Cursor;
-
 use x25519_dalek::{x25519, X25519_BASEPOINT_BYTES};
 
 use rand::{rngs::OsRng, RngCore};
@@ -38,24 +36,8 @@ pub fn verify_password(pass: &[u8], data: &[u8]) -> Result<bool> {
 }
 
 pub fn generate_key_exchange() -> Result<(Vec<u8>, Vec<u8>)> {
-    let mut signature_pub = vec![0x0D, 0x0C, 0x01, 0x00];
-    let mut signature_priv = signature_pub.clone();
-
-    signature_pub.append(&mut vec![0x01, 0x00, 0x01, 0x00]);
-    signature_priv.append(&mut vec![0x02, 0x00, 0x01, 0x00]);
-
-    let mut rng = OsRng::new()?;
-    let mut private = [0u8; 32];
-
-    rng.fill_bytes(&mut private);
-
-    let mut private_vec = private.to_vec();
-
-    let public = x25519(private, X25519_BASEPOINT_BYTES);
-
-    signature_pub.append(&mut public.to_vec());
-    signature_priv.append(&mut private_vec);
-    Ok((signature_pub, signature_priv))
+    let (public, private) = DcDataBlob::generate_key_exchange()?;
+    Ok((public.into(), private.into())
 }
 
 pub fn mix_key_exchange(public: &[u8], private: &[u8]) -> Result<Vec<u8>> {
