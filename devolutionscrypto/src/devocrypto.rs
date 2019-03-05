@@ -31,11 +31,11 @@ pub fn verify_password(pass: &[u8], data: &[u8]) -> Result<bool> {
 }
 
 pub fn generate_key_exchange() -> Result<(Vec<u8>, Vec<u8>)> {
-    let (public, private) = DcDataBlob::generate_key_exchange()?;
-    Ok((public.into(), private.into()))
+    let (private, public) = DcDataBlob::generate_key_exchange()?;
+    Ok((private.into(), public.into()))
 }
 
-pub fn mix_key_exchange(public: &[u8], private: &[u8]) -> Result<Vec<u8>> {
+pub fn mix_key_exchange(private: &[u8], public: &[u8]) -> Result<Vec<u8>> {
     let private = DcDataBlob::try_from(private)?;
     let public = DcDataBlob::try_from(public)?;
     private.mix_key_exchange(public)
@@ -48,9 +48,9 @@ pub fn generate_key(length: usize) -> Result<Vec<u8>> {
     Ok(key)
 }
 
-pub fn derive_key(key: &[u8], salt: &[u8], niterations: usize, size: usize) -> Vec<u8> {
+pub fn derive_key(key: &[u8], salt: &[u8], iterations: usize, size: usize) -> Vec<u8> {
     let mut new_key = vec![0u8; size];
-    pbkdf2::<Hmac<Sha256>>(&key, &salt, niterations, &mut new_key);
+    pbkdf2::<Hmac<Sha256>>(&key, &salt, iterations, &mut new_key);
     new_key
 }
 
@@ -80,11 +80,11 @@ fn password_test() {
 
 #[test]
 fn ecdh_test() {
-    let (bob_pub, bob_priv) = generate_key_exchange().unwrap();
-    let (alice_pub, alice_priv) = generate_key_exchange().unwrap();
+    let (bob_priv, bob_pub) = generate_key_exchange().unwrap();
+    let (alice_priv, alice_pub) = generate_key_exchange().unwrap();
 
-    let bob_shared = mix_key_exchange(&alice_pub, &bob_priv).unwrap();
-    let alice_shared = mix_key_exchange(&bob_pub, &alice_priv).unwrap();
+    let bob_shared = mix_key_exchange(&bob_priv, &alice_pub).unwrap();
+    let alice_shared = mix_key_exchange(&alice_priv, &bob_pub).unwrap();
 
     assert_eq!(bob_shared, alice_shared);
 }

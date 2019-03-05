@@ -48,7 +48,7 @@ pub fn generate_key_exchange() -> KeyPair {
 
 #[wasm_bindgen]
 pub fn mix_key_exchange(public: &[u8], private: &[u8]) -> Vec<u8> {
-    devocrypto::mix_key_exchange(public, private)
+    devocrypto::mix_key_exchange(public, private).unwrap()
 }
 
 #[wasm_bindgen]
