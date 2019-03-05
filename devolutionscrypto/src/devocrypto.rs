@@ -37,7 +37,7 @@ pub fn verify_password(pass: &[u8], data: &[u8]) -> Result<bool> {
 
 pub fn generate_key_exchange() -> Result<(Vec<u8>, Vec<u8>)> {
     let (public, private) = DcDataBlob::generate_key_exchange()?;
-    Ok((public.into(), private.into())
+    Ok((public.into(), private.into()))
 }
 
 pub fn mix_key_exchange(public: &[u8], private: &[u8]) -> Result<Vec<u8>> {
