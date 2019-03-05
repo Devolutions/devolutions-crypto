@@ -65,8 +65,21 @@ impl DcDataBlob {
     pub fn generate_key_exchange() -> Result<(DcDataBlob, DcDataBlob)> {
         let mut header_public = DcHeader::new();
         let mut header_private = DcHeader::new();
-        let (payload_public, payload_private) = DcPayload::generate_key_exchange(&mut header_public, &mut header_private)?;
-        Ok((DcDataBlob{header: header_public, payload: payload_public},
-            DcDataBlob{header:header_private, payload: payload_private}))
+        let (payload_public, payload_private) =
+            DcPayload::generate_key_exchange(&mut header_public, &mut header_private)?;
+        Ok((
+            DcDataBlob {
+                header: header_public,
+                payload: payload_public,
+            },
+            DcDataBlob {
+                header: header_private,
+                payload: payload_private,
+            },
+        ))
+    }
+
+    pub fn mix_key_exchange(self, public: DcDataBlob) -> Result<Vec<u8>> {
+        self.payload.mix_key_exchange(public.payload)
     }
 }

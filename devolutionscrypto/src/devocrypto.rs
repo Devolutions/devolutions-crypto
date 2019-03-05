@@ -1,7 +1,5 @@
 use std::convert::TryFrom as _;
 
-use x25519_dalek::{x25519, X25519_BASEPOINT_BYTES};
-
 use rand::{rngs::OsRng, RngCore};
 
 use hmac::Hmac;
@@ -9,10 +7,7 @@ use sha2::Sha256;
 
 use pbkdf2::pbkdf2;
 
-use byteorder::{LittleEndian, ReadBytesExt};
-
 use super::dc_data_blob::DcDataBlob;
-use super::devocrypto_errors::DevoCryptoError;
 use super::Result;
 
 pub fn encrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
@@ -41,23 +36,9 @@ pub fn generate_key_exchange() -> Result<(Vec<u8>, Vec<u8>)> {
 }
 
 pub fn mix_key_exchange(public: &[u8], private: &[u8]) -> Result<Vec<u8>> {
-    let signature_pub = &public[0..8];
-    let signature_priv = &private[0..8];
-
-    if signature_pub != [0xD, 0xC, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00]
-        || signature_priv != [0x0D, 0x0C, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00]
-    {
-        return Err(DevoCryptoError::InvalidSignature);
-    }
-
-    let mut public_sized = [0u8; 32];
-    let mut private_sized = [0u8; 32];
-
-    public_sized.copy_from_slice(&public[8..40]);
-    private_sized.copy_from_slice(&private[8..40]);
-
-    let shared = x25519(private_sized, public_sized);
-    Ok(shared.to_vec())
+    let private = DcDataBlob::try_from(private)?;
+    let public = DcDataBlob::try_from(public)?;
+    private.mix_key_exchange(public)
 }
 
 pub fn generate_key(length: usize) -> Result<Vec<u8>> {
