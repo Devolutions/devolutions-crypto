@@ -62,8 +62,6 @@ fn crypto_test() {
     let encrypted = encrypt(data, key).expect("Cannot encrypt");
     let decrypted = decrypt(&encrypted, key).expect("Cannot decrypt");
 
-    println!("{:?}", data);
-    println!("{:?}", decrypted);
     assert_eq!(decrypted, data);
 }
 

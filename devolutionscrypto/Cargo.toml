@@ -18,6 +18,8 @@ hmac = "0.7.0"
 pbkdf2 = { version = "0.3", default-features = false }
 sha2 = "0.8.0"
 x25519-dalek = "0.5.1"
+subtle = "2.0.0"
+
 clear_on_drop = { version = "0.2.3", features = ["no_cc"] }
 
 [target.'cfg(target_arch="wasm32")'.dependencies]

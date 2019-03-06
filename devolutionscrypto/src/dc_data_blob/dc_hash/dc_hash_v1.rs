@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use subtle::ConstantTimeEq as _;
 
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use hmac::Hmac;
@@ -70,6 +71,6 @@ impl DcHashV1 {
     pub fn verify_password(&self, pass: &[u8]) -> Result<bool> {
         let mut res = vec![0u8; 32];
         pbkdf2::<Hmac<Sha256>>(pass, &self.salt, self.iterations as usize, &mut res);
-        Ok(self.hash == res)
+        Ok(res.ct_eq(&self.hash).into())
     }
 }
