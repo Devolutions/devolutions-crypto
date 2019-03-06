@@ -2,12 +2,14 @@
 extern crate cfg_if;
 
 mod dc_data_blob;
-
 pub mod devocrypto;
+
 mod devocrypto_errors;
 
 pub type Result<T> = std::result::Result<T, devocrypto_errors::DevoCryptoError>;
-use devocrypto_errors::DevoCryptoError;
+
+pub use devocrypto_errors::DevoCryptoError;
+pub use dc_data_blob::DcDataBlob;
 
 cfg_if! {
     if #[cfg(target_arch = "wasm32")] {

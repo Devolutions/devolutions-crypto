@@ -83,3 +83,37 @@ impl DcDataBlob {
         self.payload.mix_key_exchange(public.payload)
     }
 }
+
+
+#[test]
+fn crypto_test() {
+    let key = "0123456789abcdefghijkl".as_bytes();
+    let data = "This is a very complex string of character that we need to encrypt".as_bytes();
+
+    let encrypted = DcDataBlob::encrypt(data, key).unwrap();
+    let decrypted = encrypted.decrypt(key).unwrap();
+
+    assert_eq!(decrypted, data);
+}
+
+#[test]
+fn password_test() {
+    let pass = "thisisaveryveryverystrongPa$$w0rd , //".as_bytes();
+    let iterations = 1234u32;
+
+    let hash = DcDataBlob::hash_password(pass, iterations).unwrap();
+
+    assert!(hash.verify_password(pass).unwrap());
+    assert!(!hash.verify_password("averybadpassword".as_bytes()).unwrap())
+}
+
+#[test]
+fn ecdh_test() {
+    let (bob_priv, bob_pub) = DcDataBlob::generate_key_exchange().unwrap();
+    let (alice_priv, alice_pub) = DcDataBlob::generate_key_exchange().unwrap();
+
+    let bob_shared = bob_priv.mix_key_exchange(alice_pub).unwrap();
+    let alice_shared = alice_priv.mix_key_exchange(bob_pub).unwrap();
+
+    assert_eq!(bob_shared, alice_shared);
+}

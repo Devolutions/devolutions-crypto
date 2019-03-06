@@ -1,6 +1,10 @@
 #![allow(non_snake_case)]
 
 use super::devocrypto;
+use super::DcDataBlob;
+
+use std::convert::TryFrom as _;
+
 use libc::{size_t, uint8_t};
 use std::slice;
 
@@ -21,16 +25,17 @@ pub unsafe extern "C" fn Encrypt(
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    match devocrypto::encrypt(data, key) {
+    match DcDataBlob::encrypt(data, key) {
         Ok(res) => {
+            let res: Vec<u8> = res.into();
             if result.len() >= res.len() {
                 result[0..res.len()].copy_from_slice(&res);
                 res.len() as i64
             } else {
                 -1
             }
-        }
-        Err(_) => -1,
+        },
+        Err(e) => e.error_code(),
     }
 }
 
@@ -56,16 +61,21 @@ pub unsafe extern "C" fn Decrypt(
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    match devocrypto::decrypt(data, key) {
+    match DcDataBlob::try_from(data) {
         Ok(res) => {
-            if result.len() >= res.len() {
-                result[0..res.len()].copy_from_slice(&res);
-                res.len() as i64
-            } else {
-                -1
+            match res.decrypt(key) {
+                Ok(res) => {
+                    if result.len() >= res.len() {
+                        result[0..res.len()].copy_from_slice(&res);
+                        res.len() as i64
+                    } else {
+                        -1
+                    }
+                },
+                Err(e) => e.error_code(),
             }
-        }
-        Err(_) => -1,
+        },
+        Err(e) => e.error_code(),
     }
 }
 
@@ -73,7 +83,7 @@ pub unsafe extern "C" fn Decrypt(
 pub unsafe extern "C" fn HashPassword(
     password: *const uint8_t,
     password_length: size_t,
-    niterations: u32,
+    iterations: u32,
     result: *mut uint8_t,
     result_length: size_t,
 ) -> i64 {
@@ -83,16 +93,17 @@ pub unsafe extern "C" fn HashPassword(
     let password = slice::from_raw_parts(password, password_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    match devocrypto::hash_password(password, niterations) {
+    match DcDataBlob::hash_password(password, iterations) {
         Ok(res) => {
+            let res: Vec<u8> = res.into();
             if result.len() >= res.len() {
                 result[0..res.len()].copy_from_slice(&res);
                 res.len() as i64
             } else {
                 -1
             }
-        }
-        Err(_) => -1,
+        },
+        Err(e) => e.error_code(),
     }
 }
 
@@ -114,47 +125,53 @@ pub unsafe extern "C" fn VerifyPassword(
     let password = slice::from_raw_parts(password, password_length);
     let hash = slice::from_raw_parts(hash, hash_length);
 
-    match devocrypto::verify_password(password, hash) {
+    match DcDataBlob::try_from(hash) {
         Ok(res) => {
-            if res {
-                1
-            } else {
-                0
+            match res.verify_password(password) {
+                Ok(res) => {
+                    if res {
+                        1
+                    } else {
+                        0
+                    }
+                },
+                Err(e) => e.error_code(),
             }
-        }
-        Err(_) => -1,
+        },
+        Err(e) => e.error_code(),
     }
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn GenerateKeyExchange(
-    public: *mut uint8_t,
-    public_size: size_t,
     private: *mut uint8_t,
     private_size: size_t,
+    public: *mut uint8_t,
+    public_size: size_t,
 ) -> i64 {
-    assert!(!public.is_null());
     assert!(!private.is_null());
-    assert_eq!(public_size, 32 + 8);
+    assert!(!public.is_null());
     assert_eq!(private_size, 32 + 8);
+    assert_eq!(public_size, 32 + 8);
 
-    let public = slice::from_raw_parts_mut(public, public_size);
     let private = slice::from_raw_parts_mut(private, private_size);
+    let public = slice::from_raw_parts_mut(public, public_size);
 
-    match devocrypto::generate_key_exchange() {
-        Ok(res) => {
-            let (pub_res, priv_res) = res;
+    match DcDataBlob::generate_key_exchange() {
+        Ok((priv_res, pub_res)) => {
+            let priv_res: Vec<u8> = priv_res.into();
+            let pub_res: Vec<u8> = pub_res.into();
             public[0..pub_res.len()].copy_from_slice(&pub_res);
             private[0..priv_res.len()].copy_from_slice(&priv_res);
             0
         },
-        Err(_) => -1
+        Err(e) => e.error_code(),
     }
 }
 
 #[no_mangle]
 pub extern "C" fn GenerateKeyExchangeSize() -> i64 {
-    8 + 32 // header + key lenght
+    8 + 32 // header + key length
 }
 
 #[no_mangle]
@@ -177,9 +194,20 @@ pub unsafe extern "C" fn MixKeyExchange(
     let private = slice::from_raw_parts(private, private_size);
     let shared = slice::from_raw_parts_mut(shared, shared_size);
 
-    let shared_vec = devocrypto::mix_key_exchange(&public, &private).unwrap();
-    shared[0..shared_vec.len()].copy_from_slice(&shared_vec);
-    0
+    match (DcDataBlob::try_from(private), DcDataBlob::try_from(public)) {
+        (Ok(private), Ok(public)) => {
+            match private.mix_key_exchange(public) {
+                Ok(res) => {
+                    shared[0..res.len()].copy_from_slice(&res);
+                    0
+                },
+                Err(e) => e.error_code(),
+            }
+        },
+        (Ok(_), Err(e)) => e.error_code(),
+        (Err(e), Ok(_)) => e.error_code(),
+        (Err(e), Err(_)) => e.error_code(),
+    }
 }
 
 #[no_mangle]
@@ -232,15 +260,3 @@ pub unsafe extern "C" fn DeriveKey(
 pub extern "C" fn KeySize() -> u32 {
     256
 }
-
-#[test]
-fn password_test() {
-    // Test hash length
-    let pass = "averystrongpassword".as_bytes();
-    let niterations = 1234u32;
-
-    let hash = devocrypto::hash_password(pass, niterations).unwrap();
-
-    assert_eq!(hash.len(), HashPasswordLength() as usize);
-}
-

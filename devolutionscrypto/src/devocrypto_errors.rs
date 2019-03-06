@@ -19,6 +19,20 @@ pub enum DevoCryptoError {
     IoError(Error),
 }
 
+impl DevoCryptoError {
+    pub fn error_code(&self) -> i64 {
+        match *self {
+            DevoCryptoError::InvalidLength => -1,
+            DevoCryptoError::InvalidKeyLength => -2,
+            DevoCryptoError::InvalidSignature => -3,
+            DevoCryptoError::InvalidMac => -4,
+            DevoCryptoError::CryptoError => -5,
+            DevoCryptoError::RandomError => -6,
+            DevoCryptoError::IoError(_) => -7,
+        }
+    }
+}
+
 impl fmt::Display for DevoCryptoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match *self {
