@@ -2,6 +2,7 @@
 
 use super::devocrypto;
 use super::DcDataBlob;
+use super::DevoCryptoError;
 
 use std::convert::TryFrom as _;
 
@@ -32,7 +33,7 @@ pub unsafe extern "C" fn Encrypt(
                 result[0..res.len()].copy_from_slice(&res);
                 res.len() as i64
             } else {
-                -1
+                DevoCryptoError::InvalidLength.error_code()
             }
         },
         Err(e) => e.error_code(),
@@ -69,7 +70,7 @@ pub unsafe extern "C" fn Decrypt(
                         result[0..res.len()].copy_from_slice(&res);
                         res.len() as i64
                     } else {
-                        -1
+                        DevoCryptoError::InvalidLength.error_code()
                     }
                 },
                 Err(e) => e.error_code(),
@@ -100,7 +101,7 @@ pub unsafe extern "C" fn HashPassword(
                 result[0..res.len()].copy_from_slice(&res);
                 res.len() as i64
             } else {
-                -1
+                DevoCryptoError::InvalidLength.error_code()
             }
         },
         Err(e) => e.error_code(),
@@ -225,7 +226,7 @@ pub unsafe extern "C" fn GenerateKey(key: *mut uint8_t, key_length: size_t) -> i
             key.copy_from_slice(&k);
             0
         }
-        Err(_) => -1,
+        Err(e) => e.error_code(),
     }
 }
 
@@ -259,4 +260,57 @@ pub unsafe extern "C" fn DeriveKey(
 #[no_mangle]
 pub extern "C" fn KeySize() -> u32 {
     256
+}
+
+#[test]
+fn test_encrypt_length() {
+    let key = b"supersecret";
+    let length_zero = b"";
+    let length_one_block = b"hello";
+    let one_full_block = b"0123456789abcdef";
+    let multiple_blocks = b"0123456789abcdefghijkl";
+
+    let length_zero_enc: Vec<u8> = DcDataBlob::encrypt(length_zero, key).unwrap().into();
+    let length_one_block_enc: Vec<u8> = DcDataBlob::encrypt(length_one_block, key).unwrap().into();
+    let one_full_block_enc: Vec<u8> = DcDataBlob::encrypt(one_full_block, key).unwrap().into();
+    let multiple_blocks_enc: Vec<u8> = DcDataBlob::encrypt(multiple_blocks, key).unwrap().into();
+
+    assert_eq!(length_zero_enc.len() as i64, EncryptSize(length_zero.len()));
+    assert_eq!(length_one_block_enc.len() as i64, EncryptSize(length_one_block.len()));
+    assert_eq!(one_full_block_enc.len() as i64, EncryptSize(one_full_block.len()));
+    assert_eq!(multiple_blocks_enc.len() as i64, EncryptSize(multiple_blocks.len()));
+}
+
+#[test]
+fn test_hash_password_length() {
+    let small_password = b"pass";
+    let long_password = b"this is a very long and complicated password that is, I hope,\
+     longer than the length of the actual hash. It also contains we1rd pa$$w0rd///s.\\";
+
+    let small_password_hash: Vec<u8> = DcDataBlob::hash_password(small_password, 100).unwrap().into();
+    let long_password_hash: Vec<u8> = DcDataBlob::hash_password(long_password, 2642).unwrap().into();
+
+    assert_eq!(HashPasswordLength() as usize, small_password_hash.len());
+    assert_eq!(HashPasswordLength() as usize, long_password_hash.len());
+}
+
+#[test]
+fn test_key_exchange_length() {
+    let (private_bob, public_bob) = DcDataBlob::generate_key_exchange().unwrap();
+    let (private_alice, public_alice) = DcDataBlob::generate_key_exchange().unwrap();
+
+    let private_bob: Vec<u8> = private_bob.into();
+    let public_bob: Vec<u8> = public_bob.into();
+
+    assert_eq!(GenerateKeyExchangeSize() as usize, private_bob.len());
+    assert_eq!(GenerateKeyExchangeSize() as usize, public_bob.len());
+
+    let private_bob = DcDataBlob::try_from(private_bob.as_slice()).unwrap();
+    let public_bob = DcDataBlob::try_from(public_bob.as_slice()).unwrap();
+
+    let shared_bob = private_bob.mix_key_exchange(public_alice).unwrap();
+    let shared_alice = private_alice.mix_key_exchange(public_bob).unwrap();
+
+    assert_eq!(MixKeyExchangeSize() as usize, shared_bob.len());
+    assert_eq!(MixKeyExchangeSize() as usize, shared_alice.len());
 }
