@@ -84,7 +84,6 @@ impl DcDataBlob {
     }
 }
 
-
 #[test]
 fn crypto_test() {
     let key = "0123456789abcdefghijkl".as_bytes();

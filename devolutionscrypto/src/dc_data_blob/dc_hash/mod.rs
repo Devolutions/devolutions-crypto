@@ -19,7 +19,7 @@ impl DcHash {
     pub fn try_from_header(data: &[u8], header: &DcHeader) -> Result<DcHash> {
         match header.version {
             V1 => Ok(DcHash::V1(DcHashV1::try_from(data)?)),
-            _ => panic!(),
+            _ => Err(DevoCryptoError::UnknownVersion),
         }
     }
 }

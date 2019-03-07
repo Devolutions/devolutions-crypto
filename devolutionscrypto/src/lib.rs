@@ -8,8 +8,8 @@ mod devocrypto_errors;
 
 pub type Result<T> = std::result::Result<T, devocrypto_errors::DevoCryptoError>;
 
-pub use devocrypto_errors::DevoCryptoError;
 pub use dc_data_blob::DcDataBlob;
+pub use devocrypto_errors::DevoCryptoError;
 
 cfg_if! {
     if #[cfg(target_arch = "wasm32")] {

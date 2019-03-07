@@ -2,6 +2,7 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use std::convert::TryFrom;
 use std::io::Cursor;
 
+use super::DevoCryptoError;
 use super::Result;
 
 const SIGNATURE: u16 = 0x0C0D;
@@ -22,6 +23,10 @@ impl TryFrom<&[u8]> for DcHeader {
         let data_type = data_cursor.read_u16::<LittleEndian>()?;
         let data_subtype = data_cursor.read_u16::<LittleEndian>()?;
         let version = data_cursor.read_u16::<LittleEndian>()?;
+
+        if signature != SIGNATURE {
+            return Err(DevoCryptoError::InvalidSignature);
+        }
 
         Ok(DcHeader {
             signature,
