@@ -1,5 +1,13 @@
 #![allow(non_snake_case)]
 
+//! FFI interface for use with other languages. Mostly used for C and C#
+//! # Safety
+//! Note that this API is unsafe by nature: Rust can do a couple of check but cannot garantee
+//!     the received pointers are valid. It is the job of the calling language to verify it passes
+//!     the right pointers and length.
+//! The Size functions must be called to get the required length of the returned array before
+//!     calling it.
+
 use super::devocrypto;
 use super::DcDataBlob;
 use super::DevoCryptoError;
@@ -9,6 +17,19 @@ use std::convert::TryFrom as _;
 use libc::{size_t, uint8_t};
 use std::slice;
 
+
+/// Encrypt a data blob
+/// # Arguments
+///  * `data` - Pointer to the data to encrypt.
+///  * `data_length` - Length of the data to encrypt.
+///  * `key` - Pointer to the key to use to encrypt.
+///  * `key_length` - Length of the key to use to encrypt.
+///  * `result` - Pointer to the buffer to write the ciphertext to.
+///  * `result_length` - Length of the buffer to write the ciphertext to. You can get the value by
+///                         calling EncryptSize() beforehand.
+/// # Returns
+/// This returns the length of the ciphertext. If there is an error, it will return the
+///     appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn Encrypt(
     data: *const uint8_t,
@@ -40,11 +61,30 @@ pub unsafe extern "C" fn Encrypt(
     }
 }
 
+
+/// Get the size of the resulting ciphertext.
+/// # Arguments
+///  * data_length - Length of the plaintext.
+/// # Returns
+/// Returns the length of the ciphertext to input as `result_length` in `Encrypt()`.
 #[no_mangle]
 pub extern "C" fn EncryptSize(data_length: size_t) -> i64 {
     (8 + 16 + (data_length / 16 + 1) * 16 + 32) as i64 // Header + IV + data(padded to 16) + HMAC
 }
 
+
+/// Decrypt a data blob
+/// # Arguments
+///  * `data` - Pointer to the data to decrypt.
+///  * `data_length` - Length of the data to decrypt.
+///  * `key` - Pointer to the key to use to decrypt.
+///  * `key_length` - Length of the key to use to decrypt.
+///  * `result` - Pointer to the buffer to write the plaintext to.
+///  * `result_length` - Length of the buffer to write the plaintext to.
+///                     The safest size is the same size as the ciphertext.
+/// # Returns
+/// This returns the length of the plaintext. If there is an error, it will return the
+///     appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn Decrypt(
     data: *const uint8_t,
@@ -80,6 +120,19 @@ pub unsafe extern "C" fn Decrypt(
     }
 }
 
+/// Hash a password using a high-cost algorithm.
+/// # Arguments
+///  * `password` - Pointer to the password to hash.
+///  * `password_length` - Length of the password to hash.
+///  * `iterations` - Number of iterations of the password hash.
+///                   A higher number is slower but harder to brute-force. The recommended is 10000,
+///                   but the number can be set by the user.
+///  * `result` - Pointer to the buffer to write the hash to.
+///  * `result_length` - Length of the buffer to write the hash to. You can get the value by
+///                         calling HashPasswordLength() beforehand.
+/// # Returns
+/// This returns the length of the hash. If there is an error, it will return the
+///     appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn HashPassword(
     password: *const uint8_t,
@@ -108,11 +161,25 @@ pub unsafe extern "C" fn HashPassword(
     }
 }
 
+
+/// Get the size of the resulting hash.
+/// # Returns
+/// Returns the length of the hash to input as `result_length` in `HashPassword()`.
 #[no_mangle]
 pub extern "C" fn HashPasswordLength() -> i64 {
     8 + 4 + 32 + 32 // Header + iterations + salt + hash
 }
 
+
+/// Verify a password against a hash with constant-time equality.
+/// # Arguments
+///  * `password` - Pointer to the password to verify.
+///  * `password_length` - Length of the password to verify.
+///  * `hash` - Pointer to the hash to verify.
+///  * `hash_length` - Length of the hash to verify.
+/// # Returns
+/// Returns 0 if the password is invalid or 1 if the password is valid. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn VerifyPassword(
     password: *const uint8_t,
@@ -143,20 +210,31 @@ pub unsafe extern "C" fn VerifyPassword(
     }
 }
 
+/// Generate a key pair to perform a key exchange. Must be used with MixKey()
+/// # Arguments
+///  * `private` - Pointer to the buffer to write the private key to.
+///  * `private_length` - Length of the buffer to write the private key to.
+///                         You can get the value by calling `GenerateKeyExchangeSize()` beforehand.
+///  * `public` - Pointer to the buffer to write the public key to.
+///  * `public_length` - Length of the buffer to write the public key to.
+///                         You can get the value by calling `GenerateKeyExchangeSize()` beforehand.
+/// # Returns
+/// Returns 0 if the generation worked. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn GenerateKeyExchange(
     private: *mut uint8_t,
-    private_size: size_t,
+    private_length: size_t,
     public: *mut uint8_t,
-    public_size: size_t,
+    public_length: size_t,
 ) -> i64 {
     assert!(!private.is_null());
     assert!(!public.is_null());
-    assert_eq!(private_size, 32 + 8);
-    assert_eq!(public_size, 32 + 8);
+    assert_eq!(private_length, 32 + 8);
+    assert_eq!(public_length, 32 + 8);
 
-    let private = slice::from_raw_parts_mut(private, private_size);
-    let public = slice::from_raw_parts_mut(public, public_size);
+    let private = slice::from_raw_parts_mut(private, private_length);
+    let public = slice::from_raw_parts_mut(public, public_length);
 
     match DcDataBlob::generate_key_exchange() {
         Ok((priv_res, pub_res)) => {
@@ -170,11 +248,27 @@ pub unsafe extern "C" fn GenerateKeyExchange(
     }
 }
 
+/// Get the size of the keys in the key exchange key pair.
+/// # Returns
+/// Returns the length of the keys to input as `private_length`
+///     and `public_length` in `GenerateKeyExchange()`.
 #[no_mangle]
 pub extern "C" fn GenerateKeyExchangeSize() -> i64 {
     8 + 32 // header + key length
 }
 
+
+/// Generate a key pair to perform a key exchange. Must be used with MixKey()
+/// # Arguments
+///  * `private` - Pointer to the buffer to write the private key to.
+///  * `private_length` - Length of the buffer to write the private key to.
+///                         You can get the value by calling `GenerateKeyExchangeSize()` beforehand.
+///  * `public` - Pointer to the buffer to write the public key to.
+///  * `public_length` - Length of the buffer to write the public key to.
+///                         You can get the value by calling `GenerateKeyExchangeSize()` beforehand.
+/// # Returns
+/// Returns 0 if the generation worked. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn MixKeyExchange(
     public: *const uint8_t,
