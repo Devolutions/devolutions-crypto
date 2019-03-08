@@ -6,7 +6,7 @@ pub mod devocrypto;
 
 mod devocrypto_errors;
 
-pub type Result<T> = std::result::Result<T, devocrypto_errors::DevoCryptoError>;
+type Result<T> = std::result::Result<T, devocrypto_errors::DevoCryptoError>;
 
 pub use dc_data_blob::DcDataBlob;
 pub use devocrypto_errors::DevoCryptoError;

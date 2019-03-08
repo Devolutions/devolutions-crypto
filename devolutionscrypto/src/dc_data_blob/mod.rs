@@ -11,13 +11,17 @@ mod dc_ciphertext;
 mod dc_hash;
 mod dc_key;
 
-pub use self::dc_header::DcHeader;
-pub use self::dc_payload::DcPayload;
+use self::dc_header::DcHeader;
+use self::dc_payload::DcPayload;
 
-pub use self::dc_ciphertext::{DcCiphertext, CIPHERTEXT};
-pub use self::dc_hash::{DcHash, HASH};
-pub use self::dc_key::{DcKey, KEY};
+use self::dc_ciphertext::{DcCiphertext, CIPHERTEXT};
+use self::dc_hash::{DcHash, HASH};
+use self::dc_key::{DcKey, KEY};
 
+/// Data structure containing cryptographic information. It is made to be used as a black box
+///     for misuse resistance. It implements `TryFrom<&[u8]` and `Into<Vec<u8>>` to be serialized
+///     and parsed into raw bytes for use with other language and to send over a channel.
+/// If the channel does not support raw byte, the data can be encoded easily using base64.
 pub struct DcDataBlob {
     header: DcHeader,
     payload: DcPayload,
@@ -25,6 +29,7 @@ pub struct DcDataBlob {
 
 impl TryFrom<&[u8]> for DcDataBlob {
     type Error = DevoCryptoError;
+    /// Parses the data. Can return an Error of the data is invalid or unrecognized.
     fn try_from(data: &[u8]) -> Result<DcDataBlob> {
         let header = DcHeader::try_from(&data[0..8])?;
         let payload = DcPayload::try_from_header(&data[8..], &header)?;
@@ -33,6 +38,7 @@ impl TryFrom<&[u8]> for DcDataBlob {
 }
 
 impl Into<Vec<u8>> for DcDataBlob {
+    /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
     fn into(self) -> Vec<u8> {
         let mut data: Vec<u8> = self.header.into();
         let mut payload: Vec<u8> = self.payload.into();
@@ -42,26 +48,98 @@ impl Into<Vec<u8>> for DcDataBlob {
 }
 
 impl DcDataBlob {
+    /// Creates an encrypted data blob from cleartext data and a key.
+    /// # Arguments
+    ///  * `data` - Data to encrypt.
+    ///  * `key` - Key to use. Can be of arbitrary size.
+    /// # Returns
+    /// Returns a `DcDataBlob` containing the encrypted data.
+    /// # Example
+    /// ```rust
+    /// use devocrypto::DcDataBlob;
+    ///
+    /// let data = b"somesecretdata";
+    /// let key = b"somesecretkey";
+    ///
+    /// let encrypted_data = DcDataBlob::encrypt(data, key).unwrap();
+    /// ```
     pub fn encrypt(data: &[u8], key: &[u8]) -> Result<DcDataBlob> {
         let mut header = DcHeader::new();
         let payload = DcPayload::encrypt(data, key, &mut header)?;
         Ok(DcDataBlob { header, payload })
     }
 
+    /// Decrypt the data blob using a key.
+    /// # Arguments
+    ///  * `key` - Key to use. Can be of arbitrary size.
+    /// # Returns
+    /// Returns the decrypted data.
+    /// # Example
+    /// ```rust
+    /// use devocrypto::DcDataBlob;
+    ///
+    /// let data = b"somesecretdata";
+    /// let key = b"somesecretkey";
+    ///
+    /// let encrypted_data = DcDataBlob::encrypt(data, key).unwrap();
+    /// let decrypted_data = encrypted_data.decrypt(key).unwrap();
+    ///
+    /// assert_eq!(data, decrypted_data);
+    ///```
     pub fn decrypt(&self, key: &[u8]) -> Result<Vec<u8>> {
         self.payload.decrypt(key, &self.header)
     }
 
-    pub fn hash_password(pass: &[u8], iterations: u32) -> Result<DcDataBlob> {
+    /// Creates a data blob containing a password hash.
+    /// # Arguments
+    ///  * `password` - The password to hash.
+    ///  * `iterations` - The number of iterations of the password hash.
+    ///                     A higher number is slower but harder to brute-force.
+    ///                     The recommended is 10000, but the number can be set by the user.
+    /// # Returns
+    /// Returns a `DcDataBlob` containing the hashed password.
+    /// # Example
+    /// ```rust
+    /// use devocrypto::DcDataBlob;
+    ///
+    /// let password = b"somesuperstrongpa$$w0rd!"
+    ///
+    /// let hashed_password = DcDataBlob::hash_password(password, 10000);
+    /// ```
+    pub fn hash_password(password: &[u8], iterations: u32) -> Result<DcDataBlob> {
         let mut header = DcHeader::new();
-        let payload = DcPayload::hash_password(pass, iterations, &mut header)?;
+        let payload = DcPayload::hash_password(password, iterations, &mut header)?;
         Ok(DcDataBlob { header, payload })
     }
 
-    pub fn verify_password(&self, pass: &[u8]) -> Result<bool> {
-        self.payload.verify_password(pass)
+    /// Verify if the blob matches with the specified password. Should execute in constant time.
+    /// # Arguments
+    ///  * `password` - Password to verify.
+    /// # Returns
+    /// Returns true if the password matches and false if it doesn't.
+    /// # Example
+    /// ```rust
+    /// use devocrypto::DcDataBlob;
+    ///
+    /// let password = b"somesuperstrongpa$$w0rd!";
+    ///
+    /// let hashed_password = DcDataBlob::hash_password(password, 10000);
+    /// assert!(hashed_password.verify(b"somesuperstrongpa$$w0rd!").unwrap());
+    /// assert!(!hashed_password.verify(b"someweakpa$$w0rd!").unwrap());
+    /// ```
+    pub fn verify_password(&self, password: &[u8]) -> Result<bool> {
+        self.payload.verify_password(password)
     }
 
+    /// Generates a key pair to use in a key exchange. See `mix_key_exchange` for a complete usage.
+    /// # Returns
+    /// Returns, in order, the private key and the public key in a `DcDataBlob`.
+    /// # Example
+    /// ```rust
+    /// use devocrypto::DcDataBlob;
+    ///
+    /// let (private, public) = DcDataBlob::generate_key_exchange().unwrap();
+    /// ```
     pub fn generate_key_exchange() -> Result<(DcDataBlob, DcDataBlob)> {
         let mut header_private = DcHeader::new();
         let mut header_public = DcHeader::new();
@@ -79,6 +157,44 @@ impl DcDataBlob {
         ))
     }
 
+    /// Mix a private key with another client public key to get a shared secret.
+    /// # Arguments
+    ///  * `self` - The user's private key obtained through `generate_key_exchange`.
+    ///  * `public` - The peer public key.
+    /// # Returns
+    /// Returns a shared secret in the form of a `Vec<u8>`, which can then be used
+    ///     as an encryption key between the two peers.
+    /// # Example
+    /// ```rust
+    /// use devocrypto::DcDataBlob;
+    ///
+    /// // This happens on Bob's side.
+    /// let (bob_priv, bob_pub) = DcDataBlob::generate_key_exchange().unwrap();
+    /// let bob_serialized_pub: Vec<u8> = bob_pub.into();
+    ///
+    /// send_key_to_alice(bob_serialized_pub);
+    ///
+    /// // This happens on Alice's side.
+    /// let (alice_priv, alice_pub) = DcDataBlob::generate_key_exchange().unwrap();
+    /// let alice_serialized_pub: Vec<u8> = alice_pub.into();
+    ///
+    /// send_key_to_bob(alice_serialized_pub);
+    ///
+    /// // Bob can now generate the shared secret.
+    /// let alice_received_serialized_pub = receive_key_from_alice();
+    /// let alice_received_pub = DcDataBlob::try_from(&alice_received_serialized_pub).unwrap();
+    ///
+    /// let bob_shared = bob_priv.mix_key_exchange(alice_received_pub).unwrap();
+    ///
+    /// // Alice can now generate the shared secret
+    /// let bob_received_serialized_pub = receive_key_from_bob();
+    /// let bob_received_pub = DcDataBlob::try_from(&bob_received_serialized_pub).unwrap();
+    ///
+    /// let alice_shared = alice_priv.mix_key_exchange(bob_received_pub).unwrap();
+    ///
+    /// // They now have a shared secret!
+    /// assert_eq!(bob_shared, alice_shared);
+    /// ```
     pub fn mix_key_exchange(self, public: DcDataBlob) -> Result<Vec<u8>> {
         self.payload.mix_key_exchange(public.payload)
     }
