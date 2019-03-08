@@ -7,6 +7,7 @@ use hmac::crypto_mac::InvalidKeyLength;
 use hmac::crypto_mac::MacError;
 
 use std;
+use std::error::Error as _;
 use std::fmt;
 use std::io::Error;
 
@@ -16,6 +17,7 @@ pub enum DevoCryptoError {
     /// The provided data has an invalid length.
     InvalidLength,
     InvalidKeyLength,
+    InvalidOutputLength,
     InvalidSignature,
     InvalidMac,
     InvalidDataType,
@@ -35,6 +37,7 @@ impl DevoCryptoError {
         match *self {
             DevoCryptoError::InvalidLength => -1,
             DevoCryptoError::InvalidKeyLength => -2,
+            DevoCryptoError::InvalidOutputLength => -13,
             DevoCryptoError::InvalidSignature => -3,
             DevoCryptoError::InvalidMac => -4,
             DevoCryptoError::InvalidDataType => -8,
@@ -52,31 +55,18 @@ impl DevoCryptoError {
 impl fmt::Display for DevoCryptoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match *self {
-            DevoCryptoError::InvalidLength => write!(f, "Cipher has an invalid length!"),
-            DevoCryptoError::InvalidKeyLength => write!(f, "Key has an invalid length!"),
-            DevoCryptoError::InvalidSignature => write!(f, "Cipher has an invalid signature!"),
-            DevoCryptoError::InvalidMac => write!(f, "Cipher has an invalid MAC!"),
-            DevoCryptoError::InvalidDataType => {
-                write!(f, "Operation cannot be done with this data type!")
-            }
-            DevoCryptoError::UnknownType => {
-                write!(f, "The type specified in the header is unknown")
-            }
-            DevoCryptoError::UnknownSubtype => {
-                write!(f, "The subtype specified in the header is unknown")
-            }
-            DevoCryptoError::UnknownVersion => {
-                write!(f, "The version specified in the header is unknown")
-            }
-            DevoCryptoError::NullPointer => {
-                write!(f, "A null pointer has been passed to the library")
-            }
-            DevoCryptoError::CryptoError => {
-                write!(f, "An error happened during a cryptographic operation")
-            }
-            DevoCryptoError::RandomError => {
-                write!(f, "An error happened while initializing the RNG")
-            }
+            DevoCryptoError::InvalidLength => write!(f, "{}", self.description()),
+            DevoCryptoError::InvalidKeyLength => write!(f, "{}", self.description()),
+            DevoCryptoError::InvalidOutputLength => write!(f, "{}", self.description()),
+            DevoCryptoError::InvalidSignature => write!(f, "{}", self.description()),
+            DevoCryptoError::InvalidMac => write!(f, "{}", self.description()),
+            DevoCryptoError::InvalidDataType => write!(f, "{}", self.description()),
+            DevoCryptoError::UnknownType => write!(f, "{}", self.description()),
+            DevoCryptoError::UnknownSubtype => write!(f, "{}", self.description()),
+            DevoCryptoError::UnknownVersion => write!(f, "{}", self.description()),
+            DevoCryptoError::NullPointer => write!(f, "{}", self.description()),
+            DevoCryptoError::CryptoError => write!(f, "{}", self.description()),
+            DevoCryptoError::RandomError => write!(f, "{}", self.description()),
             DevoCryptoError::IoError(ref error) => error.fmt(f),
         }
     }
@@ -87,6 +77,7 @@ impl std::error::Error for DevoCryptoError {
         match *self {
             DevoCryptoError::InvalidLength => "Cipher has an invalid length!",
             DevoCryptoError::InvalidKeyLength => "Key has an invalid length!",
+            DevoCryptoError::InvalidOutputLength => "The output buffer size is invalid!",
             DevoCryptoError::InvalidSignature => "Cipher has an invalid signature!",
             DevoCryptoError::InvalidMac => "Cipher has an invalid MAC!",
             DevoCryptoError::InvalidDataType => "Operation cannot be done with this data type!",

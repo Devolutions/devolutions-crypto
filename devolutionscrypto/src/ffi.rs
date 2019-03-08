@@ -43,6 +43,10 @@ pub unsafe extern "C" fn Encrypt(
         return DevoCryptoError::NullPointer.error_code();
     };
 
+    if result_length != EncryptSize(data_length) as usize {
+        return DevoCryptoError::InvalidOutputLength.error_code();
+    }
+
     let data = slice::from_raw_parts(data, data_length);
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
@@ -50,12 +54,8 @@ pub unsafe extern "C" fn Encrypt(
     match DcDataBlob::encrypt(data, key) {
         Ok(res) => {
             let res: Vec<u8> = res.into();
-            if result.len() >= res.len() {
-                result[0..res.len()].copy_from_slice(&res);
-                res.len() as i64
-            } else {
-                DevoCryptoError::InvalidLength.error_code()
-            }
+            result[0..res.len()].copy_from_slice(&res);
+            res.len() as i64
         },
         Err(e) => e.error_code(),
     }
@@ -110,7 +110,7 @@ pub unsafe extern "C" fn Decrypt(
                         result[0..res.len()].copy_from_slice(&res);
                         res.len() as i64
                     } else {
-                        DevoCryptoError::InvalidLength.error_code()
+                        DevoCryptoError::InvalidOutputLength.error_code()
                     }
                 },
                 Err(e) => e.error_code(),
@@ -145,18 +145,18 @@ pub unsafe extern "C" fn HashPassword(
         return DevoCryptoError::NullPointer.error_code();
     };
 
+    if result_length != HashPasswordLength() as usize {
+        return DevoCryptoError::InvalidOutputLength.error_code();
+    };
+
     let password = slice::from_raw_parts(password, password_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
     match DcDataBlob::hash_password(password, iterations) {
         Ok(res) => {
             let res: Vec<u8> = res.into();
-            if result.len() >= res.len() {
-                result[0..res.len()].copy_from_slice(&res);
-                res.len() as i64
-            } else {
-                DevoCryptoError::InvalidLength.error_code()
-            }
+            result[0..res.len()].copy_from_slice(&res);
+            res.len() as i64
         },
         Err(e) => e.error_code(),
     }
@@ -233,8 +233,11 @@ pub unsafe extern "C" fn GenerateKeyExchange(
     if private.is_null() || public.is_null() {
         return DevoCryptoError::NullPointer.error_code();
     };
-    assert_eq!(private_length, 32 + 8);
-    assert_eq!(public_length, 32 + 8);
+
+    if private_length != GenerateKeyExchangeSize() as usize
+        || public_length != GenerateKeyExchangeSize() as usize {
+        return DevoCryptoError::InvalidOutputLength.error_code();
+    }
 
     let private = slice::from_raw_parts_mut(private, private_length);
     let public = slice::from_raw_parts_mut(public, public_length);
@@ -284,9 +287,10 @@ pub unsafe extern "C" fn MixKeyExchange(
     if private.is_null() || public.is_null() || shared.is_null() {
         return DevoCryptoError::NullPointer.error_code();
     };
-    assert_eq!(public_size, 32 + 8);
-    assert_eq!(private_size, 32 + 8);
-    assert_eq!(shared_size, 32);
+
+    if shared_size != MixKeyExchangeSize() as usize {
+        return DevoCryptoError::InvalidOutputLength.error_code();
+    }
 
     let public = slice::from_raw_parts(public, public_size);
     let private = slice::from_raw_parts(private, private_size);
