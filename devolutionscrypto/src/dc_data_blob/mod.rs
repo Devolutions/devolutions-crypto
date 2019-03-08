@@ -1,9 +1,3 @@
-use std;
-use std::convert::TryFrom;
-
-use super::DevoCryptoError;
-use super::Result;
-
 mod dc_header;
 mod dc_payload;
 
@@ -11,12 +5,18 @@ mod dc_ciphertext;
 mod dc_hash;
 mod dc_key;
 
-use self::dc_header::DcHeader;
-use self::dc_payload::DcPayload;
+use super::DevoCryptoError;
+use super::Result;
 
 use self::dc_ciphertext::{DcCiphertext, CIPHERTEXT};
 use self::dc_hash::{DcHash, HASH};
 use self::dc_key::{DcKey, KEY};
+
+use self::dc_header::DcHeader;
+use self::dc_payload::DcPayload;
+
+use std;
+use std::convert::TryFrom;
 
 /// Data structure containing cryptographic information. It is made to be used as a black box
 ///     for misuse resistance. It implements `TryFrom<&[u8]` and `Into<Vec<u8>>` to be serialized

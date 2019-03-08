@@ -1,13 +1,11 @@
 //! Cryptographic utils that does not use the Devolutions custom data type.
 
-use rand::{rngs::OsRng, RngCore};
+use super::Result;
 
 use hmac::Hmac;
-use sha2::Sha256;
-
 use pbkdf2::pbkdf2;
-
-use super::Result;
+use rand::{rngs::OsRng, RngCore};
+use sha2::Sha256;
 
 /// Returns a random key of the specified length.
 /// # Arguments

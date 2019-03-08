@@ -13,9 +13,8 @@ use super::DcDataBlob;
 use super::DevoCryptoError;
 
 use std::convert::TryFrom as _;
-
-use libc::{size_t, uint8_t};
 use std::slice;
+use libc::{size_t, uint8_t};
 
 
 /// Encrypt a data blob

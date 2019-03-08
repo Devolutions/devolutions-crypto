@@ -1,15 +1,14 @@
 //! Possible errors in the library.
 
-use rand;
-
-use block_modes::{BlockModeError, InvalidKeyIvLength};
-use hmac::crypto_mac::InvalidKeyLength;
-use hmac::crypto_mac::MacError;
-
 use std;
 use std::error::Error as _;
 use std::fmt;
 use std::io::Error;
+
+use block_modes::{BlockModeError, InvalidKeyIvLength};
+use hmac::crypto_mac::InvalidKeyLength;
+use hmac::crypto_mac::MacError;
+use rand;
 
 /// The enum containing the various error types.
 #[derive(Debug)]

@@ -1,9 +1,10 @@
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
+use super::DevoCryptoError;
+use super::Result;
+
 use std::convert::TryFrom;
 use std::io::Cursor;
 
-use super::DevoCryptoError;
-use super::Result;
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
 const SIGNATURE: u16 = 0x0C0D;
 

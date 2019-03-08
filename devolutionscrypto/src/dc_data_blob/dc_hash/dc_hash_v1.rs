@@ -1,15 +1,15 @@
+use super::DevoCryptoError;
+use super::Result;
+
 use std::convert::TryFrom;
-use subtle::ConstantTimeEq as _;
+use std::io::Cursor;
 
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
-use std::io::Cursor;
-
-use super::DevoCryptoError;
-use super::Result;
+use subtle::ConstantTimeEq as _;
 
 pub struct DcHashV1 {
     iterations: u32,

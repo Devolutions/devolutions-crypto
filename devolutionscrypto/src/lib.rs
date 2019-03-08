@@ -4,9 +4,8 @@ extern crate cfg_if;
 mod dc_data_blob;
 pub mod devocrypto;
 
-mod devocrypto_errors;
-
 type Result<T> = std::result::Result<T, devocrypto_errors::DevoCryptoError>;
+mod devocrypto_errors;
 
 pub use dc_data_blob::DcDataBlob;
 pub use devocrypto_errors::DevoCryptoError;
