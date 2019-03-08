@@ -34,6 +34,10 @@ impl TryFrom<&[u8]> for DcHashV1 {
     type Error = DevoCryptoError;
 
     fn try_from(data: &[u8]) -> Result<DcHashV1> {
+        if data.len() != 68 {
+            return Err(DevoCryptoError::InvalidLength);
+        };
+
         let mut vec_iterations = Cursor::new(&data[0..4]);
         let mut salt = vec![0u8; 32];
         let mut hash = vec![0u8; 32];

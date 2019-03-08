@@ -31,8 +31,12 @@ impl TryFrom<&[u8]> for DcDataBlob {
     type Error = DevoCryptoError;
     /// Parses the data. Can return an Error of the data is invalid or unrecognized.
     fn try_from(data: &[u8]) -> Result<DcDataBlob> {
-        let header = DcHeader::try_from(&data[0..8])?;
-        let payload = DcPayload::try_from_header(&data[8..], &header)?;
+        if data.len() < DcHeader::len() {
+            return Err(DevoCryptoError::InvalidLength);
+        };
+
+        let header = DcHeader::try_from(&data[0..DcHeader::len()])?;
+        let payload = DcPayload::try_from_header(&data[DcHeader::len()..], &header)?;
         Ok(DcDataBlob { header, payload })
     }
 }

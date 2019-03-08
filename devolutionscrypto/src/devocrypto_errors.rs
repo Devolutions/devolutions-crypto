@@ -75,7 +75,7 @@ impl fmt::Display for DevoCryptoError {
 impl std::error::Error for DevoCryptoError {
     fn description(&self) -> &str {
         match *self {
-            DevoCryptoError::InvalidLength => "Cipher has an invalid length!",
+            DevoCryptoError::InvalidLength => "The data blob has an invalid length!",
             DevoCryptoError::InvalidKeyLength => "Key has an invalid length!",
             DevoCryptoError::InvalidOutputLength => "The output buffer size is invalid!",
             DevoCryptoError::InvalidSignature => "Cipher has an invalid signature!",

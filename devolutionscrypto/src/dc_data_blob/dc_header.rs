@@ -57,4 +57,8 @@ impl DcHeader {
             version: 0,
         }
     }
+
+    pub fn len() -> usize {
+        8
+    }
 }
