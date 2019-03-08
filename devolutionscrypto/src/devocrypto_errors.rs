@@ -1,3 +1,5 @@
+//! Possible errors in the library.
+
 use rand;
 
 use block_modes::{BlockModeError, InvalidKeyIvLength};
@@ -8,8 +10,10 @@ use std;
 use std::fmt;
 use std::io::Error;
 
+/// The enum containing the various error types.
 #[derive(Debug)]
 pub enum DevoCryptoError {
+    /// The provided data has an invalid length.
     InvalidLength,
     InvalidKeyLength,
     InvalidSignature,
@@ -18,12 +22,15 @@ pub enum DevoCryptoError {
     UnknownType,
     UnknownSubtype,
     UnknownVersion,
+    NullPointer,
     CryptoError,
     RandomError,
     IoError(Error),
 }
 
 impl DevoCryptoError {
+    /// Returns the error code associated with the error.
+    /// This is useful for passing the exception type across a language boundary.
     pub fn error_code(&self) -> i64 {
         match *self {
             DevoCryptoError::InvalidLength => -1,
@@ -34,6 +41,7 @@ impl DevoCryptoError {
             DevoCryptoError::UnknownType => -9,
             DevoCryptoError::UnknownSubtype => -10,
             DevoCryptoError::UnknownVersion => -11,
+            DevoCryptoError::NullPointer => -12,
             DevoCryptoError::CryptoError => -5,
             DevoCryptoError::RandomError => -6,
             DevoCryptoError::IoError(_) => -7,
@@ -60,6 +68,9 @@ impl fmt::Display for DevoCryptoError {
             DevoCryptoError::UnknownVersion => {
                 write!(f, "The version specified in the header is unknown")
             }
+            DevoCryptoError::NullPointer => {
+                write!(f, "A null pointer has been passed to the library")
+            }
             DevoCryptoError::CryptoError => {
                 write!(f, "An error happened during a cryptographic operation")
             }
@@ -82,6 +93,7 @@ impl std::error::Error for DevoCryptoError {
             DevoCryptoError::UnknownType => "The type specified in the header is unknown",
             DevoCryptoError::UnknownSubtype => "The subtype specified in the header is unknown",
             DevoCryptoError::UnknownVersion => "The version specified in the header is unknown",
+            DevoCryptoError::NullPointer => "A null pointer has been passed to the library",
             DevoCryptoError::CryptoError => "An error happened during a cryptographic operation",
             DevoCryptoError::RandomError => "An error happened while initializing the RNG",
             DevoCryptoError::IoError(ref error) => error.description(),

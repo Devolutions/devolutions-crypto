@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-//! FFI interface for use with other languages. Mostly used for C and C#
+//! FFI interface for use with other languages. Mostly used for C and C#.
 //! # Safety
 //! Note that this API is unsafe by nature: Rust can do a couple of check but cannot garantee
 //!     the received pointers are valid. It is the job of the calling language to verify it passes
@@ -258,7 +258,7 @@ pub extern "C" fn GenerateKeyExchangeSize() -> i64 {
 }
 
 
-/// Generate a key pair to perform a key exchange. Must be used with MixKey()
+/// Generate a key pair to perform a key exchange. Must be used with MixKey().
 /// # Arguments
 ///  * `private` - Pointer to the buffer to write the private key to.
 ///  * `private_length` - Length of the buffer to write the private key to.
@@ -305,11 +305,21 @@ pub unsafe extern "C" fn MixKeyExchange(
     }
 }
 
+/// Get the size of the keys in the key exchange key pair.
+/// # Returns
+/// Returns the length of the keys to input as `shared_length` in `MixKeyExchange()`.
 #[no_mangle]
 pub extern "C" fn MixKeyExchangeSize() -> i64 {
     32
 }
 
+/// Generate a key using a CSPRNG.
+/// # Arguments
+///  * key - Pointer to the buffer to fill with random values.
+///  * key_length - Length of the buffer to fill.
+/// # Returns
+/// Returns 0 if the operation is successful. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn GenerateKey(key: *mut uint8_t, key_length: size_t) -> i64 {
     assert!(!key.is_null());
@@ -324,6 +334,17 @@ pub unsafe extern "C" fn GenerateKey(key: *mut uint8_t, key_length: size_t) -> i
     }
 }
 
+/// Derive a key to create a new one. Can be used with a password.
+/// # Arguments
+///  * key - Pointer to the key to derive.
+///  * key_length - Length of the key to derive.
+///  * salt - Pointer to the buffer containing the salt. Can be null.
+///  * salt_length - Length of the salt to use.
+///  * result - Pointer to the buffer to write the new key to.
+///  * result_length - Length of buffer to write the key to.
+/// # Returns
+/// Returns 0 if the operation is successful. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn DeriveKey(
     key: *const uint8_t,
@@ -351,10 +372,14 @@ pub unsafe extern "C" fn DeriveKey(
     0
 }
 
+///  Size, in bits, of the key used for the current Encrypt() implementation.
+/// # Returns
+/// Returns the size, in bits, of the key used fot the current Encrypt() implementation.
 #[no_mangle]
 pub extern "C" fn KeySize() -> u32 {
     256
 }
+
 
 #[test]
 fn test_encrypt_length() {

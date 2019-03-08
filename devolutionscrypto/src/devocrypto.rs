@@ -1,4 +1,4 @@
-//! Cryptographic utils that does not use the Devolutions custom data type
+//! Cryptographic utils that does not use the Devolutions custom data type.
 
 use rand::{rngs::OsRng, RngCore};
 
@@ -9,9 +9,9 @@ use pbkdf2::pbkdf2;
 
 use super::Result;
 
-/// Returns a random key of the specified length
+/// Returns a random key of the specified length.
 /// # Arguments
-///  * `length` - Length of the key
+///  * `length` - Length of the key.
 /// # Example
 /// ```
 /// use devocrypto::generate_key;
@@ -26,13 +26,13 @@ pub fn generate_key(length: usize) -> Result<Vec<u8>> {
     Ok(key)
 }
 
-/// Derives a key or password into a new one
+/// Derives a key or password into a new one.
 /// # Arguments
-///  * `key` - The key to derive
-///  * `salt` - The cryptographic salt to be used to add randomness. Can be empty
+///  * `key` - The key to derive.
+///  * `salt` - The cryptographic salt to be used to add randomness. Can be empty.
 ///  * `iterations` - The number of time the key will be derived. A higher number is slower but harder to brute-force.
-///                   10 000 iterations are recommended for a password
-///  * `length` - Length of the desired key
+///                   10 000 iterations are recommended for a password.
+///  * `length` - Length of the desired key.
 /// # Example
 /// ```
 /// use devocrypto::derive_key;
