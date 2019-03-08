@@ -39,9 +39,9 @@ pub unsafe extern "C" fn Encrypt(
     result: *mut uint8_t,
     result_length: size_t,
 ) -> i64 {
-    assert!(!data.is_null());
-    assert!(!key.is_null());
-    assert!(!result.is_null());
+    if data.is_null() || key.is_null() || result.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
 
     let data = slice::from_raw_parts(data, data_length);
     let key = slice::from_raw_parts(key, key_length);
@@ -94,9 +94,9 @@ pub unsafe extern "C" fn Decrypt(
     result: *mut uint8_t,
     result_length: size_t,
 ) -> i64 {
-    assert!(!data.is_null());
-    assert!(!key.is_null());
-    assert!(!result.is_null());
+    if data.is_null() || key.is_null() || result.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
 
     let data = slice::from_raw_parts(data, data_length);
     let key = slice::from_raw_parts(key, key_length);
@@ -141,8 +141,9 @@ pub unsafe extern "C" fn HashPassword(
     result: *mut uint8_t,
     result_length: size_t,
 ) -> i64 {
-    assert!(!password.is_null());
-    assert!(!result.is_null());
+    if password.is_null() || result.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
 
     let password = slice::from_raw_parts(password, password_length);
     let result = slice::from_raw_parts_mut(result, result_length);
@@ -187,8 +188,9 @@ pub unsafe extern "C" fn VerifyPassword(
     hash: *const uint8_t,
     hash_length: size_t,
 ) -> i64 {
-    assert!(!password.is_null());
-    assert!(!hash.is_null());
+    if password.is_null() || hash.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
 
     let password = slice::from_raw_parts(password, password_length);
     let hash = slice::from_raw_parts(hash, hash_length);
@@ -228,8 +230,9 @@ pub unsafe extern "C" fn GenerateKeyExchange(
     public: *mut uint8_t,
     public_length: size_t,
 ) -> i64 {
-    assert!(!private.is_null());
-    assert!(!public.is_null());
+    if private.is_null() || public.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
     assert_eq!(private_length, 32 + 8);
     assert_eq!(public_length, 32 + 8);
 
@@ -278,9 +281,9 @@ pub unsafe extern "C" fn MixKeyExchange(
     shared: *mut uint8_t,
     shared_size: size_t,
 ) -> i64 {
-    assert!(!public.is_null());
-    assert!(!private.is_null());
-    assert!(!shared.is_null());
+    if private.is_null() || public.is_null() || shared.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
     assert_eq!(public_size, 32 + 8);
     assert_eq!(private_size, 32 + 8);
     assert_eq!(shared_size, 32);
@@ -322,7 +325,10 @@ pub extern "C" fn MixKeyExchangeSize() -> i64 {
 ///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn GenerateKey(key: *mut uint8_t, key_length: size_t) -> i64 {
-    assert!(!key.is_null());
+    if key.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
+
     let key = slice::from_raw_parts_mut(key, key_length);
 
     match devocrypto::generate_key(key_length) {
@@ -355,10 +361,11 @@ pub unsafe extern "C" fn DeriveKey(
     result: *mut uint8_t,
     result_length: size_t,
 ) -> i64 {
-    assert!(!key.is_null());
-    assert!(!result.is_null());
+    if key.is_null() || result.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
 
-    let salt = if salt.is_null() {
+    let salt = if salt.is_null() || salt_length == 0 {
         b""
     }
     else {
