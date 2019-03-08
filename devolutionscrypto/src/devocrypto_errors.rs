@@ -14,19 +14,31 @@ use std::io::Error;
 /// The enum containing the various error types.
 #[derive(Debug)]
 pub enum DevoCryptoError {
-    /// The provided data has an invalid length.
+    /// The provided data has an invalid length. Error code: -1
     InvalidLength,
+    /// The key length is invalid. Error code: -2
     InvalidKeyLength,
+    /// The length of the FFI output buffer is invalid. Error code: -3
     InvalidOutputLength,
+    /// The signature of the data blob does not match 0x0d0c. Error code: -11
     InvalidSignature,
+    /// The MAC is invalid. Error code: -12
     InvalidMac,
+    /// The operation cannot be done with this type. Error code: -13
     InvalidDataType,
+    /// The data type is unknown. Error code: -21
     UnknownType,
+    /// The data subtype is unknown. Error code: -22
     UnknownSubtype,
+    /// The data type version is unknown. Error code: -23
     UnknownVersion,
+    /// A null pointer has been passed to the FFI interface. Error code: -31
     NullPointer,
+    /// A cryptographic error occurred. Error code: -32
     CryptoError,
+    /// An error with the Random Number Generator occurred. Error code: -33
     RandomError,
+    /// A generic IO error has occurred. Error code: -34
     IoError(Error),
 }
 
@@ -37,17 +49,17 @@ impl DevoCryptoError {
         match *self {
             DevoCryptoError::InvalidLength => -1,
             DevoCryptoError::InvalidKeyLength => -2,
-            DevoCryptoError::InvalidOutputLength => -13,
-            DevoCryptoError::InvalidSignature => -3,
-            DevoCryptoError::InvalidMac => -4,
-            DevoCryptoError::InvalidDataType => -8,
-            DevoCryptoError::UnknownType => -9,
-            DevoCryptoError::UnknownSubtype => -10,
-            DevoCryptoError::UnknownVersion => -11,
-            DevoCryptoError::NullPointer => -12,
-            DevoCryptoError::CryptoError => -5,
-            DevoCryptoError::RandomError => -6,
-            DevoCryptoError::IoError(_) => -7,
+            DevoCryptoError::InvalidOutputLength => -3,
+            DevoCryptoError::InvalidSignature => -11,
+            DevoCryptoError::InvalidMac => -12,
+            DevoCryptoError::InvalidDataType => -13,
+            DevoCryptoError::UnknownType => -21,
+            DevoCryptoError::UnknownSubtype => -22,
+            DevoCryptoError::UnknownVersion => -23,
+            DevoCryptoError::NullPointer => -31,
+            DevoCryptoError::CryptoError => -32,
+            DevoCryptoError::RandomError => -33,
+            DevoCryptoError::IoError(_) => -34,
         }
     }
 }
@@ -55,19 +67,8 @@ impl DevoCryptoError {
 impl fmt::Display for DevoCryptoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match *self {
-            DevoCryptoError::InvalidLength => write!(f, "{}", self.description()),
-            DevoCryptoError::InvalidKeyLength => write!(f, "{}", self.description()),
-            DevoCryptoError::InvalidOutputLength => write!(f, "{}", self.description()),
-            DevoCryptoError::InvalidSignature => write!(f, "{}", self.description()),
-            DevoCryptoError::InvalidMac => write!(f, "{}", self.description()),
-            DevoCryptoError::InvalidDataType => write!(f, "{}", self.description()),
-            DevoCryptoError::UnknownType => write!(f, "{}", self.description()),
-            DevoCryptoError::UnknownSubtype => write!(f, "{}", self.description()),
-            DevoCryptoError::UnknownVersion => write!(f, "{}", self.description()),
-            DevoCryptoError::NullPointer => write!(f, "{}", self.description()),
-            DevoCryptoError::CryptoError => write!(f, "{}", self.description()),
-            DevoCryptoError::RandomError => write!(f, "{}", self.description()),
             DevoCryptoError::IoError(ref error) => error.fmt(f),
+            _ => write!(f, "Error {}: {}", self.error_code(), self.description()),
         }
     }
 }
@@ -75,18 +76,22 @@ impl fmt::Display for DevoCryptoError {
 impl std::error::Error for DevoCryptoError {
     fn description(&self) -> &str {
         match *self {
-            DevoCryptoError::InvalidLength => "The data blob has an invalid length!",
-            DevoCryptoError::InvalidKeyLength => "Key has an invalid length!",
-            DevoCryptoError::InvalidOutputLength => "The output buffer size is invalid!",
-            DevoCryptoError::InvalidSignature => "Cipher has an invalid signature!",
-            DevoCryptoError::InvalidMac => "Cipher has an invalid MAC!",
-            DevoCryptoError::InvalidDataType => "Operation cannot be done with this data type!",
-            DevoCryptoError::UnknownType => "The type specified in the header is unknown",
-            DevoCryptoError::UnknownSubtype => "The subtype specified in the header is unknown",
-            DevoCryptoError::UnknownVersion => "The version specified in the header is unknown",
-            DevoCryptoError::NullPointer => "A null pointer has been passed to the library",
-            DevoCryptoError::CryptoError => "An error happened during a cryptographic operation",
-            DevoCryptoError::RandomError => "An error happened while initializing the RNG",
+            DevoCryptoError::InvalidLength => "The provided data has an invalid length.",
+            DevoCryptoError::InvalidKeyLength => "The key length is invalid.",
+            DevoCryptoError::InvalidOutputLength => {
+                "The length of the FFI output buffer is invalid."
+            }
+            DevoCryptoError::InvalidSignature => {
+                "The signature of the data blob does not match 0x0d0c."
+            }
+            DevoCryptoError::InvalidMac => "The MAC is invalid.",
+            DevoCryptoError::InvalidDataType => "The operation cannot be done with this type.",
+            DevoCryptoError::UnknownType => "The data type is unknown.",
+            DevoCryptoError::UnknownSubtype => "The data subtype is unknown.",
+            DevoCryptoError::UnknownVersion => "The data type version is unknown.",
+            DevoCryptoError::NullPointer => "A null pointer has been passed to the FFI interface.",
+            DevoCryptoError::CryptoError => "A cryptographic error occurred.",
+            DevoCryptoError::RandomError => "An error with the Random Number Generator occurred.",
             DevoCryptoError::IoError(ref error) => error.description(),
         }
     }
