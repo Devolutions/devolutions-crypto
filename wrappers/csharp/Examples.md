@@ -2,12 +2,12 @@
 ###
 
 ```csharp
-  string encrypt = Cryptography.EncryptWithPasswordAsString("secretdata", "secretpass");
+  string encrypt = Devolutions.Cryptography.Managed.EncryptWithPasswordAsString("secretdata", "secretpass");
 ```
 
 # Decrypt
 ###
 
 ```csharp
-  string decrypt = Cryptography.DecryptWithPasswordAsString(encrypt, "secretpass");
+  string decrypt = Devolutions.Cryptography.Managed.DecryptWithPasswordAsString(encrypt, "secretpass");
 ```

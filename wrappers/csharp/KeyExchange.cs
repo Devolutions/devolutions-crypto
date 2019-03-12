@@ -1,4 +1,4 @@
-namespace Devolutions
+namespace Devolutions.Cryptography
 {
     using System;
 
