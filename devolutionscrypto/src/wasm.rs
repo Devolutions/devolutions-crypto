@@ -5,20 +5,28 @@ use wasm_bindgen::prelude::*;
 use super::devocrypto;
 use super::DcDataBlob;
 
+use zeroize::Zeroize as _;
+
 #[wasm_bindgen]
 pub struct KeyPair {
-    public_key: Vec<u8>,
     private_key: Vec<u8>,
+    public_key: Vec<u8>,
 }
 
 #[wasm_bindgen]
 impl KeyPair {
+    pub fn private(&self) -> Vec<u8> {
+        self.private_key.clone()
+    }
     pub fn public(&self) -> Vec<u8> {
         self.public_key.clone()
     }
+}
 
-    pub fn private(&self) -> Vec<u8> {
-        self.private_key.clone()
+impl Drop for KeyPair {
+    fn drop(&mut self) {
+        self.private_key.zeroize();
+        self.public_key.zeroize();
     }
 }
 

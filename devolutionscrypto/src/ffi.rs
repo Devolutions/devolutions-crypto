@@ -14,7 +14,9 @@ use super::DevoCryptoError;
 
 use std::convert::TryFrom as _;
 use std::slice;
+
 use libc::{size_t, uint8_t};
+use zeroize::Zeroize as _;
 
 
 /// Encrypt a data blob
@@ -52,9 +54,11 @@ pub unsafe extern "C" fn Encrypt(
 
     match DcDataBlob::encrypt(data, key) {
         Ok(res) => {
-            let res: Vec<u8> = res.into();
-            result[0..res.len()].copy_from_slice(&res);
-            res.len() as i64
+            let mut res: Vec<u8> = res.into();
+            let length = res.len();
+            result[0..length].copy_from_slice(&res);
+            res.zeroize();
+            length as i64
         },
         Err(e) => e.error_code(),
     }
@@ -104,11 +108,14 @@ pub unsafe extern "C" fn Decrypt(
     match DcDataBlob::try_from(data) {
         Ok(res) => {
             match res.decrypt(key) {
-                Ok(res) => {
+                Ok(mut res) => {
                     if result.len() >= res.len() {
-                        result[0..res.len()].copy_from_slice(&res);
-                        res.len() as i64
+                        let length = res.len();
+                        result[0..length].copy_from_slice(&res);
+                        res.zeroize();
+                        length as i64
                     } else {
+                        res.zeroize();
                         DevoCryptoError::InvalidOutputLength.error_code()
                     }
                 },
@@ -153,9 +160,11 @@ pub unsafe extern "C" fn HashPassword(
 
     match DcDataBlob::hash_password(password, iterations) {
         Ok(res) => {
-            let res: Vec<u8> = res.into();
-            result[0..res.len()].copy_from_slice(&res);
-            res.len() as i64
+            let mut res: Vec<u8> = res.into();
+            let length = res.len();
+            result[0..length].copy_from_slice(&res);
+            res.zeroize();
+            length as i64
         },
         Err(e) => e.error_code(),
     }
@@ -243,10 +252,12 @@ pub unsafe extern "C" fn GenerateKeyExchange(
 
     match DcDataBlob::generate_key_exchange() {
         Ok((priv_res, pub_res)) => {
-            let priv_res: Vec<u8> = priv_res.into();
-            let pub_res: Vec<u8> = pub_res.into();
+            let mut priv_res: Vec<u8> = priv_res.into();
+            let mut pub_res: Vec<u8> = pub_res.into();
             public[0..pub_res.len()].copy_from_slice(&pub_res);
             private[0..priv_res.len()].copy_from_slice(&priv_res);
+            priv_res.zeroize();
+            pub_res.zeroize();
             0
         },
         Err(e) => e.error_code(),
@@ -298,8 +309,9 @@ pub unsafe extern "C" fn MixKeyExchange(
     match (DcDataBlob::try_from(private), DcDataBlob::try_from(public)) {
         (Ok(private), Ok(public)) => {
             match private.mix_key_exchange(public) {
-                Ok(res) => {
+                Ok(mut res) => {
                     shared[0..res.len()].copy_from_slice(&res);
+                    res.zeroize();
                     0
                 },
                 Err(e) => e.error_code(),
@@ -335,8 +347,9 @@ pub unsafe extern "C" fn GenerateKey(key: *mut uint8_t, key_length: size_t) -> i
     let key = slice::from_raw_parts_mut(key, key_length);
 
     match devocrypto::generate_key(key_length) {
-        Ok(k) => {
+        Ok(mut k) => {
             key.copy_from_slice(&k);
+            k.zeroize();
             0
         }
         Err(e) => e.error_code(),
@@ -378,7 +391,9 @@ pub unsafe extern "C" fn DeriveKey(
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    result.copy_from_slice(&devocrypto::derive_key(&key, &salt, niterations, result_length));
+    let mut native_result = devocrypto::derive_key(&key, &salt, niterations, result_length);
+    result.copy_from_slice(&native_result);
+    native_result.zeroize();
     0
 }
 

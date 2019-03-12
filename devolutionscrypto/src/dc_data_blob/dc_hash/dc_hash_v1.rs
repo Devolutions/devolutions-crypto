@@ -10,11 +10,20 @@ use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
+use zeroize::Zeroize as _;
 
 pub struct DcHashV1 {
     iterations: u32,
     salt: Vec<u8>,
     hash: Vec<u8>,
+}
+
+impl Drop for DcHashV1 {
+    fn drop(&mut self) {
+        self.iterations.zeroize();
+        self.salt.zeroize();
+        self.hash.zeroize();
+    }
 }
 
 impl Into<Vec<u8>> for DcHashV1 {
@@ -75,6 +84,10 @@ impl DcHashV1 {
     pub fn verify_password(&self, pass: &[u8]) -> Result<bool> {
         let mut res = vec![0u8; 32];
         pbkdf2::<Hmac<Sha256>>(pass, &self.salt, self.iterations as usize, &mut res);
-        Ok(res.ct_eq(&self.hash).into())
+
+        let is_equal = res.ct_eq(&self.hash).into();
+
+        res.zeroize();
+        Ok(is_equal)
     }
 }

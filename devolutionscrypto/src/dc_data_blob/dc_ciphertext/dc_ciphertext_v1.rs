@@ -4,6 +4,7 @@ use super::Result;
 
 use std::convert::TryFrom;
 
+use zeroize::Zeroize as _;
 use aes::Aes256;
 use block_modes::{block_padding::Pkcs7, BlockMode, Cbc};
 use hmac::{Hmac, Mac};
@@ -15,6 +16,14 @@ pub struct DcCiphertextV1 {
     iv: Vec<u8>,
     ciphertext: Vec<u8>,
     hmac: Vec<u8>,
+}
+
+impl Drop for DcCiphertextV1 {
+    fn drop(&mut self) {
+        self.iv.zeroize();
+        self.ciphertext.zeroize();
+        self.hmac.zeroize();
+    }
 }
 
 impl Into<Vec<u8>> for DcCiphertextV1 {
@@ -74,6 +83,9 @@ impl DcCiphertextV1 {
         let cipher = Cbc::<Aes256, Pkcs7>::new_var(&encryption_key, &iv)?;
         let ciphertext = cipher.encrypt_vec(data);
 
+        // Zero out the key
+        encryption_key.zeroize();
+
         // Append MAC data
         let mut mac_data: Vec<u8> = (*header).clone().into();
         mac_data.append(&mut iv.clone());
@@ -84,6 +96,9 @@ impl DcCiphertextV1 {
         mac.input(&mac_data);
 
         let hmac = mac.result().code().to_vec();
+
+        // Zero out the key
+        signature_key.zeroize();
 
         Ok(DcCiphertextV1 {
             iv,
@@ -107,8 +122,14 @@ impl DcCiphertextV1 {
         mac.input(&mac_data);
         mac.verify(&self.hmac)?;
 
+        // Zeroize the key
+        signature_key.zeroize();
+
         let cipher = Cbc::<Aes256, Pkcs7>::new_var(&encryption_key, &self.iv)?;
         let result = cipher.decrypt_vec(&self.ciphertext)?;
+
+        // Zeroize the key
+        encryption_key.zeroize();
 
         Ok(result)
     }
