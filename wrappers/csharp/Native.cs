@@ -2,7 +2,6 @@ namespace Devolutions.Cryptography
 {
     using System;
     using System.Runtime.InteropServices;
-    using System.Text;
     using System.Linq;
     using System.IO;
     using System.Reflection;
@@ -183,6 +182,31 @@ namespace Devolutions.Cryptography
             }
         }
 
+        public static byte[] GenerateKey(uint keySize, Action<Enum> error = null)
+        {
+            try
+            {
+                byte[] key = new byte[keySize];
+
+                long res = GenerateKeyNative(key, (UIntPtr)keySize);
+
+                if (res < 0)
+                {
+                    HandleError(res, error);
+
+                    return null;
+                }
+
+                return key;
+            }
+            catch
+            {
+                error?.Invoke(ManagedError.Error);
+
+                return null;
+            }
+        }
+
         public static KeyExchange GenerateKeyExchange(Action<Enum> error = null)
         {
             try
@@ -320,62 +344,6 @@ namespace Devolutions.Cryptography
             if (sharedAlice.SequenceEqual(sharedBob))
             {
                 Console.WriteLine("Success");
-            }
-            else
-            {
-                throw new Exception();
-            }
-
-            byte[] data = Encoding.UTF8.GetBytes("secretdata");
-
-            byte[] encrypt_result = Managed.EncryptWithPassword(data, "secretpass");
-
-            byte[] decrypt_result = Managed.DecryptWithPassword(encrypt_result, "secretpass");
-
-            if (data.SequenceEqual(decrypt_result))
-            {
-                Console.WriteLine("success");
-            }
-            else
-            {
-                throw new Exception();
-            }
-
-
-            string string_encrypt_result = Managed.EncryptWithPasswordAsString(data, "secretpass");
-            string string_decrypt_result = Managed.DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
-
-            if (string_decrypt_result == "secretdata")
-            {
-                Console.WriteLine("success");
-            }
-            else
-            {
-                throw new Exception();
-            }
-
-
-            string base64data = Convert.ToBase64String(Encoding.UTF8.GetBytes("secretdata"));
-
-            string_encrypt_result = Managed.EncryptBase64WithPasswordAsString(base64data, "secretpass");
-            string_decrypt_result = Managed.DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
-
-            if (string_decrypt_result == "secretdata")
-            {
-                Console.WriteLine("success");
-            }
-            else
-            {
-                throw new Exception();
-            }
-
-
-            string_encrypt_result = Managed.EncryptWithPasswordAsString("secretdata", "secretpass");
-            string_decrypt_result = Managed.DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
-
-            if (string_decrypt_result == "secretdata")
-            {
-                Console.WriteLine("success");
             }
             else
             {
