@@ -1,6 +1,10 @@
 # DevolutionsCrypto
 This repo contains the library used for cryptography of products used by Devolutions. 
-It also includes wrapper for it for different languages.
+It also includes wrapper for it for different languages.  
+Currently, the C# wrapper is supported for the implemented methods. Webassembly build and works,
+but is still considered alpha.   
+The code makes great use of the "TryFrom" trait, which currently only builds on nightly.
+
 
 ## API Definition
 ### Provided Functions
