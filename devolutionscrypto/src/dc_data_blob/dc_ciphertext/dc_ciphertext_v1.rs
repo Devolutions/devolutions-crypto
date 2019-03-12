@@ -124,6 +124,7 @@ impl DcCiphertextV1 {
 
         // Zeroize the key
         signature_key.zeroize();
+        mac_data.zeroize();
 
         let cipher = Cbc::<Aes256, Pkcs7>::new_var(&encryption_key, &self.iv)?;
         let result = cipher.decrypt_vec(&self.ciphertext)?;
