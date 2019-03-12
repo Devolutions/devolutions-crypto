@@ -276,10 +276,10 @@ pub extern "C" fn GenerateKeyExchangeSize() -> i64 {
 ///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn MixKeyExchange(
-    public: *const uint8_t,
-    public_size: size_t,
     private: *const uint8_t,
     private_size: size_t,
+    public: *const uint8_t,
+    public_size: size_t,
     shared: *mut uint8_t,
     shared_size: size_t,
 ) -> i64 {
