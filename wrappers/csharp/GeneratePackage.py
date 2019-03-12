@@ -95,7 +95,7 @@ for arch in architectures["arch"]:
 
 print("Building Managed Library...")
 
-command= subprocess.Popen([csc_path,"-out:./bin/Devolutions.Crypto.dll", "-target:library", "-platform:anycpu" ,"DevolutionsCrypto.cs", "KeyExchange.cs", "DevolutionsCryptoNative.cs", "./bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+command= subprocess.Popen([csc_path,"-out:./bin/Devolutions.Crypto.dll", "-target:library", "-platform:anycpu" ,"NativeError.cs", "Native.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "./bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
 output = command.stdout.read().decode('utf-8')
 
 print(output)

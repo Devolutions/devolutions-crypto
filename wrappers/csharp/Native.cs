@@ -1,4 +1,4 @@
-namespace Devolutions
+namespace Devolutions.Cryptography
 {
     using System;
     using System.Runtime.InteropServices;
@@ -7,9 +7,9 @@ namespace Devolutions
     using System.IO;
     using System.Reflection;
 
-    public static class CryptographyNative
+    internal static class Native
     {
-        static CryptographyNative()
+        static Native()
         {
             // Load the right native DLL depending on the arch
             string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -24,12 +24,14 @@ namespace Devolutions
             }
         }
 
-        public static byte[] Decrypt(byte[] data, byte[] key)
+        public static byte[] Decrypt(byte[] data, byte[] key,  Action<Enum> error = null)
         {
             try
             {
                 if (data == null || data.Length == 0)
                 {
+                    error?.Invoke(ManagedError.InvalidParameter);
+
                     return null;
                 }
 
@@ -44,6 +46,8 @@ namespace Devolutions
 
                 if (res < 0)
                 {
+                    HandleError(res, error);
+
                     return null;
                 }
 
@@ -54,16 +58,37 @@ namespace Devolutions
             }
             catch
             {
+                error?.Invoke(ManagedError.Error);
+
                 return null;
             }
         }
 
-        public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000)
+        private static void HandleError(long errorCode, Action<Enum> error)
+        {
+            if (error == null)
+            {
+                return;
+            }
+
+            if (Enum.IsDefined(typeof(NativeError), errorCode))
+            {
+                error?.Invoke((NativeError)errorCode);
+            }
+            else
+            {
+                error?.Invoke(ManagedError.Error);
+            }
+        }
+
+        public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000, Action<Enum> error = null)
         {
             try
             {
-                if (key == null || salt == null)
+                if (key == null)
                 {
+                    error?.Invoke(ManagedError.InvalidParameter);
+
                     return null;
                 }
 
@@ -71,10 +96,14 @@ namespace Devolutions
 
                 byte[] result = new byte[keySize];
 
-                long res = DeriveKeyNative(key, (UIntPtr)key.Length, salt, (UIntPtr)salt.Length, (UIntPtr)iterations, result, (UIntPtr)result.Length);
+                int saltLength = salt == null ? 0 : salt.Length;
+
+                long res = DeriveKeyNative(key, (UIntPtr)key.Length, salt, (UIntPtr)saltLength, (UIntPtr)iterations, result, (UIntPtr)result.Length);
 
                 if (res < 0)
                 {
+                    HandleError(res, error);
+
                     return null;
                 }
 
@@ -82,17 +111,20 @@ namespace Devolutions
             }
             catch
             {
+                error?.Invoke(ManagedError.Error);
+
                 return null;
             }
         }
 
-
-        public static byte[] Encrypt(byte[] data, byte[] key)
+        public static byte[] Encrypt(byte[] data, byte[] key, Action<Enum> error = null)
         {
             try
             {
                 if (data == null || data.Length == 0)
                 {
+                    error?.Invoke(ManagedError.InvalidParameter);
+
                     return null;
                 }
 
@@ -109,6 +141,8 @@ namespace Devolutions
 
                 if (res < 0)
                 {
+                    HandleError(res, error);
+
                     return null;
                 }
 
@@ -116,11 +150,13 @@ namespace Devolutions
             }
             catch
             {
+                error?.Invoke(ManagedError.Error);
+
                 return null;
             }
         }
 
-        public static byte[] GenerateKey()
+        public static byte[] GenerateKey(Action<Enum> error = null)
         {
             try
             {
@@ -132,6 +168,8 @@ namespace Devolutions
 
                 if (res < 0)
                 {
+                    HandleError(res, error);
+
                     return null;
                 }
 
@@ -139,11 +177,13 @@ namespace Devolutions
             }
             catch
             {
+                error?.Invoke(ManagedError.Error);
+
                 return null;
             }
         }
 
-        public static KeyExchange GenerateKeyExchange()
+        public static KeyExchange GenerateKeyExchange(Action<Enum> error = null)
         {
             try
             {
@@ -152,10 +192,12 @@ namespace Devolutions
                 byte[] publicKey = new byte[keySize];
                 byte[] privateKey = new byte[keySize];
 
-                long result = GenerateKeyExchangeNative(publicKey, (UIntPtr)publicKey.Length, privateKey, (UIntPtr)privateKey.Length);
+                long res = GenerateKeyExchangeNative(privateKey, (UIntPtr)privateKey.Length, publicKey, (UIntPtr)publicKey.Length);
 
-                if (result < 0)
+                if (res < 0)
                 {
+                    HandleError(res, error);
+
                     return null;
                 }
 
@@ -163,16 +205,20 @@ namespace Devolutions
             }
             catch
             {
+                error?.Invoke(ManagedError.Error);
+
                 return null;
             }
         }
 
-        public static byte[] HashPassword(byte[] password, uint iterations = 10000)
+        public static byte[] HashPassword(byte[] password, uint iterations = 10000, Action<Enum> error = null)
         {
             try
             {
                 if (password == null || password.Length == 0)
                 {
+                    error?.Invoke(ManagedError.InvalidParameter);
+
                     return null;
                 }
 
@@ -184,6 +230,8 @@ namespace Devolutions
 
                 if (res < 0)
                 {
+                    HandleError(res, error);
+
                     return null;
                 }
 
@@ -191,16 +239,20 @@ namespace Devolutions
             }
             catch
             {
+                error?.Invoke(ManagedError.Error);
+
                 return null;
             }
         }
 
-        public static byte[] MixKeyExchange(byte[] publicKey, byte[] privatekey)
+        public static byte[] MixKeyExchange(byte[] privatekey, byte[] publicKey, Action<Enum> error = null)
         {
             try
             {
                 if (publicKey == null || privatekey == null)
                 {
+                    error?.Invoke(ManagedError.InvalidParameter);
+
                     return null;
                 }
 
@@ -208,10 +260,12 @@ namespace Devolutions
 
                 byte[] shared = new byte[sharedKeySize];
 
-                long result = MixKeyExchangeNative(publicKey, (UIntPtr)publicKey.Length, privatekey, (UIntPtr)privatekey.Length, shared, (UIntPtr)shared.Length);
+                long res = MixKeyExchangeNative(privatekey, (UIntPtr)privatekey.Length, publicKey, (UIntPtr)publicKey.Length, shared, (UIntPtr)shared.Length);
 
-                if (result < 0)
+                if (res < 0)
                 {
+                    HandleError(res, error);
+
                     return null;
                 }
 
@@ -219,72 +273,64 @@ namespace Devolutions
             }
             catch
             {
+                error?.Invoke(ManagedError.Error);
+
                 return null;
+            }
+        }
+
+        public static bool VerifyPassword(byte[] password, byte[] hash, Action<Enum> error = null)
+        {
+            try
+            {
+                if (password == null || hash == null)
+                {
+                    error?.Invoke(ManagedError.InvalidParameter);
+
+                    return false;
+                }
+
+                long res = VerifyPasswordNative(password, (UIntPtr)password.Length, hash, (UIntPtr)hash.Length);
+
+                if (res <= 0)
+                {
+                    HandleError(res, error);
+
+                    return false;
+                }
+
+                return true;
+            }
+            catch
+            {
+                error?.Invoke(ManagedError.Error);
+
+                return false;
             }
         }
 
         public static void Test()
         {
-            /*var bobresult = Encrypt("Johny", "12345678901234561234567890123456");
-
-            var john = Decrypt(bobresult, "12345678901234561234567890123456");
-
-            if (john != "Johny")
-            {
-                throw new Exception();
-            }
-
-            string hashresult = HashPassword("bob", 10000);
-
-            bool hashverify = VerifyPassword("bob", hashresult);
-
-            if (!hashverify)
-            {
-                throw new Exception();
-            }
-
-            byte[] generateKey = GenerateKey();
-
-            string dericeKeyResult = DeriveKey("", "");
-
-            if (dericeKeyResult == null)
-            {
-                throw new Exception();
-            }
-
             KeyExchange bob = GenerateKeyExchange();
             KeyExchange alice = GenerateKeyExchange();
 
-            byte[] sharedAlice = MixKeyExchange(bob.PublicKey, alice.PrivateKey);
-            byte[] sharedBob = MixKeyExchange(alice.PublicKey, bob.PrivateKey);
+            byte[] sharedAlice = MixKeyExchange(alice.PrivateKey, bob.PublicKey);
+            byte[] sharedBob = MixKeyExchange(bob.PrivateKey, alice.PublicKey);
 
             if (sharedAlice.SequenceEqual(sharedBob))
             {
-                Console.WriteLine("Youhouu");
+                Console.WriteLine("Success");
             }
             else
             {
                 throw new Exception();
             }
-
-            string sharedString1 = MixKeyExchange(bob.PublicKeyString, alice.PrivateKeyString);
-            string sharedString2 = MixKeyExchange(alice.PublicKeyString, bob.PrivateKeyString);
-
-            if (sharedString1 == sharedString2)
-            {
-                Console.WriteLine("Youhouu");
-            }
-            else
-            {
-                throw new Exception();
-            }*/
-
 
             byte[] data = Encoding.UTF8.GetBytes("secretdata");
 
-            byte[] encrypt_result = Cryptography.EncryptWithPassword(data, "secretpass");
+            byte[] encrypt_result = Managed.EncryptWithPassword(data, "secretpass");
 
-            byte[] decrypt_result = Cryptography.DecryptWithPassword(encrypt_result, "secretpass");
+            byte[] decrypt_result = Managed.DecryptWithPassword(encrypt_result, "secretpass");
 
             if (data.SequenceEqual(decrypt_result))
             {
@@ -296,8 +342,8 @@ namespace Devolutions
             }
 
 
-            string string_encrypt_result = Cryptography.EncryptWithPasswordAsString(data, "secretpass");
-            string string_decrypt_result = Cryptography.DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
+            string string_encrypt_result = Managed.EncryptWithPasswordAsString(data, "secretpass");
+            string string_decrypt_result = Managed.DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
 
             if (string_decrypt_result == "secretdata")
             {
@@ -311,8 +357,8 @@ namespace Devolutions
 
             string base64data = Convert.ToBase64String(Encoding.UTF8.GetBytes("secretdata"));
 
-            string_encrypt_result = Cryptography.EncryptBase64WithPasswordAsString(base64data, "secretpass");
-            string_decrypt_result = Cryptography.DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
+            string_encrypt_result = Managed.EncryptBase64WithPasswordAsString(base64data, "secretpass");
+            string_decrypt_result = Managed.DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
 
             if (string_decrypt_result == "secretdata")
             {
@@ -324,8 +370,8 @@ namespace Devolutions
             }
 
 
-            string_encrypt_result = Cryptography.EncryptWithPasswordAsString("secretdata", "secretpass");
-            string_decrypt_result = Cryptography.DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
+            string_encrypt_result = Managed.EncryptWithPasswordAsString("secretdata", "secretpass");
+            string_decrypt_result = Managed.DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
 
             if (string_decrypt_result == "secretdata")
             {
@@ -335,29 +381,14 @@ namespace Devolutions
             {
                 throw new Exception();
             }
-        }
 
-        public static bool VerifyPassword(byte[] password, byte[] hash)
-        {
-            try
+            byte[] generateKey = GenerateKey();
+
+            byte[] dericeKeyResult = DeriveKey(generateKey, null);
+
+            if (dericeKeyResult == null)
             {
-                if (password == null || hash == null)
-                {
-                    return false;
-                }
-
-                long res = VerifyPasswordNative(password, (UIntPtr)password.Length, hash, (UIntPtr)hash.Length);
-
-                if (res <= 0)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-            catch
-            {
-                return false;
+                throw new Exception();
             }
         }
 
@@ -374,7 +405,7 @@ namespace Devolutions
         private static extern long EncryptSizeNative(UIntPtr dataLength);
 
         [DllImport("DevolutionsCrypto.dll", EntryPoint = "GenerateKeyExchange", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateKeyExchangeNative(byte[] publicKey, UIntPtr publicKeySize, byte[] privateKey, UIntPtr privateKeySize);
+        private static extern long GenerateKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize);
 
         [DllImport("DevolutionsCrypto.dll", EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long GenerateKeyExchangeSizeNative();
@@ -392,7 +423,7 @@ namespace Devolutions
         private static extern uint KeySizeNative();
 
         [DllImport("DevolutionsCrypto.dll", EntryPoint = "MixKeyExchange", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long MixKeyExchangeNative(byte[] publicKey, UIntPtr publicKeySize, byte[] privateKey, UIntPtr privateKeySize, byte[] shared, UIntPtr sharedSize);
+        private static extern long MixKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize, byte[] shared, UIntPtr sharedSize);
 
         [DllImport("DevolutionsCrypto.dll", EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long MixKeyExchangeSizeNative();
