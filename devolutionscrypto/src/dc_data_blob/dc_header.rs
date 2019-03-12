@@ -4,8 +4,8 @@ use super::Result;
 use std::convert::TryFrom;
 use std::io::Cursor;
 
-use zeroize::Zeroize as _;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
+use zeroize::Zeroize as _;
 
 const SIGNATURE: u16 = 0x0C0D;
 

@@ -4,13 +4,13 @@ use super::Result;
 
 use std::convert::TryFrom;
 
-use zeroize::Zeroize as _;
 use aes::Aes256;
 use block_modes::{block_padding::Pkcs7, BlockMode, Cbc};
 use hmac::{Hmac, Mac};
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
+use zeroize::Zeroize as _;
 
 pub struct DcCiphertextV1 {
     iv: Vec<u8>,
