@@ -2,7 +2,7 @@
 This repo contains the library used for cryptography of products used by Devolutions. 
 It also includes wrapper for it for different languages.  
 Currently, the C# wrapper is supported for the implemented methods. Webassembly build and works,
-but is still considered alpha.   
+but is still considered alpha and not production-ready.   
 The code makes great use of the "TryFrom" trait, which currently only builds on nightly.
 
 
@@ -16,7 +16,7 @@ It contains the following functions:
 `Decrypt`: Decrypt data with the provided key. Can take any size of key.  
 `HashPassword`: Hash a password using high-cost algorithm so it is hard to brute-force. Depending on the wrapper,
 you may need to specify an iteration number(the standard is 1000). Can also be used to derive a key. 
-Should be use whenever there is a user provided password.  
+Should be used whenever there is a user provided password.  
 `VerifyPassword`: Verify a password hash using constant time equality to prevent an array of side-channels attacks.  
 `GenerateKeyExchange`: Generate a key pair to use in a Key Exchange. Should be used for any data in transit.  
 MixKeyExchange: Mix a public key with a private key. Generates a shared secret between the client and the server.
@@ -32,7 +32,7 @@ Uses PBKDF2 with HMAC-SHA256 to create a key using the supplied parameters.
 
 #### Encrypt
 1. Derives the secret using PBKDF2 into two keys using HMAC-SHA256 and 1 iteration: 
-The encryption key(salt="\x00") and the signature key(salt="\x01").  
+The encryption key(`salt="\x00"`) and the signature key(`salt="\x01"`).  
 2. Generate a random 128bits Initialization Vector(IV).  
 3. Encrypt the data using the encryption key and the IV.  
 4. Create an HMAC-SHA256 of version + IV + encrypted_data using the signature key.  
@@ -41,22 +41,22 @@ The encryption key(salt="\x00") and the signature key(salt="\x01").
 #### HashPassword
 1. Generate a random 256bits salt.  
 2. Hash the password with the salt and the specified iteration number using HMAC-SHA256.  
-3. Final: 4 version bytes + 4 bytes niterations + 32 bytes salt + 32 bytes hash
+3. Final: 4 version bytes + 4 bytes iterations* + 32 bytes salt + 32 bytes hash
 
 #### KeyExchange
 The key exchanges uses x25519 protocol, which uses Diffie-Hellman based on elliptic curves.
 
 ## Headers
 The current data header works as the following:  
-1. 2 bytes signature: [ 0x0D, 0x0C ], stands for Devocultions Crypto.  
+1. 2 bytes signature: [ 0x0D, 0x0C ], stands for Devolutions Crypto.  
 2. 2 bytes type in Little Endian. The following types are implemented:  
     - Key = 1
     - Ciphertext = 2
     - Hash = 3
 3. 2 bytes subtype in little endian.
     - Key
-        - Public = 1
-        - Private = 2
+        - Private = 1
+        - Public = 2
 4. 2 bytes version in Little Endian. Currently, everything is at version 1.
 
 ## Wrappers and How To Build
@@ -102,7 +102,7 @@ TODO
 #### Use the Library
 View the examples.md file in the wrappers folder
 
-### WebAssembly
+### WebAssembly (Alpha)
 #### Build the Library
 You need to install the `wasm32-unknown-unknown` toolchain:
 ```bash
@@ -112,8 +112,8 @@ You also need to install wasm-pack:
 ```bash
 cargo install wasm-pack
 ```
-Make sure your .cargo/bin is in your $PATH and run wasm_build.bat(on Windows) 
-or wasm_build.sh(on Linux) to build the webassembly files.
+Make sure your .cargo/bin is in your $PATH and run `wasm_build.bat`(on Windows) 
+or `wasm_build.sh`(on Linux) to build the webassembly files.
 
 #### Use the Library
 Make sure your server returns the `application/wasm` Content-Type header on *.wasm requests.  
