@@ -1,6 +1,7 @@
 namespace Devolutions.Cryptography
 {
     using System;
+    using System.Linq;
     using System.Text;
 
     public static class Managed
@@ -161,6 +162,78 @@ namespace Devolutions.Cryptography
             byte[] result = Native.Decrypt(Base64StringToByteArray(data), key);
 
             return result;
+        }
+
+        public static Guid GenerateAPIKey()
+        {
+            byte[] apiKey = Native.GenerateKey(16);
+
+            if (apiKey == null)
+            {
+                return Guid.Empty;
+            }
+
+            return new Guid(apiKey);
+        }
+        
+        public static void Test()
+        {
+            Guid api = GenerateAPIKey();
+            
+            byte[] data = Encoding.UTF8.GetBytes("secretdata");
+
+            byte[] encrypt_result = EncryptWithPassword(data, "secretpass");
+
+            byte[] decrypt_result = DecryptWithPassword(encrypt_result, "secretpass");
+
+            if (data.SequenceEqual(decrypt_result))
+            {
+                Console.WriteLine("success");
+            }
+            else
+            {
+                throw new Exception();
+            }
+
+            string string_encrypt_result = EncryptWithPasswordAsString(data, "secretpass");
+            string string_decrypt_result = DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
+
+            if (string_decrypt_result == "secretdata")
+            {
+                Console.WriteLine("success");
+            }
+            else
+            {
+                throw new Exception();
+            }
+
+
+            string base64data = Convert.ToBase64String(Encoding.UTF8.GetBytes("secretdata"));
+
+            string_encrypt_result = EncryptBase64WithPasswordAsString(base64data, "secretpass");
+            string_decrypt_result = DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
+
+            if (string_decrypt_result == "secretdata")
+            {
+                Console.WriteLine("success");
+            }
+            else
+            {
+                throw new Exception();
+            }
+
+
+            string_encrypt_result = EncryptWithPasswordAsString("secretdata", "secretpass");
+            string_decrypt_result = DecryptWithPasswordAsString(string_encrypt_result, "secretpass");
+
+            if (string_decrypt_result == "secretdata")
+            {
+                Console.WriteLine("success");
+            }
+            else
+            {
+                throw new Exception();
+            }
         }
     }   
 }
