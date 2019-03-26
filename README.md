@@ -107,8 +107,23 @@ cargo build --release --target x86_64-apple-darwin
 cargo build --release --target i686-apple-darwin
 ```
 ##### Android
-You can refer to the following link on how to setup rust for android:
-https://mozilla.github.io/firefox-browser-architecture/experiments/2017-09-06-rust-on-ios.html
+You can refer to the following link on how to setup rust for android:  
+https://mozilla.github.io/firefox-browser-architecture/experiments/2017-09-21-rust-on-android.html  
+Install the targets:
+```bash
+rustup target add aarch64-linux-android
+rustup target add armv7-linux-androideabi
+rustup target add i686-linux-android
+```
+Then, navigate to `devolutionscrypto/` and run: 
+```batch
+cargo build --release --target aarch64-linux-android
+cargo build --release --target armv7-linux-androideabi
+cargo build --release --target i686-linux-android
+```
+##### iOS
+You can refer to the following link on how to setup rust for android:  
+https://mozilla.github.io/firefox-browser-architecture/experiments/2017-09-06-rust-on-ios.html  
 Install the targets:
 ```bash
 rustup target add aarch64-apple-ios
@@ -125,20 +140,6 @@ cargo build --release --target armv7s-apple-ios
 cargo build --release --target x86_64-apple-ios
 cargo build --release --target i386-apple-ios
 ```
-##### iOS
-You can refer to the following link on how to setup rust for android:
-https://mozilla.github.io/firefox-browser-architecture/experiments/2017-09-21-rust-on-android.html  
-Install the targets:
-```bash
-rustup target add aarch64-linux-android
-rustup target add armv7-linux-androideabi
-rustup target add i686-linux-android
-```
-Then, navigate to `devolutionscrypto/` and run: 
-```batch
-cargo build --release --target aarch64-linux-android
-cargo build --release --target armv7-linux-androideabi
-cargo build --release --target i686-linux-android
 
 #### Import the Library
 TODO
