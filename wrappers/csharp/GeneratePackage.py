@@ -163,11 +163,11 @@ if sys.argv[1] == "MAC":
     libs = []
 
     for arch in architectures["arch"]:
-        libs.append("./macos/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.a")
+        libs.append("./macos/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib")
     
     args = ["lipo", "-create"]
     args = args + libs
-    args = args + ["-output", "./macos/bin/universal/libDevolutionsCrypto.a"]
+    args = args + ["-output", "./macos/bin/universal/libDevolutionsCrypto.dylib"]
     
     command= subprocess.Popen(args, stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
