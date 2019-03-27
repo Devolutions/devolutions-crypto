@@ -255,7 +255,8 @@ if sys.argv[1] == "ANDROID":
                     [
                         {"name" : "aarch64", "value" : "aarch64-linux-android"},
                         {"name" : "armv7", "value" : "armv7-linux-androideabi"},
-                        {"name" : "i686", "value" : "i686-linux-android"}
+                        {"name" : "i686", "value" : "i686-linux-android"},
+                        {"name" : "x86_64", "value" : "x86_64-linux-android"}
                     ]
             }
 
