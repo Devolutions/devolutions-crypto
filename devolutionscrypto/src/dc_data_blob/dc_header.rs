@@ -5,25 +5,16 @@ use std::convert::TryFrom;
 use std::io::Cursor;
 
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use zeroize::Zeroize as _;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 const SIGNATURE: u16 = 0x0C0D;
 
-#[derive(Clone)]
+#[derive(Clone, Zeroize, ZeroizeOnDrop)]
 pub struct DcHeader {
     pub signature: u16,
     pub data_type: u16,
     pub data_subtype: u16,
     pub version: u16,
-}
-
-impl Drop for DcHeader {
-    fn drop(&mut self) {
-        self.signature.zeroize();
-        self.data_type.zeroize();
-        self.data_subtype.zeroize();
-        self.version.zeroize();
-    }
 }
 
 impl TryFrom<&[u8]> for DcHeader {

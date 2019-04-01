@@ -10,20 +10,13 @@ use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
-use zeroize::Zeroize as _;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
+#[derive(Zeroize, ZeroizeOnDrop)]
 pub struct DcHashV1 {
     iterations: u32,
     salt: Vec<u8>,
     hash: Vec<u8>,
-}
-
-impl Drop for DcHashV1 {
-    fn drop(&mut self) {
-        self.iterations.zeroize();
-        self.salt.zeroize();
-        self.hash.zeroize();
-    }
 }
 
 impl Into<Vec<u8>> for DcHashV1 {
