@@ -3,6 +3,7 @@ This repo contains the library used for cryptography of products used by Devolut
 It also includes wrapper for it for different languages.  
 Currently, the C# wrapper is supported for the implemented methods. Webassembly build and works,
 but is still considered alpha and not production-ready.   
+The minimum Rust version to build on stable is 1.34.  
 
 
 ## API Definition
