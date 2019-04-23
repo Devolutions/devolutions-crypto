@@ -3,7 +3,7 @@ This repo contains the library used for cryptography of products used by Devolut
 It also includes wrapper for it for different languages.  
 Currently, the C# wrapper is supported for the implemented methods. Webassembly build and works,
 but is still considered alpha and not production-ready.   
-The code makes great use of the "TryFrom" trait, which currently only builds on nightly.
+The minimum Rust version to build on stable is 1.34.  
 
 
 ## API Definition
@@ -75,10 +75,6 @@ rustup target add x86_64-pc-windows-msvc
 rustup target add i686-pc-windows-msvc
 ```
 
-```batch
-rustup target add x86_64-pc-windows-msvc --toolchain nightly
-rustup target add i686-pc-windows-msvc --toolchain nightly
-```
 Then, navigate to `devolutionscrypto/` and run: 
 ```batch
 cargo build --release --target x86_64-pc-windows-msvc
