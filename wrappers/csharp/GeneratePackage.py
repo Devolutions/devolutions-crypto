@@ -52,7 +52,16 @@ if sys.argv[1] == "WIN":
 
     paths = output.split("\r\n")
 
-    csc_path = paths[0]
+    paths_filtered = []
+    for path in paths:
+        if("Roslyn" in path):
+            paths_filtered.append(path)
+
+    if(len(paths_filtered) == 0):
+        print("csc compiler not found!")
+        exit()
+
+    csc_path = paths_filtered[0]
 
     if "csc.exe" not in csc_path:
         print("csc compiler not found!")
