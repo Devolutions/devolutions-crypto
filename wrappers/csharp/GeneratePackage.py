@@ -121,7 +121,7 @@ if sys.argv[1] == "WIN":
 if sys.argv[1] == "MAC":
     architectures = { "arch" : 
                     [
-                        {"name" : "i686", "value" : "i686-apple-darwin"},
+                        #{"name" : "i686", "value" : "i686-apple-darwin"}, # 32 bit no longer supported by mac
                         {"name" : "x86_64", "value" : "x86_64-apple-darwin"}
                     ]
             }
