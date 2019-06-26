@@ -1,0 +1,30 @@
+﻿<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>Devolutions.Crypto</id>
+        <version>$version$</version>
+        <authors>Devolutions Inc</authors>
+        <description>Devolutions Cryptographic Library For the .NET Framework, .NET Standard platforms and .NET Core</description>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <copyright>Copyright 2019 @ Devolutions Inc</copyright>
+        <frameworkAssemblies>
+            <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5" />
+            <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.5" />
+        </frameworkAssemblies>
+    </metadata>
+    <files>
+
+    <file src="../../windows/bin/Devolutions.Crypto.dll" target="lib/net45/Devolutions.Crypto.dll" />
+    <file src="../../windows/bin/Devolutions.Crypto.dll" target="lib/netstandard1.5/Devolutions.Crypto.dll" />
+    <file src="../../windows/bin/Devolutions.Crypto.dll" target="lib/netstandard2.0/Devolutions.Crypto.dll" />
+
+    <file src="../../windows/bin/x64/DevolutionsCrypto.dll" target="runtimes/win-x64/native/DevolutionsCrypto.dll"/>
+    <file src="../../windows/bin/x86/DevolutionsCrypto.dll" target="runtimes/win-x86/native/DevolutionsCrypto.dll"/>
+
+
+    <file src="../../linux/bin/x86_64/libDevolutionsCrypto.so" target="runtimes/linux-x64/native/libDevolutionsCrypto.so"/>
+    <file src="../../linux/bin/i686/libDevolutionsCrypto.so" target="runtimes/linux-x86/native/libDevolutionsCrypto.so"/>
+
+    <file src="Devolutions.Crypto.targets" target="build/net45/Devolutions.Crypto.targets"/>
+</files>
+</package>
