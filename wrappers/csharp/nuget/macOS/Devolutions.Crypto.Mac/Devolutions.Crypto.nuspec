@@ -1,0 +1,18 @@
+﻿<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>Devolutions.Crypto.Mac</id>
+        <version>$version$</version>
+        <authors>Devolutions Inc</authors>
+        <description>Devolutions Cryptographic Library For the macOS platform</description>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <copyright>Copyright 2019 @ Devolutions Inc</copyright>
+    </metadata>
+    <files>
+
+    <!-- macOS -->
+    <file src="Devolutions.Crypto.Mac/bin/Release/Devolutions.Crypto.dll" target="lib/Xamarin.Mac20/Devolutions.Crypto.dll" />
+    <file src="Devolutions.Crypto.Mac/bin/Release/Devolutions.Crypto.pdb" target="lib/Xamarin.Mac20/Devolutions.Crypto.pdb" />
+
+</files>
+</package>
