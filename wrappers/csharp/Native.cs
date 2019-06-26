@@ -18,7 +18,7 @@ namespace Devolutions.Cryptography
 
         static Native()
         {
-#if WIN
+#if RDM
             // RDM Specific
             // Load the right native DLL depending on the arch
            string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -410,7 +410,7 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
         private static extern long VerifyPasswordNative(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);
 
-#if WIN
+#if RDM
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern bool SetDllDirectory(string path);
 #endif
