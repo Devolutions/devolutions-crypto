@@ -10,20 +10,13 @@ use hmac::{Hmac, Mac};
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
-use zeroize::Zeroize as _;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
+#[derive(Zeroize, ZeroizeOnDrop)]
 pub struct DcCiphertextV1 {
     iv: Vec<u8>,
     ciphertext: Vec<u8>,
     hmac: Vec<u8>,
-}
-
-impl Drop for DcCiphertextV1 {
-    fn drop(&mut self) {
-        self.iv.zeroize();
-        self.ciphertext.zeroize();
-        self.hmac.zeroize();
-    }
 }
 
 impl Into<Vec<u8>> for DcCiphertextV1 {

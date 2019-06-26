@@ -3,7 +3,7 @@ This repo contains the library used for cryptography of products used by Devolut
 It also includes wrapper for it for different languages.  
 Currently, the C# wrapper is supported for the implemented methods. Webassembly build and works,
 but is still considered alpha and not production-ready.   
-The code makes great use of the "TryFrom" trait, which currently only builds on nightly.
+The minimum Rust version to build on stable is 1.34.  
 
 
 ## API Definition
@@ -75,10 +75,6 @@ rustup target add x86_64-pc-windows-msvc
 rustup target add i686-pc-windows-msvc
 ```
 
-```batch
-rustup target add x86_64-pc-windows-msvc --toolchain nightly
-rustup target add i686-pc-windows-msvc --toolchain nightly
-```
 Then, navigate to `devolutionscrypto/` and run: 
 ```batch
 cargo build --release --target x86_64-pc-windows-msvc
@@ -107,8 +103,24 @@ cargo build --release --target x86_64-apple-darwin
 cargo build --release --target i686-apple-darwin
 ```
 ##### Android
-You can refer to the following link on how to setup rust for android:
-https://mozilla.github.io/firefox-browser-architecture/experiments/2017-09-06-rust-on-ios.html
+You can refer to the following link on how to setup rust for android:  
+https://mozilla.github.io/firefox-browser-architecture/experiments/2017-09-21-rust-on-android.html  
+Install the targets:
+```bash
+rustup target add aarch64-linux-android
+rustup target add armv7-linux-androideabi
+rustup target add i686-linux-android
+rustup target add x86_64-linux-android
+```
+Then, navigate to `devolutionscrypto/` and run: 
+```batch
+cargo build --release --target aarch64-linux-android
+cargo build --release --target armv7-linux-androideabi
+cargo build --release --target i686-linux-android
+```
+##### iOS
+You can refer to the following link on how to setup rust for android:  
+https://mozilla.github.io/firefox-browser-architecture/experiments/2017-09-06-rust-on-ios.html  
 Install the targets:
 ```bash
 rustup target add aarch64-apple-ios
@@ -125,20 +137,6 @@ cargo build --release --target armv7s-apple-ios
 cargo build --release --target x86_64-apple-ios
 cargo build --release --target i386-apple-ios
 ```
-##### iOS
-You can refer to the following link on how to setup rust for android:
-https://mozilla.github.io/firefox-browser-architecture/experiments/2017-09-21-rust-on-android.html  
-Install the targets:
-```bash
-rustup target add aarch64-linux-android
-rustup target add armv7-linux-androideabi
-rustup target add i686-linux-android
-```
-Then, navigate to `devolutionscrypto/` and run: 
-```batch
-cargo build --release --target aarch64-linux-android
-cargo build --release --target armv7-linux-androideabi
-cargo build --release --target i686-linux-android
 
 #### Import the Library
 TODO

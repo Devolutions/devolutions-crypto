@@ -2,6 +2,7 @@ namespace Devolutions.Cryptography
 {
     using System;
     using System.Runtime.InteropServices;
+  
 #if WIN
     using System.IO;
     using System.Reflection;
