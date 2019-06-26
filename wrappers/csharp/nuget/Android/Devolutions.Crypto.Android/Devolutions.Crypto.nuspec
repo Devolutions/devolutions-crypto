@@ -1,0 +1,18 @@
+﻿<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>Devolutions.Crypto.Android</id>
+        <version>$version$</version>
+        <authors>Devolutions Inc</authors>
+        <description>Devolutions Cryptographic Library For the Android platform</description>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <copyright>Copyright 2019 @ Devolutions Inc</copyright>
+    </metadata>
+    <files>
+
+    <!-- Android -->
+    <file src="Devolutions.Crypto.Android/bin/Release/Devolutions.Crypto.dll" target="lib/MonoAndroid81/Devolutions.Crypto.dll" />
+    <file src="Devolutions.Crypto.Android/bin/Release/Devolutions.Crypto.pdb" target="lib/MonoAndroid81/Devolutions.Crypto.pdb" />
+
+</files>
+</package>
