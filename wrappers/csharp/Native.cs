@@ -2,25 +2,35 @@ namespace Devolutions.Cryptography
 {
     using System;
     using System.Runtime.InteropServices;
-    using System.Linq;
+#if WIN
     using System.IO;
     using System.Reflection;
+#endif
 
     internal static class Native
     {
+#if IOS
+        private const string LibName = "__Internal";
+#else
+        private const string LibName = "DevolutionsCrypto";
+#endif
+
         static Native()
         {
+#if WIN
+            // RDM Specific
             // Load the right native DLL depending on the arch
-            string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+           string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-            path = Path.Combine(path, IntPtr.Size == 8 ? "x64" : "x86");
+           path = Path.Combine(path, IntPtr.Size == 8 ? "x64" : "x86");
 
-            bool ok = SetDllDirectory(path);
+           bool ok = SetDllDirectory(path);
 
-            if (!ok)
-            {
-                throw new System.ComponentModel.Win32Exception();
-            }
+           if (!ok)
+           {
+               throw new System.ComponentModel.Win32Exception();
+           }
+#endif
         }
 
         public static byte[] Decrypt(byte[] data, byte[] key,  Action<Enum> error = null)
@@ -341,7 +351,7 @@ namespace Devolutions.Cryptography
             byte[] sharedAlice = MixKeyExchange(alice.PrivateKey, bob.PublicKey);
             byte[] sharedBob = MixKeyExchange(bob.PrivateKey, alice.PublicKey);
 
-            if (sharedAlice.SequenceEqual(sharedBob))
+            if (Convert.ToBase64String(sharedAlice) == Convert.ToBase64String(sharedBob))
             {
                 Console.WriteLine("Success");
             }
@@ -360,46 +370,48 @@ namespace Devolutions.Cryptography
             }
         }
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DeriveKeyNative(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
         private static extern long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long EncryptSizeNative(UIntPtr dataLength);
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "GenerateKeyExchange", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "GenerateKeyExchange", CallingConvention = CallingConvention.Cdecl)]
         private static extern long GenerateKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize);
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long GenerateKeyExchangeSizeNative();
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "GenerateKey", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "GenerateKey", CallingConvention = CallingConvention.Cdecl)]
         private static extern long GenerateKeyNative(byte[] key, UIntPtr keyLength);
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "HashPasswordLength", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "HashPasswordLength", CallingConvention = CallingConvention.Cdecl)]
         private static extern long HashPasswordLengthNative();
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "HashPassword", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "HashPassword", CallingConvention = CallingConvention.Cdecl)]
         private static extern long HashPasswordNative(byte[] password, UIntPtr passwordLength, uint iterations, byte[] result, UIntPtr resultLength);
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "KeySize", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "KeySize", CallingConvention = CallingConvention.Cdecl)]
         private static extern uint KeySizeNative();
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "MixKeyExchange", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "MixKeyExchange", CallingConvention = CallingConvention.Cdecl)]
         private static extern long MixKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize, byte[] shared, UIntPtr sharedSize);
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long MixKeyExchangeSizeNative();
 
-        [DllImport("DevolutionsCrypto.dll", EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
         private static extern long VerifyPasswordNative(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);
 
+#if WIN
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern bool SetDllDirectory(string path);
+#endif
     }
 }
