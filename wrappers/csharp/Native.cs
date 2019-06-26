@@ -2,7 +2,7 @@ namespace Devolutions.Cryptography
 {
     using System;
     using System.Runtime.InteropServices;
-    using System.Linq;
+  
 #if WIN
     using System.IO;
     using System.Reflection;
@@ -352,7 +352,7 @@ namespace Devolutions.Cryptography
             byte[] sharedAlice = MixKeyExchange(alice.PrivateKey, bob.PublicKey);
             byte[] sharedBob = MixKeyExchange(bob.PrivateKey, alice.PublicKey);
 
-            if (sharedAlice.SequenceEqual(sharedBob))
+            if (Convert.ToBase64String(sharedAlice) == Convert.ToBase64String(sharedBob))
             {
                 Console.WriteLine("Success");
             }

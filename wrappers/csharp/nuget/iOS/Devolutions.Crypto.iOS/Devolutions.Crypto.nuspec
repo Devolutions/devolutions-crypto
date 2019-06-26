@@ -1,0 +1,18 @@
+﻿<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>Devolutions.Crypto.iOS</id>
+        <version>$version$</version>
+        <authors>Devolutions Inc</authors>
+        <description>Devolutions Cryptographic Library For the iOS platform</description>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <copyright>Copyright 2019 @ Devolutions Inc</copyright>
+    </metadata>
+    <files>
+
+    <!-- iOS -->
+    <file src="Devolutions.Crypto.iOS/bin/Release/Devolutions.Crypto.dll" target="lib/Xamarin.iOS10/Devolutions.Crypto.dll" />
+    <file src="Devolutions.Crypto.iOS/bin/Release/Devolutions.Crypto.pdb" target="lib/Xamarin.iOS10/Devolutions.Crypto.pdb" />
+
+</files>
+</package>

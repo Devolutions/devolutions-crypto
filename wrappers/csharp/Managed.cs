@@ -1,7 +1,6 @@
 namespace Devolutions.Cryptography
 {
     using System;
-    using System.Linq;
     using System.Text;
 
     public static class Managed
@@ -186,7 +185,7 @@ namespace Devolutions.Cryptography
 
             byte[] decrypt_result = DecryptWithPassword(encrypt_result, "secretpass");
 
-            if (data.SequenceEqual(decrypt_result))
+            if (Convert.ToBase64String(data) == Convert.ToBase64String(decrypt_result))
             {
                 Console.WriteLine("success");
             }
