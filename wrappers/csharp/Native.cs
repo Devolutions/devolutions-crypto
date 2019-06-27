@@ -3,7 +3,7 @@ namespace Devolutions.Cryptography
     using System;
     using System.Runtime.InteropServices;
   
-#if WIN
+#if RDM
     using System.IO;
     using System.Reflection;
 #endif
