@@ -22,7 +22,7 @@
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;ANDROID;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -31,7 +31,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;ANDROID;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -61,6 +61,9 @@
     </Compile>
     <Compile Include="..\..\..\..\KeyExchange.cs">
       <Link>KeyExchange.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\Native.Xamarin.cs">
+      <Link>Native.Xamarin.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
