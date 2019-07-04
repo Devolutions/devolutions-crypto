@@ -16,7 +16,6 @@ cfg_if! {
         pub mod wasm;
     }
     else {
-        extern crate libc;
         pub mod ffi;
     }
 }
