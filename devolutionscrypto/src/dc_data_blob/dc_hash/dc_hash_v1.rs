@@ -10,9 +10,10 @@ use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
-use zeroize::{Zeroize, ZeroizeOnDrop};
+use zeroize::Zeroize;
 
-#[derive(Zeroize, ZeroizeOnDrop)]
+#[derive(Zeroize)]
+#[zeroize(drop)]
 pub struct DcHashV1 {
     iterations: u32,
     salt: Vec<u8>,
