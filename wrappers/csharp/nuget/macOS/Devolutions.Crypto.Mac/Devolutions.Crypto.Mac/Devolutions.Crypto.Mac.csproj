@@ -15,7 +15,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
+    <DefineConstants>__UNIFIED__;__MACOS__;DEBUG;MAC;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -24,6 +24,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>__UNIFIED__;__MACOS__;MAC;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -48,6 +49,9 @@
     </Compile>
     <Compile Include="..\..\..\..\NativeError.cs">
       <Link>NativeError.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\Native.Xamarin.cs">
+      <Link>Native.Xamarin.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

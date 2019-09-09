@@ -15,7 +15,6 @@ use super::DevoCryptoError;
 use std::convert::TryFrom as _;
 use std::slice;
 
-use libc::{size_t, uint8_t};
 use zeroize::Zeroize as _;
 
 
@@ -33,12 +32,12 @@ use zeroize::Zeroize as _;
 ///     appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn Encrypt(
-    data: *const uint8_t,
-    data_length: size_t,
-    key: *const uint8_t,
-    key_length: size_t,
-    result: *mut uint8_t,
-    result_length: size_t,
+    data: *const u8,
+    data_length: usize,
+    key: *const u8,
+    key_length: usize,
+    result: *mut u8,
+    result_length: usize,
 ) -> i64 {
     if data.is_null() || key.is_null() || result.is_null() {
         return DevoCryptoError::NullPointer.error_code();
@@ -71,7 +70,7 @@ pub unsafe extern "C" fn Encrypt(
 /// # Returns
 /// Returns the length of the ciphertext to input as `result_length` in `Encrypt()`.
 #[no_mangle]
-pub extern "C" fn EncryptSize(data_length: size_t) -> i64 {
+pub extern "C" fn EncryptSize(data_length: usize) -> i64 {
     (8 + 16 + (data_length / 16 + 1) * 16 + 32) as i64 // Header + IV + data(padded to 16) + HMAC
 }
 
@@ -90,12 +89,12 @@ pub extern "C" fn EncryptSize(data_length: size_t) -> i64 {
 ///     appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn Decrypt(
-    data: *const uint8_t,
-    data_length: size_t,
-    key: *const uint8_t,
-    key_length: size_t,
-    result: *mut uint8_t,
-    result_length: size_t,
+    data: *const u8,
+    data_length: usize,
+    key: *const u8,
+    key_length: usize,
+    result: *mut u8,
+    result_length: usize,
 ) -> i64 {
     if data.is_null() || key.is_null() || result.is_null() {
         return DevoCryptoError::NullPointer.error_code();
@@ -141,11 +140,11 @@ pub unsafe extern "C" fn Decrypt(
 ///     appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn HashPassword(
-    password: *const uint8_t,
-    password_length: size_t,
+    password: *const u8,
+    password_length: usize,
     iterations: u32,
-    result: *mut uint8_t,
-    result_length: size_t,
+    result: *mut u8,
+    result_length: usize,
 ) -> i64 {
     if password.is_null() || result.is_null() {
         return DevoCryptoError::NullPointer.error_code();
@@ -191,10 +190,10 @@ pub extern "C" fn HashPasswordLength() -> i64 {
 ///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn VerifyPassword(
-    password: *const uint8_t,
-    password_length: size_t,
-    hash: *const uint8_t,
-    hash_length: size_t,
+    password: *const u8,
+    password_length: usize,
+    hash: *const u8,
+    hash_length: usize,
 ) -> i64 {
     if password.is_null() || hash.is_null() {
         return DevoCryptoError::NullPointer.error_code();
@@ -233,10 +232,10 @@ pub unsafe extern "C" fn VerifyPassword(
 ///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn GenerateKeyExchange(
-    private: *mut uint8_t,
-    private_length: size_t,
-    public: *mut uint8_t,
-    public_length: size_t,
+    private: *mut u8,
+    private_length: usize,
+    public: *mut u8,
+    public_length: usize,
 ) -> i64 {
     if private.is_null() || public.is_null() {
         return DevoCryptoError::NullPointer.error_code();
@@ -287,12 +286,12 @@ pub extern "C" fn GenerateKeyExchangeSize() -> i64 {
 ///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn MixKeyExchange(
-    private: *const uint8_t,
-    private_size: size_t,
-    public: *const uint8_t,
-    public_size: size_t,
-    shared: *mut uint8_t,
-    shared_size: size_t,
+    private: *const u8,
+    private_size: usize,
+    public: *const u8,
+    public_size: usize,
+    shared: *mut u8,
+    shared_size: usize,
 ) -> i64 {
     if private.is_null() || public.is_null() || shared.is_null() {
         return DevoCryptoError::NullPointer.error_code();
@@ -339,7 +338,7 @@ pub extern "C" fn MixKeyExchangeSize() -> i64 {
 /// Returns 0 if the operation is successful. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
-pub unsafe extern "C" fn GenerateKey(key: *mut uint8_t, key_length: size_t) -> i64 {
+pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
     if key.is_null() {
         return DevoCryptoError::NullPointer.error_code();
     };
@@ -369,13 +368,13 @@ pub unsafe extern "C" fn GenerateKey(key: *mut uint8_t, key_length: size_t) -> i
 ///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn DeriveKey(
-    key: *const uint8_t,
-    key_length: size_t,
-    salt: *const uint8_t,
-    salt_length: size_t,
+    key: *const u8,
+    key_length: usize,
+    salt: *const u8,
+    salt_length: usize,
     niterations: usize,
-    result: *mut uint8_t,
-    result_length: size_t,
+    result: *mut u8,
+    result_length: usize,
 ) -> i64 {
     if key.is_null() || result.is_null() {
         return DevoCryptoError::NullPointer.error_code();

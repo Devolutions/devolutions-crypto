@@ -57,6 +57,9 @@
     <Compile Include="..\..\..\..\KeyExchange.cs">
       <Link>KeyExchange.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\..\Native.Xamarin.cs">
+      <Link>Native.Xamarin.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="..\..\..\..\ios\bin\universal\libDevolutionsCrypto.a">

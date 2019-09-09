@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate cfg_if;
 
+#[macro_use]
+extern crate zeroize_derive;
+
 mod dc_data_blob;
 pub mod devocrypto;
 
@@ -16,7 +19,6 @@ cfg_if! {
         pub mod wasm;
     }
     else {
-        extern crate libc;
         pub mod ffi;
     }
 }

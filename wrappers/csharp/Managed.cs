@@ -60,6 +60,20 @@ namespace Devolutions.Cryptography
          *                       Encrypt
          * 
          * **************************************************************/
+        public static string EncryptWithKeyAsString(byte[] data, byte[] key, uint iterations = 10000)
+        {
+            byte[] cipher = Native.Encrypt(data, key);
+
+            return ToBase64String(cipher);
+        }
+
+        public static byte[] EncryptWithKey(byte[] data, byte[] key, uint iterations = 10000)
+        {
+            byte[] cipher = Native.Encrypt(data, key);
+
+            return cipher;
+        }
+
         public static string EncryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000)
         {
             byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
@@ -123,6 +137,20 @@ namespace Devolutions.Cryptography
          *                       Decrypt
          * 
          * **************************************************************/
+        
+        public static string DecryptWithKeyAsString(byte[] data, byte[] key, uint iterations = 10000)
+        {
+            byte[] result = Native.Decrypt(data, key);
+
+            return ByteArrayToString(result);
+        }
+
+        public static byte[] DecryptWithKey(byte[] data, byte[] key, uint iterations = 10000)
+        {
+            byte[] result = Native.Decrypt(data, key);
+
+            return result;
+        }
 
         public static string DecryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000)
         {
