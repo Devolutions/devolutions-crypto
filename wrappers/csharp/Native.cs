@@ -10,8 +10,8 @@ namespace Devolutions.Cryptography
 
     internal static partial class Native
     {
-        private const string LibName64 = "DevolutionsCrypto.x64";
-        private const string LibName86 = "DevolutionsCrypto.x86";
+        private const string LibName64 = "DevolutionsCrypto-x64";
+        private const string LibName86 = "DevolutionsCrypto-x86";
         static Native()
         {
 #if RDM
@@ -478,7 +478,7 @@ namespace Devolutions.Cryptography
                 return GenerateKeyNative64(key, keyLength);
             }
 
-            return GenerateKeyNative64(key, keyLength);
+            return GenerateKeyNative86(key, keyLength);
         }
 
         [DllImport(LibName86, EntryPoint = "GenerateKey", CallingConvention = CallingConvention.Cdecl)]
