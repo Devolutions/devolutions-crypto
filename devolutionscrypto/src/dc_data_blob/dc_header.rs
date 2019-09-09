@@ -5,11 +5,12 @@ use std::convert::TryFrom;
 use std::io::Cursor;
 
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use zeroize::{Zeroize, ZeroizeOnDrop};
+use zeroize::Zeroize;
 
 const SIGNATURE: u16 = 0x0C0D;
 
-#[derive(Clone, Zeroize, ZeroizeOnDrop)]
+#[derive(Clone, Zeroize)]
+#[zeroize(drop)]
 pub struct DcHeader {
     pub signature: u16,
     pub data_type: u16,

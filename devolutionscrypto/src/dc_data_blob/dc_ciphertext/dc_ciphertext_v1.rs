@@ -10,9 +10,10 @@ use hmac::{Hmac, Mac};
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
-use zeroize::{Zeroize, ZeroizeOnDrop};
+use zeroize::Zeroize;
 
-#[derive(Zeroize, ZeroizeOnDrop)]
+#[derive(Zeroize)]
+#[zeroize(drop)]
 pub struct DcCiphertextV1 {
     iv: Vec<u8>,
     ciphertext: Vec<u8>,
