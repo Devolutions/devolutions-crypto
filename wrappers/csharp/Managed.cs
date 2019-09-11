@@ -5,66 +5,31 @@ namespace Devolutions.Cryptography
 
     public static class Managed
     {
-        private static byte[] StringToByteArray(string data)
-        {
-            if (data == null)
-            {
-                return null;
-            }
-
-            return Encoding.UTF8.GetBytes(data);
-        }
-
-        private static string ToBase64String(byte[] bytes)
-        {
-            if (bytes == null || bytes.Length == 0)
-            {
-                return null;
-            }
-
-            return Convert.ToBase64String(bytes);
-        }
-
-        private static byte[] Base64StringToByteArray(string data)
-        {
-            if (data == null || data.Length == 0)
-            {
-                return null;
-            }
-
-            try
-            {
-                return Convert.FromBase64String(data);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static string ByteArrayToString(byte[] data)
-        {
-            if (data == null || data.Length == 0)
-            {
-                return null;
-            }
-
-            return Encoding.UTF8.GetString(data);
-        }
-
-
-
-
         /***************************************************************
          * 
          *                       Encrypt
          * 
          * **************************************************************/
+
+        public static string EncryptWithKeyAsString(string data, byte[] key, uint iterations = 10000)
+        {
+            byte[] cipher = Native.Encrypt(Utils.StringToByteArray(data), key);
+
+            return Utils.ToBase64String(cipher);
+        }
+
+        public static byte[] EncryptWithKey(string data, byte[] key, uint iterations = 10000)
+        {
+            byte[] cipher = Native.Encrypt(Utils.StringToByteArray(data), key);
+
+            return cipher;
+        }
+
         public static string EncryptWithKeyAsString(byte[] data, byte[] key, uint iterations = 10000)
         {
             byte[] cipher = Native.Encrypt(data, key);
 
-            return ToBase64String(cipher);
+            return Utils.ToBase64String(cipher);
         }
 
         public static byte[] EncryptWithKey(byte[] data, byte[] key, uint iterations = 10000)
@@ -76,36 +41,36 @@ namespace Devolutions.Cryptography
 
         public static string EncryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000)
         {
-            byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
+            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
             byte[] cipher = Native.Encrypt(data, key);
 
-            return ToBase64String(cipher);
+            return Utils.ToBase64String(cipher);
         }
 
         // Encrypt base64 string data and return base64 string
         public static string EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = 10000)
         {
-            byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
+            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
-            byte[] cipher = Native.Encrypt(Base64StringToByteArray(b64data), key);
+            byte[] cipher = Native.Encrypt(Utils.Base64StringToByteArray(b64data), key);
 
-            return ToBase64String(cipher);
+            return Utils.ToBase64String(cipher);
         }
 
         public static string EncryptWithPasswordAsString(string data, string password, uint iterations = 10000)
         {
-            byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
+            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
-            byte[] cipher = Native.Encrypt(StringToByteArray(data), key);
+            byte[] cipher = Native.Encrypt(Utils.StringToByteArray(data), key);
 
-            return ToBase64String(cipher);
+            return Utils.ToBase64String(cipher);
         }
         
 
         public static byte[] EncryptWithPassword(byte[] data, string password, uint iterations = 10000)
         {
-            byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
+            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
             byte[] cipher = Native.Encrypt(data, key);
 
@@ -115,18 +80,18 @@ namespace Devolutions.Cryptography
         // Encrypt base64 string data
         public static byte[] EncryptBase64WithPassword(string b64data, string password, uint iterations = 10000)
         {
-            byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
+            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
-            byte[] cipher = Native.Encrypt(Base64StringToByteArray(b64data), key);
+            byte[] cipher = Native.Encrypt(Utils.Base64StringToByteArray(b64data), key);
 
             return cipher;
         }
 
         public static byte[] EncryptWithPassword(string data, string password, uint iterations = 10000)
         {
-            byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
+            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
-            byte[] cipher = Native.Encrypt(StringToByteArray(data), key);
+            byte[] cipher = Native.Encrypt(Utils.StringToByteArray(data), key);
 
             return cipher;
         }
@@ -138,11 +103,25 @@ namespace Devolutions.Cryptography
          * 
          * **************************************************************/
         
+        public static string DecryptWithKeyAsString(string data, byte[] key, uint iterations = 10000)
+        {
+            byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
+
+            return Utils.ByteArrayToString(result);
+        }
+
+        public static byte[] DecryptWithKey(string data, byte[] key, uint iterations = 10000)
+        {
+            byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
+
+            return result;
+        }
+
         public static string DecryptWithKeyAsString(byte[] data, byte[] key, uint iterations = 10000)
         {
             byte[] result = Native.Decrypt(data, key);
 
-            return ByteArrayToString(result);
+            return Utils.ByteArrayToString(result);
         }
 
         public static byte[] DecryptWithKey(byte[] data, byte[] key, uint iterations = 10000)
@@ -154,27 +133,27 @@ namespace Devolutions.Cryptography
 
         public static string DecryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000)
         {
-            byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
+            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
             byte[] result = Native.Decrypt(data, key);
 
-            return ByteArrayToString(result);
+            return Utils.ByteArrayToString(result);
         }
 
         // Encrypt base64 string data and return base64 string
         public static string DecryptWithPasswordAsString(string data, string password, uint iterations = 10000)
         {
-            byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
+            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
-            byte[] result = Native.Decrypt(Base64StringToByteArray(data), key);
+            byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
 
-            return ByteArrayToString(result);
+            return Utils.ByteArrayToString(result);
         }
 
 
         public static byte[] DecryptWithPassword(byte[] data, string password, uint iterations = 10000)
         {
-            byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
+            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
             byte[] result = Native.Decrypt(data, key);
 
@@ -184,9 +163,9 @@ namespace Devolutions.Cryptography
         // Encrypt base64 string data and return base64 string
         public static byte[] DecryptWithPassword(string data, string password, uint iterations = 10000)
         {
-            byte[] key = Native.DeriveKey(StringToByteArray(password), null, iterations);
+            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
-            byte[] result = Native.Decrypt(Base64StringToByteArray(data), key);
+            byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
 
             return result;
         }

@@ -8,10 +8,17 @@ namespace Devolutions.Cryptography
     using System.Reflection;
 #endif
 
-    internal static partial class Native
+    public static partial class Native
     {
+
+#if RDM
+        private const string LibName64 = "DevolutionsCrypto";
+        private const string LibName86 = "DevolutionsCrypto";
+#else
         private const string LibName64 = "DevolutionsCrypto-x64";
         private const string LibName86 = "DevolutionsCrypto-x86";
+#endif
+
         static Native()
         {
 #if RDM
@@ -85,6 +92,11 @@ namespace Devolutions.Cryptography
             {
                 error?.Invoke(ManagedError.Error);
             }
+        }
+
+        public static byte[] DerivePassword(string password, string salt, uint iterations = 10000, Action<Enum> error = null)
+        {
+            return DeriveKey(Utils.StringToByteArray(password), Utils.StringToByteArray(salt), iterations, error);
         }
 
         public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000, Action<Enum> error = null)

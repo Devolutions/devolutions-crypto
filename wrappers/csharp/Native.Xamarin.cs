@@ -4,7 +4,7 @@ namespace Devolutions.Cryptography
     using System;
     using System.Runtime.InteropServices;
 
-    internal static partial class Native
+    public static partial class Native
     {
 #if IOS
         private const string LibName = "__Internal";
