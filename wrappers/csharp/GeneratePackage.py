@@ -112,7 +112,7 @@ if sys.argv[1] == "WIN":
 
     define = "-define:WIN"
 
-    if(sys.argv[2] == "RDM"):
+    if(len(sys.argv) >= 3 and sys.argv[2] == "RDM"):
         define += ";RDM"
 
     command= subprocess.Popen([csc_path,"-out:./windows/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./windows/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", define ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "./windows/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
@@ -366,5 +366,4 @@ if sys.argv[1] == "LINUX":
 
     print("Done")
     exit(0)
-
 
