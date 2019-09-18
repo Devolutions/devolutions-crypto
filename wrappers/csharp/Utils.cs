@@ -48,7 +48,14 @@ namespace Devolutions.Cryptography
                 return null;
             }
 
-            return Encoding.UTF8.GetString(data);
+            try
+            {
+                return Encoding.UTF8.GetString(data);
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }
