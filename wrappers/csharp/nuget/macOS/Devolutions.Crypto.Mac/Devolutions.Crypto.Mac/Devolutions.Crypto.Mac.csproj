@@ -53,6 +53,9 @@
     <Compile Include="..\..\..\..\Native.Xamarin.cs">
       <Link>Native.Xamarin.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\..\Utils.cs">
+      <Link>Utils.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />

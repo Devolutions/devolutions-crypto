@@ -14,7 +14,9 @@ namespace Devolutions.Cryptography
 #if RDM
         private const string LibName64 = "DevolutionsCrypto";
         private const string LibName86 = "DevolutionsCrypto";
-#else
+#endif
+
+#if !ANDROID && !IOS && !MAC && !RDM
         private const string LibName64 = "DevolutionsCrypto-x64";
         private const string LibName86 = "DevolutionsCrypto-x86";
 #endif
