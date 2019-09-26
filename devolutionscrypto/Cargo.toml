@@ -11,7 +11,7 @@ description = "An abstraction layer for the cryptography used by Devolutions"
 
 [lib]
 name="devolutionscrypto"
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 aes = "0.3.2"
