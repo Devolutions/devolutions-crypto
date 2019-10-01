@@ -11,9 +11,8 @@ namespace Devolutions.Cryptography
 #else
         private const string LibName = "DevolutionsCrypto";
 #endif
-
-        [DllImport(LibName, EntryPoint = "Decode")]
-        public static extern long DecodeNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+        [DllImport(LibName, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
+        public static extern long DecodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
         [DllImport(LibName, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
@@ -21,7 +20,7 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DeriveKeyNative(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
 
-        [DllImport(LibName, EntryPoint = "Encode")]
+        [DllImport(LibName, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
         public static extern long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
         [DllImport(LibName, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
