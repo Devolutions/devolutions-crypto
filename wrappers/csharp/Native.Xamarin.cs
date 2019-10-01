@@ -13,7 +13,7 @@ namespace Devolutions.Cryptography
 #endif
 
         [DllImport(LibName, EntryPoint = "Decode")]
-        public static extern long DecodeNative(byte[] input, UIntPtr input_length, byte[] output, IntPtr output_length);
+        public static extern long DecodeNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
         [DllImport(LibName, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
