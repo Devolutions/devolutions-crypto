@@ -17,7 +17,7 @@ use std::slice;
 
 use zeroize::Zeroize as _;
 
-use base64::{decode_config_slice, encode_config_slice, Config, CharacterSet};
+use base64::{decode_config_slice, encode_config_slice, STANDARD};
 
 /// Encrypt a data blob
 /// # Arguments
@@ -420,10 +420,9 @@ pub unsafe extern "C" fn Decode(input: *const u8, input_length: usize, output: *
     };
 
     let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
-
     let mut output = slice::from_raw_parts_mut(output, output_length);
 
-    match decode_config_slice(&input, Config::new(CharacterSet::Standard, true), &mut output) {
+    match decode_config_slice(&input, STANDARD, &mut output) {
         Ok(res) => {
             res as i64
         },
@@ -449,10 +448,9 @@ pub unsafe extern "C" fn Encode(input: *const u8, input_length: usize, output: *
     };
 
     let input = slice::from_raw_parts(input, input_length);
-
     let mut output = slice::from_raw_parts_mut(output, output_length);
 
-    encode_config_slice(&input, Config::new(CharacterSet::Standard, true), &mut output) as i64
+    encode_config_slice(&input, STANDARD, &mut output) as i64
 }
 
 #[test]
