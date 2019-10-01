@@ -2,7 +2,8 @@ namespace Devolutions.Cryptography
 {
     using System;
     using System.Text;
-    internal static partial class Utils
+    
+    public static partial class Utils
     {
         public static byte[] StringToByteArray(string data)
         {
@@ -21,7 +22,7 @@ namespace Devolutions.Cryptography
                 return null;
             }
 
-            return Convert.ToBase64String(bytes);
+            return Encode(bytes);
         }
 
         public static byte[] Base64StringToByteArray(string data)
@@ -31,14 +32,7 @@ namespace Devolutions.Cryptography
                 return null;
             }
 
-            try
-            {
-                return Convert.FromBase64String(data);
-            }
-            catch
-            {
-                return null;
-            }
+            return Decode(data);
         }
 
         public static string ByteArrayToString(byte[] data)
@@ -56,6 +50,86 @@ namespace Devolutions.Cryptography
             {
                 return null;
             }
+        }
+
+        public static byte[] Decode(string data)
+        {
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+
+            int length = GetDecodedLength(data);
+
+            if(length == 0)
+            {
+                return null;
+            }
+
+            byte[] buffer = new byte[length];
+
+            long decode_res = Native.DecodeNative(data, (UIntPtr)data.Length, buffer, (UIntPtr)buffer.Length);
+
+            if (decode_res == -1)
+                return null;
+            
+            return buffer;
+        }
+
+        public static string Encode(byte[] data)
+        {
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+
+            int length = GetEncodedLength(data);
+
+            if(length == 0)
+            {
+                return null;
+            }
+            
+            byte[] buffer = new byte[length];
+
+            long encode_res = Native.EncodeNative(data, (UIntPtr)data.Length, buffer, (UIntPtr)buffer.Length);
+
+            return ByteArrayToString(buffer);
+        }
+
+        public static int GetEncodedLength(byte[] buffer)
+        {
+            if(buffer == null)
+            {
+                return 0;
+            }
+
+            return ((4 * buffer.Length / 3) + 3) & ~3;
+        }
+
+        public static int GetDecodedLength(string base64)
+        {
+            if (string.IsNullOrEmpty(base64)) 
+            { 
+                return 0; 
+            }
+
+            int characterCount = base64.Length;
+
+            int result = Convert.ToInt32(3 * ((double)characterCount/4));
+		
+            int index = characterCount - 1;
+
+            int loopCount = 1;
+
+            while(base64[index] == '=' && loopCount <= 2)
+            {
+                result--;
+                index--;
+                loopCount++;
+            }
+
+            return  result;
         }
     }
 }

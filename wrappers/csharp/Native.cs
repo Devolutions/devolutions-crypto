@@ -382,7 +382,6 @@ namespace Devolutions.Cryptography
         }
 
 #if !ANDROID && !IOS && !MAC
-
         private static long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength)
         {
             if(Environment.Is64BitProcess)
@@ -443,7 +442,6 @@ namespace Devolutions.Cryptography
             return EncryptSizeNative86(dataLength);
         }
 
-
         [DllImport(LibName86, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long EncryptSizeNative86(UIntPtr dataLength);
 
@@ -463,7 +461,6 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName86, EntryPoint = "GenerateKeyExchange", CallingConvention = CallingConvention.Cdecl)]
         private static extern long GenerateKeyExchangeNative86(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize);
-
 
         [DllImport(LibName64, EntryPoint = "GenerateKeyExchange", CallingConvention = CallingConvention.Cdecl)]
         private static extern long GenerateKeyExchangeNative64(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize);
@@ -593,12 +590,43 @@ namespace Devolutions.Cryptography
             return VerifyPasswordNative86(password, passwordLength, hash, hashLength);
         }
 
-
         [DllImport(LibName86, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
         private static extern long VerifyPasswordNative86(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);
 
         [DllImport(LibName64, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
         private static extern long VerifyPasswordNative64(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);
+
+        public static long DecodeNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length)
+        {
+            if(Environment.Is64BitProcess)
+            {
+                return Decode64(input, input_length, output, output_length);
+            }
+
+            return Decode86(input, input_length, output, output_length);
+        }
+
+        [DllImport(LibName86, EntryPoint = "Decode")]
+        public static extern long Decode86(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName64, EntryPoint = "Decode")]
+        public static extern long Decode64(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        public static long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length)
+        {
+            if(Environment.Is64BitProcess)
+            {
+                return Encode64(input, input_length, output, output_length);
+            }
+
+            return Encode86(input, input_length, output, output_length);
+        }
+
+        [DllImport(LibName86, EntryPoint = "Encode")]
+        public static extern long Encode86(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName64, EntryPoint = "Encode")]
+        public static extern long Encode64(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 #endif
 
 #if RDM

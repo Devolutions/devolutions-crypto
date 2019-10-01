@@ -17,6 +17,7 @@ use std::slice;
 
 use zeroize::Zeroize as _;
 
+use base64::{decode_config_slice, encode_config_slice, STANDARD};
 
 /// Encrypt a data blob
 /// # Arguments
@@ -404,6 +405,53 @@ pub extern "C" fn KeySize() -> u32 {
     256
 }
 
+/// Decode a base64 string to bytes.
+/// # Arguments
+///  * input - Pointer to the string to decode.
+///  * input_length - Length of the string to decode.
+///  * output - Pointer to the output buffer.
+///  * output_length - Length of the output buffer.
+/// # Returns
+/// Returns the size of the decoded string.
+#[no_mangle]
+pub unsafe extern "C" fn Decode(input: *const u8, input_length: usize, output: *mut u8 , output_length: usize ) -> i64 {
+    if input.is_null() || output.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
+
+    let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
+    let mut output = slice::from_raw_parts_mut(output, output_length);
+
+    match decode_config_slice(&input, STANDARD, &mut output) {
+        Ok(res) => {
+            res as i64
+        },
+        Err(_e) =>
+        {
+            -1
+        }
+    }
+}
+
+/// Encode a byte array to a base64 string.
+/// # Arguments
+///  * input - Pointer to the buffer to encode.
+///  * input_length - Length of the buffer to encode.
+///  * output - Pointer to the output buffer.
+///  * output_length - Length of the output buffer.
+/// # Returns
+/// Returns the size, in bytes, of the output buffer.
+#[no_mangle]
+pub unsafe extern "C" fn Encode(input: *const u8, input_length: usize, output: *mut u8 , output_length: usize ) -> i64 {
+    if input.is_null() || output.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
+
+    let input = slice::from_raw_parts(input, input_length);
+    let mut output = slice::from_raw_parts_mut(output, output_length);
+
+    encode_config_slice(&input, STANDARD, &mut output) as i64
+}
 
 #[test]
 fn test_encrypt_length() {
