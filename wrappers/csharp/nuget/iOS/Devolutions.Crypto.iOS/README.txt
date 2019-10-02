@@ -1,5 +1,0 @@
-To generate the nuget package :
-1: build the dll from the iOS project
-
-2: nuget pack Devolutions.Crypto.nuspec -Version 0.1.3 -OutputDirectory ./package
-

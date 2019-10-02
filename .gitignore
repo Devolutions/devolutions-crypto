@@ -4,6 +4,6 @@ obj
 .vs
 *.nupkg
 wrappers/csharp/nuget/dotnet/package/*
-wrappers/csharp/nuget/Android/package/*
-wrappers/csharp/nuget/iOS/package/*
-wrappers/csharp/nuget/macOS/package/*
+wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/package/*
+wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/package/*
+wrappers/csharp/nuget/macOS/Devolutions.Crypto.Mac/package/*

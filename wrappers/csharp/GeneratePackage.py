@@ -7,7 +7,7 @@ import shutil
 
 
 if len(sys.argv) < 2:
-    print("Usage :  python GeneratePakage.py <platform>")
+    print("Usage :  python GeneratePackage.py <platform>")
     exit(0)
 
 # Assembly manifest template
@@ -76,17 +76,26 @@ if sys.argv[1] == "WIN":
                     ]
             }
 
+    rdm = False
+
+    if(len(sys.argv) >= 3 and sys.argv[2] == "RDM"):
+        rdm = True
+
+    folder = "windows"
+
+    if rdm:
+        folder = "rdm"
+
     try:
-        shutil.rmtree("./windows")
+        shutil.rmtree("./" + folder)
     except:
         pass
 
-    os.mkdir("./windows")
-    os.mkdir("./windows/bin")
+    os.mkdir("./" + folder)
+    os.mkdir("./" + folder + "/bin")
 
-    with open("./windows/bin/AssemblyInfo.cs","w+") as filee:
+    with open("./" + folder + "/bin/AssemblyInfo.cs","w+") as filee:
         filee.write(assembly_manifest)
-
 
     for arch in architectures["arch"]:
         print("Starting build for " + arch["name"])
@@ -103,22 +112,30 @@ if sys.argv[1] == "WIN":
         output = command.stdout.read().decode('utf-8')
 
         print(output)
+        
+        if rdm:
+            os.mkdir("./" + folder + "/bin/" + arch["name"])
 
-        os.mkdir("./windows/bin/" + arch["name"])
+        dllpath = "./" + folder + "/bin/DevolutionsCrypto-" + arch["name"] + ".dll"
 
-        shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/devolutionscrypto.dll", "./windows/bin/" + arch["name"] + "/DevolutionsCrypto.dll")
+        if rdm:
+            dllpath = "./rdm/bin/" + arch["name"] + "/DevolutionsCrypto-" + arch["name"] + ".dll"
+
+        shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/devolutionscrypto.dll", dllpath)
 
     print("Building Managed Library...")
 
     define = "-define:WIN"
 
-    if(len(sys.argv) >= 3 and sys.argv[2] == "RDM"):
+    if rdm:
         define += ";RDM"
 
-    command= subprocess.Popen([csc_path,"-out:./windows/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./windows/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", define ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "./windows/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+    command= subprocess.Popen([csc_path,"-out:./" + folder + "/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./" + folder + "/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", define ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "./" + folder + "/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+    os.remove("./" + folder + "/bin/AssemblyInfo.cs")
 
     print("Done")
     exit(0)
@@ -169,6 +186,8 @@ if sys.argv[1] == "MAC":
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+    os.remove("./macos/bin/AssemblyInfo.cs")
 
     print("Making universal binary...")
 
@@ -242,6 +261,7 @@ if sys.argv[1] == "IOS":
 
     print(output)
 
+    os.remove("./ios/bin/AssemblyInfo.cs")
 
     print("Making universal binary...")
 
@@ -313,6 +333,7 @@ if sys.argv[1] == "ANDROID":
 
     print(output)   
 
+    os.remove("./android/bin/AssemblyInfo.cs")
 
     print("Done")
     exit(0)
@@ -353,9 +374,14 @@ if sys.argv[1] == "LINUX":
 
         print(output)
 
-        os.mkdir("./linux/bin/" + arch["name"])
+        archforpackaging = ""
 
-        shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/libdevolutionscrypto.so", "./linux/bin/" + arch["name"] + "/libDevolutionsCrypto.so")
+        if(arch["name"] == "i686"):
+            archforpackaging = "x86"
+        else:
+            archforpackaging = "x64"
+
+        shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/libdevolutionscrypto.so", "./linux/bin/libDevolutionsCrypto-" + archforpackaging + ".so")
 
     print("Building Managed Library...")
 
@@ -363,6 +389,8 @@ if sys.argv[1] == "LINUX":
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+    os.remove("./linux/bin/AssemblyInfo.cs")
 
     print("Done")
     exit(0)
