@@ -606,10 +606,10 @@ namespace Devolutions.Cryptography
             return Decode86(input, input_length, output, output_length);
         }
 
-        [DllImport(LibName86, EntryPoint = "Decode")]
+        [DllImport(LibName86, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
         public static extern long Decode86(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
-        [DllImport(LibName64, EntryPoint = "Decode")]
+        [DllImport(LibName64, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
         public static extern long Decode64(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
         public static long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length)
@@ -622,10 +622,10 @@ namespace Devolutions.Cryptography
             return Encode86(input, input_length, output, output_length);
         }
 
-        [DllImport(LibName86, EntryPoint = "Encode")]
+        [DllImport(LibName86, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
         public static extern long Encode86(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
-        [DllImport(LibName64, EntryPoint = "Encode")]
+        [DllImport(LibName64, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
         public static extern long Encode64(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 #endif
 
