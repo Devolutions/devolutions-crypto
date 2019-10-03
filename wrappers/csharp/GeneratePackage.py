@@ -119,7 +119,7 @@ if sys.argv[1] == "WIN":
         dllpath = "./" + folder + "/bin/DevolutionsCrypto-" + arch["name"] + ".dll"
 
         if rdm:
-            dllpath = "./rdm/bin/" + arch["name"] + "/DevolutionsCrypto-" + arch["name"] + ".dll"
+            dllpath = "./rdm/bin/" + arch["name"] + "/DevolutionsCrypto.dll"
 
         shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/devolutionscrypto.dll", dllpath)
 
