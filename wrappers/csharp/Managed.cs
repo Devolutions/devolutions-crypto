@@ -5,6 +5,21 @@ namespace Devolutions.Cryptography
 
     public static class Managed
     {
+        public static byte[] DeriveKey(byte[] password, byte[] salt = null, uint iterations = 10000)
+        {
+            return Native.DeriveKey(password, salt, iterations);
+        }
+
+        public static byte[] DeriveKey(string password, byte[] salt = null, uint iterations = 10000)
+        {
+            return Native.DeriveKey(Utils.StringToByteArray(password), salt, iterations);
+        }
+
+        public static byte[] GenerateKey(uint keySize)
+        {
+            return Native.GenerateKey(keySize);
+        }
+
         /***************************************************************
          * 
          *                       Encrypt
