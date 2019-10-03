@@ -104,9 +104,9 @@ impl DcDataBlob {
     /// Returns a `DcDataBlob` containing the hashed password.
     /// # Example
     /// ```rust
-    /// use devocrypto::DcDataBlob;
+    /// use devolutionscrypto::DcDataBlob;
     ///
-    /// let password = b"somesuperstrongpa$$w0rd!"
+    /// let password = b"somesuperstrongpa$$w0rd!";
     ///
     /// let hashed_password = DcDataBlob::hash_password(password, 10000);
     /// ```
