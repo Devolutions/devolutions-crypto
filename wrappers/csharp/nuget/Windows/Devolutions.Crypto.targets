@@ -10,17 +10,6 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <Link>DevolutionsCrypto-x64.dll</Link>
         </Content>
-
-
-        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\linux-x86\native\libDevolutionsCrypto-x86.so">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Link>libDevolutionsCrypto-x86.so</Link>
-        </Content>
-
-        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\linux-x64\native\libDevolutionsCrypto-x64.so">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Link>libDevolutionsCrypto-x64.so</Link>
-        </Content>
     </ItemGroup>
 </Project>
 

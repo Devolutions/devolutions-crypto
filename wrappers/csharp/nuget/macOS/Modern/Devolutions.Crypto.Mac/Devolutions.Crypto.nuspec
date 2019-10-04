@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0"?>
 <package>
     <metadata>
-        <id>Devolutions.Crypto.Mac</id>
+        <id>Devolutions.Crypto.Mac.Modern</id>
         <version>$version$</version>
         <authors>Devolutions Inc</authors>
-        <description>Devolutions Cryptographic Library For the macOS platform</description>
+        <description>Devolutions Cryptographic Library For the Xamarin Mac Modern platform</description>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <copyright>Copyright 2019 @ Devolutions Inc</copyright>
     </metadata>
