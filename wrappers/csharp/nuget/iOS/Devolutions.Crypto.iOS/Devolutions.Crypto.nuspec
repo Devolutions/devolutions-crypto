@@ -4,7 +4,7 @@
         <id>Devolutions.Crypto.iOS</id>
         <version>$version$</version>
         <authors>Devolutions Inc</authors>
-        <description>Devolutions Cryptographic Library For the iOS platform</description>
+        <description>Devolutions Cryptographic Library For the Xamarin iOS platform</description>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <copyright>Copyright 2019 @ Devolutions Inc</copyright>
     </metadata>

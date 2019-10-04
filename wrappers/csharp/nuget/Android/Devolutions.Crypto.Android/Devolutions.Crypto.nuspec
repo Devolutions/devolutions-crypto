@@ -4,7 +4,7 @@
         <id>Devolutions.Crypto.Android</id>
         <version>$version$</version>
         <authors>Devolutions Inc</authors>
-        <description>Devolutions Cryptographic Library For the Android platform</description>
+        <description>Devolutions Cryptographic Library For the Xamarin Android platform</description>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <copyright>Copyright 2019 @ Devolutions Inc</copyright>
     </metadata>
