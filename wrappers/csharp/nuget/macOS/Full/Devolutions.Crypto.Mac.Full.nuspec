@@ -25,6 +25,6 @@
 
     <file src="../../../macos/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto-x64.dylib"/>
 
-    <file src="Devolutions.Crypto.targets" target="build/net45/Devolutions.Crypto.targets"/>
+    <file src="Devolutions.Crypto.Mac.Full.targets" target="build/net45/Devolutions.Crypto.Mac.Full.targets"/>
 </files>
 </package>

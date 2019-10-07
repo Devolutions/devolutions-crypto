@@ -26,6 +26,6 @@
     <file src="../../windows/bin/DevolutionsCrypto-x64.dll" target="runtimes/win-x64/native/DevolutionsCrypto-x64.dll"/>
     <file src="../../windows/bin/DevolutionsCrypto-x86.dll" target="runtimes/win-x86/native/DevolutionsCrypto-x86.dll"/>
 
-    <file src="Devolutions.Crypto.targets" target="build/net45/Devolutions.Crypto.targets"/>
+    <file src="Devolutions.Crypto.Windows.targets" target="build/net45/Devolutions.Crypto.Windows.targets"/>
 </files>
 </package>
