@@ -21,7 +21,7 @@ everything = sys.argv[1] == "ALL"
 if sys.argv[1] == "WIN" or everything:
     print("Generating WINDOWS nuget...")
 
-    command= subprocess.Popen(["nuget", "pack", "./Windows/Devolutions.Crypto.nuspec", "-Version", version, "-OutputDirectory", "./Windows/package", "-Properties", "platform=windows"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["nuget", "pack", "./Windows/Devolutions.Crypto.Windows.nuspec", "-Version", version, "-OutputDirectory", "./Windows/package", "-Properties", "platform=windows"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
@@ -29,7 +29,7 @@ if sys.argv[1] == "WIN" or everything:
 if sys.argv[1] == "LINUX" or everything:
     print("Generating LINUX nuget...")
 
-    command= subprocess.Popen(["nuget", "pack", "./Linux/Devolutions.Crypto.nuspec", "-Version", version, "-OutputDirectory", "./Linux/package", "-Properties", "platform=linux"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["nuget", "pack", "./Linux/Devolutions.Crypto.Linux.nuspec", "-Version", version, "-OutputDirectory", "./Linux/package", "-Properties", "platform=linux"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
@@ -67,7 +67,8 @@ if sys.argv[1] == "MAC-MODERN" or everything:
 if sys.argv[1] == "MAC-FULL" or everything:
     print("Generating MAC FULL nuget...")
 
-    command= subprocess.Popen(["nuget", "pack", "./macOS/Full/Devolutions.Crypto.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Full/package", "-Properties", "platform=macos"], stdout=subprocess.PIPE)
+    # platform windows (since the managed mac dll only supports xamarin modern, windows managed dll is compatible)
+    command= subprocess.Popen(["nuget", "pack", "./macOS/Full/Devolutions.Crypto.Mac.Full.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Full/package", "-Properties", "platform=windows"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)

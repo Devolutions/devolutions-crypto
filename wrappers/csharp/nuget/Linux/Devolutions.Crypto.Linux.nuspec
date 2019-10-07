@@ -26,6 +26,6 @@
     <file src="../../linux/bin/libDevolutionsCrypto-x64.so" target="runtimes/linux-x64/native/libDevolutionsCrypto-x64.so"/>
     <file src="../../linux/bin/libDevolutionsCrypto-x86.so" target="runtimes/linux-x86/native/libDevolutionsCrypto-x86.so"/>
 
-    <file src="Devolutions.Crypto.targets" target="build/net45/Devolutions.Crypto.targets"/>
+    <file src="Devolutions.Crypto.Linux.targets" target="build/net45/Devolutions.Crypto.Linux.targets"/>
 </files>
 </package>
