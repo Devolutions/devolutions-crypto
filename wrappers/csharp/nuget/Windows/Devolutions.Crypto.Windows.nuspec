@@ -4,7 +4,7 @@
         <id>Devolutions.Crypto.Windows</id>
         <version>$version$</version>
         <authors>Devolutions Inc</authors>
-        <description>Devolutions Cryptographic Library For the .NET Framework, .NET Standard platforms and .NET Core for the Windows platform</description>
+        <description>Devolutions Cryptographic Library For the .NET Framework, .NET Standard platforms for the Windows platform</description>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <copyright>Copyright 2019 @ Devolutions Inc</copyright>
         <frameworkAssemblies>

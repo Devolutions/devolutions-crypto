@@ -87,3 +87,12 @@ if sys.argv[1] == "ANDROID" or everything:
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+
+if sys.argv[1] == "DOTNET" or everything:
+    print("Generating DOTNET CORE nuget...")
+
+    command= subprocess.Popen(["nuget", "pack", "./dotnet-core/Devolutions.Crypto.Core.nuspec", "-Version", version, "-OutputDirectory", "./dotnet-core/package"], stdout=subprocess.PIPE)
+    output = command.stdout.read().decode('utf-8')
+
+    print(output)

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>Devolutions.Crypto.Core</id>
+        <version>$version$</version>
+        <authors>Devolutions Inc</authors>
+        <description>Devolutions Cryptographic Library For the .NET Core Platform (supported Windows, Linux, Mac) </description>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <copyright>Copyright 2019 @ Devolutions Inc</copyright>
+    </metadata>
+    <files>
+
+    <file src="../../windows/bin/Devolutions.Crypto.dll" target="lib/netstandard1.5/Devolutions.Crypto.dll" />
+    <file src="../../windows/bin/Devolutions.Crypto.pdb" target="lib/netstandard1.5/Devolutions.Crypto.pdb" />
+
+    <file src="../../windows/bin/Devolutions.Crypto.dll" target="lib/netstandard2.0/Devolutions.Crypto.dll" />
+    <file src="../../windows/bin/Devolutions.Crypto.pdb" target="lib/netstandard2.0/Devolutions.Crypto.pdb" />
+
+    <file src="../../windows/bin/DevolutionsCrypto-x64.dll" target="runtimes/win-x64/native/DevolutionsCrypto-x64.dll"/>
+    <file src="../../windows/bin/DevolutionsCrypto-x86.dll" target="runtimes/win-x86/native/DevolutionsCrypto-x86.dll"/>
+
+    <file src="../../linux/bin/libDevolutionsCrypto-x64.so" target="runtimes/linux-x64/native/libDevolutionsCrypto-x64.so"/>
+    <file src="../../linux/bin/libDevolutionsCrypto-x86.so" target="runtimes/linux-x86/native/libDevolutionsCrypto-x86.so"/>
+
+    <file src="../../macos/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto-x64.dylib"/>
+
+</files>
+</package>
