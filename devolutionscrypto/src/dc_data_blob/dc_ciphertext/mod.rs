@@ -33,13 +33,15 @@ impl DcCiphertext {
         header.data_type = CIPHERTEXT;
         header.version = V2;
 
-        Ok(DcCiphertext::V2(DcCiphertextV2::encrypt(data, key)?))
+        Ok(DcCiphertext::V2(DcCiphertextV2::encrypt(
+            data, key, header,
+        )?))
     }
 
     pub fn decrypt(&self, key: &[u8], header: &DcHeader) -> Result<Vec<u8>> {
         match self {
             DcCiphertext::V1(x) => x.decrypt(key, header),
-            DcCiphertext::V2(x) => x.decrypt(key),
+            DcCiphertext::V2(x) => x.decrypt(key, header),
         }
     }
 }

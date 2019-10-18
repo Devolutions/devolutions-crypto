@@ -1,3 +1,4 @@
+use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
 
@@ -5,7 +6,7 @@ use std::convert::TryFrom;
 
 use aead::{
     generic_array::{typenum, GenericArray},
-    Aead, NewAead,
+    Aead, NewAead, Payload,
 };
 use chacha20poly1305::XChaCha20Poly1305;
 use rand::{rngs::OsRng, RngCore};
@@ -52,7 +53,7 @@ impl DcCiphertextV2 {
         hasher.result()
     }
 
-    pub fn encrypt(data: &[u8], key: &[u8]) -> Result<DcCiphertextV2> {
+    pub fn encrypt(data: &[u8], key: &[u8], header: &DcHeader) -> Result<DcCiphertextV2> {
         // Derive key
         let mut key = DcCiphertextV2::derive_key(&key);
 
@@ -61,9 +62,16 @@ impl DcCiphertextV2 {
         let mut nonce = vec![0u8; 24];
         rng.fill_bytes(&mut nonce);
 
+        // Authenticate the header
+        let aad: Vec<u8> = (*header).clone().into();
+        let payload = Payload {
+            msg: data,
+            aad: &aad,
+        };
+
         // Encrypt
         let cipher = XChaCha20Poly1305::new(key);
-        let ciphertext = cipher.encrypt(&GenericArray::from_slice(&nonce), data)?;
+        let ciphertext = cipher.encrypt(&GenericArray::from_slice(&nonce), payload)?;
 
         // Zero out the key
         key.zeroize();
@@ -71,15 +79,20 @@ impl DcCiphertextV2 {
         Ok(DcCiphertextV2 { nonce, ciphertext })
     }
 
-    pub fn decrypt(&self, key: &[u8]) -> Result<Vec<u8>> {
+    pub fn decrypt(&self, key: &[u8], header: &DcHeader) -> Result<Vec<u8>> {
         // Derive key
         let mut key = DcCiphertextV2::derive_key(&key);
 
+        // Authenticate the header
+        let aad: Vec<u8> = (*header).clone().into();
+        let payload = Payload {
+            msg: self.ciphertext.as_slice(),
+            aad: &aad,
+        };
+
+        // Decrypt
         let cipher = XChaCha20Poly1305::new(key);
-        let result = cipher.decrypt(
-            &GenericArray::from_slice(&self.nonce),
-            self.ciphertext.as_slice(),
-        )?;
+        let result = cipher.decrypt(&GenericArray::from_slice(&self.nonce), payload)?;
 
         // Zeroize the key
         key.zeroize();
