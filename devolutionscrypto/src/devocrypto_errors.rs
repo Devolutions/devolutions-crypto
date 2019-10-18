@@ -120,6 +120,12 @@ impl From<BlockModeError> for DevoCryptoError {
     }
 }
 
+impl From<aead::Error> for DevoCryptoError {
+    fn from(_error: aead::Error) -> DevoCryptoError {
+        DevoCryptoError::CryptoError
+    }
+}
+
 impl From<rand::Error> for DevoCryptoError {
     fn from(_error: rand::Error) -> DevoCryptoError {
         DevoCryptoError::RandomError

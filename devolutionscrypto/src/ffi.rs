@@ -72,7 +72,7 @@ pub unsafe extern "C" fn Encrypt(
 /// Returns the length of the ciphertext to input as `result_length` in `Encrypt()`.
 #[no_mangle]
 pub extern "C" fn EncryptSize(data_length: usize) -> i64 {
-    (8 + 16 + (data_length / 16 + 1) * 16 + 32) as i64 // Header + IV + data(padded to 16) + HMAC
+    (8 + 24 + data_length + 16) as i64 // Header + nonce + data + Poly1305 tag
 }
 
 
