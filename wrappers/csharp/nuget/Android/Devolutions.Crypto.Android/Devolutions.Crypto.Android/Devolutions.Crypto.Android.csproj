@@ -68,6 +68,9 @@
     <Compile Include="..\..\..\..\Utils.cs">
       <Link>Utils.cs</Link>
     </Compile>
+	<Compile Include="..\..\..\..\Enums.cs">
+      <Link>Enums.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
