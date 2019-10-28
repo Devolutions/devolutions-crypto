@@ -123,6 +123,10 @@ if sys.argv[1] == "WIN":
 
         shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/devolutionscrypto.dll", dllpath)
 
+        command= subprocess.Popen(["./tools/rcedit-x64.exe", dllpath, "--set-file-version", version], stdout=subprocess.PIPE)
+        output = command.stdout.read().decode('utf-8')
+        print(output)
+
     print("Building Managed Library...")
 
     define = "-define:WIN"
