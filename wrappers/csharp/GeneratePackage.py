@@ -36,6 +36,8 @@ with open('../../devolutionscrypto/Cargo.toml', 'r') as filee:
     assembly_manifest = assembly_manifest.replace("||VERSION||", version)
 
 if sys.argv[1] == "WIN":
+    # prevent being dependent on VCRUNTIME140.dll
+    os.environ['RUSTFLAGS'] = '-C target-feature=+crt-static'
 
     # Compile a DevolutionsCrypto.dll in 32 bit and 64 bit for windows platform
     print("Finding csc compiler...")
@@ -122,6 +124,10 @@ if sys.argv[1] == "WIN":
             dllpath = "./rdm/bin/" + arch["name"] + "/DevolutionsCrypto.dll"
 
         shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/devolutionscrypto.dll", dllpath)
+
+        command= subprocess.Popen(["./tools/rcedit-x64.exe", dllpath, "--set-file-version", version], stdout=subprocess.PIPE)
+        output = command.stdout.read().decode('utf-8')
+        print(output)
 
     print("Building Managed Library...")
 
