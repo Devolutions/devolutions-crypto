@@ -15,11 +15,11 @@ It contains the following functions:
 `Encrypt`: Encrypt data with the provided key. Can take any size of key, but if it is a password you should use DeriveKey before.  
 `Decrypt`: Decrypt data with the provided key. Can take any size of key, but if it is a password you should use DeriveKey before.  
 `HashPassword`: Hash a password using high-cost algorithm so it is hard to brute-force. Depending on the wrapper,
-you may need to specify an iteration number(the standard is 1000). Can also be used to derive a key. 
+you may need to specify an iteration number(the standard is 10000). Can also be used to derive a key. 
 Should be used whenever there is a user provided password.  
 `VerifyPassword`: Verify a password hash using constant time equality to prevent an array of side-channels attacks.  
 `GenerateKeyExchange`: Generate a key pair to use in a Key Exchange. Should be used for any data in transit.  
-MixKeyExchange: Mix a public key with a private key. Generates a shared secret between the client and the server.
+`MixKeyExchange`: Mix a public key with a private key. Generates a shared secret between the client and the server.
 
 ### Technical Informations
 As of the current version:
@@ -34,7 +34,7 @@ Uses PBKDF2 with HMAC-SHA256 to create a key using the supplied parameters.
 1. Derives the secret into a key using SHA256.  
 2. Generate a random 192bits nonce.  
 3. Encrypt the data using the encryption key and the nonce with the XChaCha20Poly1305 AEAD.  
-5. Final: 4 version bytes + 24 IV bytes + data + 16 authentication tag.
+5. Final: 4 version bytes + 24 IV bytes + data + 16 authentication tag bytes.
 
 #### HashPassword
 1. Generate a random 256bits salt.  
