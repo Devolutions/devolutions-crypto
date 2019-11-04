@@ -8,7 +8,7 @@
 //! The Size functions must be called to get the required length of the returned array before
 //!     calling it.
 
-use super::devocrypto;
+use super::utils;
 use super::DcDataBlob;
 use super::DevoCryptoError;
 
@@ -346,7 +346,7 @@ pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
 
     let key = slice::from_raw_parts_mut(key, key_length);
 
-    match devocrypto::generate_key(key_length) {
+    match utils::generate_key(key_length) {
         Ok(mut k) => {
             key.copy_from_slice(&k);
             k.zeroize();
@@ -391,7 +391,7 @@ pub unsafe extern "C" fn DeriveKey(
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    let mut native_result = devocrypto::derive_key(&key, &salt, niterations, result_length);
+    let mut native_result = utils::derive_key(&key, &salt, niterations, result_length);
     result.copy_from_slice(&native_result);
     native_result.zeroize();
     0

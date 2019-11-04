@@ -5,7 +5,7 @@ extern crate cfg_if;
 extern crate zeroize_derive;
 
 mod dc_data_blob;
-pub mod devocrypto;
+pub mod utils;
 
 type Result<T> = std::result::Result<T, devocrypto_errors::DevoCryptoError>;
 mod devocrypto_errors;
