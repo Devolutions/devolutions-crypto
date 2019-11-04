@@ -5,6 +5,21 @@ namespace Devolutions.Cryptography
     
     public static partial class Utils
     {
+        public static bool ValidateCiphertextSignature(byte[] data)
+        {
+            if(data == null)
+            {
+                return false;
+            }
+
+            if(data.Length >= 8)
+            {
+                return data[0] == '\xD' && data[1] == '\xC' && data[2] == (int)DataType.Cipher && data[3] == 0 && data[4] == 0 && data[5] == 0;
+            }
+
+            return false;
+        }
+
         public static byte[] StringToByteArray(string data)
         {
             if (data == null)

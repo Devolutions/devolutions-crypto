@@ -123,6 +123,10 @@ if sys.argv[1] == "WIN":
 
         shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/devolutionscrypto.dll", dllpath)
 
+        command= subprocess.Popen(["./tools/rcedit-x64.exe", dllpath, "--set-file-version", version], stdout=subprocess.PIPE)
+        output = command.stdout.read().decode('utf-8')
+        print(output)
+
     print("Building Managed Library...")
 
     define = "-define:WIN"
@@ -130,7 +134,7 @@ if sys.argv[1] == "WIN":
     if rdm:
         define += ";RDM"
 
-    command= subprocess.Popen([csc_path,"-out:./" + folder + "/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./" + folder + "/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", define ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "./" + folder + "/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+    command= subprocess.Popen([csc_path,"-out:./" + folder + "/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./" + folder + "/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", define ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./" + folder + "/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
@@ -182,7 +186,7 @@ if sys.argv[1] == "MAC":
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
-    command= subprocess.Popen(["csc", "-out:./macos/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./macos/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:MAC" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "./macos/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["csc", "-out:./macos/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./macos/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:MAC" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./macos/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
@@ -256,7 +260,7 @@ if sys.argv[1] == "IOS":
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
-    command= subprocess.Popen(["csc", "-out:./ios/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./ios/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:IOS" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "./ios/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["csc", "-out:./ios/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./ios/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:IOS" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./ios/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
@@ -328,7 +332,7 @@ if sys.argv[1] == "ANDROID":
 
     print("Building Managed Library...")
 
-    command = subprocess.Popen(["csc", "-out:./android/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./android/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:ANDROID" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "./android/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+    command = subprocess.Popen(["csc", "-out:./android/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./android/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:ANDROID" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./android/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)   
@@ -385,7 +389,7 @@ if sys.argv[1] == "LINUX":
 
     print("Building Managed Library...")
 
-    command= subprocess.Popen(["csc", "-out:./linux/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./linux/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:LINUX" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "./linux/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["csc", "-out:./linux/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./linux/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:LINUX" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./linux/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
