@@ -212,14 +212,41 @@ impl DcDataBlob {
 }
 
 #[test]
-fn crypto_test() {
+fn encrypt_decrypt_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
     let data = "This is a very complex string of character that we need to encrypt".as_bytes();
 
-    let encrypted = DcDataBlob::encrypt(data, key).unwrap();
+    let encrypted = DcDataBlob::encrypt(data, &key).unwrap();
+    let encrypted: Vec<u8> = encrypted.into();
+
+    let encrypted = DcDataBlob::try_from(encrypted.as_slice()).unwrap();
     let decrypted = encrypted.decrypt(key).unwrap();
 
     assert_eq!(decrypted, data);
+}
+
+#[test]
+fn decrypt_v1_test() {
+    use base64;
+    
+    let data = base64::decode("DQwCAAAAAQBo87jumRMVMIuTP8cFbFTgwDguKXkBvlkE/rNu4HLRRueQqfCzmXEyGR7qWAKkz4BFFyGedCmQ/xXTW4V7UnV9um1TJClz3yzQy0SQui+1UA==").unwrap();
+    let key = base64::decode("Xk63o/+6TeC63Z4j2HZOOdiGfqjQNJz1PTbQ3/L5nM0=").unwrap();
+    let encrypted = DcDataBlob::try_from(data.as_slice()).unwrap();
+    let decrypted = encrypted.decrypt(&key).unwrap();
+
+    assert_eq!(decrypted, "A secret v1 string".as_bytes());
+}
+
+#[test]
+fn decrypt_v2_test() {
+    use base64;
+    
+    let data = base64::decode("DQwCAAAAAgCcJ6yg2jWt3Zr1ZvenW4/AFi3Xj82IqfvaHmmPzMgzkrTfeKp8Shey3KLLLOhtMU4eNmYBRcAtSPfQ").unwrap();
+    let key = base64::decode("Dipney+DR14k+Bvz/gBJrM19yAerG/0g5iHSm/HcOJU=").unwrap();
+    let encrypted = DcDataBlob::try_from(data.as_slice()).unwrap();
+    let decrypted = encrypted.decrypt(&key).unwrap();
+
+    assert_eq!(decrypted, "A secret v2 string".as_bytes());
 }
 
 #[test]
