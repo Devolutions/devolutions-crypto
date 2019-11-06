@@ -60,7 +60,7 @@ impl DcDataBlob {
     /// Returns a `DcDataBlob` containing the encrypted data.
     /// # Example
     /// ```rust
-    /// use devocrypto::DcDataBlob;
+    /// use devolutionscrypto::DcDataBlob;
     ///
     /// let data = b"somesecretdata";
     /// let key = b"somesecretkey";
@@ -80,7 +80,7 @@ impl DcDataBlob {
     /// Returns the decrypted data.
     /// # Example
     /// ```rust
-    /// use devocrypto::DcDataBlob;
+    /// use devolutionscrypto::DcDataBlob;
     ///
     /// let data = b"somesecretdata";
     /// let key = b"somesecretkey";
@@ -88,7 +88,7 @@ impl DcDataBlob {
     /// let encrypted_data = DcDataBlob::encrypt(data, key).unwrap();
     /// let decrypted_data = encrypted_data.decrypt(key).unwrap();
     ///
-    /// assert_eq!(data, decrypted_data);
+    /// assert_eq!(data.to_vec(), decrypted_data);
     ///```
     pub fn decrypt(&self, key: &[u8]) -> Result<Vec<u8>> {
         self.payload.decrypt(key, &self.header)
@@ -123,13 +123,13 @@ impl DcDataBlob {
     /// Returns true if the password matches and false if it doesn't.
     /// # Example
     /// ```rust
-    /// use devocrypto::DcDataBlob;
+    /// use devolutionscrypto::DcDataBlob;
     ///
     /// let password = b"somesuperstrongpa$$w0rd!";
     ///
-    /// let hashed_password = DcDataBlob::hash_password(password, 10000);
-    /// assert!(hashed_password.verify(b"somesuperstrongpa$$w0rd!").unwrap());
-    /// assert!(!hashed_password.verify(b"someweakpa$$w0rd!").unwrap());
+    /// let hashed_password = DcDataBlob::hash_password(password, 10000).unwrap();
+    /// assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!").unwrap());
+    /// assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!").unwrap());
     /// ```
     pub fn verify_password(&self, password: &[u8]) -> Result<bool> {
         self.payload.verify_password(password)
@@ -140,7 +140,7 @@ impl DcDataBlob {
     /// Returns, in order, the private key and the public key in a `DcDataBlob`.
     /// # Example
     /// ```rust
-    /// use devocrypto::DcDataBlob;
+    /// use devolutionscrypto::DcDataBlob;
     ///
     /// let (private, public) = DcDataBlob::generate_key_exchange().unwrap();
     /// ```
@@ -170,29 +170,36 @@ impl DcDataBlob {
     ///     as an encryption key between the two peers.
     /// # Example
     /// ```rust
-    /// use devocrypto::DcDataBlob;
+    /// use std::convert::TryFrom as _;
+    /// use devolutionscrypto::DcDataBlob;
+    /// # fn send_key_to_alice(_: &[u8]) {}
+    /// # fn send_key_to_bob(_: &[u8]) {}
+    /// # fn receive_key_from_alice() {}
+    /// # fn receive_key_from_bob() {}
     ///
     /// // This happens on Bob's side.
     /// let (bob_priv, bob_pub) = DcDataBlob::generate_key_exchange().unwrap();
     /// let bob_serialized_pub: Vec<u8> = bob_pub.into();
     ///
-    /// send_key_to_alice(bob_serialized_pub);
+    /// send_key_to_alice(&bob_serialized_pub);
     ///
     /// // This happens on Alice's side.
     /// let (alice_priv, alice_pub) = DcDataBlob::generate_key_exchange().unwrap();
     /// let alice_serialized_pub: Vec<u8> = alice_pub.into();
     ///
-    /// send_key_to_bob(alice_serialized_pub);
+    /// send_key_to_bob(&alice_serialized_pub);
     ///
     /// // Bob can now generate the shared secret.
     /// let alice_received_serialized_pub = receive_key_from_alice();
-    /// let alice_received_pub = DcDataBlob::try_from(&alice_received_serialized_pub).unwrap();
+    /// # let alice_received_serialized_pub = alice_serialized_pub;
+    /// let alice_received_pub = DcDataBlob::try_from(alice_received_serialized_pub.as_slice()).unwrap();
     ///
     /// let bob_shared = bob_priv.mix_key_exchange(alice_received_pub).unwrap();
     ///
     /// // Alice can now generate the shared secret
     /// let bob_received_serialized_pub = receive_key_from_bob();
-    /// let bob_received_pub = DcDataBlob::try_from(&bob_received_serialized_pub).unwrap();
+    /// # let bob_received_serialized_pub = bob_serialized_pub;
+    /// let bob_received_pub = DcDataBlob::try_from(bob_received_serialized_pub.as_slice()).unwrap();
     ///
     /// let alice_shared = alice_priv.mix_key_exchange(bob_received_pub).unwrap();
     ///
@@ -205,14 +212,41 @@ impl DcDataBlob {
 }
 
 #[test]
-fn crypto_test() {
+fn encrypt_decrypt_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
     let data = "This is a very complex string of character that we need to encrypt".as_bytes();
 
-    let encrypted = DcDataBlob::encrypt(data, key).unwrap();
+    let encrypted = DcDataBlob::encrypt(data, &key).unwrap();
+    let encrypted: Vec<u8> = encrypted.into();
+
+    let encrypted = DcDataBlob::try_from(encrypted.as_slice()).unwrap();
     let decrypted = encrypted.decrypt(key).unwrap();
 
     assert_eq!(decrypted, data);
+}
+
+#[test]
+fn decrypt_v1_test() {
+    use base64;
+    
+    let data = base64::decode("DQwCAAAAAQBo87jumRMVMIuTP8cFbFTgwDguKXkBvlkE/rNu4HLRRueQqfCzmXEyGR7qWAKkz4BFFyGedCmQ/xXTW4V7UnV9um1TJClz3yzQy0SQui+1UA==").unwrap();
+    let key = base64::decode("Xk63o/+6TeC63Z4j2HZOOdiGfqjQNJz1PTbQ3/L5nM0=").unwrap();
+    let encrypted = DcDataBlob::try_from(data.as_slice()).unwrap();
+    let decrypted = encrypted.decrypt(&key).unwrap();
+
+    assert_eq!(decrypted, "A secret v1 string".as_bytes());
+}
+
+#[test]
+fn decrypt_v2_test() {
+    use base64;
+    
+    let data = base64::decode("DQwCAAAAAgCcJ6yg2jWt3Zr1ZvenW4/AFi3Xj82IqfvaHmmPzMgzkrTfeKp8Shey3KLLLOhtMU4eNmYBRcAtSPfQ").unwrap();
+    let key = base64::decode("Dipney+DR14k+Bvz/gBJrM19yAerG/0g5iHSm/HcOJU=").unwrap();
+    let encrypted = DcDataBlob::try_from(data.as_slice()).unwrap();
+    let decrypted = encrypted.decrypt(&key).unwrap();
+
+    assert_eq!(decrypted, "A secret v2 string".as_bytes());
 }
 
 #[test]

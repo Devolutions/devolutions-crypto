@@ -188,33 +188,6 @@ namespace Devolutions.Cryptography
             }
         }
 
-        public static byte[] GenerateKey(Action<Enum> error = null)
-        {
-            try
-            {
-                uint keySize = KeySizeNative();
-
-                byte[] key = new byte[keySize];
-
-                long res = GenerateKeyNative(key, (UIntPtr)keySize);
-
-                if (res < 0)
-                {
-                    HandleError(res, error);
-
-                    return null;
-                }
-
-                return key;
-            }
-            catch
-            {
-                error?.Invoke(ManagedError.Error);
-
-                return null;
-            }
-        }
-
         public static byte[] GenerateKey(uint keySize, Action<Enum> error = null)
         {
             try
@@ -383,7 +356,7 @@ namespace Devolutions.Cryptography
                 throw new Exception();
             }
 
-            byte[] generateKey = GenerateKey();
+            byte[] generateKey = GenerateKey(32);
 
             byte[] dericeKeyResult = DeriveKey(generateKey, null);
 

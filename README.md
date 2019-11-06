@@ -12,14 +12,14 @@ It contains the following functions:
 
 `GenerateKey`: Generate a key of the required size using secure PRNGs.  
 `DeriveKey`: Generates a key from a secret using the supplied parameters.  
-`Encrypt`: Encrypt data with the provided key. Can take any size of key.  
-`Decrypt`: Decrypt data with the provided key. Can take any size of key.  
+`Encrypt`: Encrypt data with the provided key. Can take any size of key, but if it is a password you should use DeriveKey before.  
+`Decrypt`: Decrypt data with the provided key. Can take any size of key, but if it is a password you should use DeriveKey before.  
 `HashPassword`: Hash a password using high-cost algorithm so it is hard to brute-force. Depending on the wrapper,
-you may need to specify an iteration number(the standard is 1000). Can also be used to derive a key. 
+you may need to specify an iteration number(the standard is 10000). Can also be used to derive a key. 
 Should be used whenever there is a user provided password.  
 `VerifyPassword`: Verify a password hash using constant time equality to prevent an array of side-channels attacks.  
 `GenerateKeyExchange`: Generate a key pair to use in a Key Exchange. Should be used for any data in transit.  
-MixKeyExchange: Mix a public key with a private key. Generates a shared secret between the client and the server.
+`MixKeyExchange`: Mix a public key with a private key. Generates a shared secret between the client and the server.
 
 ### Technical Informations
 As of the current version:
@@ -31,17 +31,15 @@ Uses rand::OsRng which uses a platform-dependant cryptographically safe PRNG.
 Uses PBKDF2 with HMAC-SHA256 to create a key using the supplied parameters.
 
 #### Encrypt
-1. Derives the secret using PBKDF2 into two keys using HMAC-SHA256 and 1 iteration: 
-The encryption key(`salt="\x00"`) and the signature key(`salt="\x01"`).  
-2. Generate a random 128bits Initialization Vector(IV).  
-3. Encrypt the data using the encryption key and the IV.  
-4. Create an HMAC-SHA256 of version + IV + encrypted_data using the signature key.  
-5. Final: 4 version bytes + 16 IV bytes + data + 32 HMAC bytes.
+1. Derives the secret into a key using SHA256.  
+2. Generate a random 192bits nonce.  
+3. Encrypt the data using the encryption key and the nonce with the XChaCha20Poly1305 AEAD. The header is used as the associated data so it is authenticated and can't be tampered.  
+5. Final: 8 header bytes + 24 nonce bytes + data + 16 authentication tag bytes.
 
 #### HashPassword
 1. Generate a random 256bits salt.  
-2. Hash the password with the salt and the specified iteration number using HMAC-SHA256.  
-3. Final: 4 version bytes + 4 bytes iterations* + 32 bytes salt + 32 bytes hash
+2. Hash the password with the salt and the specified iteration number using PBKDF2-HMAC-SHA256.  
+3. Final: 8 header bytes + 4 bytes iterations + 32 bytes salt + 32 bytes hash
 
 #### KeyExchange
 The key exchanges uses x25519 protocol, which uses Diffie-Hellman based on elliptic curves.
