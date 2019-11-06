@@ -2,7 +2,7 @@ use std::convert::TryFrom as _;
 
 use wasm_bindgen::prelude::*;
 
-use super::devocrypto;
+use super::utils;
 use super::DcDataBlob;
 
 use zeroize::Zeroize as _;
@@ -68,10 +68,10 @@ pub fn mix_key_exchange(private: &[u8], public: &[u8]) -> Vec<u8> {
 
 #[wasm_bindgen]
 pub fn generate_key(length: usize) -> Vec<u8> {
-    devocrypto::generate_key(length).unwrap()
+    utils::generate_key(length).unwrap()
 }
 
 #[wasm_bindgen]
 pub fn derive_key(key: &[u8], salt: &[u8], iterations: usize, length: usize) -> Vec<u8> {
-    devocrypto::derive_key(key, salt, iterations, length)
+    utils::derive_key(key, salt, iterations, length)
 }
