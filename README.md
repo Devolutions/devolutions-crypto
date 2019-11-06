@@ -34,7 +34,7 @@ Uses PBKDF2 with HMAC-SHA256 to create a key using the supplied parameters.
 1. Derives the secret into a key using SHA256.  
 2. Generate a random 192bits nonce.  
 3. Encrypt the data using the encryption key and the nonce with the XChaCha20Poly1305 AEAD.  
-5. Final: 4 version bytes + 24 IV bytes + data + 16 authentication tag bytes.
+5. Final: 4 version bytes + 24 nonce bytes + data + 16 authentication tag bytes.
 
 #### HashPassword
 1. Generate a random 256bits salt.  
