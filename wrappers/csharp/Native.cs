@@ -40,7 +40,7 @@ namespace Devolutions.Cryptography
 
            string path = Path.GetDirectoryName(assembly.Location);
 
-           path = Path.Combine(path, IntPtr.Size == 8 ? "x64" : "x86");
+           path = Path.Combine(path, Environment.Is64BitProcess ? "x64" : "x86");
 
            bool ok = SetDllDirectory(path);
 
