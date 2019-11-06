@@ -33,13 +33,13 @@ Uses PBKDF2 with HMAC-SHA256 to create a key using the supplied parameters.
 #### Encrypt
 1. Derives the secret into a key using SHA256.  
 2. Generate a random 192bits nonce.  
-3. Encrypt the data using the encryption key and the nonce with the XChaCha20Poly1305 AEAD.  
-5. Final: 4 version bytes + 24 nonce bytes + data + 16 authentication tag bytes.
+3. Encrypt the data using the encryption key and the nonce with the XChaCha20Poly1305 AEAD. The header is used as the associated data so it is authenticated and can't be tampered.  
+5. Final: 8 header bytes + 24 nonce bytes + data + 16 authentication tag bytes.
 
 #### HashPassword
 1. Generate a random 256bits salt.  
 2. Hash the password with the salt and the specified iteration number using PBKDF2-HMAC-SHA256.  
-3. Final: 4 version bytes + 4 bytes iterations* + 32 bytes salt + 32 bytes hash
+3. Final: 8 header bytes + 4 bytes iterations + 32 bytes salt + 32 bytes hash
 
 #### KeyExchange
 The key exchanges uses x25519 protocol, which uses Diffie-Hellman based on elliptic curves.
