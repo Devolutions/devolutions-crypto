@@ -149,7 +149,7 @@ namespace Devolutions.Cryptography
             }
         }
 
-        public static byte[] Encrypt(byte[] data, byte[] key, Action<Enum> error = null)
+        public static byte[] Encrypt(byte[] data, byte[] key, uint version = 0, Action<Enum> error = null)
         {
             try
             {
@@ -165,11 +165,11 @@ namespace Devolutions.Cryptography
                     key = new byte[0];
                 }
 
-                long resultLength = EncryptSizeNative((UIntPtr)data.Length);
+                long resultLength = EncryptSizeNative((UIntPtr)data.Length, (UInt16) version);
 
                 byte[] result = new byte[resultLength];
 
-                long res = EncryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length);
+                long res = EncryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length, (UInt16)version);
 
                 if (res < 0)
                 {
@@ -400,39 +400,39 @@ namespace Devolutions.Cryptography
         [DllImport(LibName64, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DeriveKeyNative64(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
 
-        private static long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength)
+        private static long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, UInt16 version)
         {
             if(Environment.Is64BitProcess)
             {
-                return EncryptNative64(data, dataLength, key, keyLength, result, resultLength);
+                return EncryptNative64(data, dataLength, key, keyLength, result, resultLength, version);
             }
 
-            return EncryptNative86(data, dataLength, key, keyLength, result, resultLength);
+            return EncryptNative86(data, dataLength, key, keyLength, result, resultLength, version);
         }
 
         [DllImport(LibName86, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
+        private static extern long EncryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, UInt16 version);
 
 
         [DllImport(LibName64, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
+        private static extern long EncryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, UInt16 version);
 
-        private static long EncryptSizeNative(UIntPtr dataLength)
+        private static long EncryptSizeNative(UIntPtr dataLength, UInt16 version)
         {
             if(Environment.Is64BitProcess)
             {
-                return EncryptSizeNative64(dataLength);
+                return EncryptSizeNative64(dataLength, version);
             }
 
-            return EncryptSizeNative86(dataLength);
+            return EncryptSizeNative86(dataLength, version);
         }
 
         [DllImport(LibName86, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptSizeNative86(UIntPtr dataLength);
+        private static extern long EncryptSizeNative86(UIntPtr dataLength, UInt16 version);
 
 
         [DllImport(LibName64, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptSizeNative64(UIntPtr dataLength);
+        private static extern long EncryptSizeNative64(UIntPtr dataLength, UInt16 version);
 
         private static long GenerateKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize)
         {

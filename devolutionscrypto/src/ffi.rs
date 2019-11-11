@@ -28,6 +28,7 @@ use base64::{decode_config_slice, encode_config_slice, STANDARD};
 ///  * `result` - Pointer to the buffer to write the ciphertext to.
 ///  * `result_length` - Length of the buffer to write the ciphertext to. You can get the value by
 ///                         calling EncryptSize() beforehand.
+///  * `version` - Version to use. Use 0 for the latest one.
 /// # Returns
 /// This returns the length of the ciphertext. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
@@ -39,12 +40,13 @@ pub unsafe extern "C" fn Encrypt(
     key_length: usize,
     result: *mut u8,
     result_length: usize,
+    version: u16,
 ) -> i64 {
     if data.is_null() || key.is_null() || result.is_null() {
         return DevoCryptoError::NullPointer.error_code();
     };
 
-    if result_length != EncryptSize(data_length) as usize {
+    if result_length != EncryptSize(data_length, version) as usize {
         return DevoCryptoError::InvalidOutputLength.error_code();
     }
 
@@ -52,7 +54,7 @@ pub unsafe extern "C" fn Encrypt(
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    match DcDataBlob::encrypt(data, key) {
+    match DcDataBlob::encrypt(data, key, version) {
         Ok(res) => {
             let mut res: Vec<u8> = res.into();
             let length = res.len();
@@ -71,8 +73,18 @@ pub unsafe extern "C" fn Encrypt(
 /// # Returns
 /// Returns the length of the ciphertext to input as `result_length` in `Encrypt()`.
 #[no_mangle]
-pub extern "C" fn EncryptSize(data_length: usize) -> i64 {
-    (8 + 24 + data_length + 16) as i64 // Header + nonce + data + Poly1305 tag
+pub extern "C" fn EncryptSize(data_length: usize, version: u16) -> i64 {
+    match version {
+        1 => {
+            (8 + 16 + (data_length / 16 + 1) * 16 + 32) as i64 // Header + IV + data(padded to 16) + HMAC
+        }
+        0 | 2 => {
+            (8 + 24 + data_length + 16) as i64 // Header + nonce + data + Poly1305 tag
+        }
+        _ => {
+            DevoCryptoError::UnknownVersion.error_code()
+        }
+    }
 }
 
 
@@ -461,15 +473,15 @@ fn test_encrypt_length() {
     let one_full_block = b"0123456789abcdef";
     let multiple_blocks = b"0123456789abcdefghijkl";
 
-    let length_zero_enc: Vec<u8> = DcDataBlob::encrypt(length_zero, key).unwrap().into();
-    let length_one_block_enc: Vec<u8> = DcDataBlob::encrypt(length_one_block, key).unwrap().into();
-    let one_full_block_enc: Vec<u8> = DcDataBlob::encrypt(one_full_block, key).unwrap().into();
-    let multiple_blocks_enc: Vec<u8> = DcDataBlob::encrypt(multiple_blocks, key).unwrap().into();
+    let length_zero_enc: Vec<u8> = DcDataBlob::encrypt(length_zero, key, 0).unwrap().into();
+    let length_one_block_enc: Vec<u8> = DcDataBlob::encrypt(length_one_block, key, 0).unwrap().into();
+    let one_full_block_enc: Vec<u8> = DcDataBlob::encrypt(one_full_block, key, 0).unwrap().into();
+    let multiple_blocks_enc: Vec<u8> = DcDataBlob::encrypt(multiple_blocks, key, 0).unwrap().into();
 
-    assert_eq!(length_zero_enc.len() as i64, EncryptSize(length_zero.len()));
-    assert_eq!(length_one_block_enc.len() as i64, EncryptSize(length_one_block.len()));
-    assert_eq!(one_full_block_enc.len() as i64, EncryptSize(one_full_block.len()));
-    assert_eq!(multiple_blocks_enc.len() as i64, EncryptSize(multiple_blocks.len()));
+    assert_eq!(length_zero_enc.len() as i64, EncryptSize(length_zero.len(), 0));
+    assert_eq!(length_one_block_enc.len() as i64, EncryptSize(length_one_block.len(), 0));
+    assert_eq!(one_full_block_enc.len() as i64, EncryptSize(one_full_block.len(), 0));
+    assert_eq!(multiple_blocks_enc.len() as i64, EncryptSize(multiple_blocks.len(), 0));
 }
 
 #[test]
