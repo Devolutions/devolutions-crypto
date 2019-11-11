@@ -1,0 +1,353 @@
+trigger:
+- master
+
+stages:
+- stage: Native_Build
+  jobs:
+  - job: Linux
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        sudo apt install openjdk-8-jdk
+        sudo apt install unzip
+        sudo apt install nuget
+      displayName: "Installing dependencies"
+    - script: |
+          cd ~
+          wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
+          unzip sdk-tools-linux-4333796.zip
+          rm sdk-tools-linux-4333796.zip
+          mkdir android-sdk
+          mv tools android-sdk/tools
+
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$PATH:$ANDROID_HOME/tools/bin
+          export PATH=$PATH:$ANDROID_HOME/platform-tools        
+
+          yes | sdkmanager "cmake;3.10.2.4988404"
+          yes | sdkmanager "ndk-bundle"
+          yes | sdkmanager "lldb;3.1"
+          yes | sdkmanager "build-tools;24.0.0"
+
+          export NDK_HOME=$ANDROID_HOME/ndk-bundle
+      displayName: "Installing Android SDK"
+
+    - script: |
+        set -e
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
+        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+        rustup target add x86_64-unknown-linux-gnu
+        rustup target add i686-unknown-linux-gnu
+
+        rustup target add aarch64-linux-android
+        rustup target add armv7-linux-androideabi
+        rustup target add i686-linux-android
+        rustup target add x86_64-linux-android
+
+        mkdir .cargo
+      env:
+        RUSTUP_TOOLCHAIN: $(RUST_VERSION)
+      displayName: "Install rust"
+    
+    - script: |
+        sudo apt update
+        sudo apt install gcc-multilib
+      displayName: "Install rust dependencies (gcc-multilib)"
+
+    - script: |
+        python3 GeneratePackage.py LINUX
+      workingDirectory: "./wrappers/csharp"
+      displayName: "Building Linux"
+
+    - script: |
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/tools/bin
+        export PATH=$PATH:$ANDROID_HOME/platform-tools
+        
+        export NDK_HOME=$ANDROID_HOME/ndk-bundle
+
+        echo "[target.aarch64-linux-android]
+        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar\"
+        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang\"
+        [target.armv7-linux-androideabi]
+        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar\"
+        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang\"
+        [target.i686-linux-android]
+        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-ar\"
+        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android26-clang\"
+        [target.x86_64-linux-android]
+        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ar\"
+        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang\"" >> ./.cargo/config
+
+    - script: |
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/tools/bin
+        export PATH=$PATH:$ANDROID_HOME/platform-tools
+        
+        export NDK_HOME=$ANDROID_HOME/ndk-bundle
+
+        python3 GeneratePackage.py ANDROID
+      workingDirectory: "./wrappers/csharp"
+      displayName: "Building Android"
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/android/**'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/linux/**'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: MyBuildOutputs
+
+
+
+
+
+  - job: macOS
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+
+    - script: |
+        set -e
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
+        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+        source $HOME/.cargo/env
+
+        rustup target add x86_64-apple-darwin
+        rustup target add i686-apple-darwin
+
+        rustup target add aarch64-apple-ios
+        rustup target add armv7-apple-ios
+        rustup target add armv7s-apple-ios
+        rustup target add x86_64-apple-ios
+        rustup target add i386-apple-ios
+      env:
+        RUSTUP_TOOLCHAIN: $(RUST_VERSION)
+      displayName: "Install rust"
+
+    - script: |
+        source $HOME/.cargo/env
+        
+        python3 GeneratePackage.py MAC
+      workingDirectory: "./wrappers/csharp"
+      displayName: "Building Mac"
+
+    - script: |
+        source $HOME/.cargo/env
+
+        python3 GeneratePackage.py IOS
+      workingDirectory: "./wrappers/csharp"
+      displayName: "Building IOS"
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/macos/**'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/ios/**'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: MyBuildOutputs
+
+
+
+  - job: Windows
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - checkout: self
+      lfs: true
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+        addToPath: true
+        architecture: 'x64'
+
+    - powershell: |
+        set PATH="%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\Roslyn"
+        echo "##vso[task.setvariable variable=PATH;]%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\Roslyn"
+
+    - script: |
+        curl -sSf -o rustup-init.exe https://win.rustup.rs
+        rustup-init.exe -y --default-toolchain %RUSTUP_TOOLCHAIN%
+        set PATH=%PATH%;%USERPROFILE%\.cargo\bin
+        echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
+      env:
+        RUSTUP_TOOLCHAIN: $(RUST_VERSION)
+      displayName: "Install rust (windows)"
+
+    - script: |
+        rustup target add x86_64-pc-windows-msvc
+        rustup target add i686-pc-windows-msvc
+      env:
+        RUSTUP_TOOLCHAIN: $(RUST_VERSION)
+      displayName: "Installing rust targets"
+
+    - script: |
+        python GeneratePackage.py WIN
+      workingDirectory: "./wrappers/csharp"
+      displayName: "Building WIN"
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/windows/**'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: MyBuildOutputs
+
+- stage: Nugets
+  jobs:
+  - job: Linux
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: "MyBuildOutputs"
+        targetPath: "."
+    
+    - script: |
+        sudo apt install nuget
+      displayName: "Install nuget"
+
+    - script: |
+        python3 GenerateNuget.py LINUX
+      workingDirectory: "./wrappers/csharp/nuget"
+      displayName: "Generating Linux Nuget"
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/nuget/Linux/package/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: Nugets
+
+
+  - job: macOS
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: "MyBuildOutputs"
+        targetPath: "."
+
+    - script: |
+        python3 GenerateNuget.py IOS
+      workingDirectory: "./wrappers/csharp/nuget"
+      displayName: "Generating IOS Nuget"
+
+    - script: |
+        python3 GenerateNuget.py MAC-MODERN
+      workingDirectory: "./wrappers/csharp/nuget"
+      displayName: "Generating MAC-MODERN Nuget"
+
+    - script: |
+        python3 GenerateNuget.py MAC-FULL
+      workingDirectory: "./wrappers/csharp/nuget"
+      displayName: "Generating MAC-FULL Nuget"
+
+    - script: |
+        python3 GenerateNuget.py ANDROID
+      workingDirectory: "./wrappers/csharp/nuget"
+      displayName: "Generating Android Nuget"
+    
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/package/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/nuget/macOS/Full/package/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/nuget/macOS/Modern/Devolutions.Crypto.Mac/package/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/package/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: Nugets
+
+
+  - job: Windows
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - checkout: self
+      lfs: true
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+        addToPath: true
+        architecture: 'x64'
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: "MyBuildOutputs"
+        targetPath: "."
+
+    - script: | 
+        curl https://dist.nuget.org/win-x86-commandline/latest/nuget.exe --output nuget.exe
+      workingDirectory: "./wrappers/csharp/nuget"
+      displayName: "Downloading nuget"
+
+    - script: |
+        python GenerateNuget.py WIN
+      workingDirectory: "./wrappers/csharp/nuget"
+      displayName: "Generating WIN Nuget"
+
+    - script: |
+        python GenerateNuget.py DOTNET
+      workingDirectory: "./wrappers/csharp/nuget"
+      displayName: "Generating DOTNET Nuget"
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/nuget/Windows/package/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/nuget/dotnet-core/package/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: Nugets
