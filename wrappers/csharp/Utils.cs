@@ -5,7 +5,7 @@ namespace Devolutions.Cryptography
     
     public static partial class Utils
     {
-        public static bool ValidateCiphertextSignature(byte[] data, DataType type = DataType.Cipher)
+        public static bool ValidateSignature(byte[] data, DataType type)
         {
             if(data == null)
             {
