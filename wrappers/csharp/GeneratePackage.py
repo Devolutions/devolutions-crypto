@@ -36,38 +36,6 @@ with open('../../devolutionscrypto/Cargo.toml', 'r') as filee:
     assembly_manifest = assembly_manifest.replace("||VERSION||", version)
 
 if sys.argv[1] == "WIN":
-    # Compile a DevolutionsCrypto.dll in 32 bit and 64 bit for windows platform
-    print("Finding csc compiler...")
-    csc_path = ""
-        
-    command= subprocess.Popen(["where","/r", "c:\\", "csc.exe"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-
-    print(output)
-
-    if not output or len(output) <= 0:
-        print("csc compiler not found!")
-        exit()
-
-    paths = output.split("\r\n")
-
-    paths_filtered = []
-    for path in paths:
-        if("Roslyn" in path):
-            paths_filtered.append(path)
-
-    if(len(paths_filtered) == 0):
-        print("csc compiler not found!")
-        exit()
-
-    csc_path = paths_filtered[0]
-
-    if "csc.exe" not in csc_path:
-        print("csc compiler not found!")
-        exit()
-
-    print("Found csc compiler!")
-
     architectures = { "arch" : 
                     [
                         {"name" : "x86", "value" : "i686-pc-windows-msvc"},
@@ -133,7 +101,7 @@ if sys.argv[1] == "WIN":
     if rdm:
         define += ";RDM"
 
-    command= subprocess.Popen([csc_path,"-out:./" + folder + "/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./" + folder + "/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", define ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./" + folder + "/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["csc","-out:./" + folder + "/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./" + folder + "/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", define ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./" + folder + "/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
