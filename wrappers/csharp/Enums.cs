@@ -1,6 +1,6 @@
 namespace Devolutions.Cryptography
 {
-    enum DataType 
+    public enum DataType 
     {
         Key = 1,
         Cipher = 2,

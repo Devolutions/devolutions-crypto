@@ -5,7 +5,7 @@ namespace Devolutions.Cryptography
     
     public static partial class Utils
     {
-        public static bool ValidateCiphertextSignature(byte[] data)
+        public static bool ValidateSignature(byte[] data, DataType type)
         {
             if(data == null)
             {
@@ -14,7 +14,13 @@ namespace Devolutions.Cryptography
 
             if(data.Length >= 8)
             {
-                return data[0] == '\xD' && data[1] == '\xC' && data[2] == (int)DataType.Cipher && data[3] == 0 && data[4] == 0 && data[5] == 0;
+                byte[] typeBytes = BitConverter.GetBytes((UInt16) type);
+                if(!BitConverter.IsLittleEndian)
+                {
+                    Array.Reverse(typeBytes);
+                }
+
+                return data[0] == '\xD' && data[1] == '\xC' && data[2] == typeBytes[0] && data[3] == typeBytes[1];
             }
 
             return false;
