@@ -14,7 +14,13 @@ namespace Devolutions.Cryptography
 
             if(data.Length >= 8)
             {
-                return data[0] == '\xD' && data[1] == '\xC' && data[2] == (int)type && data[3] == 0;
+                byte[] typeBytes = BitConverter.GetBytes((UInt16) type);
+                if(!BitConverter.IsLittleEndian)
+                {
+                    Array.Reverse(typeBytes);
+                }
+
+                return data[0] == '\xD' && data[1] == '\xC' && data[2] == typeBytes[0] && data[3] == typeBytes[1];
             }
 
             return false;
