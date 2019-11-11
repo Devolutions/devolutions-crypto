@@ -56,6 +56,7 @@ impl DcDataBlob {
     /// # Arguments
     ///  * `data` - Data to encrypt.
     ///  * `key` - Key to use. Can be of arbitrary size.
+    ///  * `version` - Version of the library to encrypt with. Use 0 for default.
     /// # Returns
     /// Returns a `DcDataBlob` containing the encrypted data.
     /// # Example
@@ -65,11 +66,11 @@ impl DcDataBlob {
     /// let data = b"somesecretdata";
     /// let key = b"somesecretkey";
     ///
-    /// let encrypted_data = DcDataBlob::encrypt(data, key).unwrap();
+    /// let encrypted_data = DcDataBlob::encrypt(data, key, 0).unwrap();
     /// ```
-    pub fn encrypt(data: &[u8], key: &[u8]) -> Result<DcDataBlob> {
+    pub fn encrypt(data: &[u8], key: &[u8], version: u16) -> Result<DcDataBlob> {
         let mut header = DcHeader::new();
-        let payload = DcPayload::encrypt(data, key, &mut header)?;
+        let payload = DcPayload::encrypt(data, key, &mut header, version)?;
         Ok(DcDataBlob { header, payload })
     }
 
@@ -85,7 +86,7 @@ impl DcDataBlob {
     /// let data = b"somesecretdata";
     /// let key = b"somesecretkey";
     ///
-    /// let encrypted_data = DcDataBlob::encrypt(data, key).unwrap();
+    /// let encrypted_data = DcDataBlob::encrypt(data, key, 0).unwrap();
     /// let decrypted_data = encrypted_data.decrypt(key).unwrap();
     ///
     /// assert_eq!(data.to_vec(), decrypted_data);
@@ -216,7 +217,7 @@ fn encrypt_decrypt_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
     let data = "This is a very complex string of character that we need to encrypt".as_bytes();
 
-    let encrypted = DcDataBlob::encrypt(data, &key).unwrap();
+    let encrypted = DcDataBlob::encrypt(data, &key, 0).unwrap();
     let encrypted: Vec<u8> = encrypted.into();
 
     let encrypted = DcDataBlob::try_from(encrypted.as_slice()).unwrap();

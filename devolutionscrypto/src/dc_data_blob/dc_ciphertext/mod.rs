@@ -12,6 +12,7 @@ use std::convert::TryFrom as _;
 
 pub const CIPHERTEXT: u16 = 2;
 
+const DEFAULT: u16 = 0;
 const V1: u16 = 1;
 const V2: u16 = 2;
 
@@ -29,13 +30,26 @@ impl DcCiphertext {
         }
     }
 
-    pub fn encrypt(data: &[u8], key: &[u8], header: &mut DcHeader) -> Result<DcCiphertext> {
+    pub fn encrypt(data: &[u8], key: &[u8], header: &mut DcHeader, version: u16) -> Result<DcCiphertext> {
         header.data_type = CIPHERTEXT;
-        header.version = V2;
 
-        Ok(DcCiphertext::V2(DcCiphertextV2::encrypt(
-            data, key, header,
-        )?))
+        match version {
+            V1 => {
+                header.version = V1;
+                Ok(DcCiphertext::V1(DcCiphertextV1::encrypt(
+                    data, key, header,
+                )?))
+            }
+            V2| DEFAULT => {
+                header.version = V2;
+                Ok(DcCiphertext::V2(DcCiphertextV2::encrypt(
+                    data, key, header,
+                )?))
+            }
+            _ => {
+                Err(DevoCryptoError::UnknownVersion)
+            }
+        }
     }
 
     pub fn decrypt(&self, key: &[u8], header: &DcHeader) -> Result<Vec<u8>> {
