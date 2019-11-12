@@ -31,8 +31,8 @@ impl Drop for KeyPair {
 }
 
 #[wasm_bindgen]
-pub fn encrypt(data: &[u8], key: &[u8]) -> Vec<u8> {
-    DcDataBlob::encrypt(&data, &key).unwrap().into()
+pub fn encrypt(data: &[u8], key: &[u8], version: u16) -> Vec<u8> {
+    DcDataBlob::encrypt(&data, &key, version).unwrap().into()
 }
 
 #[wasm_bindgen]
