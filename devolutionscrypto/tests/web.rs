@@ -1,8 +1,8 @@
-extern crate wasm_bindgen_test;
 extern crate base64;
+extern crate wasm_bindgen_test;
 
-use wasm_bindgen_test::*;
 use std::convert::TryFrom as _;
+use wasm_bindgen_test::*;
 
 use devolutionscrypto::DcDataBlob;
 

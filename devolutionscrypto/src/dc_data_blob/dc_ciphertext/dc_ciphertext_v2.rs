@@ -1,5 +1,4 @@
 /// Ciphertext V2: XChaCha20Poly1305
-
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;

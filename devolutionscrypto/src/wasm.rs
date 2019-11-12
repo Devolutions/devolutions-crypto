@@ -1,7 +1,7 @@
 use std::convert::TryFrom as _;
 
-use wasm_bindgen::prelude::*;
 use base64;
+use wasm_bindgen::prelude::*;
 
 use super::utils;
 use super::DcDataBlob;
@@ -45,7 +45,9 @@ pub fn decrypt(data: &[u8], key: &[u8]) -> Vec<u8> {
 
 #[wasm_bindgen]
 pub fn hash_password(password: &[u8], iterations: Option<u32>) -> Vec<u8> {
-    DcDataBlob::hash_password(&password, iterations.unwrap_or(10000)).unwrap().into()
+    DcDataBlob::hash_password(&password, iterations.unwrap_or(10000))
+        .unwrap()
+        .into()
 }
 
 #[wasm_bindgen]
@@ -57,7 +59,10 @@ pub fn verify_password(password: &[u8], hash: &[u8]) -> bool {
 #[wasm_bindgen]
 pub fn generate_key_exchange() -> KeyPair {
     let (private, public) = DcDataBlob::generate_key_exchange().unwrap();
-    let pair = KeyPair { private_key: private.into(), public_key: public.into() };
+    let pair = KeyPair {
+        private_key: private.into(),
+        public_key: public.into(),
+    };
     pair
 }
 

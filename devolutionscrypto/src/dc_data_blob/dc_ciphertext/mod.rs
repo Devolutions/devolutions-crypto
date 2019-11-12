@@ -30,7 +30,12 @@ impl DcCiphertext {
         }
     }
 
-    pub fn encrypt(data: &[u8], key: &[u8], header: &mut DcHeader, version: u16) -> Result<DcCiphertext> {
+    pub fn encrypt(
+        data: &[u8],
+        key: &[u8],
+        header: &mut DcHeader,
+        version: u16,
+    ) -> Result<DcCiphertext> {
         header.data_type = CIPHERTEXT;
 
         match version {
@@ -40,15 +45,13 @@ impl DcCiphertext {
                     data, key, header,
                 )?))
             }
-            V2| DEFAULT => {
+            V2 | DEFAULT => {
                 header.version = V2;
                 Ok(DcCiphertext::V2(DcCiphertextV2::encrypt(
                     data, key, header,
                 )?))
             }
-            _ => {
-                Err(DevoCryptoError::UnknownVersion)
-            }
+            _ => Err(DevoCryptoError::UnknownVersion),
         }
     }
 
