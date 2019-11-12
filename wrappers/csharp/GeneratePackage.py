@@ -104,6 +104,9 @@ if sys.argv[1] == "WIN":
     command= subprocess.Popen(["csc","-out:./" + folder + "/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./" + folder + "/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", define ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./" + folder + "/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
+    if("error" in output):
+        exit(1)
+        
     print(output)
 
     os.remove("./" + folder + "/bin/AssemblyInfo.cs")
@@ -155,6 +158,9 @@ if sys.argv[1] == "MAC":
     # TODO create universal library with lipo
     command= subprocess.Popen(["csc", "-out:./macos/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./macos/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:MAC" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./macos/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
+
+    if("error" in output):
+        exit(1)
 
     print(output)
 
@@ -230,6 +236,9 @@ if sys.argv[1] == "IOS":
     command= subprocess.Popen(["csc", "-out:./ios/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./ios/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:IOS" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./ios/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
+    if("error" in output):
+        exit(1)
+
     print(output)
 
     os.remove("./ios/bin/AssemblyInfo.cs")
@@ -302,6 +311,9 @@ if sys.argv[1] == "ANDROID":
     command = subprocess.Popen(["csc", "-out:./android/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./android/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:ANDROID" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./android/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
+    if("error" in output):
+        exit(1)
+
     print(output)   
 
     os.remove("./android/bin/AssemblyInfo.cs")
@@ -358,6 +370,9 @@ if sys.argv[1] == "LINUX":
 
     command= subprocess.Popen(["csc", "-out:./linux/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./linux/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:LINUX" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./linux/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
+
+    if("error" in output):
+        exit(1)
 
     print(output)
 
