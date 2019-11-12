@@ -75,7 +75,7 @@ if sys.argv[1] == "WIN":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "+nightly", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
@@ -142,7 +142,7 @@ if sys.argv[1] == "MAC":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "+nightly", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
@@ -216,7 +216,7 @@ if sys.argv[1] == "IOS":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "+nightly", "build", "--release", "--target", arch["value"], "--example", "static"], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"], "--example", "static"], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
@@ -288,7 +288,7 @@ if sys.argv[1] == "ANDROID":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "+nightly", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
@@ -340,7 +340,7 @@ if sys.argv[1] == "LINUX":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "+nightly", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
