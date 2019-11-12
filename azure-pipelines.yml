@@ -9,34 +9,14 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: |
-        sudo apt install openjdk-8-jdk
-        sudo apt install unzip
+        sudo apt update
         sudo apt install nuget
+        sudo apt install gcc-multilib
       displayName: "Installing dependencies"
-    - script: |
-          cd ~
-          wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
-          unzip sdk-tools-linux-4333796.zip
-          rm sdk-tools-linux-4333796.zip
-          mkdir android-sdk
-          mv tools android-sdk/tools
-
-          export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$PATH:$ANDROID_HOME/tools/bin
-          export PATH=$PATH:$ANDROID_HOME/platform-tools        
-
-          yes | sdkmanager "cmake;3.10.2.4988404"
-          yes | sdkmanager "ndk-bundle"
-          yes | sdkmanager "lldb;3.1"
-          yes | sdkmanager "build-tools;24.0.0"
-
-          export NDK_HOME=$ANDROID_HOME/ndk-bundle
-      displayName: "Installing Android SDK"
 
     - script: |
-        set -e
-        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
-        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+        rustup update
+
         rustup target add x86_64-unknown-linux-gnu
         rustup target add i686-unknown-linux-gnu
 
@@ -46,12 +26,7 @@ stages:
         rustup target add x86_64-linux-android
 
         mkdir .cargo
-      displayName: "Install rust"
-    
-    - script: |
-        sudo apt update
-        sudo apt install gcc-multilib
-      displayName: "Install rust dependencies (gcc-multilib)"
+      displayName: "Install rust"    
 
     - script: |
         python3 GeneratePackage.py LINUX
@@ -59,10 +34,7 @@ stages:
       displayName: "Building Linux"
 
     - script: |
-        export ANDROID_HOME=$HOME/android-sdk
-        export PATH=$PATH:$ANDROID_HOME/tools/bin
-        export PATH=$PATH:$ANDROID_HOME/platform-tools
-        
+        export ANDROID_HOME=/usr/local/lib/android/sdk        
         export NDK_HOME=$ANDROID_HOME/ndk-bundle
 
         echo "[target.aarch64-linux-android]
@@ -79,10 +51,7 @@ stages:
         linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang\"" >> ./.cargo/config
 
     - script: |
-        export ANDROID_HOME=$HOME/android-sdk
-        export PATH=$PATH:$ANDROID_HOME/tools/bin
-        export PATH=$PATH:$ANDROID_HOME/platform-tools
-        
+        export ANDROID_HOME=/usr/local/lib/android/sdk        
         export NDK_HOME=$ANDROID_HOME/ndk-bundle
 
         python3 GeneratePackage.py ANDROID
@@ -103,9 +72,6 @@ stages:
       inputs:
         pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: MyBuildOutputs
-
-
-
 
 
   - job: macOS
