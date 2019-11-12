@@ -1,9 +1,11 @@
+[![Build Status](https://dev.azure.com/mrmathmo/DevolutionsCrypto/_apis/build/status/Devolutions.devolutions-crypto?branchName=master)](https://dev.azure.com/mrmathmo/DevolutionsCrypto/_build/latest?definitionId=2&branchName=master)
+
 # DevolutionsCrypto
 This repo contains the library used for cryptography of products used by Devolutions. 
 It also includes wrapper for it for different languages.  
 Currently, the C# wrapper is supported for the implemented methods. Webassembly build and works,
 but is still considered alpha and not production-ready.   
-The minimum Rust version to build on stable is 1.34.  
+The minimum Rust version to build on stable is 1.34.
 
 
 ## API Definition
