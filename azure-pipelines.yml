@@ -35,7 +35,7 @@ stages:
 
     - script: |
         set -e
-        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
         rustup target add x86_64-unknown-linux-gnu
         rustup target add i686-unknown-linux-gnu
@@ -46,8 +46,6 @@ stages:
         rustup target add x86_64-linux-android
 
         mkdir .cargo
-      env:
-        RUSTUP_TOOLCHAIN: $(RUST_VERSION)
       displayName: "Install rust"
     
     - script: |
@@ -117,7 +115,7 @@ stages:
 
     - script: |
         set -e
-        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
         source $HOME/.cargo/env
 
@@ -129,8 +127,6 @@ stages:
         rustup target add armv7s-apple-ios
         rustup target add x86_64-apple-ios
         rustup target add i386-apple-ios
-      env:
-        RUSTUP_TOOLCHAIN: $(RUST_VERSION)
       displayName: "Install rust"
 
     - script: |
@@ -182,18 +178,14 @@ stages:
 
     - script: |
         curl -sSf -o rustup-init.exe https://win.rustup.rs
-        rustup-init.exe -y --default-toolchain %RUSTUP_TOOLCHAIN%
+        rustup-init.exe -y --default-toolchain stable
         set PATH=%PATH%;%USERPROFILE%\.cargo\bin
         echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
-      env:
-        RUSTUP_TOOLCHAIN: $(RUST_VERSION)
       displayName: "Install rust (windows)"
 
     - script: |
         rustup target add x86_64-pc-windows-msvc
         rustup target add i686-pc-windows-msvc
-      env:
-        RUSTUP_TOOLCHAIN: $(RUST_VERSION)
       displayName: "Installing rust targets"
 
     - script: |
