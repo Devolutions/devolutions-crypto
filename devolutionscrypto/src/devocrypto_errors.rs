@@ -5,6 +5,9 @@ use std::error::Error as _;
 use std::fmt;
 use std::io::Error;
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::JsValue;
+
 use block_modes::{BlockModeError, InvalidKeyIvLength};
 use hmac::crypto_mac::InvalidKeyLength;
 use hmac::crypto_mac::MacError;
@@ -135,5 +138,12 @@ impl From<rand::Error> for DevoCryptoError {
 impl From<std::io::Error> for DevoCryptoError {
     fn from(_error: std::io::Error) -> DevoCryptoError {
         DevoCryptoError::RandomError
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl From<DevoCryptoError> for JsValue {
+    fn from(error: DevoCryptoError) -> JsValue {
+        JsValue::from(error.description())
     }
 }
