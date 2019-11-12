@@ -66,6 +66,28 @@ impl DevoCryptoError {
     }
 }
 
+#[cfg(target_arch = "wasm32")]
+impl DevoCryptoError {
+    // Returns the error name for JavaScript error handling
+    pub fn name(&self) -> &str {
+        match *self {
+            DevoCryptoError::InvalidLength => "InvalidLength",
+            DevoCryptoError::InvalidKeyLength => "InvalidKeyLength",
+            DevoCryptoError::InvalidOutputLength => "InvalidOutputLength",
+            DevoCryptoError::InvalidSignature => "InvalidSignature",
+            DevoCryptoError::InvalidMac => "InvalidMac",
+            DevoCryptoError::InvalidDataType => "InvalidDataType",
+            DevoCryptoError::UnknownType => "UnknownType",
+            DevoCryptoError::UnknownSubtype => "UnknownSubtype",
+            DevoCryptoError::UnknownVersion => "UnknownVersion",
+            DevoCryptoError::NullPointer => "NullPointer",
+            DevoCryptoError::CryptoError => "CryptoError",
+            DevoCryptoError::RandomError => "RandomError",
+            DevoCryptoError::IoError(_) => "IoError",
+        }
+    }
+}
+
 impl fmt::Display for DevoCryptoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match *self {
@@ -144,6 +166,6 @@ impl From<std::io::Error> for DevoCryptoError {
 #[cfg(target_arch = "wasm32")]
 impl From<DevoCryptoError> for JsValue {
     fn from(error: DevoCryptoError) -> JsValue {
-        JsValue::from(error.description())
+        JsValue::symbol(Some(error.name()))
     }
 }
