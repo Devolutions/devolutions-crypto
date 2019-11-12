@@ -24,10 +24,10 @@ namespace Devolutions.Cryptography
         public static extern long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
         [DllImport(LibName, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
+        private static extern long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, UInt16 version);
 
         [DllImport(LibName, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptSizeNative(UIntPtr dataLength);
+        private static extern long EncryptSizeNative(UIntPtr dataLength, UInt16 version);
 
         [DllImport(LibName, EntryPoint = "GenerateKeyExchange", CallingConvention = CallingConvention.Cdecl)]
         private static extern long GenerateKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize);
