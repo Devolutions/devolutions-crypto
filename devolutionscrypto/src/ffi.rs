@@ -61,11 +61,10 @@ pub unsafe extern "C" fn Encrypt(
             result[0..length].copy_from_slice(&res);
             res.zeroize();
             length as i64
-        },
+        }
         Err(e) => e.error_code(),
     }
 }
-
 
 /// Get the size of the resulting ciphertext.
 /// # Arguments
@@ -81,12 +80,9 @@ pub extern "C" fn EncryptSize(data_length: usize, version: u16) -> i64 {
         0 | 2 => {
             (8 + 24 + data_length + 16) as i64 // Header + nonce + data + Poly1305 tag
         }
-        _ => {
-            DevoCryptoError::UnknownVersion.error_code()
-        }
+        _ => DevoCryptoError::UnknownVersion.error_code(),
     }
 }
-
 
 /// Decrypt a data blob
 /// # Arguments
@@ -118,21 +114,19 @@ pub unsafe extern "C" fn Decrypt(
     let result = slice::from_raw_parts_mut(result, result_length);
 
     match DcDataBlob::try_from(data) {
-        Ok(res) => {
-            match res.decrypt(key) {
-                Ok(mut res) => {
-                    if result.len() >= res.len() {
-                        let length = res.len();
-                        result[0..length].copy_from_slice(&res);
-                        res.zeroize();
-                        length as i64
-                    } else {
-                        res.zeroize();
-                        DevoCryptoError::InvalidOutputLength.error_code()
-                    }
-                },
-                Err(e) => e.error_code(),
+        Ok(res) => match res.decrypt(key) {
+            Ok(mut res) => {
+                if result.len() >= res.len() {
+                    let length = res.len();
+                    result[0..length].copy_from_slice(&res);
+                    res.zeroize();
+                    length as i64
+                } else {
+                    res.zeroize();
+                    DevoCryptoError::InvalidOutputLength.error_code()
+                }
             }
+            Err(e) => e.error_code(),
         },
         Err(e) => e.error_code(),
     }
@@ -177,11 +171,10 @@ pub unsafe extern "C" fn HashPassword(
             result[0..length].copy_from_slice(&res);
             res.zeroize();
             length as i64
-        },
+        }
         Err(e) => e.error_code(),
     }
 }
-
 
 /// Get the size of the resulting hash.
 /// # Returns
@@ -190,7 +183,6 @@ pub unsafe extern "C" fn HashPassword(
 pub extern "C" fn HashPasswordLength() -> i64 {
     8 + 4 + 32 + 32 // Header + iterations + salt + hash
 }
-
 
 /// Verify a password against a hash with constant-time equality.
 /// # Arguments
@@ -216,17 +208,15 @@ pub unsafe extern "C" fn VerifyPassword(
     let hash = slice::from_raw_parts(hash, hash_length);
 
     match DcDataBlob::try_from(hash) {
-        Ok(res) => {
-            match res.verify_password(password) {
-                Ok(res) => {
-                    if res {
-                        1
-                    } else {
-                        0
-                    }
-                },
-                Err(e) => e.error_code(),
+        Ok(res) => match res.verify_password(password) {
+            Ok(res) => {
+                if res {
+                    1
+                } else {
+                    0
+                }
             }
+            Err(e) => e.error_code(),
         },
         Err(e) => e.error_code(),
     }
@@ -255,7 +245,8 @@ pub unsafe extern "C" fn GenerateKeyExchange(
     };
 
     if private_length != GenerateKeyExchangeSize() as usize
-        || public_length != GenerateKeyExchangeSize() as usize {
+        || public_length != GenerateKeyExchangeSize() as usize
+    {
         return DevoCryptoError::InvalidOutputLength.error_code();
     }
 
@@ -271,7 +262,7 @@ pub unsafe extern "C" fn GenerateKeyExchange(
             priv_res.zeroize();
             pub_res.zeroize();
             0
-        },
+        }
         Err(e) => e.error_code(),
     }
 }
@@ -284,7 +275,6 @@ pub unsafe extern "C" fn GenerateKeyExchange(
 pub extern "C" fn GenerateKeyExchangeSize() -> i64 {
     8 + 32 // header + key length
 }
-
 
 /// Generate a key pair to perform a key exchange. Must be used with MixKey().
 /// # Arguments
@@ -319,15 +309,13 @@ pub unsafe extern "C" fn MixKeyExchange(
     let shared = slice::from_raw_parts_mut(shared, shared_size);
 
     match (DcDataBlob::try_from(private), DcDataBlob::try_from(public)) {
-        (Ok(private), Ok(public)) => {
-            match private.mix_key_exchange(public) {
-                Ok(mut res) => {
-                    shared[0..res.len()].copy_from_slice(&res);
-                    res.zeroize();
-                    0
-                },
-                Err(e) => e.error_code(),
+        (Ok(private), Ok(public)) => match private.mix_key_exchange(public) {
+            Ok(mut res) => {
+                shared[0..res.len()].copy_from_slice(&res);
+                res.zeroize();
+                0
             }
+            Err(e) => e.error_code(),
         },
         (Ok(_), Err(e)) => e.error_code(),
         (Err(e), Ok(_)) => e.error_code(),
@@ -395,8 +383,7 @@ pub unsafe extern "C" fn DeriveKey(
 
     let salt = if salt.is_null() || salt_length == 0 {
         b""
-    }
-    else {
+    } else {
         slice::from_raw_parts(salt, salt_length)
     };
 
@@ -426,7 +413,12 @@ pub extern "C" fn KeySize() -> u32 {
 /// # Returns
 /// Returns the size of the decoded string.
 #[no_mangle]
-pub unsafe extern "C" fn Decode(input: *const u8, input_length: usize, output: *mut u8 , output_length: usize ) -> i64 {
+pub unsafe extern "C" fn Decode(
+    input: *const u8,
+    input_length: usize,
+    output: *mut u8,
+    output_length: usize,
+) -> i64 {
     if input.is_null() || output.is_null() {
         return DevoCryptoError::NullPointer.error_code();
     };
@@ -435,13 +427,8 @@ pub unsafe extern "C" fn Decode(input: *const u8, input_length: usize, output: *
     let mut output = slice::from_raw_parts_mut(output, output_length);
 
     match decode_config_slice(&input, STANDARD, &mut output) {
-        Ok(res) => {
-            res as i64
-        },
-        Err(_e) =>
-        {
-            -1
-        }
+        Ok(res) => res as i64,
+        Err(_e) => -1,
     }
 }
 
@@ -454,7 +441,12 @@ pub unsafe extern "C" fn Decode(input: *const u8, input_length: usize, output: *
 /// # Returns
 /// Returns the size, in bytes, of the output buffer.
 #[no_mangle]
-pub unsafe extern "C" fn Encode(input: *const u8, input_length: usize, output: *mut u8 , output_length: usize ) -> i64 {
+pub unsafe extern "C" fn Encode(
+    input: *const u8,
+    input_length: usize,
+    output: *mut u8,
+    output_length: usize,
+) -> i64 {
     if input.is_null() || output.is_null() {
         return DevoCryptoError::NullPointer.error_code();
     };
@@ -474,14 +466,28 @@ fn test_encrypt_length() {
     let multiple_blocks = b"0123456789abcdefghijkl";
 
     let length_zero_enc: Vec<u8> = DcDataBlob::encrypt(length_zero, key, 0).unwrap().into();
-    let length_one_block_enc: Vec<u8> = DcDataBlob::encrypt(length_one_block, key, 0).unwrap().into();
+    let length_one_block_enc: Vec<u8> = DcDataBlob::encrypt(length_one_block, key, 0)
+        .unwrap()
+        .into();
     let one_full_block_enc: Vec<u8> = DcDataBlob::encrypt(one_full_block, key, 0).unwrap().into();
     let multiple_blocks_enc: Vec<u8> = DcDataBlob::encrypt(multiple_blocks, key, 0).unwrap().into();
 
-    assert_eq!(length_zero_enc.len() as i64, EncryptSize(length_zero.len(), 0));
-    assert_eq!(length_one_block_enc.len() as i64, EncryptSize(length_one_block.len(), 0));
-    assert_eq!(one_full_block_enc.len() as i64, EncryptSize(one_full_block.len(), 0));
-    assert_eq!(multiple_blocks_enc.len() as i64, EncryptSize(multiple_blocks.len(), 0));
+    assert_eq!(
+        length_zero_enc.len() as i64,
+        EncryptSize(length_zero.len(), 0)
+    );
+    assert_eq!(
+        length_one_block_enc.len() as i64,
+        EncryptSize(length_one_block.len(), 0)
+    );
+    assert_eq!(
+        one_full_block_enc.len() as i64,
+        EncryptSize(one_full_block.len(), 0)
+    );
+    assert_eq!(
+        multiple_blocks_enc.len() as i64,
+        EncryptSize(multiple_blocks.len(), 0)
+    );
 }
 
 #[test]
@@ -490,8 +496,12 @@ fn test_hash_password_length() {
     let long_password = b"this is a very long and complicated password that is, I hope,\
      longer than the length of the actual hash. It also contains we1rd pa$$w0rd///s.\\";
 
-    let small_password_hash: Vec<u8> = DcDataBlob::hash_password(small_password, 100).unwrap().into();
-    let long_password_hash: Vec<u8> = DcDataBlob::hash_password(long_password, 2642).unwrap().into();
+    let small_password_hash: Vec<u8> = DcDataBlob::hash_password(small_password, 100)
+        .unwrap()
+        .into();
+    let long_password_hash: Vec<u8> = DcDataBlob::hash_password(long_password, 2642)
+        .unwrap()
+        .into();
 
     assert_eq!(HashPasswordLength() as usize, small_password_hash.len());
     assert_eq!(HashPasswordLength() as usize, long_password_hash.len());

@@ -25,9 +25,14 @@ impl DcPayload {
         }
     }
 
-    pub fn encrypt(data: &[u8], key: &[u8], header: &mut DcHeader, version: u16) -> Result<DcPayload> {
+    pub fn encrypt(
+        data: &[u8],
+        key: &[u8],
+        header: &mut DcHeader,
+        version: u16,
+    ) -> Result<DcPayload> {
         Ok(DcPayload::Ciphertext(DcCiphertext::encrypt(
-            data, key, header, version
+            data, key, header, version,
         )?))
     }
 

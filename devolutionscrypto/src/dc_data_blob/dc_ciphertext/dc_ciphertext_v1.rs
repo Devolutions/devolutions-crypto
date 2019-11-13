@@ -1,5 +1,4 @@
 /// Ciphertext V1: AES256-CBC with HMAC-SHA256
-
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;

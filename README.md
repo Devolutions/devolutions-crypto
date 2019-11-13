@@ -144,22 +144,8 @@ TODO
 #### Use the Library
 View the examples.md file in the wrappers folder
 
-### WebAssembly (Alpha)
-#### Build the Library
-You need to install the `wasm32-unknown-unknown` toolchain:
-```bash
-rustup add target wasm32-unknown-unknown
-```
-You also need to install wasm-pack:
-```bash
-cargo install wasm-pack
-```
-Make sure your .cargo/bin is in your $PATH and run `wasm_build.bat`(on Windows) 
-or `wasm_build.sh`(on Linux) to build the webassembly files.
-
-#### Use the Library
-Make sure your server returns the `application/wasm` Content-Type header on *.wasm requests.  
-TODO
+### WebAssembly
+Refer to the `wrappers/wasm/README.md` file info regarding webassembly.
 
 # License
 

@@ -5,6 +5,9 @@ use std::error::Error as _;
 use std::fmt;
 use std::io::Error;
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::JsValue;
+
 use block_modes::{BlockModeError, InvalidKeyIvLength};
 use hmac::crypto_mac::InvalidKeyLength;
 use hmac::crypto_mac::MacError;
@@ -59,6 +62,28 @@ impl DevoCryptoError {
             DevoCryptoError::CryptoError => -32,
             DevoCryptoError::RandomError => -33,
             DevoCryptoError::IoError(_) => -34,
+        }
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl DevoCryptoError {
+    // Returns the error name for JavaScript error handling
+    pub fn name(&self) -> &str {
+        match *self {
+            DevoCryptoError::InvalidLength => "InvalidLength",
+            DevoCryptoError::InvalidKeyLength => "InvalidKeyLength",
+            DevoCryptoError::InvalidOutputLength => "InvalidOutputLength",
+            DevoCryptoError::InvalidSignature => "InvalidSignature",
+            DevoCryptoError::InvalidMac => "InvalidMac",
+            DevoCryptoError::InvalidDataType => "InvalidDataType",
+            DevoCryptoError::UnknownType => "UnknownType",
+            DevoCryptoError::UnknownSubtype => "UnknownSubtype",
+            DevoCryptoError::UnknownVersion => "UnknownVersion",
+            DevoCryptoError::NullPointer => "NullPointer",
+            DevoCryptoError::CryptoError => "CryptoError",
+            DevoCryptoError::RandomError => "RandomError",
+            DevoCryptoError::IoError(_) => "IoError",
         }
     }
 }
@@ -135,5 +160,12 @@ impl From<rand::Error> for DevoCryptoError {
 impl From<std::io::Error> for DevoCryptoError {
     fn from(_error: std::io::Error) -> DevoCryptoError {
         DevoCryptoError::RandomError
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl From<DevoCryptoError> for JsValue {
+    fn from(error: DevoCryptoError) -> JsValue {
+        JsValue::symbol(Some(error.name()))
     }
 }

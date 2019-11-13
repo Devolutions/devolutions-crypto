@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title>Devolutions Crypto</title>
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+      <script src="./bootstrap.js"></script>
+      <meta charset="UTF-8">
+  </head>
+  <style>
+  textarea
+{
+width:50%;
+}
+  </style>
+  <body class="text-center bg-dark text-white">
+    <h1>Devolutions Crypto Webassembly Example</h1>
+    <h2> Encryption </h2>
+    <p>Here, using a generated key, you can encrypt or decrypt data.<br>
+      Place the input int the top box and click a button.</p>
+    <div>
+      <textarea id="encryptionInput"></textarea>
+      <br><br>
+      <input id="btnEncrypt" type="button" value="Encrypt">
+      <input id="btnDecrypt" type="button" value="Decrypt">
+      <br><br>
+      <textarea id="encryptionOutput"></textarea>
+    </div>
+
+    <h2>Password Hashing</h2>
+    <div>
+      <p>Here is an example of how to hash a password and verify it.<br>
+        This should be the only way to verify a password.</p>
+      <h3>Hash</h3>
+      <div>
+        <p>Here you can hash a password.<br>
+          Note that not providing an iteration count to the library will default to 10000 as recommended by the NIST.</p>
+        Password: <input id="hashPasswordPasswordInput"></input><br><br>
+        Iterations: <input id="hashPasswordIterationsInput"></input><br><br>
+        <input id="btnHashPassword" type="button" value="Hash"><br>
+        <textarea id="hashPasswordOutput"></textarea>
+      </div>
+
+      <h3>Verify</h3>
+      <div>
+        <p>Here you can verify a password if you have the hash.<br>
+          Note that this should be used instead of re-hashing and comparing.<br>
+          The reasons for that mostly because of constant time equalitity and memory clearing.</p>
+        Password: <input id="verifyPasswordPasswordInput"></input><br><br>
+        Hash: <br>
+        <textarea id="verifyPasswordHashInput"></textarea><br><br>
+        <input id="btnVerifyPassword" type="button" value="Verify"><br>
+        <textarea id="verifyPasswordOutput"></textarea>
+      </div>
+    </div>
+    </div>
+
+    <h2>Keypair Generation</h2>
+    <div>
+      <p>Here is how to make a key exchange.<br>
+        With that, you can create an shared encryption key between the client and server that 
+        cannot be intercepted between those two.</p>
+      <p>Click the the buttons to generate keypairs for Alice and Bob.</p>
+      <input id="btnBob" type="button" value="Generate Bob's Key"><br>
+      <textarea id="bob"></textarea>
+      <br><br>
+      
+      <input id="btnAlice" type="button" value="Generate Alice's Key"><br>
+      <textarea id="alice"></textarea>
+    </div>
+
+    <h2>Key Exchange</h2>
+    <div>
+      <p>Now that the keypairs are generated, both partys must exchange their public keys.<br>
+        By mixing the client private key with the server public key and the opposite, both gets the same shared keys.</p>
+      <p>Click on the button to mix previously generated keys to get a shared key between Bob and Alice.</p>
+      <input id="btnBobMix" type="button" value="Mix Bob's Keys"><br>
+      <textarea id="bobmix"></textarea>
+      <br><br>
+
+      <input id="btnAliceMix" type="button" value="Mix Alice's Keys"><br>
+      <textarea id="alicemix"></textarea>
+    </div>
+
+    <h2>Utils</h2>
+    <div>
+      <h3>Base64</h3>
+      <div>
+        <p>Here you can encode or decode binary data to a string using Base64.<br> 
+          Simply put the input into the top box and click a button.<br> 
+          Note that, using the web interface, you can online encode strings, which is not really useful, but the library takes a UInt8Array as an input.</p>
+        <textarea id="base64input"></textarea>
+        <br><br>
+        <input id="btnBase64Encode" type="button" value="Encode">
+        <input id="btnBase64Decode" type="button" value="Decode">
+        <br><br>
+        <textarea id="base64output"></textarea>
+      </div>
+
+      <h3>Generate Key</h3>
+      <div>
+        <p>Here you can generate an encryption key using a cryptographically-safe RNG.<br>
+          If you don't provide a length to the library, it will default to a 256 bit key(32 bytes).</p>
+        Desired length: <input id="generateKeyLengthInput"></input><br><br>
+        <input id="btnGenerateKey" type="button" value="Generate"><br>
+        <textarea id="generateKeyOutput"></textarea>
+      </div>
+
+      <h3>DeriveKey</h3>
+      <div>
+        <p>Here you can take a password and create an encryption key with it.</p>          
+        <p>Note that the input doesn't have to be a password, it can be another key.</p>
+        Password: <input id="deriveKeyPasswordInput"></input><br><br>
+
+        <p>The salt should be a 32 byte random value(use generate_key()).</p>
+        Salt(base64): <input id="deriveKeySaltInput"></input><br><br>
+
+        <p>The default iteration count is 10000 and can be adjusted for a tradeoff between performance and security.<br>
+          Lowering it makes the key easier to brute-force, but shouldn't be that much of a problem if used with a random key as input.</p>
+        Iterations: <input id="deriveKeyIterationsInput"></input><br><br>
+
+        <p></p>The length parameter specifies the length of the desired key. In case of doubt, use 32.</p>
+        Desired length: <input id="deriveKeyLengthInput"></input><br><br>
+        <input id="btnDeriveKey" type="button" value="Derive"><br>
+        
+        <textarea id="deriveKeyOutput"></textarea>
+      </div>
+    </div>
+  </body>
+</html>
