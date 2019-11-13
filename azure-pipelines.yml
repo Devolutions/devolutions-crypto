@@ -26,7 +26,12 @@ stages:
         rustup target add x86_64-linux-android
 
         mkdir .cargo
-      displayName: "Install rust"    
+      displayName: "Install rust"
+            
+    - script: |
+        cargo test
+      workingDirectory: "./devolutionscrypto"
+      displayName: "Unit tests"  
 
     - script: |
         python3 GeneratePackage.py LINUX
@@ -73,7 +78,6 @@ stages:
         pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: MyBuildOutputs
 
-
   - job: macOS
     pool:
       vmImage: 'macOS-latest'
@@ -94,6 +98,12 @@ stages:
         rustup target add x86_64-apple-ios
         rustup target add i386-apple-ios
       displayName: "Install rust"
+
+    - script: |
+        source $HOME/.cargo/env
+        cargo test
+      workingDirectory: "./devolutionscrypto"
+      displayName: "Unit tests"
 
     - script: |
         source $HOME/.cargo/env
@@ -124,8 +134,6 @@ stages:
         pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: MyBuildOutputs
 
-
-
   - job: Windows
     pool:
       vmImage: 'windows-latest'
@@ -153,6 +161,11 @@ stages:
         rustup target add x86_64-pc-windows-msvc
         rustup target add i686-pc-windows-msvc
       displayName: "Installing rust targets"
+
+    - script: |
+        cargo test
+      workingDirectory: "./devolutionscrypto"
+      displayName: "Unit tests"
 
     - script: |
         python GeneratePackage.py WIN
@@ -199,7 +212,6 @@ stages:
       inputs:
         pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: Nugets
-
 
   - job: macOS
     pool:
@@ -309,3 +321,37 @@ stages:
       inputs:
         pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: Nugets
+
+- stage: WebAssembly
+  jobs:
+  - job: Linux
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    
+    - script: |
+        rustup update
+
+        cargo install wasm-pack
+      displayName: "Update rust and install wasm-pack"
+
+    - script: |
+        wasm-pack test --node
+      workingDirectory: "./devolutionscrypto"
+      displayName: "Unit tests"
+
+    - script: |
+        sh ./wasm_build.sh
+      workingDirectory: "./wrappers/wasm"
+      displayName: "Generating npm package"
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/wasm/pkg/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: WebAssembly
