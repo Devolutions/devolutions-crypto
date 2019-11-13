@@ -65,7 +65,7 @@ pub fn generate_key_exchange() -> Result<KeyPair, JsValue> {
 }
 
 #[wasm_bindgen]
-pub fn mix_key_exchange(private_key: &[u8], public_key: &[u8]) -> Result<Vec<u8>, JsValue>  {
+pub fn mix_key_exchange(private_key: &[u8], public_key: &[u8]) -> Result<Vec<u8>, JsValue> {
     let private = DcDataBlob::try_from(private_key)?;
     let public = DcDataBlob::try_from(public_key)?;
     Ok(private.mix_key_exchange(public)?)
@@ -89,7 +89,7 @@ pub fn base64encode(data: &[u8]) -> String {
 #[wasm_bindgen]
 pub fn base64decode(data: String) -> Result<Vec<u8>, JsValue> {
     match base64::decode(&data) {
-        Ok(res) => { Ok(res) }
+        Ok(res) => Ok(res),
         Err(e) => {
             let error = JsValue::from_str(&format!("{}", e));
             Err(error)
