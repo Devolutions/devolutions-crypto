@@ -33,6 +33,7 @@ aead = "0.1.1"
 rand = { version = "0.6.4", features = ["wasm-bindgen"] }
 clear_on_drop = { version = "0.2.3", features = ["no_cc"] }
 wasm-bindgen = "0.2.54"
+js-sys = "0.3.31"
 
 [target.'cfg(not(target_arch="wasm32"))'.dependencies]
 rand = { version = "0.6.4" }
