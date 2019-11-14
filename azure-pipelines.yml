@@ -1,5 +1,9 @@
+name: devolutions-crypto-$(Rev:r)
+
 trigger:
-- master
+  branches:
+    include:
+      - master
 
 stages:
 - stage: Native_Build
@@ -79,45 +83,24 @@ stages:
         artifactName: MyBuildOutputs
 
   - job: macOS
-    pool:
-      vmImage: 'macOS-latest'
+    pool: 'Devolutions - macOS'
+
     steps:
-
-    - script: |
-        set -e
-        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
-        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-        source $HOME/.cargo/env
-
-        rustup target add x86_64-apple-darwin
-        rustup target add i686-apple-darwin
-
-        rustup target add aarch64-apple-ios
-        rustup target add armv7-apple-ios
-        rustup target add armv7s-apple-ios
-        rustup target add x86_64-apple-ios
-        rustup target add i386-apple-ios
-      displayName: "Install rust"
-
-    - script: |
-        source $HOME/.cargo/env
-        cargo test
+    - script: cargo test
       workingDirectory: "./devolutionscrypto"
       displayName: "Unit tests"
 
-    - script: |
-        source $HOME/.cargo/env
-        
-        python3 GeneratePackage.py MAC
+    - script: python3 GeneratePackage.py MAC
       workingDirectory: "./wrappers/csharp"
       displayName: "Building Mac"
+      env:
+        PATH: /Users/_admin/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
 
-    - script: |
-        source $HOME/.cargo/env
-
-        python3 GeneratePackage.py IOS
+    - script: python3 GeneratePackage.py IOS
       workingDirectory: "./wrappers/csharp"
       displayName: "Building IOS"
+      env:
+        PATH: /Users/_admin/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
 
     - task: CopyFiles@2
       inputs:
@@ -214,8 +197,7 @@ stages:
         artifactName: Nugets
 
   - job: macOS
-    pool:
-      vmImage: 'macOS-latest'
+    pool: 'Devolutions - macOS'
     steps:
     - task: DownloadPipelineArtifact@2
       inputs:
