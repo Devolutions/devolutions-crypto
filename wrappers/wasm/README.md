@@ -26,3 +26,6 @@ Refer to the `example/` folder for an example on how to use it with webpack. I'l
 ## Current State
 Currently, the webassembly module implements the same functionnalities as the native version, while keeping the build system pretty easy to use. It is also part of the CI. On a security standpoint it is as secure as the native one and is also pretty fast.  
 Please note however that we still consider it to be beta as the API is not final yet and might still change, so we won't publish it to npm for now.
+
+## Known Issue
+On firefox, exception shows up as `Error` in the console if not caught, but the value of `error.name` is the right one, so you can still try/catch depending on the error name but it can be misleading for developpers.
