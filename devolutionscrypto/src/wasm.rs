@@ -92,6 +92,7 @@ pub fn base64decode(data: String) -> Result<Vec<u8>, JsValue> {
         Ok(res) => Ok(res),
         Err(e) => {
             let error = js_sys::Error::new(&format!("{}", e));
+            error.set_name("Base64Error");
             Err(error.into())
         }
     }
