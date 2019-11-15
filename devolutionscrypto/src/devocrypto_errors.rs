@@ -168,8 +168,7 @@ impl From<DevoCryptoError> for JsValue {
     fn from(error: DevoCryptoError) -> JsValue {
         let js_error = js_sys::Error::new(error.description());
 
-        // This line is commented as the method doesn't work in the library right now.
-        //js_error.set_name("allo");
+        js_error.set_name(error.name());
         js_error.into()
     }
 }
