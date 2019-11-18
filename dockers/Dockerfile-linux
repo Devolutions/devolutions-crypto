@@ -1,0 +1,55 @@
+FROM ubuntu:latest
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG ANDROID_SDK_VER=4333796
+
+RUN useradd -s /bin/bash -m -u 1000 devo
+
+RUN sed -i 's/archive.ubuntu.com/ubuntu.mirrors.ovh.net/g' /etc/apt/sources.list
+
+RUN apt-get update && apt-get install wget openjdk-8-jdk unzip nuget gcc-multilib curl python3 -y
+
+USER devo
+WORKDIR /home/devo
+
+ENV HOME="/home/devo"
+ENV ANDROID_HOME="$HOME/android-sdk"
+ENV PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools/bin:$HOME/.cargo/bin"
+ENV NDK_HOME="$ANDROID_HOME/ndk-bundle"
+
+RUN wget https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_VER}.zip && \
+    unzip sdk-tools-linux-${ANDROID_SDK_VER}.zip && \
+    rm sdk-tools-linux-${ANDROID_SDK_VER}.zip && \
+    mkdir android-sdk && \
+    mv tools android-sdk/tools
+
+RUN yes | sdkmanager "cmake;3.10.2.4988404"
+RUN yes | sdkmanager "ndk-bundle"
+RUN yes | sdkmanager "lldb;3.1"
+RUN yes | sdkmanager "build-tools;24.0.0"
+
+# Rust
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable -y
+
+RUN echo "[target.aarch64-linux-android] \
+ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar\" \
+linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang\" \
+[target.armv7-linux-androideabi] \
+ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar\" \
+linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang\" \
+[target.i686-linux-android] \
+ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-ar\" \
+linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android26-clang\" \
+[target.x86_64-linux-android] \
+ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ar\" \
+linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang\"" >> ./.cargo/config
+
+RUN rustup target add aarch64-linux-android && \
+    rustup target add arm-linux-androideabi && \
+    rustup target add i686-linux-android && \
+    rustup target add x86_64-linux-android && \
+    rustup target add x86_64-unknown-linux-gnu && \
+    rustup target add i686-unknown-linux-gnu
+
+
+USER root
