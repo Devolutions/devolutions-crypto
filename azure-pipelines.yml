@@ -208,21 +208,29 @@ stages:
         python3 GenerateNuget.py IOS
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating IOS Nuget"
+      env:
+        PATH: /Users/_admin/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
 
     - script: |
         python3 GenerateNuget.py MAC-MODERN
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating MAC-MODERN Nuget"
+      env:
+        PATH: /Users/_admin/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
 
     - script: |
         python3 GenerateNuget.py MAC-FULL
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating MAC-FULL Nuget"
+      env:
+        PATH: /Users/_admin/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
 
     - script: |
         python3 GenerateNuget.py ANDROID
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating Android Nuget"
+      env:
+        PATH: /Users/_admin/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
     
 
     - task: CopyFiles@2
