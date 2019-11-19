@@ -314,6 +314,24 @@ stages:
 
 - stage: WebAssembly
   jobs:
+  - job: safari_unit_tests
+    pool:
+      vmImage: 'Devolutions - macOS'
+    steps:
+    
+    - script: |
+        rustup update
+
+        cargo install wasm-pack
+      displayName: "Update rust and install wasm-pack"
+
+    - script: |
+        wasm-pack test --node
+        wasm-pack test --safari --headless
+      workingDirectory: "./devolutionscrypto"
+      displayName: "Unit tests"
+
+
   - job: Linux
     pool:
       vmImage: 'ubuntu-latest'
@@ -327,6 +345,8 @@ stages:
 
     - script: |
         wasm-pack test --node
+        wasm-pack test --firefox --headless
+        wasm-pack test --chrome --headless
       workingDirectory: "./devolutionscrypto"
       displayName: "Unit tests"
 
