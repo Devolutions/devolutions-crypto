@@ -230,7 +230,10 @@ stages:
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating Android Nuget"
       env:
-        PATH: /Users/_admin/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
+        ANDROID_SDK_ROOT: /usr/local/share/android-sdk
+        ANDROID_HOME: /usr/local/share/android-sdk
+        ANDROID_NDK_HOME: /usr/local/share/android-ndk
+        PATH: /Users/_admin/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:$(ANDROID_SDK_ROOT)/platform-tools:$(ANDROID_SDK_ROOT)/tools
     
 
     - task: CopyFiles@2
@@ -315,8 +318,7 @@ stages:
 - stage: WebAssembly
   jobs:
   - job: safari_unit_tests
-    pool:
-      vmImage: 'Devolutions - macOS'
+    pool: 'Devolutions - macOS'
     steps:
     
     - script: |
