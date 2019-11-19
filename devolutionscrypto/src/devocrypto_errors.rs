@@ -166,6 +166,9 @@ impl From<std::io::Error> for DevoCryptoError {
 #[cfg(target_arch = "wasm32")]
 impl From<DevoCryptoError> for JsValue {
     fn from(error: DevoCryptoError) -> JsValue {
-        JsValue::symbol(Some(error.name()))
+        let js_error = js_sys::Error::new(error.description());
+
+        js_error.set_name(error.name());
+        js_error.into()
     }
 }

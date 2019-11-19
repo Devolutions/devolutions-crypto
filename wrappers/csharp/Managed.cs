@@ -5,6 +5,12 @@ namespace Devolutions.Cryptography
 
     public static class Managed
     {
+#if RDM
+        private const uint CIPHER_VERSION = 1;
+#else
+        private const uint CIPHER_VERSION = 0;
+#endif
+
         public static byte[] DeriveKey(byte[] password, byte[] salt = null, uint iterations = 10000)
         {
             return Native.DeriveKey(password, salt, iterations);
@@ -26,7 +32,7 @@ namespace Devolutions.Cryptography
          * 
          * **************************************************************/
 
-        public static string EncryptWithKeyAsString(string data, byte[] key, uint version = 0)
+        public static string EncryptWithKeyAsString(string data, byte[] key, uint version = CIPHER_VERSION)
         {
             byte[] cipher = Native.Encrypt(Utils.StringToByteArray(data), key, version);
 
@@ -40,21 +46,21 @@ namespace Devolutions.Cryptography
             return cipher;
         }
 
-        public static string EncryptWithKeyAsString(byte[] data, byte[] key, uint version = 0)
+        public static string EncryptWithKeyAsString(byte[] data, byte[] key, uint version = CIPHER_VERSION)
         {
             byte[] cipher = Native.Encrypt(data, key, version);
 
             return Utils.ToBase64String(cipher);
         }
 
-        public static byte[] EncryptWithKey(byte[] data, byte[] key, uint version = 0)
+        public static byte[] EncryptWithKey(byte[] data, byte[] key, uint version = CIPHER_VERSION)
         {
             byte[] cipher = Native.Encrypt(data, key, version);
 
             return cipher;
         }
 
-        public static string EncryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000, uint cipher_version = 0)
+        public static string EncryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000, uint cipher_version = CIPHER_VERSION)
         {
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
@@ -64,7 +70,7 @@ namespace Devolutions.Cryptography
         }
 
         // Encrypt base64 string data and return base64 string
-        public static string EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = 10000, uint cipher_version = 0)
+        public static string EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = 10000, uint cipher_version = CIPHER_VERSION)
         {
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
@@ -73,7 +79,7 @@ namespace Devolutions.Cryptography
             return Utils.ToBase64String(cipher);
         }
 
-        public static string EncryptWithPasswordAsString(string data, string password, uint iterations = 10000, uint cipher_version = 0)
+        public static string EncryptWithPasswordAsString(string data, string password, uint iterations = 10000, uint cipher_version = CIPHER_VERSION)
         {
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
@@ -83,7 +89,7 @@ namespace Devolutions.Cryptography
         }
         
 
-        public static byte[] EncryptWithPassword(byte[] data, string password, uint iterations = 10000, uint cipher_version = 0)
+        public static byte[] EncryptWithPassword(byte[] data, string password, uint iterations = 10000, uint cipher_version = CIPHER_VERSION)
         {
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
@@ -93,7 +99,7 @@ namespace Devolutions.Cryptography
         }
 
         // Encrypt base64 string data
-        public static byte[] EncryptBase64WithPassword(string b64data, string password, uint iterations = 10000, uint cipher_version = 0)
+        public static byte[] EncryptBase64WithPassword(string b64data, string password, uint iterations = 10000, uint cipher_version = CIPHER_VERSION)
         {
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 
@@ -102,7 +108,7 @@ namespace Devolutions.Cryptography
             return cipher;
         }
 
-        public static byte[] EncryptWithPassword(string data, string password, uint iterations = 10000, uint cipher_version = 0)
+        public static byte[] EncryptWithPassword(string data, string password, uint iterations = 10000, uint cipher_version = CIPHER_VERSION)
         {
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations);
 

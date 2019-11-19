@@ -1,5 +1,5 @@
 // Import library
-import * as devolutionscrypto from "../pkg/devolutionscrypto";
+import * as devolutionscrypto from "devolutionscrypto";
 
 // Generate a random key for the lifetime of the script
 var key = devolutionscrypto.generate_key();

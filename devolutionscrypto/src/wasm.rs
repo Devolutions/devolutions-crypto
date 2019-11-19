@@ -87,12 +87,13 @@ pub fn base64encode(data: &[u8]) -> String {
 }
 
 #[wasm_bindgen]
-pub fn base64decode(data: String) -> Result<Vec<u8>, JsValue> {
+pub fn base64decode(data: &str) -> Result<Vec<u8>, JsValue> {
     match base64::decode(&data) {
         Ok(res) => Ok(res),
         Err(e) => {
-            let error = JsValue::from_str(&format!("{}", e));
-            Err(error)
+            let error = js_sys::Error::new(&format!("{}", e));
+            error.set_name("Base64Error");
+            Err(error.into())
         }
     }
 }
