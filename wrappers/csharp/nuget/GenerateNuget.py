@@ -42,6 +42,9 @@ if sys.argv[1] == "IOS" or everything:
 
     print(output)
 
+    if("FAILED" in output):
+        exit(1)
+
     print("Generating IOS nuget...")
 
     command= subprocess.Popen(["nuget", "pack", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.nuspec", "-Version", version, "-OutputDirectory", "./iOS/Devolutions.Crypto.iOS/package"], stdout=subprocess.PIPE)
@@ -56,6 +59,9 @@ if sys.argv[1] == "MAC-MODERN" or everything:
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+    if("FAILED" in output):
+        exit(1)
 
     print("Generating MAC MODERN nuget...")
 
@@ -80,6 +86,9 @@ if sys.argv[1] == "ANDROID" or everything:
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+    if("FAILED" in output):
+        exit(1)
 
     print("Generating ANDROID nuget...")
 

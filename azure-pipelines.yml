@@ -324,11 +324,29 @@ stages:
 
 - stage: WebAssembly
   jobs:
+#  - job: safari_unit_tests
+#    pool:
+#      vmImage: 'macOS-latest'
+#    steps:
+#    - script: |
+#        set -e
+#        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
+#        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+#        source $HOME/.cargo/env
+
+#        cargo install wasm-pack
+#      displayName: "install rust"
+
+#    - script: |
+#        wasm-pack test --node
+#        wasm-pack test --safari --headless
+#      workingDirectory: "./devolutionscrypto"
+#      displayName: "Unit tests"
+
   - job: Linux
     pool:
       vmImage: 'ubuntu-latest'
-    steps:
-    
+    steps:    
     - script: |
         rustup update
 
@@ -337,6 +355,8 @@ stages:
 
     - script: |
         wasm-pack test --node
+        wasm-pack test --firefox --headless
+        wasm-pack test --chrome --headless
       workingDirectory: "./devolutionscrypto"
       displayName: "Unit tests"
 
