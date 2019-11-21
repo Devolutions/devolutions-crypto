@@ -2,9 +2,9 @@
 
 # DevolutionsCrypto
 This repo contains the library used for cryptography of products used by Devolutions. 
-It also includes wrapper for it for different languages.  
+It also includes wrappers for it in different languages.  
 Currently, the C# wrapper is supported for the implemented methods. Webassembly build and works,
-but is still considered alpha and not production-ready.   
+but still it's API is still subject to change.   
 The minimum Rust version to build on stable is 1.34.
 
 
@@ -12,7 +12,7 @@ The minimum Rust version to build on stable is 1.34.
 ### Provided Functions
 It contains the following functions:  
 
-`GenerateKey`: Generate a key of the required size using secure PRNGs.  
+`GenerateKey`: Generate a key of the required size using secure CSPRNGs.  
 `DeriveKey`: Generates a key from a secret using the supplied parameters.  
 `Encrypt`: Encrypt data with the provided key. Can take any size of key, but if it is a password you should use DeriveKey before.  
 `Decrypt`: Decrypt data with the provided key. Can take any size of key, but if it is a password you should use DeriveKey before.  
@@ -57,7 +57,7 @@ The current data header works as the following:
     - Key
         - Private = 1
         - Public = 2
-4. 2 bytes version in Little Endian. Currently, everything is at version 1.
+4. 2 bytes version in Little Endian.
 
 ## Wrappers and How To Build
 Wrappers currently supported are for C# and WebAssembly. Since the C# bindings uses FFI, the same 
