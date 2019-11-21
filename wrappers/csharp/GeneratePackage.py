@@ -27,7 +27,7 @@ using System.Runtime.InteropServices;
 print("Generating assembly manifest...")
 
 # Generate assembly manifest with the right version
-with open('../../devolutionscrypto/Cargo.toml', 'r') as filee:
+with open('../../devolutions-crypto/Cargo.toml', 'r') as filee:
     data=filee.read()
     version = data.split("version = \"")[1].split("\"", 1)[0]
     year = data.split("edition = \"")[1].split("\"", 1)[0]
@@ -68,14 +68,14 @@ if sys.argv[1] == "WIN":
         print("Starting build for " + arch["name"])
 
         try:
-            shutil.rmtree("../../devolutionscrypto/target/" + arch["value"] + "/release")
+            shutil.rmtree("../../devolutions-crypto/target/" + arch["value"] + "/release")
         except:
             pass
 
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
@@ -88,7 +88,7 @@ if sys.argv[1] == "WIN":
         if rdm:
             dllpath = "./rdm/bin/" + arch["name"] + "/DevolutionsCrypto.dll"
 
-        shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/devolutionscrypto.dll", dllpath)
+        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/devolutions_crypto.dll", dllpath)
 
         command= subprocess.Popen(["./tools/rcedit-x64.exe", dllpath, "--set-file-version", version], stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
@@ -137,21 +137,21 @@ if sys.argv[1] == "MAC":
         print("Starting build for " + arch["name"])
 
         try:
-            shutil.rmtree("../../devolutionscrypto/target/" + arch["value"] + "/release")
+            shutil.rmtree("../../devolutions-crypto/target/" + arch["value"] + "/release")
         except:
             pass
 
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
 
         os.mkdir("./macos/bin/" + arch["name"])
 
-        shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/libdevolutionscrypto.dylib", "./macos/bin/" + arch["name"] + "/libDevolutionsCrypto.dylib")
+        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/libdevolutions_crypto.dylib", "./macos/bin/" + arch["name"] + "/libDevolutionsCrypto.dylib")
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
@@ -213,21 +213,21 @@ if sys.argv[1] == "IOS":
         print("Starting build for " + arch["name"])
 
         try:
-            shutil.rmtree("../../devolutionscrypto/target/" + arch["value"] + "/release")
+            shutil.rmtree("../../devolutions-crypto/target/" + arch["value"] + "/release")
         except:
             pass
 
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"], "--example", "static"], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"], "--example", "static"], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
 
         os.mkdir("./ios/bin/" + arch["name"])
 
-        shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/examples/libstatic.a", "./ios/bin/" + arch["name"] + "/libDevolutionsCrypto.a")
+        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/examples/libstatic.a", "./ios/bin/" + arch["name"] + "/libDevolutionsCrypto.a")
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
@@ -287,21 +287,21 @@ if sys.argv[1] == "ANDROID":
         print("Starting build for " + arch["name"])
 
         try:
-            shutil.rmtree("../../devolutionscrypto/target/" + arch["value"] + "/release")
+            shutil.rmtree("../../devolutions-crypto/target/" + arch["value"] + "/release")
         except:
             pass
 
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
 
         os.mkdir("./android/bin/" + arch["name"])
 
-        shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/libdevolutionscrypto.so", "./android/bin/" + arch["name"] + "/libDevolutionsCrypto.so")
+        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/libdevolutions_crypto.so", "./android/bin/" + arch["name"] + "/libDevolutionsCrypto.so")
 
     print("Building Managed Library...")
 
@@ -341,14 +341,14 @@ if sys.argv[1] == "LINUX":
         print("Starting build for " + arch["name"])
 
         try:
-            shutil.rmtree("../../devolutionscrypto/target/" + arch["value"] + "/release")
+            shutil.rmtree("../../devolutions-crypto/target/" + arch["value"] + "/release")
         except:
             pass
 
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutionscrypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
@@ -360,7 +360,7 @@ if sys.argv[1] == "LINUX":
         else:
             archforpackaging = "x64"
 
-        shutil.copy("../../devolutionscrypto/target/" + arch["value"] + "/release/libdevolutionscrypto.so", "./linux/bin/libDevolutionsCrypto-" + archforpackaging + ".so")
+        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/libdevolutions_crypto.so", "./linux/bin/libDevolutionsCrypto-" + archforpackaging + ".so")
 
     print("Building Managed Library...")
 

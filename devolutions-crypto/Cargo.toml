@@ -1,16 +1,16 @@
 [package]
-name = "devolutionscrypto"
+name = "devolutions-crypto"
 version = "0.2.0"
 authors = ["Philippe Dugre <pdugre@devolutions.net>", "Mathieu Morrissette <mmorrissette@devolutions.net>"]
 edition = "2018"
 readme = "../README.md"
 license = "MIT/Apache-2.0"
-homepage = "https://github.com/devolutions/devolutionscrypto"
-repository = "https://github.com/devolutions/devolutionscrypto"
+homepage = "https://github.com/devolutions/devolutions-crypto"
+repository = "https://github.com/devolutions/devolutions-crypto"
 description = "An abstraction layer for the cryptography used by Devolutions"
 
 [lib]
-name="devolutionscrypto"
+name="devolutions_crypto"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
