@@ -1,8 +1,8 @@
 // Import library
-import * as devolutionscrypto from "devolutionscrypto";
+import * as devolutionsCrypto from "devolutions-crypto";
 
 // Generate a random key for the lifetime of the script
-var key = devolutionscrypto.generate_key();
+var key = devolutionsCrypto.generate_key();
 
 // Declare a bunch of global variables to access the DOM
 var enc = new TextEncoder();
@@ -67,15 +67,15 @@ var btnDeriveKey = document.getElementById("btnDeriveKey");
 // Encryption
 btnEncrypt.addEventListener("click", () => 
 {
-    let result = devolutionscrypto.encrypt(enc.encode(encryptionInput.value),  key);
-    encryptionOutput.value = devolutionscrypto.base64encode(result);
+    let result = devolutionsCrypto.encrypt(enc.encode(encryptionInput.value),  key);
+    encryptionOutput.value = devolutionsCrypto.base64encode(result);
 });
 
 btnDecrypt.addEventListener("click", () =>
 {
-    let buffer = devolutionscrypto.base64decode(encryptionInput.value);
+    let buffer = devolutionsCrypto.base64decode(encryptionInput.value);
 
-    let result = devolutionscrypto.decrypt(buffer, key);
+    let result = devolutionsCrypto.decrypt(buffer, key);
     encryptionOutput.value = dec.decode(result);
 
 });
@@ -90,56 +90,56 @@ btnHashPassword.addEventListener("click", () => {
         iterations = 10000;
     }
 
-    hashPasswordOutput.value = devolutionscrypto.base64encode(devolutionscrypto.hash_password(password, iterations));
+    hashPasswordOutput.value = devolutionsCrypto.base64encode(devolutionsCrypto.hash_password(password, iterations));
 });
 
 //Verify
 btnVerifyPassword.addEventListener("click", () => {
     let password = enc.encode(verifyPasswordPasswordInput.value);
-    let hash = devolutionscrypto.base64decode(verifyPasswordHashInput.value);
+    let hash = devolutionsCrypto.base64decode(verifyPasswordHashInput.value);
 
-    verifyPasswordOutput.value = devolutionscrypto.verify_password(password, hash);
+    verifyPasswordOutput.value = devolutionsCrypto.verify_password(password, hash);
 });
 
 // Keypair Generation
 btnBob.addEventListener("click", () => {
-    let result = devolutionscrypto.generate_key_exchange();
+    let result = devolutionsCrypto.generate_key_exchange();
 
     publicBob = result.public();
     privateBob = result.private();
 
-    outputbob.value = devolutionscrypto.base64encode(publicBob);
+    outputbob.value = devolutionsCrypto.base64encode(publicBob);
 
 });
 
 btnAlice.addEventListener("click", () => {
-    let result = devolutionscrypto.generate_key_exchange();
+    let result = devolutionsCrypto.generate_key_exchange();
 
     publicAlice = result.public();
     privateAlice = result.private();
 
-    outputalice.value = devolutionscrypto.base64encode(publicAlice);
+    outputalice.value = devolutionsCrypto.base64encode(publicAlice);
 });
 
 // Key Exchange
 btnBobMix.addEventListener("click", () => {
-    let result = devolutionscrypto.mix_key_exchange(privateBob, publicAlice);
-    outputbobmix.value = devolutionscrypto.base64encode(result);
+    let result = devolutionsCrypto.mix_key_exchange(privateBob, publicAlice);
+    outputbobmix.value = devolutionsCrypto.base64encode(result);
 });
 
 btnAliceMix.addEventListener("click", () => {
-    let result = devolutionscrypto.mix_key_exchange(privateAlice, publicBob);
-    outputalicemix.value = devolutionscrypto.base64encode(result);
+    let result = devolutionsCrypto.mix_key_exchange(privateAlice, publicBob);
+    outputalicemix.value = devolutionsCrypto.base64encode(result);
 });
 
 // Utils
 // Base64
 btnBase64Encode.addEventListener("click", () => {
-    base64output.value = devolutionscrypto.base64encode(enc.encode(base64input.value));
+    base64output.value = devolutionsCrypto.base64encode(enc.encode(base64input.value));
 });
 
 btnBase64Decode.addEventListener("click", () => {
-    base64output.value = dec.decode(devolutionscrypto.base64decode(base64input.value));
+    base64output.value = dec.decode(devolutionsCrypto.base64decode(base64input.value));
 });
 
 // Generate Key
@@ -149,7 +149,7 @@ btnGenerateKey.addEventListener("click", () => {
         length = 32;
     }
 
-    generateKeyOutput.value = devolutionscrypto.base64encode(devolutionscrypto.generate_key(length));
+    generateKeyOutput.value = devolutionsCrypto.base64encode(devolutionsCrypto.generate_key(length));
 });
 
 // Derive Key
@@ -166,7 +166,7 @@ btnDeriveKey.addEventListener("click", () => {
         salt = new Uint8Array(0);
     }
     else {
-        salt = devolutionscrypto.base64decode(salt);
+        salt = devolutionsCrypto.base64decode(salt);
     }
 
     let length = parseInt(deriveKeyLengthInput.value);
@@ -174,5 +174,5 @@ btnDeriveKey.addEventListener("click", () => {
         length = 32;
     }
 
-    deriveKeyOutput.value = devolutionscrypto.base64encode(devolutionscrypto.derive_key(password, salt, iterations, length));
+    deriveKeyOutput.value = devolutionsCrypto.base64encode(devolutionsCrypto.derive_key(password, salt, iterations, length));
 });

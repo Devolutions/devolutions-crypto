@@ -8,7 +8,7 @@ cfg_if! {
 
         use wasm_bindgen_test::*;
 
-        use devolutionscrypto::wasm;
+        use devolutions_crypto::wasm;
 
         #[wasm_bindgen_test]
         fn test_encrypt_decrypt() {

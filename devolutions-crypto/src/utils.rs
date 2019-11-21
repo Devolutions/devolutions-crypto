@@ -12,7 +12,7 @@ use sha2::Sha256;
 ///  * `length` - Length of the key.
 /// # Example
 /// ```
-/// use devolutionscrypto::utils::generate_key;
+/// use devolutions_crypto::utils::generate_key;
 ///
 /// let key = generate_key(32).unwrap();
 /// assert_eq!(32, key.len());
@@ -33,7 +33,7 @@ pub fn generate_key(length: usize) -> Result<Vec<u8>> {
 ///  * `length` - Length of the desired key.
 /// # Example
 /// ```
-/// use devolutionscrypto::utils::derive_key;
+/// use devolutions_crypto::utils::derive_key;
 /// let key = b"this is a secret password";
 /// let salt = b"this is a salt";
 /// let iterations = 10000;

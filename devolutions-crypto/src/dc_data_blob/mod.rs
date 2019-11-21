@@ -61,7 +61,7 @@ impl DcDataBlob {
     /// Returns a `DcDataBlob` containing the encrypted data.
     /// # Example
     /// ```rust
-    /// use devolutionscrypto::DcDataBlob;
+    /// use devolutions_crypto::DcDataBlob;
     ///
     /// let data = b"somesecretdata";
     /// let key = b"somesecretkey";
@@ -81,7 +81,7 @@ impl DcDataBlob {
     /// Returns the decrypted data.
     /// # Example
     /// ```rust
-    /// use devolutionscrypto::DcDataBlob;
+    /// use devolutions_crypto::DcDataBlob;
     ///
     /// let data = b"somesecretdata";
     /// let key = b"somesecretkey";
@@ -105,7 +105,7 @@ impl DcDataBlob {
     /// Returns a `DcDataBlob` containing the hashed password.
     /// # Example
     /// ```rust
-    /// use devolutionscrypto::DcDataBlob;
+    /// use devolutions_crypto::DcDataBlob;
     ///
     /// let password = b"somesuperstrongpa$$w0rd!";
     ///
@@ -124,7 +124,7 @@ impl DcDataBlob {
     /// Returns true if the password matches and false if it doesn't.
     /// # Example
     /// ```rust
-    /// use devolutionscrypto::DcDataBlob;
+    /// use devolutions_crypto::DcDataBlob;
     ///
     /// let password = b"somesuperstrongpa$$w0rd!";
     ///
@@ -141,7 +141,7 @@ impl DcDataBlob {
     /// Returns, in order, the private key and the public key in a `DcDataBlob`.
     /// # Example
     /// ```rust
-    /// use devolutionscrypto::DcDataBlob;
+    /// use devolutions_crypto::DcDataBlob;
     ///
     /// let (private, public) = DcDataBlob::generate_key_exchange().unwrap();
     /// ```
@@ -172,7 +172,7 @@ impl DcDataBlob {
     /// # Example
     /// ```rust
     /// use std::convert::TryFrom as _;
-    /// use devolutionscrypto::DcDataBlob;
+    /// use devolutions_crypto::DcDataBlob;
     /// # fn send_key_to_alice(_: &[u8]) {}
     /// # fn send_key_to_bob(_: &[u8]) {}
     /// # fn receive_key_from_alice() {}

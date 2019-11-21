@@ -30,7 +30,7 @@ stages:
             
     - script: |
         cargo test
-      workingDirectory: "./devolutionscrypto"
+      workingDirectory: "./devolutions-crypto"
       displayName: "Unit tests"  
 
     - script: |
@@ -102,7 +102,7 @@ stages:
     - script: |
         source $HOME/.cargo/env
         cargo test
-      workingDirectory: "./devolutionscrypto"
+      workingDirectory: "./devolutions-crypto"
       displayName: "Unit tests"
 
     - script: |
@@ -164,7 +164,7 @@ stages:
 
     - script: |
         cargo test
-      workingDirectory: "./devolutionscrypto"
+      workingDirectory: "./devolutions-crypto"
       displayName: "Unit tests"
 
     - script: |
@@ -341,7 +341,7 @@ stages:
         sudo npm update -g npm
 
         wasm-pack test --safari --headless
-      workingDirectory: "./devolutionscrypto"
+      workingDirectory: "./devolutions-crypto"
       displayName: "Unit tests"
 
   - job: Linux
@@ -358,7 +358,7 @@ stages:
         wasm-pack test --node
         wasm-pack test --firefox --headless
         wasm-pack test --chrome --headless
-      workingDirectory: "./devolutionscrypto"
+      workingDirectory: "./devolutions-crypto"
       displayName: "Unit tests"
 
     - script: |

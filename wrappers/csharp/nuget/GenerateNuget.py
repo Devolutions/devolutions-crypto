@@ -12,7 +12,7 @@ if len(sys.argv) < 2:
 
 version = ""
 
-with open('../../../devolutionscrypto/Cargo.toml', 'r') as file:
+with open('../../../devolutions-crypto/Cargo.toml', 'r') as file:
     data=file.read()
     version = data.split("version = \"")[1].split("\"", 1)[0]
 
