@@ -21,11 +21,11 @@ pub struct DcCiphertextV2 {
     ciphertext: Vec<u8>,
 }
 
-impl Into<Vec<u8>> for DcCiphertextV2 {
-    fn into(mut self) -> Vec<u8> {
+impl From<DcCiphertextV2> for Vec<u8> {
+    fn from(mut cipher: DcCiphertextV2) -> Vec<u8> {
         let mut data = Vec::new();
-        data.append(&mut self.nonce);
-        data.append(&mut self.ciphertext);
+        data.append(&mut cipher.nonce);
+        data.append(&mut cipher.ciphertext);
         data
     }
 }

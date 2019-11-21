@@ -44,9 +44,9 @@ impl DcKey {
     }
 }
 
-impl Into<Vec<u8>> for DcKey {
-    fn into(self) -> Vec<u8> {
-        match self {
+impl From<DcKey> for Vec<u8> {
+    fn from(key: DcKey) -> Vec<u8> {
+        match key {
             DcKey::V1(x) => x.into(),
         }
     }

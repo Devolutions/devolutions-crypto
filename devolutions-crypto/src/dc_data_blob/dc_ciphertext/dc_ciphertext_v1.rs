@@ -21,12 +21,12 @@ pub struct DcCiphertextV1 {
     hmac: Vec<u8>,
 }
 
-impl Into<Vec<u8>> for DcCiphertextV1 {
-    fn into(mut self) -> Vec<u8> {
+impl From<DcCiphertextV1> for Vec<u8> {
+    fn from(mut cipher: DcCiphertextV1) -> Vec<u8> {
         let mut data = Vec::new();
-        data.append(&mut self.iv);
-        data.append(&mut self.ciphertext);
-        data.append(&mut self.hmac);
+        data.append(&mut cipher.iv);
+        data.append(&mut cipher.ciphertext);
+        data.append(&mut cipher.hmac);
         data
     }
 }

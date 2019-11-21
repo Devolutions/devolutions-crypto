@@ -20,14 +20,14 @@ pub struct DcHashV1 {
     hash: Vec<u8>,
 }
 
-impl Into<Vec<u8>> for DcHashV1 {
-    fn into(mut self) -> Vec<u8> {
-        let iterations = self.iterations;
+impl From<DcHashV1> for Vec<u8> {
+    fn from(mut hash: DcHashV1) -> Vec<u8> {
+        let iterations = hash.iterations;
         let mut data = Vec::with_capacity(4);
         data.write_u32::<LittleEndian>(iterations).unwrap();
 
-        data.append(&mut self.salt);
-        data.append(&mut self.hash);
+        data.append(&mut hash.salt);
+        data.append(&mut hash.hash);
 
         data
     }
