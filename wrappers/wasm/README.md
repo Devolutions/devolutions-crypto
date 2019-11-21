@@ -7,7 +7,7 @@ First you need to install `wasm-pack`.
 ```
 cargo install wasm-pack
 ```
-Then, add it too the PATH by adding this line to your .bashrc
+Then, add it too the PATH by adding this line to your `.bashrc` or `.zshrc`
 ```
 export PATH=/$HOME/.cargo/bin:$PATH
 ```
