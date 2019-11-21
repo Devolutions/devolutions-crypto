@@ -88,7 +88,7 @@ if sys.argv[1] == "WIN":
         if rdm:
             dllpath = "./rdm/bin/" + arch["name"] + "/DevolutionsCrypto.dll"
 
-        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/devolutionscrypto.dll", dllpath)
+        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/devolutions_crypto.dll", dllpath)
 
         command= subprocess.Popen(["./tools/rcedit-x64.exe", dllpath, "--set-file-version", version], stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
@@ -321,7 +321,7 @@ if sys.argv[1] == "LINUX":
     architectures = { "arch" : 
                 [
                     {"name" : "x86_64", "value" : "x86_64-unknown-linux-gnu"},
-                    #{"name" : "i686", "value" : "i686-unknown-linux-gnu"}
+                    {"name" : "i686", "value" : "i686-unknown-linux-gnu"}
                 ]
         }
 
