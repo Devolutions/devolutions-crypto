@@ -13,9 +13,9 @@ pub enum DcKeyV1 {
     Public(PublicKey),
 }
 
-impl Into<Vec<u8>> for DcKeyV1 {
-    fn into(self) -> Vec<u8> {
-        match self {
+impl From<DcKeyV1> for Vec<u8> {
+    fn from(key: DcKeyV1) -> Vec<u8> {
+        match key {
             DcKeyV1::Private(x) => x.to_bytes().to_vec(),
             DcKeyV1::Public(x) => x.as_bytes().to_vec(),
         }

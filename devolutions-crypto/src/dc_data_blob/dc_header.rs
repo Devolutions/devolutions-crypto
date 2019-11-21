@@ -40,13 +40,13 @@ impl TryFrom<&[u8]> for DcHeader {
     }
 }
 
-impl Into<Vec<u8>> for DcHeader {
-    fn into(self) -> Vec<u8> {
+impl From<DcHeader> for Vec<u8> {
+    fn from(header: DcHeader) -> Vec<u8> {
         let mut data = Vec::with_capacity(8);
-        data.write_u16::<LittleEndian>(self.signature).unwrap();
-        data.write_u16::<LittleEndian>(self.data_type).unwrap();
-        data.write_u16::<LittleEndian>(self.data_subtype).unwrap();
-        data.write_u16::<LittleEndian>(self.version).unwrap();
+        data.write_u16::<LittleEndian>(header.signature).unwrap();
+        data.write_u16::<LittleEndian>(header.data_type).unwrap();
+        data.write_u16::<LittleEndian>(header.data_subtype).unwrap();
+        data.write_u16::<LittleEndian>(header.version).unwrap();
         data
     }
 }

@@ -63,9 +63,9 @@ impl DcCiphertext {
     }
 }
 
-impl Into<Vec<u8>> for DcCiphertext {
-    fn into(self) -> Vec<u8> {
-        match self {
+impl From<DcCiphertext> for Vec<u8> {
+    fn from(cipher: DcCiphertext) -> Vec<u8> {
+        match cipher {
             DcCiphertext::V1(x) => x.into(),
             DcCiphertext::V2(x) => x.into(),
         }

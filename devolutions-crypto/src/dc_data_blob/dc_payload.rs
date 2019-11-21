@@ -73,9 +73,9 @@ impl DcPayload {
     }
 }
 
-impl Into<Vec<u8>> for DcPayload {
-    fn into(self) -> Vec<u8> {
-        match self {
+impl From<DcPayload> for Vec<u8> {
+    fn from(payload: DcPayload) -> Vec<u8> {
+        match payload {
             DcPayload::Key(x) => x.into(),
             DcPayload::Ciphertext(x) => x.into(),
             DcPayload::Hash(x) => x.into(),

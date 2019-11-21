@@ -41,11 +41,11 @@ impl TryFrom<&[u8]> for DcDataBlob {
     }
 }
 
-impl Into<Vec<u8>> for DcDataBlob {
+impl From<DcDataBlob> for Vec<u8> {
     /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
-    fn into(self) -> Vec<u8> {
-        let mut data: Vec<u8> = self.header.into();
-        let mut payload: Vec<u8> = self.payload.into();
+    fn from(blob: DcDataBlob) -> Vec<u8> {
+        let mut data: Vec<u8> = blob.header.into();
+        let mut payload: Vec<u8> = blob.payload.into();
         data.append(&mut payload);
         data
     }
