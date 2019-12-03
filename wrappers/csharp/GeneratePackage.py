@@ -30,9 +30,8 @@ print("Generating assembly manifest...")
 with open('../../devolutions-crypto/Cargo.toml', 'r') as filee:
     data=filee.read()
     version = data.split("version = \"")[1].split("\"", 1)[0]
-    year = data.split("edition = \"")[1].split("\"", 1)[0]
     
-    assembly_manifest = assembly_manifest.replace("||YEAR||", year)
+    assembly_manifest = assembly_manifest.replace("||YEAR||", str(datetime.datetime.now().year))
     assembly_manifest = assembly_manifest.replace("||VERSION||", version)
 
 if sys.argv[1] == "WIN":
@@ -61,7 +60,7 @@ if sys.argv[1] == "WIN":
     os.mkdir("./" + folder)
     os.mkdir("./" + folder + "/bin")
 
-    with open("./" + folder + "/bin/AssemblyInfo.cs","wb") as filee:
+    with open("./" + folder + "/bin/AssemblyInfo.cs","wb+") as filee:
         filee.write(assembly_manifest.encode("utf-8"))
 
     for arch in architectures["arch"]:
