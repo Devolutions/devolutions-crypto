@@ -60,7 +60,7 @@ namespace Devolutions.Cryptography
         public static extern long VersionNative(byte[] output, UIntPtr output_length);
 
         [DllImport(LibName, EntryPoint = "VersionSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long VersionSizeNative();
+        public static extern long VersionSizeNative();
     }
 }
 #endif
