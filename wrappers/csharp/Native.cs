@@ -26,19 +26,19 @@ namespace Devolutions.Cryptography
 #if RDM
             // RDM Specific
             // Load the right native DLL depending on the arch
-           Assembly assembly = Assembly.GetEntryAssembly();
+           Assembly assemblyRdm = Assembly.GetEntryAssembly();
 
-           if(assembly == null)
+           if(assemblyRdm == null)
            {
-               assembly = Assembly.GetExecutingAssembly();
+               assemblyRdm = Assembly.GetExecutingAssembly();
            }
 
-           if(assembly == null)
+           if(assemblyRdm == null)
            {
                throw new System.ComponentModel.Win32Exception();
            }
 
-           string path = Path.GetDirectoryName(assembly.Location);
+           string path = Path.GetDirectoryName(assemblyRdm.Location);
 
            path = Path.Combine(path, Environment.Is64BitProcess ? "x64" : "x86");
 

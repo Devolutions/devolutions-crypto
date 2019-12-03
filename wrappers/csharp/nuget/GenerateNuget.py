@@ -55,6 +55,9 @@ if sys.argv[1] == "IOS" or everything:
     assembly_manifest_ios = assembly_manifest_ios.replace("||YEAR||", str(datetime.datetime.now().year))
     assembly_manifest_ios = assembly_manifest_ios.replace("||VERSION||", version)
     
+    if not os.path.exists("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties"):
+        os.makedirs("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties")    
+
     with open("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties/AssemblyInfo.cs","wb+") as filee:
         filee.write(assembly_manifest_ios.encode("utf-8"))
 
@@ -95,6 +98,9 @@ if sys.argv[1] == "MAC-MODERN" or everything:
 
     assembly_manifest_mac_modern = assembly_manifest_mac_modern.replace("||YEAR||", str(datetime.datetime.now().year))
     assembly_manifest_mac_modern = assembly_manifest_mac_modern.replace("||VERSION||", version)
+
+    if not os.path.exists("./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac/Properties"):
+        os.makedirs("./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac/Properties")    
 
     with open("./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac/Properties/AssemblyInfo.cs","wb+") as filee:
         filee.write(assembly_manifest_mac_modern.encode("utf-8"))
@@ -145,6 +151,9 @@ if sys.argv[1] == "ANDROID" or everything:
 
     assembly_manifest_android = assembly_manifest_android.replace("||YEAR||", str(datetime.datetime.now().year))
     assembly_manifest_android = assembly_manifest_android.replace("||VERSION||", version)
+
+    if not os.path.exists("./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android/Properties"):
+        os.makedirs("./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android/Properties")    
 
     with open("./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android/Properties/AssemblyInfo.cs","wb+") as filee:
         filee.write(assembly_manifest_android.encode("utf-8"))
