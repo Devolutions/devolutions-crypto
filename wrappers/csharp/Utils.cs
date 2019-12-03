@@ -152,5 +152,16 @@ namespace Devolutions.Cryptography
 
             return  result;
         }
+
+        public static string Version()
+        {
+            long size = Native.VersionSizeNative();
+
+            byte[] versionBytes = new byte[size];
+
+            Native.VersionNative(versionBytes, (UIntPtr)versionBytes.Length);            
+
+            return Encoding.UTF8.GetString(versionBytes);
+        }
     }
 }
