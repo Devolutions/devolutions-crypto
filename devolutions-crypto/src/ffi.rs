@@ -19,6 +19,8 @@ use zeroize::Zeroize as _;
 
 use base64::{decode_config_slice, encode_config_slice, STANDARD};
 
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
 /// Encrypt a data blob
 /// # Arguments
 ///  * `data` - Pointer to the data to encrypt.
@@ -455,6 +457,32 @@ pub unsafe extern "C" fn Encode(
     let mut output = slice::from_raw_parts_mut(output, output_length);
 
     encode_config_slice(&input, STANDARD, &mut output) as i64
+}
+
+///  Size of the version string
+/// # Returns
+/// Returns the size of the version string
+#[no_mangle]
+pub extern "C" fn VersionSize() -> i64 {
+    VERSION.len() as i64
+}
+
+///  Fill the output buffer with the version string
+/// # Arguments
+///  * output - Pointer to the output buffer.
+///  * output_length - Length of the output buffer.
+/// # Returns
+/// Returns the size, in bytes, of the output buffer.
+#[no_mangle]
+pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize,) -> i64 {
+    if output.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
+
+    let output = slice::from_raw_parts_mut(output, output_length);
+    output.copy_from_slice(&VERSION.as_bytes());
+
+    output.len() as i64
 }
 
 #[test]

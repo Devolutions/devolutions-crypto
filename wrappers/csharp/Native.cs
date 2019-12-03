@@ -1,11 +1,11 @@
 namespace Devolutions.Cryptography
 {
     using System;
-    using System.Runtime.InteropServices;
+    using System.Runtime.InteropServices;    
+    using System.Reflection;
   
 #if RDM
     using System.IO;
-    using System.Reflection;
 #endif
 
     public static partial class Native
@@ -26,19 +26,19 @@ namespace Devolutions.Cryptography
 #if RDM
             // RDM Specific
             // Load the right native DLL depending on the arch
-           Assembly assembly = Assembly.GetEntryAssembly();
+           Assembly assemblyRdm = Assembly.GetEntryAssembly();
 
-           if(assembly == null)
+           if(assemblyRdm == null)
            {
-               assembly = Assembly.GetExecutingAssembly();
+               assemblyRdm = Assembly.GetExecutingAssembly();
            }
 
-           if(assembly == null)
+           if(assemblyRdm == null)
            {
                throw new System.ComponentModel.Win32Exception();
            }
 
-           string path = Path.GetDirectoryName(assembly.Location);
+           string path = Path.GetDirectoryName(assemblyRdm.Location);
 
            path = Path.Combine(path, Environment.Is64BitProcess ? "x64" : "x86");
 
@@ -49,6 +49,16 @@ namespace Devolutions.Cryptography
                throw new System.ComponentModel.Win32Exception();
            }
 #endif
+
+            Assembly assembly = Assembly.GetExecutingAssembly();
+
+            string managedVersion = assembly.GetName().Version.ToString();
+            string nativeVersion = Utils.Version() + ".0";
+
+            if(managedVersion != nativeVersion)
+            {
+                throw new Exception("Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion);
+            }
         }
 
         public static byte[] Decrypt(byte[] data, byte[] key,  Action<Enum> error = null)
@@ -64,7 +74,7 @@ namespace Devolutions.Cryptography
 
                 if (key == null)
                 {
-                    key = new byte[0];
+                    return null;
                 }
 
                 byte[] result = new byte[data.Length];
@@ -162,7 +172,7 @@ namespace Devolutions.Cryptography
 
                 if (key == null)
                 {
-                    key = new byte[0];
+                    return null;
                 }
 
                 long resultLength = EncryptSizeNative((UIntPtr)data.Length, (UInt16) version);
@@ -563,8 +573,6 @@ namespace Devolutions.Cryptography
         [DllImport(LibName64, EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long MixKeyExchangeSizeNative64();
 
-
-
         private static long VerifyPasswordNative(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength)
         {
             if(Environment.Is64BitProcess)
@@ -612,6 +620,38 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName64, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
         public static extern long Encode64(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        public static long VersionNative(byte[] output, UIntPtr output_length)
+        {
+            if(Environment.Is64BitProcess)
+            {
+                return Version64(output, output_length);
+            }
+
+            return Version86(output, output_length);
+        }
+
+        [DllImport(LibName86, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
+        public static extern long Version86(byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName64, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
+        public static extern long Version64(byte[] output, UIntPtr output_length);
+
+        public static long VersionSizeNative()
+        {
+            if(Environment.Is64BitProcess)
+            {
+                return VersionSize64();
+            }
+
+            return VersionSize86();
+        }
+
+        [DllImport(LibName86, EntryPoint = "VersionSize", CallingConvention = CallingConvention.Cdecl)]
+        public static extern long VersionSize86();
+
+        [DllImport(LibName64, EntryPoint = "VersionSize", CallingConvention = CallingConvention.Cdecl)]
+        public static extern long VersionSize64();
 #endif
 
 #if RDM

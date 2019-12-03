@@ -35,6 +35,32 @@ if sys.argv[1] == "LINUX" or everything:
     print(output)
 
 if sys.argv[1] == "IOS" or everything:
+    print("Generating assembly manifest for IOS...")
+    # Assembly manifest IOS template
+    assembly_manifest_ios = """
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
+
+    using Foundation;
+
+    [assembly: LinkerSafe]
+
+    [assembly: AssemblyTitle("DevolutionsCrypto")]
+    [assembly: AssemblyCompany("Devolutions Inc.")]
+    [assembly: AssemblyCopyright("Copyright ©  ||YEAR||")]
+
+    [assembly: AssemblyVersion("||VERSION||")]
+    """
+
+    assembly_manifest_ios = assembly_manifest_ios.replace("||YEAR||", str(datetime.datetime.now().year))
+    assembly_manifest_ios = assembly_manifest_ios.replace("||VERSION||", version)
+    
+    if not os.path.exists("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties"):
+        os.makedirs("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties")    
+
+    with open("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties/AssemblyInfo.cs","wb+") as filee:
+        filee.write(assembly_manifest_ios.encode("utf-8"))
+
     print("Building...")
 
     command= subprocess.Popen(["msbuild", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS.sln", "/t:clean,build", "/p:configuration=release"], stdout=subprocess.PIPE)
@@ -53,6 +79,32 @@ if sys.argv[1] == "IOS" or everything:
     print(output)
 
 if sys.argv[1] == "MAC-MODERN" or everything:
+    print("Generating assembly manifest for MAC MODERN...")
+    # Assembly manifest Mac Modern template
+    assembly_manifest_mac_modern = """
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
+
+    using Foundation;
+
+    [assembly: LinkerSafe]
+
+    [assembly: AssemblyTitle("DevolutionsCrypto")]
+    [assembly: AssemblyCompany("Devolutions Inc.")]
+    [assembly: AssemblyCopyright("Copyright ©  ||YEAR||")]
+
+    [assembly: AssemblyVersion("||VERSION||")]
+    """
+
+    assembly_manifest_mac_modern = assembly_manifest_mac_modern.replace("||YEAR||", str(datetime.datetime.now().year))
+    assembly_manifest_mac_modern = assembly_manifest_mac_modern.replace("||VERSION||", version)
+
+    if not os.path.exists("./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac/Properties"):
+        os.makedirs("./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac/Properties")    
+
+    with open("./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac/Properties/AssemblyInfo.cs","wb+") as filee:
+        filee.write(assembly_manifest_mac_modern.encode("utf-8"))
+
     print("Building...")
 
     command= subprocess.Popen(["msbuild", "./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac.sln", "/t:clean,build", "/p:configuration=release"], stdout=subprocess.PIPE)
@@ -80,6 +132,32 @@ if sys.argv[1] == "MAC-FULL" or everything:
     print(output)
 
 if sys.argv[1] == "ANDROID" or everything:
+    print("Generating assembly manifest for Android...")
+    # Assembly manifest Android template
+    assembly_manifest_android = """
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
+    using Android.App;
+
+    [assembly: AssemblyTitle("DevolutionsCrypto")]
+    [assembly: AssemblyCompany("Devolutions Inc.")]
+    [assembly: AssemblyCopyright("Copyright ©  ||YEAR||")]
+
+    [assembly: AssemblyVersion("||VERSION||")]
+    
+    [assembly: ComVisible(false)]
+    """
+
+    assembly_manifest_android = assembly_manifest_android.replace("||YEAR||", str(datetime.datetime.now().year))
+    assembly_manifest_android = assembly_manifest_android.replace("||VERSION||", version)
+
+    if not os.path.exists("./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android/Properties"):
+        os.makedirs("./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android/Properties")    
+
+    with open("./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android/Properties/AssemblyInfo.cs","wb+") as filee:
+        filee.write(assembly_manifest_android.encode("utf-8"))
+
     print("Building...")
 
     command= subprocess.Popen(["msbuild", "./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android.sln", "/t:clean,build", "/p:configuration=release"], stdout=subprocess.PIPE)

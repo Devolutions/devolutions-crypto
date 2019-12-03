@@ -55,6 +55,12 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
         private static extern long VerifyPasswordNative(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);
+
+        [DllImport(LibName, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
+        public static extern long VersionNative(byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName, EntryPoint = "VersionSize", CallingConvention = CallingConvention.Cdecl)]
+        public static extern long VersionSizeNative();
     }
 }
 #endif
