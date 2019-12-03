@@ -108,7 +108,7 @@ namespace Devolutions.Cryptography
                 return;
             }
 
-            if (Enum.IsDefined(typeof(NativeError), errorCode))
+            if (Enum.IsDefined(typeof(NativeError), (int)errorCode))
             {
                 error?.Invoke((NativeError)errorCode);
             }
