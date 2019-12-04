@@ -12,7 +12,6 @@ use std::convert::TryFrom as _;
 
 pub const CIPHERTEXT: u16 = 2;
 
-const DEFAULT: u16 = 0;
 const V1: u16 = 1;
 const V2: u16 = 2;
 
@@ -34,18 +33,18 @@ impl DcCiphertext {
         data: &[u8],
         key: &[u8],
         header: &mut DcHeader,
-        version: u16,
+        version: Option<u16>,
     ) -> Result<DcCiphertext> {
         header.data_type = CIPHERTEXT;
 
         match version {
-            V1 => {
+            Some(V1) => {
                 header.version = V1;
                 Ok(DcCiphertext::V1(DcCiphertextV1::encrypt(
                     data, key, header,
                 )?))
             }
-            V2 | DEFAULT => {
+            Some(V2) | None => {
                 header.version = V2;
                 Ok(DcCiphertext::V2(DcCiphertextV2::encrypt(
                     data, key, header,

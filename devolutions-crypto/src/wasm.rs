@@ -33,7 +33,6 @@ impl Drop for KeyPair {
 
 #[wasm_bindgen]
 pub fn encrypt(data: &[u8], key: &[u8], version: Option<u16>) -> Result<Vec<u8>, JsValue> {
-    let version = version.unwrap_or(0);
     Ok(DcDataBlob::encrypt(&data, &key, version)?.into())
 }
 

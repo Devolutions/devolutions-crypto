@@ -18,7 +18,7 @@
   "author": "Philippe Dugre <pdugre@devolutions.net>",
   "license": "(MIT OR Apache-2.0)",
   "dependencies": {
-    "devolutions-crypto": "0.2.0"
+    "devolutions-crypto": "file:../pkg/"
   },
   "devDependencies": {
     "webpack": "^4.29.3",
