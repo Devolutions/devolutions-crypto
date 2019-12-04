@@ -66,9 +66,9 @@ impl DcDataBlob {
     /// let data = b"somesecretdata";
     /// let key = b"somesecretkey";
     ///
-    /// let encrypted_data = DcDataBlob::encrypt(data, key, 0).unwrap();
+    /// let encrypted_data = DcDataBlob::encrypt(data, key, None).unwrap();
     /// ```
-    pub fn encrypt(data: &[u8], key: &[u8], version: u16) -> Result<DcDataBlob> {
+    pub fn encrypt(data: &[u8], key: &[u8], version: Option<u16>) -> Result<DcDataBlob> {
         let mut header = DcHeader::new();
         let payload = DcPayload::encrypt(data, key, &mut header, version)?;
         Ok(DcDataBlob { header, payload })
@@ -86,7 +86,7 @@ impl DcDataBlob {
     /// let data = b"somesecretdata";
     /// let key = b"somesecretkey";
     ///
-    /// let encrypted_data = DcDataBlob::encrypt(data, key, 0).unwrap();
+    /// let encrypted_data = DcDataBlob::encrypt(data, key, None).unwrap();
     /// let decrypted_data = encrypted_data.decrypt(key).unwrap();
     ///
     /// assert_eq!(data.to_vec(), decrypted_data);
@@ -217,7 +217,7 @@ fn encrypt_decrypt_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
     let data = "This is a very complex string of character that we need to encrypt".as_bytes();
 
-    let encrypted = DcDataBlob::encrypt(data, &key, 0).unwrap();
+    let encrypted = DcDataBlob::encrypt(data, &key, None).unwrap();
     let encrypted: Vec<u8> = encrypted.into();
 
     let encrypted = DcDataBlob::try_from(encrypted.as_slice()).unwrap();
@@ -233,7 +233,7 @@ fn encrypt_v1_test() {
     let data = "testdata".as_bytes();
     let key = base64::decode("Sr98VxTc424QFZDH2csZni/n5tKk2/d4ow7iGUqd5HQ=").unwrap();
 
-    let encrypted = DcDataBlob::encrypt(data, &key, 1).unwrap();
+    let encrypted = DcDataBlob::encrypt(data, &key, Some(1)).unwrap();
 
     assert_eq!(encrypted.header.version, 1);
 
@@ -252,7 +252,7 @@ fn encrypt_v2_test() {
     let data = "testdata".as_bytes();
     let key = base64::decode("HOPWSC5oA9Az9SAnuwGI3nT3Dx/z2qtHBQI1k2WvVFo=").unwrap();
 
-    let encrypted = DcDataBlob::encrypt(data, &key, 2).unwrap();
+    let encrypted = DcDataBlob::encrypt(data, &key, Some(2)).unwrap();
 
     assert_eq!(encrypted.header.version, 2);
 

@@ -56,6 +56,11 @@ pub unsafe extern "C" fn Encrypt(
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
+    let version = match version {
+        0 => None,
+        v => Some(v),
+    };
+
     match DcDataBlob::encrypt(data, key, version) {
         Ok(res) => {
             let mut res: Vec<u8> = res.into();
@@ -474,7 +479,7 @@ pub extern "C" fn VersionSize() -> i64 {
 /// # Returns
 /// Returns the size, in bytes, of the output buffer.
 #[no_mangle]
-pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize,) -> i64 {
+pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
     if output.is_null() {
         return DevoCryptoError::NullPointer.error_code();
     };
@@ -493,12 +498,16 @@ fn test_encrypt_length() {
     let one_full_block = b"0123456789abcdef";
     let multiple_blocks = b"0123456789abcdefghijkl";
 
-    let length_zero_enc: Vec<u8> = DcDataBlob::encrypt(length_zero, key, 0).unwrap().into();
-    let length_one_block_enc: Vec<u8> = DcDataBlob::encrypt(length_one_block, key, 0)
+    let length_zero_enc: Vec<u8> = DcDataBlob::encrypt(length_zero, key, None).unwrap().into();
+    let length_one_block_enc: Vec<u8> = DcDataBlob::encrypt(length_one_block, key, None)
         .unwrap()
         .into();
-    let one_full_block_enc: Vec<u8> = DcDataBlob::encrypt(one_full_block, key, 0).unwrap().into();
-    let multiple_blocks_enc: Vec<u8> = DcDataBlob::encrypt(multiple_blocks, key, 0).unwrap().into();
+    let one_full_block_enc: Vec<u8> = DcDataBlob::encrypt(one_full_block, key, None)
+        .unwrap()
+        .into();
+    let multiple_blocks_enc: Vec<u8> = DcDataBlob::encrypt(multiple_blocks, key, None)
+        .unwrap()
+        .into();
 
     assert_eq!(
         length_zero_enc.len() as i64,

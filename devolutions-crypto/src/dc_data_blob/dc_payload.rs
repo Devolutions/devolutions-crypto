@@ -29,7 +29,7 @@ impl DcPayload {
         data: &[u8],
         key: &[u8],
         header: &mut DcHeader,
-        version: u16,
+        version: Option<u16>,
     ) -> Result<DcPayload> {
         Ok(DcPayload::Ciphertext(DcCiphertext::encrypt(
             data, key, header, version,
