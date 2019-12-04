@@ -57,323 +57,194 @@ namespace Devolutions.Cryptography
 
             if(managedVersion != nativeVersion)
             {
-                throw new Exception("Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion);
+                throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion);
             }
         }
 
-        public static byte[] Decrypt(byte[] data, byte[] key,  Action<Enum> error = null)
+        public static byte[] Decrypt(byte[] data, byte[] key)
         {
-            try
+            if (data == null || data.Length == 0 || key == null)
             {
-                if (data == null || data.Length == 0)
-                {
-                    error?.Invoke(ManagedError.InvalidParameter);
-
-                    return null;
-                }
-
-                if (key == null)
-                {
-                    return null;
-                }
-
-                byte[] result = new byte[data.Length];
-
-                long res = DecryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length);
-
-                if (res < 0)
-                {
-                    HandleError(res, error);
-
-                    return null;
-                }
-
-                // If success it returns the real result size, so we resize. 
-                Array.Resize(ref result, (int)res);
-
-                return result;
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
-            catch
+
+            byte[] result = new byte[data.Length];
+
+            long res = DecryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length);
+
+            if (res < 0)
             {
-                error?.Invoke(ManagedError.Error);
-
-                return null;
+                Utils.HandleError(res);
             }
+
+            // If success it returns the real result size, so we resize. 
+            Array.Resize(ref result, (int)res);
+
+            return result;
         }
 
-        private static void HandleError(long errorCode, Action<Enum> error)
+        public static byte[] DerivePassword(string password, string salt, uint iterations = 10000)
         {
-            if (error == null)
-            {
-                return;
-            }
-
-            if (Enum.IsDefined(typeof(NativeError), (int)errorCode))
-            {
-                error?.Invoke((NativeError)errorCode);
-            }
-            else
-            {
-                error?.Invoke(ManagedError.Error);
-            }
+            return DeriveKey(Utils.StringToByteArray(password), Utils.StringToByteArray(salt), iterations);
         }
 
-        public static byte[] DerivePassword(string password, string salt, uint iterations = 10000, Action<Enum> error = null)
+        public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000)
         {
-            return DeriveKey(Utils.StringToByteArray(password), Utils.StringToByteArray(salt), iterations, error);
+            if (key == null)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            uint keySize = KeySizeNative();
+
+            byte[] result = new byte[keySize];
+
+            int saltLength = salt == null ? 0 : salt.Length;
+
+            long res = DeriveKeyNative(key, (UIntPtr)key.Length, salt, (UIntPtr)saltLength, (UIntPtr)iterations, result, (UIntPtr)result.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return result;
         }
 
-        public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000, Action<Enum> error = null)
+        public static byte[] Encrypt(byte[] data, byte[] key, uint version = 0)
         {
-            try
+            if (data == null || data.Length == 0 || key == null)
             {
-                if (key == null)
-                {
-                    error?.Invoke(ManagedError.InvalidParameter);
-
-                    return null;
-                }
-
-                uint keySize = KeySizeNative();
-
-                byte[] result = new byte[keySize];
-
-                int saltLength = salt == null ? 0 : salt.Length;
-
-                long res = DeriveKeyNative(key, (UIntPtr)key.Length, salt, (UIntPtr)saltLength, (UIntPtr)iterations, result, (UIntPtr)result.Length);
-
-                if (res < 0)
-                {
-                    HandleError(res, error);
-
-                    return null;
-                }
-
-                return result;
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
-            catch
+
+            long resultLength = EncryptSizeNative((UIntPtr)data.Length, (UInt16) version);
+
+            if(resultLength < 0)
             {
-                error?.Invoke(ManagedError.Error);
-
-                return null;
+                Utils.HandleError(resultLength);
             }
+
+            byte[] result = new byte[resultLength];
+
+            long res = EncryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length, (UInt16)version);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return result;
         }
 
-        public static byte[] Encrypt(byte[] data, byte[] key, uint version = 0, Action<Enum> error = null)
+        public static byte[] GenerateKey(uint keySize)
         {
-            try
+            if(keySize == 0)
             {
-                if (data == null || data.Length == 0)
-                {
-                    error?.Invoke(ManagedError.InvalidParameter);
-
-                    return null;
-                }
-
-                if (key == null)
-                {
-                    return null;
-                }
-
-                long resultLength = EncryptSizeNative((UIntPtr)data.Length, (UInt16) version);
-
-                byte[] result = new byte[resultLength];
-
-                long res = EncryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length, (UInt16)version);
-
-                if (res < 0)
-                {
-                    HandleError(res, error);
-
-                    return null;
-                }
-
-                return result;
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
-            catch
+
+            byte[] key = new byte[keySize];
+
+            long res = GenerateKeyNative(key, (UIntPtr)keySize);
+
+            if (res < 0)
             {
-                error?.Invoke(ManagedError.Error);
-
-                return null;
+                Utils.HandleError(res);
             }
+
+            return key;
         }
 
-        public static byte[] GenerateKey(uint keySize, Action<Enum> error = null)
+        public static KeyExchange GenerateKeyExchange()
         {
-            try
+            long keySize = GenerateKeyExchangeSizeNative();
+
+            byte[] publicKey = new byte[keySize];
+            byte[] privateKey = new byte[keySize];
+
+            long res = GenerateKeyExchangeNative(privateKey, (UIntPtr)privateKey.Length, publicKey, (UIntPtr)publicKey.Length);
+
+            if (res < 0)
             {
-                byte[] key = new byte[keySize];
-
-                long res = GenerateKeyNative(key, (UIntPtr)keySize);
-
-                if (res < 0)
-                {
-                    HandleError(res, error);
-
-                    return null;
-                }
-
-                return key;
+                Utils.HandleError(res);
             }
-            catch
-            {
-                error?.Invoke(ManagedError.Error);
 
-                return null;
-            }
+            return new KeyExchange() { PublicKey = publicKey, PrivateKey = privateKey };
         }
 
-        public static KeyExchange GenerateKeyExchange(Action<Enum> error = null)
+        public static byte[] HashPassword(byte[] password, uint iterations = 10000)
         {
-            try
+            if (password == null || password.Length == 0)
             {
-                long keySize = GenerateKeyExchangeSizeNative();
-
-                byte[] publicKey = new byte[keySize];
-                byte[] privateKey = new byte[keySize];
-
-                long res = GenerateKeyExchangeNative(privateKey, (UIntPtr)privateKey.Length, publicKey, (UIntPtr)publicKey.Length);
-
-                if (res < 0)
-                {
-                    HandleError(res, error);
-
-                    return null;
-                }
-
-                return new KeyExchange() { PublicKey = publicKey, PrivateKey = privateKey };
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
-            catch
+
+            long hashLength = HashPasswordLengthNative();
+
+            if(hashLength < 0)
             {
-                error?.Invoke(ManagedError.Error);
-
-                return null;
+                Utils.HandleError(hashLength);
             }
+
+            byte[] result = new byte[hashLength];
+
+            long res = HashPasswordNative(password, (UIntPtr)password.Length, iterations, result, (UIntPtr)result.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return result;
         }
 
-        public static byte[] HashPassword(byte[] password, uint iterations = 10000, Action<Enum> error = null)
+        public static byte[] MixKeyExchange(byte[] privatekey, byte[] publicKey)
         {
-            try
+            if (publicKey == null || privatekey == null)
             {
-                if (password == null || password.Length == 0)
-                {
-                    error?.Invoke(ManagedError.InvalidParameter);
-
-                    return null;
-                }
-
-                long hashLength = HashPasswordLengthNative();
-
-                byte[] result = new byte[hashLength];
-
-                long res = HashPasswordNative(password, (UIntPtr)password.Length, iterations, result, (UIntPtr)result.Length);
-
-                if (res < 0)
-                {
-                    HandleError(res, error);
-
-                    return null;
-                }
-
-                return result;
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
-            catch
+
+            long sharedKeySize = MixKeyExchangeSizeNative();
+
+            if(sharedKeySize < 0)
             {
-                error?.Invoke(ManagedError.Error);
-
-                return null;
+                Utils.HandleError(sharedKeySize);
             }
+
+            byte[] shared = new byte[sharedKeySize];
+
+            long res = MixKeyExchangeNative(privatekey, (UIntPtr)privatekey.Length, publicKey, (UIntPtr)publicKey.Length, shared, (UIntPtr)shared.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return shared;
         }
 
-        public static byte[] MixKeyExchange(byte[] privatekey, byte[] publicKey, Action<Enum> error = null)
+        public static bool VerifyPassword(byte[] password, byte[] hash)
         {
-            try
+            if (password == null || hash == null)
             {
-                if (publicKey == null || privatekey == null)
-                {
-                    error?.Invoke(ManagedError.InvalidParameter);
-
-                    return null;
-                }
-
-                long sharedKeySize = MixKeyExchangeSizeNative();
-
-                byte[] shared = new byte[sharedKeySize];
-
-                long res = MixKeyExchangeNative(privatekey, (UIntPtr)privatekey.Length, publicKey, (UIntPtr)publicKey.Length, shared, (UIntPtr)shared.Length);
-
-                if (res < 0)
-                {
-                    HandleError(res, error);
-
-                    return null;
-                }
-
-                return shared;
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
-            catch
+
+            long res = VerifyPasswordNative(password, (UIntPtr)password.Length, hash, (UIntPtr)hash.Length);
+
+            if(res == 0)
             {
-                error?.Invoke(ManagedError.Error);
-
-                return null;
-            }
-        }
-
-        public static bool VerifyPassword(byte[] password, byte[] hash, Action<Enum> error = null)
-        {
-            try
-            {
-                if (password == null || hash == null)
-                {
-                    error?.Invoke(ManagedError.InvalidParameter);
-
-                    return false;
-                }
-
-                long res = VerifyPasswordNative(password, (UIntPtr)password.Length, hash, (UIntPtr)hash.Length);
-
-                if (res <= 0)
-                {
-                    HandleError(res, error);
-
-                    return false;
-                }
-
-                return true;
-            }
-            catch
-            {
-                error?.Invoke(ManagedError.Error);
-
                 return false;
             }
-        }
 
-        public static void Test()
-        {
-            KeyExchange bob = GenerateKeyExchange();
-            KeyExchange alice = GenerateKeyExchange();
-
-            byte[] sharedAlice = MixKeyExchange(alice.PrivateKey, bob.PublicKey);
-            byte[] sharedBob = MixKeyExchange(bob.PrivateKey, alice.PublicKey);
-
-            if (Convert.ToBase64String(sharedAlice) == Convert.ToBase64String(sharedBob))
+            if (res < 0)
             {
-                Console.WriteLine("Success");
-            }
-            else
-            {
-                throw new Exception();
+                Utils.HandleError(res);
             }
 
-            byte[] generateKey = GenerateKey(32);
-
-            byte[] dericeKeyResult = DeriveKey(generateKey, null);
-
-            if (dericeKeyResult == null)
-            {
-                throw new Exception();
-            }
+            return true;
         }
 
 #if !ANDROID && !IOS && !MAC
