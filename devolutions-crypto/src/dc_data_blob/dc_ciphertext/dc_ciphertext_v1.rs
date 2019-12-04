@@ -71,9 +71,8 @@ impl DcCiphertextV1 {
         DcCiphertextV1::split_key(key, &mut encryption_key, &mut signature_key);
 
         // Generate IV
-        let mut rng = OsRng::new()?;
         let mut iv = vec![0u8; 16];
-        rng.fill_bytes(&mut iv);
+        OsRng.fill_bytes(&mut iv);
 
         // Create cipher object
         let cipher = Cbc::<Aes256, Pkcs7>::new_var(&encryption_key, &iv)?;

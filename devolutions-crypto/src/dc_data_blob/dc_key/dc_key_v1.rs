@@ -47,9 +47,7 @@ impl DcKeyV1 {
         private_header.data_subtype = PRIVATE;
         public_header.data_subtype = PUBLIC;
 
-        let mut rng = OsRng::new()?;
-
-        let private = StaticSecret::new(&mut rng);
+        let private = StaticSecret::new(&mut OsRng);
         let public = PublicKey::from(&private);
 
         Ok((DcKeyV1::Private(private), DcKeyV1::Public(public)))

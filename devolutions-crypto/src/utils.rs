@@ -18,9 +18,8 @@ use sha2::Sha256;
 /// assert_eq!(32, key.len());
 /// ```
 pub fn generate_key(length: usize) -> Result<Vec<u8>> {
-    let mut rng = OsRng::new()?;
     let mut key = vec![0u8; length];
-    rng.fill_bytes(&mut key);
+    OsRng.fill_bytes(&mut key);
     Ok(key)
 }
 
