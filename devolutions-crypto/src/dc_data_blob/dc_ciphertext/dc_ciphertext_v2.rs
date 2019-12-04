@@ -59,9 +59,8 @@ impl DcCiphertextV2 {
         let mut key = DcCiphertextV2::derive_key(&key);
 
         // Generate nonce
-        let mut rng = OsRng::new()?;
         let mut nonce = vec![0u8; 24];
-        rng.fill_bytes(&mut nonce);
+        OsRng.fill_bytes(&mut nonce);
 
         // Authenticate the header
         let aad: Vec<u8> = (*header).clone().into();

@@ -60,9 +60,8 @@ impl TryFrom<&[u8]> for DcHashV1 {
 impl DcHashV1 {
     pub fn hash_password(pass: &[u8], iterations: u32) -> Result<DcHashV1> {
         // Generate salt
-        let mut rng = OsRng::new()?;
         let mut salt = vec![0u8; 32];
-        rng.fill_bytes(&mut salt);
+        OsRng.fill_bytes(&mut salt);
 
         // Generate hash
         let mut hash = vec![0u8; 32];

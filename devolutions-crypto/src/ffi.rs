@@ -474,7 +474,7 @@ pub extern "C" fn VersionSize() -> i64 {
 /// # Returns
 /// Returns the size, in bytes, of the output buffer.
 #[no_mangle]
-pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize,) -> i64 {
+pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
     if output.is_null() {
         return DevoCryptoError::NullPointer.error_code();
     };
