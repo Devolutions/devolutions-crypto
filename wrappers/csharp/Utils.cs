@@ -153,13 +153,35 @@ namespace Devolutions.Cryptography
             return  result;
         }
 
+        public static void HandleError(long errorCode)
+        {
+            if (Enum.IsDefined(typeof(NativeError), (int)errorCode))
+            {
+                throw new DevolutionsCryptoException(((NativeError)errorCode));
+            }
+            else
+            {
+                throw new DevolutionsCryptoException(ManagedError.Error);
+            }
+        }
+
         public static string Version()
         {
             long size = Native.VersionSizeNative();
 
+            if(size < 0)
+            {
+                HandleError(size);
+            }
+
             byte[] versionBytes = new byte[size];
 
-            Native.VersionNative(versionBytes, (UIntPtr)versionBytes.Length);            
+            long res = Native.VersionNative(versionBytes, (UIntPtr)versionBytes.Length);
+
+            if(res < 0)
+            {
+                HandleError(res);
+            }  
 
             return Encoding.UTF8.GetString(versionBytes);
         }
