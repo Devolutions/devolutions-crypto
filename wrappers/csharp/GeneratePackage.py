@@ -219,14 +219,14 @@ if sys.argv[1] == "IOS":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"], "--example", "static"], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"], "--manifest-path", "./ios/Cargo.toml"], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
         output = command.stdout.read().decode('utf-8')
 
         print(output)
 
         os.mkdir("./ios/bin/" + arch["name"])
 
-        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/examples/libstatic.a", "./ios/bin/" + arch["name"] + "/libDevolutionsCrypto.a")
+        shutil.copy("../../devolutions-crypto/ios/target/" + arch["value"] + "/release/libdevolutions_crypto.a", "./ios/bin/" + arch["name"] + "/libDevolutionsCrypto.a")
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
