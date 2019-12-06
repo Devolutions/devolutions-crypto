@@ -40,7 +40,7 @@ namespace Devolutions.Cryptography
                 result = "ManagedError : " + this.ManagedError.Value.ToString() + "\r\n";
             }
 
-            result = result + base.ToString();
+            return result + base.ToString();
         }
     }
 }
