@@ -67,7 +67,7 @@
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\..\..\macos\bin\universal\libDevolutionsCrypto.dylib">
+    <NativeReference Include="..\..\..\..\..\macos-modern\bin\universal\libDevolutionsCrypto.dylib">
       <Kind>Dynamic</Kind>
       <IsCxx>True</IsCxx>
       <ForceLoad>True</ForceLoad>

@@ -16,7 +16,7 @@ namespace Devolutions.Cryptography
         private const string LibName86 = "DevolutionsCrypto";
 #endif
 
-#if !ANDROID && !IOS && !MAC && !RDM
+#if !ANDROID && !IOS && !MAC_MODERN && !RDM
         private const string LibName64 = "DevolutionsCrypto-x64";
         private const string LibName86 = "DevolutionsCrypto-x86";
 #endif
@@ -247,7 +247,7 @@ namespace Devolutions.Cryptography
             return true;
         }
 
-#if !ANDROID && !IOS && !MAC
+#if !ANDROID && !IOS && !MAC_MODERN
         private static long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength)
         {
             if(Environment.Is64BitProcess)

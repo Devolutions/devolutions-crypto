@@ -14,16 +14,16 @@
     </metadata>
     <files>
 
-    <file src="../../../$platform$/bin/Devolutions.Crypto.dll" target="lib/net45/Devolutions.Crypto.dll" />
-    <file src="../../../$platform$/bin/Devolutions.Crypto.pdb" target="lib/net45/Devolutions.Crypto.pdb" />
+    <file src="../../../macos-full/bin/Devolutions.Crypto.dll" target="lib/net45/Devolutions.Crypto.dll" />
+    <file src="../../../macos-full/bin/Devolutions.Crypto.pdb" target="lib/net45/Devolutions.Crypto.pdb" />
 
-    <file src="../../../$platform$/bin/Devolutions.Crypto.dll" target="lib/netstandard1.5/Devolutions.Crypto.dll" />
-    <file src="../../../$platform$/bin/Devolutions.Crypto.pdb" target="lib/netstandard1.5/Devolutions.Crypto.pdb" />
+    <file src="../../../macos-full/bin/Devolutions.Crypto.dll" target="lib/netstandard1.5/Devolutions.Crypto.dll" />
+    <file src="../../../macos-full/bin/Devolutions.Crypto.pdb" target="lib/netstandard1.5/Devolutions.Crypto.pdb" />
 
-    <file src="../../../$platform$/bin/Devolutions.Crypto.dll" target="lib/netstandard2.0/Devolutions.Crypto.dll" />
-    <file src="../../../$platform$/bin/Devolutions.Crypto.pdb" target="lib/netstandard2.0/Devolutions.Crypto.pdb" />
+    <file src="../../../macos-full/bin/Devolutions.Crypto.dll" target="lib/netstandard2.0/Devolutions.Crypto.dll" />
+    <file src="../../../macos-full/bin/Devolutions.Crypto.pdb" target="lib/netstandard2.0/Devolutions.Crypto.pdb" />
 
-    <file src="../../../macos/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto-x64.dylib"/>
+    <file src="../../../macos-full/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto-x64.dylib"/>
 
     <file src="Devolutions.Crypto.Mac.Full.targets" target="build/net45/Devolutions.Crypto.Mac.Full.targets"/>
 </files>

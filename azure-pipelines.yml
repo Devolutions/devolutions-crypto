@@ -108,9 +108,16 @@ stages:
     - script: |
         source $HOME/.cargo/env
         
-        python3 GeneratePackage.py MAC
+        python3 GeneratePackage.py MAC-FULL
       workingDirectory: "./wrappers/csharp"
-      displayName: "Building Mac"
+      displayName: "Building Mac Full"
+
+    - script: |
+        source $HOME/.cargo/env
+        
+        python3 GeneratePackage.py MAC-MODERN
+      workingDirectory: "./wrappers/csharp"
+      displayName: "Building Mac Modern"
 
     - script: |
         source $HOME/.cargo/env
@@ -121,7 +128,12 @@ stages:
 
     - task: CopyFiles@2
       inputs:
-        contents: 'wrappers/csharp/macos/**'
+        contents: 'wrappers/csharp/macos-full/**'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/macos-modern/**'
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: CopyFiles@2

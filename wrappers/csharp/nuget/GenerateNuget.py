@@ -126,7 +126,7 @@ if sys.argv[1] == "MAC-FULL" or everything:
     print("Generating MAC FULL nuget...")
 
     # platform windows (since the managed mac dll only supports xamarin modern, windows managed dll is compatible)
-    command= subprocess.Popen(["nuget", "pack", "./macOS/Full/Devolutions.Crypto.Mac.Full.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Full/package", "-Properties", "platform=windows"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["nuget", "pack", "./macOS/Full/Devolutions.Crypto.Mac.Full.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Full/package"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
