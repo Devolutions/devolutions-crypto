@@ -10,7 +10,11 @@ namespace Devolutions.Cryptography
     public enum CipherVersion
     {
         Latest = 0,
+
+        // Aes256CbcHmacSha256
         V1 = 1,
+
+        // XChaCha20Poly1305
         V2 = 2
     }
 }
