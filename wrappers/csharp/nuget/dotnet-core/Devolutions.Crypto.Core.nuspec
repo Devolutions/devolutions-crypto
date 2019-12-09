@@ -22,7 +22,7 @@
     <file src="../../linux/bin/libDevolutionsCrypto-x64.so" target="runtimes/linux-x64/native/libDevolutionsCrypto-x64.so"/>
     <file src="../../linux/bin/libDevolutionsCrypto-x86.so" target="runtimes/linux-x86/native/libDevolutionsCrypto-x86.so"/>
 
-    <file src="../../macos/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto-x64.dylib"/>
+    <file src="../../macos-modern/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto-x64.dylib"/>
 
 </files>
 </package>

@@ -112,7 +112,7 @@ if sys.argv[1] == "WIN":
     print("Done")
     exit(0)
 
-if sys.argv[1] == "MAC":
+if sys.argv[1] == "MAC-FULL":
     architectures = { "arch" : 
                     [
                         #{"name" : "i686", "value" : "i686-apple-darwin"}, # 32 bit no longer supported by mac
@@ -121,14 +121,14 @@ if sys.argv[1] == "MAC":
             }
 
     try:
-        shutil.rmtree("./macos")
+        shutil.rmtree("./macos-full")
     except:
         pass
 
-    os.mkdir("./macos")
-    os.mkdir("./macos/bin")
+    os.mkdir("./macos-full")
+    os.mkdir("./macos-full/bin")
 
-    with open("./macos/bin/AssemblyInfo.cs","w+") as filee:
+    with open("./macos-full/bin/AssemblyInfo.cs","w+") as filee:
         filee.write(assembly_manifest)
 
 
@@ -148,39 +148,97 @@ if sys.argv[1] == "MAC":
 
         print(output)
 
-        os.mkdir("./macos/bin/" + arch["name"])
+        os.mkdir("./macos-full/bin/" + arch["name"])
 
-        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/libdevolutions_crypto.dylib", "./macos/bin/" + arch["name"] + "/libDevolutionsCrypto.dylib")
+        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/libdevolutions_crypto.dylib", "./macos-full/bin/" + arch["name"] + "/libDevolutionsCrypto.dylib")
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
-    command= subprocess.Popen(["csc", "-out:./macos/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./macos/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:MAC" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./macos/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["csc", "-out:./macos-full/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./macos-full/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:MAC_FULL" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./macos-full/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
     print(output)
 
     if("error" in output):
         exit(1)    
 
-    os.remove("./macos/bin/AssemblyInfo.cs")
+    os.remove("./macos-full/bin/AssemblyInfo.cs")
 
     print("Making universal binary...")
 
-    os.mkdir("./macos/bin/universal")
+    os.mkdir("./macos-full/bin/universal")
 
     libs = []
 
     for arch in architectures["arch"]:
-        libs.append("./macos/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib")
+        libs.append("./macos-full/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib")
     
     args = ["lipo", "-create"]
     args = args + libs
-    args = args + ["-output", "./macos/bin/universal/libDevolutionsCrypto.dylib"]
+    args = args + ["-output", "./macos-full/bin/universal/libDevolutionsCrypto.dylib"]
     
     command= subprocess.Popen(args, stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
 
+
+    print("Done")
+    exit(0)
+
+if sys.argv[1] == "MAC-MODERN":
+    architectures = { "arch" : 
+                    [
+                        #{"name" : "i686", "value" : "i686-apple-darwin"}, # 32 bit no longer supported by mac
+                        {"name" : "x86_64", "value" : "x86_64-apple-darwin"}
+                    ]
+            }
+
+    try:
+        shutil.rmtree("./macos-modern")
+    except:
+        pass
+
+    os.mkdir("./macos-modern")
+    os.mkdir("./macos-modern/bin")
+
+    for arch in architectures["arch"]:
+        print("Starting build for " + arch["name"])
+
+        try:
+            shutil.rmtree("../../devolutions-crypto/target/" + arch["value"] + "/release")
+        except:
+            pass
+
+
+        print("Building Native Libraries...")
+
+        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
+        output = command.stdout.read().decode('utf-8')
+
+        print(output)
+
+        os.mkdir("./macos-modern/bin/" + arch["name"])
+
+        shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/libdevolutions_crypto.dylib", "./macos-modern/bin/" + arch["name"] + "/libDevolutionsCrypto.dylib")
+
+
+    print("Making universal binary...")
+
+    os.mkdir("./macos-modern/bin/universal")
+
+    libs = []
+
+    for arch in architectures["arch"]:
+        libs.append("./macos-modern/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib")
+    
+    args = ["lipo", "-create"]
+    args = args + libs
+    args = args + ["-output", "./macos-modern/bin/universal/libDevolutionsCrypto.dylib"]
+    
+    command= subprocess.Popen(args, stdout=subprocess.PIPE)
+    output = command.stdout.read().decode('utf-8')
+
+    print(output)
 
     print("Done")
     exit(0)
@@ -204,10 +262,6 @@ if sys.argv[1] == "IOS":
     os.mkdir("./ios")
     os.mkdir("./ios/bin")
 
-    with open("./ios/bin/AssemblyInfo.cs","w+") as filee:
-        filee.write(assembly_manifest)
-
-
     for arch in architectures["arch"]:
         print("Starting build for " + arch["name"])
 
@@ -227,17 +281,6 @@ if sys.argv[1] == "IOS":
         os.mkdir("./ios/bin/" + arch["name"])
 
         shutil.copy("../../devolutions-crypto/ios/target/" + arch["value"] + "/release/libdevolutions_crypto.a", "./ios/bin/" + arch["name"] + "/libDevolutionsCrypto.a")
-
-    print("Building Managed Library...")
-    # TODO create universal library with lipo
-    command= subprocess.Popen(["csc", "-out:./ios/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./ios/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:IOS" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./ios/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-    print(output)
-
-    if("error" in output):
-        exit(1)
-
-    os.remove("./ios/bin/AssemblyInfo.cs")
 
     print("Making universal binary...")
 
@@ -278,10 +321,6 @@ if sys.argv[1] == "ANDROID":
     os.mkdir("./android")
     os.mkdir("./android/bin")
 
-    with open("./android/bin/AssemblyInfo.cs","w+") as filee:
-        filee.write(assembly_manifest)
-
-
     for arch in architectures["arch"]:
         print("Starting build for " + arch["name"])
 
@@ -302,16 +341,6 @@ if sys.argv[1] == "ANDROID":
 
         shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/libdevolutions_crypto.so", "./android/bin/" + arch["name"] + "/libDevolutionsCrypto.so")
 
-    print("Building Managed Library...")
-
-    command = subprocess.Popen(["csc", "-out:./android/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./android/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:ANDROID" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./android/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-    print(output)
-
-    if("error" in output):
-        exit(1)       
-
-    os.remove("./android/bin/AssemblyInfo.cs")
 
     print("Done")
     exit(0)

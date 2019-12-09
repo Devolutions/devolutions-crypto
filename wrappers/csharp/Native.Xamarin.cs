@@ -1,4 +1,4 @@
-#if ANDROID || IOS || MAC
+#if ANDROID || IOS || MAC_MODERN
 namespace Devolutions.Cryptography
 {
     using System;
