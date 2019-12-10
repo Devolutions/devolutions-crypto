@@ -19,7 +19,7 @@ pub struct DcHeader {
 }
 
 impl TryFrom<&[u8]> for DcHeader {
-    type Error = super::super::devocrypto_errors::DevoCryptoError;
+    type Error = crate::error::DevoCryptoError;
     fn try_from(data: &[u8]) -> Result<DcHeader> {
         let mut data_cursor = Cursor::new(data);
         let signature = data_cursor.read_u16::<LittleEndian>()?;
