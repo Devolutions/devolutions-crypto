@@ -1,6 +1,7 @@
 .DS_Store
 bin
 obj
+packages
 .vs
 *.nupkg
 wrappers/csharp/nuget/dotnet/package/*
