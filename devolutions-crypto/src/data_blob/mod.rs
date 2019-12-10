@@ -1,19 +1,19 @@
-mod dc_header;
-mod dc_payload;
+mod header;
+mod payload;
 
-mod dc_ciphertext;
-mod dc_hash;
-mod dc_key;
+mod ciphertext;
+mod hash;
+mod key;
 
 use super::DevoCryptoError;
 use super::Result;
 
-use self::dc_ciphertext::{DcCiphertext, CIPHERTEXT};
-use self::dc_hash::{DcHash, HASH};
-use self::dc_key::{DcKey, KEY};
+use self::ciphertext::{DcCiphertext, CIPHERTEXT};
+use self::hash::{DcHash, HASH};
+use self::key::{DcKey, KEY};
 
-use self::dc_header::DcHeader;
-use self::dc_payload::DcPayload;
+use self::header::DcHeader;
+use self::payload::DcPayload;
 
 use std;
 use std::convert::TryFrom;

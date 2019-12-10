@@ -1,10 +1,10 @@
-mod dc_hash_v1;
+mod hash_v1;
 
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
 
-use self::dc_hash_v1::DcHashV1;
+use self::hash_v1::DcHashV1;
 
 use std::convert::TryFrom as _;
 

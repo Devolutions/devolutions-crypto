@@ -1,12 +1,12 @@
-mod dc_ciphertext_v1;
-mod dc_ciphertext_v2;
+mod ciphertext_v1;
+mod ciphertext_v2;
 
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
 
-use self::dc_ciphertext_v1::DcCiphertextV1;
-use self::dc_ciphertext_v2::DcCiphertextV2;
+use self::ciphertext_v1::DcCiphertextV1;
+use self::ciphertext_v2::DcCiphertextV2;
 
 use std::convert::TryFrom as _;
 

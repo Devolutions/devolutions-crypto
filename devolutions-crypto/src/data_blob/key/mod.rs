@@ -1,10 +1,10 @@
-mod dc_key_v1;
+mod key_v1;
 
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
 
-use self::dc_key_v1::DcKeyV1;
+use self::key_v1::DcKeyV1;
 
 pub const KEY: u16 = 1;
 
