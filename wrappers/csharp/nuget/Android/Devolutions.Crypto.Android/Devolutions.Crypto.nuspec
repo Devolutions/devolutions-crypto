@@ -11,8 +11,8 @@
     <files>
 
     <!-- Android -->
-    <file src="Devolutions.Crypto.Android/bin/Release/Devolutions.Crypto.dll" target="lib/MonoAndroid81/Devolutions.Crypto.dll" />
-    <file src="Devolutions.Crypto.Android/bin/Release/Devolutions.Crypto.pdb" target="lib/MonoAndroid81/Devolutions.Crypto.pdb" />
+    <file src="Devolutions.Crypto.Android/bin/Release/Devolutions.Crypto.dll" target="lib/MonoAndroid10/Devolutions.Crypto.dll" />
+    <file src="Devolutions.Crypto.Android/bin/Release/Devolutions.Crypto.pdb" target="lib/MonoAndroid10/Devolutions.Crypto.pdb" />
 
 </files>
 </package>
