@@ -158,9 +158,9 @@ stages:
         addToPath: true
         architecture: 'x64'
 
-    - powershell: |
-        set PATH="%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\Roslyn"
-        echo "##vso[task.setvariable variable=PATH;]%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\Roslyn"
+    - bash: |
+        echo "##vso[task.prependpath]c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\Roslyn"
+      displayName: "Setting up PATH environment variable"
 
     - script: |
         curl -sSf -o rustup-init.exe https://win.rustup.rs
@@ -388,3 +388,38 @@ stages:
       inputs:
         pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: WebAssembly
+
+- stage: CSharpUnitTests
+  jobs: 
+  - job: Windows
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+      - checkout: self
+        lfs: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.x'
+          addToPath: true
+          architecture: 'x64'
+          
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          artifact: "MyBuildOutputs"
+          targetPath: "."
+
+      - bash: |
+          echo "##vso[task.prependpath]c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin"
+          echo "##vso[task.prependpath]c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow"
+        displayName: "setting up PATH environment variable"
+
+      - script: | 
+          curl https://dist.nuget.org/win-x86-commandline/latest/nuget.exe --output nuget.exe
+        workingDirectory: "./wrappers/csharp/unit-tests"
+        displayName: "Downloading nuget"
+
+      - script: |
+          python Test.py WIN
+
+        workingDirectory: "./wrappers/csharp/unit-tests"
+        displayName: "Unit tests"
