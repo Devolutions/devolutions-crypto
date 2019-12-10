@@ -19,7 +19,7 @@ use zeroize::Zeroize as _;
 
 use base64::{decode_config_slice, encode_config_slice, STANDARD};
 
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Encrypt a data blob
 /// # Arguments

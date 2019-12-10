@@ -1,11 +1,7 @@
-#[macro_use]
-extern crate cfg_if;
+use cfg_if::cfg_if;
 
 cfg_if! {
     if #[cfg(target_arch = "wasm32")] {
-        extern crate base64;
-        extern crate wasm_bindgen_test;
-
         use wasm_bindgen_test::*;
 
         use devolutions_crypto::wasm;
