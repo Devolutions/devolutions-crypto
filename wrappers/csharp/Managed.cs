@@ -6,7 +6,7 @@ namespace Devolutions.Cryptography
     public static class Managed
     {
 #if RDM
-        private const CipherVersion CIPHER_VERSION = CipherVersion.Aes256CbcHmacSha256;
+        private const CipherVersion CIPHER_VERSION = CipherVersion.V1;
 #else
         private const CipherVersion CIPHER_VERSION = CipherVersion.Latest;
 #endif
