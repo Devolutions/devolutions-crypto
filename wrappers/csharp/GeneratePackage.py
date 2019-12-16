@@ -4,6 +4,22 @@ import os
 import datetime
 import time
 import shutil
+import shlex
+
+
+def exec_command(command, cwd="."):
+    args = shlex.split(command)
+    process = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf8", cwd=cwd)
+
+    output = ""
+
+    if(process.stdout != None):
+        output = process.stdout + "\r\n"
+    
+    if(process.stderr != None):
+        output = output + process.stderr
+    
+    return output
 
 
 if len(sys.argv) < 2:
@@ -74,9 +90,7 @@ if sys.argv[1] == "WIN":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
-        output = command.stdout.read().decode('utf-8')
-
+        output = exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
         print(output)
         
         if rdm:
@@ -89,8 +103,7 @@ if sys.argv[1] == "WIN":
 
         shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/devolutions_crypto.dll", dllpath)
 
-        command= subprocess.Popen(["./tools/rcedit-x64.exe", dllpath, "--set-file-version", version], stdout=subprocess.PIPE)
-        output = command.stdout.read().decode('utf-8')
+        output = exec_command("./tools/rcedit-x64.exe " + dllpath + " --set-file-version " + version)
         print(output)
 
     print("Building Managed Library...")
@@ -100,8 +113,7 @@ if sys.argv[1] == "WIN":
     if rdm:
         define += ";RDM"
 
-    command= subprocess.Popen(["csc","-out:./" + folder + "/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./" + folder + "/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", define ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./" + folder + "/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
+    output = exec_command("csc -out:./" + folder + "/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./" + folder + "/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu " + define + " NativeError.cs Native.cs Native.Xamarin.cs ManagedError.cs Managed.cs KeyExchange.cs Utils.cs Enums.cs ./" + folder + "/bin/AssemblyInfo.cs")
     print(output)
 
     if("error" in output):
@@ -143,9 +155,7 @@ if sys.argv[1] == "MAC-FULL":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
-        output = command.stdout.read().decode('utf-8')
-
+        output = exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
         print(output)
 
         os.mkdir("./macos-full/bin/" + arch["name"])
@@ -154,8 +164,7 @@ if sys.argv[1] == "MAC-FULL":
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
-    command= subprocess.Popen(["csc", "-out:./macos-full/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./macos-full/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:MAC_FULL" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./macos-full/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
+    output = exec_command("csc -out:./macos-full/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./macos-full/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:MAC_FULL NativeError.cs Native.cs Native.Xamarin.cs ManagedError.cs Managed.cs KeyExchange.cs Utils.cs Enums.cs ./macos-full/bin/AssemblyInfo.cs")
     print(output)
 
     if("error" in output):
@@ -167,20 +176,17 @@ if sys.argv[1] == "MAC-FULL":
 
     os.mkdir("./macos-full/bin/universal")
 
-    libs = []
+    libs = " "
 
     for arch in architectures["arch"]:
-        libs.append("./macos-full/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib")
+        libs = libs + " ./macos-full/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib"
     
-    args = ["lipo", "-create"]
+    args = "lipo -create"
     args = args + libs
-    args = args + ["-output", "./macos-full/bin/universal/libDevolutionsCrypto.dylib"]
+    args = args + " -output + ./macos-full/bin/universal/libDevolutionsCrypto.dylib"
     
-    command= subprocess.Popen(args, stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-
+    output = exec_command(args)
     print(output)
-
 
     print("Done")
     exit(0)
@@ -212,9 +218,7 @@ if sys.argv[1] == "MAC-MODERN":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
-        output = command.stdout.read().decode('utf-8')
-
+        command= exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
         print(output)
 
         os.mkdir("./macos-modern/bin/" + arch["name"])
@@ -226,18 +230,16 @@ if sys.argv[1] == "MAC-MODERN":
 
     os.mkdir("./macos-modern/bin/universal")
 
-    libs = []
+    libs = " "
 
     for arch in architectures["arch"]:
-        libs.append("./macos-modern/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib")
+        libs = libs + " ./macos-modern/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib"
     
-    args = ["lipo", "-create"]
+    args = "lipo -create"
     args = args + libs
-    args = args + ["-output", "./macos-modern/bin/universal/libDevolutionsCrypto.dylib"]
+    args = args + " -output ./macos-modern/bin/universal/libDevolutionsCrypto.dylib"
     
-    command= subprocess.Popen(args, stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-
+    output = exec_command(args)
     print(output)
 
     print("Done")
@@ -273,9 +275,7 @@ if sys.argv[1] == "IOS":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"], "--manifest-path", "./ios/Cargo.toml"], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
-        output = command.stdout.read().decode('utf-8')
-
+        output = exec_command("cargo build --release --target " + arch["value"] + " --manifest-path ./ios/Cargo.toml", "../../devolutions-crypto")
         print(output)
 
         os.mkdir("./ios/bin/" + arch["name"])
@@ -286,18 +286,16 @@ if sys.argv[1] == "IOS":
 
     os.mkdir("./ios/bin/universal")
 
-    libs = []
+    libs = " "
 
     for arch in architectures["arch"]:
-        libs.append("./ios/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.a")
+        libs = libs + " ./ios/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.a"
     
-    args = ["lipo", "-create"]
+    args = "lipo -create "
     args = args + libs
-    args = args + ["-output", "./ios/bin/universal/libDevolutionsCrypto.a"]
+    args = args + " -output ./ios/bin/universal/libDevolutionsCrypto.a"
     
-    command= subprocess.Popen(args, stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-
+    output = exec_command(args)
     print(output)
     print("Done")
     exit(0)
@@ -332,9 +330,7 @@ if sys.argv[1] == "ANDROID":
 
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
-        output = command.stdout.read().decode('utf-8')
-
+        output = exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
         print(output)
 
         os.mkdir("./android/bin/" + arch["name"])
@@ -373,11 +369,9 @@ if sys.argv[1] == "LINUX":
         except:
             pass
 
-
         print("Building Native Libraries...")
 
-        command= subprocess.Popen(["cargo", "build", "--release", "--target", arch["value"]], cwd="../../devolutions-crypto", stdout=subprocess.PIPE)
-        output = command.stdout.read().decode('utf-8')
+        output = exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
 
         print(output)
 
@@ -392,8 +386,7 @@ if sys.argv[1] == "LINUX":
 
     print("Building Managed Library...")
 
-    command= subprocess.Popen(["csc", "-out:./linux/bin/Devolutions.Crypto.dll", "-debug:pdbonly" ,"-pdb:./linux/bin/Devolutions.Crypto.pdb", "-target:library", "-platform:anycpu", "-define:LINUX" ,"NativeError.cs", "Native.cs", "Native.Xamarin.cs", "ManagedError.cs", "Managed.cs", "KeyExchange.cs", "Utils.cs", "Enums.cs", "./linux/bin/AssemblyInfo.cs"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
+    output = exec_command("csc -out:./linux/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./linux/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:LINUX NativeError.cs Native.cs Native.Xamarin.cs ManagedError.cs Managed.cs KeyExchange.cs Utils.cs Enums.cs ./linux/bin/AssemblyInfo.cs")
     print(output)
 
     if("error" in output):
@@ -403,4 +396,6 @@ if sys.argv[1] == "LINUX":
 
     print("Done")
     exit(0)
+
+
 
