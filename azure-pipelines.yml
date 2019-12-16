@@ -8,14 +8,12 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7'
     - script: |
         sudo apt update
         sudo apt install nuget gcc-multilib software-properties-common
-
-        sudo add-apt-repository ppa:deadsnakes/ppa
-        sudo apt update
-
-        sudo apt install python3.7
       displayName: "Installing dependencies"
 
     - script: |
@@ -38,7 +36,7 @@ stages:
       displayName: "Unit tests"  
 
     - script: |
-        python3.7 GeneratePackage.py LINUX
+        python GeneratePackage.py LINUX
       workingDirectory: "./wrappers/csharp"
       displayName: "Building Linux"
 
@@ -63,7 +61,7 @@ stages:
         export ANDROID_HOME=/usr/local/lib/android/sdk        
         export NDK_HOME=$ANDROID_HOME/ndk-bundle
 
-        python3.7 GeneratePackage.py ANDROID
+        python GeneratePackage.py ANDROID
       workingDirectory: "./wrappers/csharp"
       displayName: "Building Android"
 
