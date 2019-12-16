@@ -218,7 +218,7 @@ if sys.argv[1] == "MAC-MODERN":
 
         print("Building Native Libraries...")
 
-        command= exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
+        output= exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
         print(output)
 
         os.mkdir("./macos-modern/bin/" + arch["name"])

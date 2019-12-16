@@ -10,8 +10,12 @@ stages:
     steps:
     - script: |
         sudo apt update
-        sudo apt install nuget
-        sudo apt install gcc-multilib
+        sudo apt install nuget gcc-multilib software-properties-common
+
+        sudo add-apt-repository ppa:deadsnakes/ppa
+        sudo apt update
+
+        sudo apt install python3.7
       displayName: "Installing dependencies"
 
     - script: |
@@ -34,7 +38,7 @@ stages:
       displayName: "Unit tests"  
 
     - script: |
-        python3 GeneratePackage.py LINUX
+        python3.7 GeneratePackage.py LINUX
       workingDirectory: "./wrappers/csharp"
       displayName: "Building Linux"
 
@@ -59,7 +63,7 @@ stages:
         export ANDROID_HOME=/usr/local/lib/android/sdk        
         export NDK_HOME=$ANDROID_HOME/ndk-bundle
 
-        python3 GeneratePackage.py ANDROID
+        python3.7 GeneratePackage.py ANDROID
       workingDirectory: "./wrappers/csharp"
       displayName: "Building Android"
 
