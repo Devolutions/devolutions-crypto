@@ -63,7 +63,12 @@ namespace Devolutions.Cryptography
 
         public static byte[] Decrypt(byte[] data, byte[] key)
         {
-            if (data == null || data.Length == 0 || key == null)
+            if(data == null || data.Length == 0)
+            {
+                return null;
+            }
+
+            if (key == null)
             {
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
@@ -113,7 +118,12 @@ namespace Devolutions.Cryptography
 
         public static byte[] Encrypt(byte[] data, byte[] key, uint version = 0)
         {
-            if (data == null || data.Length == 0 || key == null)
+            if(data == null || data.Length == 0)
+            {
+                return null;
+            }
+
+            if (key == null)
             {
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
