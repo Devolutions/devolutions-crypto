@@ -165,13 +165,7 @@ stages:
       displayName: "Setting up PATH environment variable"
 
     - script: |
-        curl -sSf -o rustup-init.exe https://win.rustup.rs
-        rustup-init.exe -y --default-toolchain stable
-        set PATH=%PATH%;%USERPROFILE%\.cargo\bin
-        echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
-      displayName: "Install rust (windows)"
-
-    - script: |
+        rustup update
         rustup target add x86_64-pc-windows-msvc
         rustup target add i686-pc-windows-msvc
       displayName: "Installing rust targets"
@@ -186,9 +180,19 @@ stages:
       workingDirectory: "./wrappers/csharp"
       displayName: "Building WIN"
 
+    - script: |
+        python GeneratePackage.py WIN RDM
+      workingDirectory: "./wrappers/csharp"
+      displayName: "Building WIN"
+
     - task: CopyFiles@2
       inputs:
         contents: 'wrappers/csharp/windows/**'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/rdm/**'
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: PublishBuildArtifacts@1
@@ -220,11 +224,11 @@ stages:
       inputs:
         contents: 'wrappers/csharp/nuget/Linux/package/**'
         flattenFolders: true
-        targetFolder: $(Build.ArtifactStagingDirectory)
+        targetFolder: $(Build.ArtifactStagingDirectory)/general
 
     - task: PublishBuildArtifacts@1
       inputs:
-        pathToPublish: $(Build.ArtifactStagingDirectory)
+        pathToPublish: $(Build.ArtifactStagingDirectory)/general
         artifactName: Nugets
 
   - job: macOS
@@ -261,29 +265,29 @@ stages:
       inputs:
         contents: 'wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/package/**'
         flattenFolders: true
-        targetFolder: $(Build.ArtifactStagingDirectory)
+        targetFolder: $(Build.ArtifactStagingDirectory)/general
 
     - task: CopyFiles@2
       inputs:
         contents: 'wrappers/csharp/nuget/macOS/Full/package/**'
         flattenFolders: true
-        targetFolder: $(Build.ArtifactStagingDirectory)
+        targetFolder: $(Build.ArtifactStagingDirectory)/general
 
     - task: CopyFiles@2
       inputs:
         contents: 'wrappers/csharp/nuget/macOS/Modern/Devolutions.Crypto.Mac/package/**'
         flattenFolders: true
-        targetFolder: $(Build.ArtifactStagingDirectory)
+        targetFolder: $(Build.ArtifactStagingDirectory)/general
 
     - task: CopyFiles@2
       inputs:
         contents: 'wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/package/**'
         flattenFolders: true
-        targetFolder: $(Build.ArtifactStagingDirectory)
+        targetFolder: $(Build.ArtifactStagingDirectory)/general
 
     - task: PublishBuildArtifacts@1
       inputs:
-        pathToPublish: $(Build.ArtifactStagingDirectory)
+        pathToPublish: $(Build.ArtifactStagingDirectory)/general
         artifactName: Nugets
 
 
@@ -315,6 +319,11 @@ stages:
       displayName: "Generating WIN Nuget"
 
     - script: |
+        python GenerateNuget.py RDM
+      workingDirectory: "./wrappers/csharp/nuget"
+      displayName: "Generating WIN RDM Nuget"
+
+    - script: |
         python GenerateNuget.py DOTNET
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating DOTNET Nuget"
@@ -323,18 +332,29 @@ stages:
       inputs:
         contents: 'wrappers/csharp/nuget/Windows/package/**'
         flattenFolders: true
-        targetFolder: $(Build.ArtifactStagingDirectory)
+        targetFolder: $(Build.ArtifactStagingDirectory)/general
 
     - task: CopyFiles@2
       inputs:
         contents: 'wrappers/csharp/nuget/dotnet-core/package/**'
         flattenFolders: true
-        targetFolder: $(Build.ArtifactStagingDirectory)
+        targetFolder: $(Build.ArtifactStagingDirectory)/general
 
     - task: PublishBuildArtifacts@1
       inputs:
-        pathToPublish: $(Build.ArtifactStagingDirectory)
+        pathToPublish: $(Build.ArtifactStagingDirectory)/general
         artifactName: Nugets
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/nuget/rdm/package/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)/app-specific
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)/app-specific
+        artifactName: AppSpecificNugets
 
 - stage: WebAssembly
   jobs:

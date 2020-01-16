@@ -26,6 +26,14 @@ if sys.argv[1] == "WIN" or everything:
 
     print(output)
 
+if sys.argv[1] == "RDM" or everything:
+    print("Generating WINDOWS RDM nuget...")
+
+    command= subprocess.Popen(["nuget", "pack", "./rdm/Devolutions.Crypto.Windows.RDM.nuspec", "-Version", version, "-OutputDirectory", "./rdm/package"], stdout=subprocess.PIPE)
+    output = command.stdout.read().decode('utf-8')
+
+    print(output)
+
 if sys.argv[1] == "LINUX" or everything:
     print("Generating LINUX nuget...")
 
