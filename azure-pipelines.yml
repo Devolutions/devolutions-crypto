@@ -186,9 +186,19 @@ stages:
       workingDirectory: "./wrappers/csharp"
       displayName: "Building WIN"
 
+    - script: |
+        python GeneratePackage.py WIN RDM
+      workingDirectory: "./wrappers/csharp"
+      displayName: "Building WIN"
+
     - task: CopyFiles@2
       inputs:
         contents: 'wrappers/csharp/windows/**'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'wrappers/csharp/rdm/**'
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: PublishBuildArtifacts@1
