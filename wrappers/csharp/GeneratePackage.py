@@ -183,10 +183,13 @@ if sys.argv[1] == "MAC-FULL":
     
     args = "lipo -create"
     args = args + libs
-    args = args + " -output + ./macos-full/bin/universal/libDevolutionsCrypto.dylib"
+    args = args + " -output ./macos-full/bin/universal/libDevolutionsCrypto.dylib"
     
     output = exec_command(args)
     print(output)
+
+    if("error" in output):
+        exit(1)
 
     print("Done")
     exit(0)
@@ -241,6 +244,9 @@ if sys.argv[1] == "MAC-MODERN":
     
     output = exec_command(args)
     print(output)
+
+    if("error" in output):
+        exit(1)
 
     print("Done")
     exit(0)
@@ -297,6 +303,10 @@ if sys.argv[1] == "IOS":
     
     output = exec_command(args)
     print(output)
+
+    if("error" in output):
+        exit(1)
+
     print("Done")
     exit(0)
 
