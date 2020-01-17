@@ -4,6 +4,7 @@ trigger:
 stages:
 
 - stage: Source_Publishing
+  dependsOn: [] 
   jobs:
   - job: Linux
     pool:
@@ -23,6 +24,7 @@ stages:
         artifactName: Source
 
 - stage: Native_Build
+  dependsOn: [] 
   jobs:
   - job: Linux
     pool:
@@ -221,6 +223,7 @@ stages:
         artifactName: MyBuildOutputs
 
 - stage: Nugets
+  dependsOn: Native_Build
   jobs:
   - job: Linux
     pool:
@@ -259,6 +262,9 @@ stages:
       inputs:
         artifact: "MyBuildOutputs"
         targetPath: "."
+    - script: |
+        sudo nuget update -self
+      displayName: "Update Nuget"
 
     - script: |
         python3 GenerateNuget.py IOS
@@ -377,6 +383,7 @@ stages:
         artifactName: AppSpecificNugets
 
 - stage: WebAssembly
+  dependsOn: [] 
   jobs:
   - job: safari_unit_tests
     pool:
@@ -432,6 +439,7 @@ stages:
         artifactName: WebAssembly
 
 - stage: CSharpUnitTests
+  dependsOn: Native_Build
   jobs: 
   - job: Windows
     pool:
