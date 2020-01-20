@@ -26,6 +26,9 @@ if sys.argv[1] == "WIN" or everything:
 
     print(output)
 
+    if("error" in output):
+        exit(1)
+
 if sys.argv[1] == "RDM" or everything:
     print("Generating WINDOWS RDM nuget...")
 
@@ -34,6 +37,9 @@ if sys.argv[1] == "RDM" or everything:
 
     print(output)
 
+    if("error" in output):
+        exit(1)
+
 if sys.argv[1] == "LINUX" or everything:
     print("Generating LINUX nuget...")
 
@@ -41,6 +47,9 @@ if sys.argv[1] == "LINUX" or everything:
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+    if("error" in output):
+        exit(1)
 
 if sys.argv[1] == "IOS" or everything:
     print("Generating assembly manifest for IOS...")
@@ -81,10 +90,13 @@ if sys.argv[1] == "IOS" or everything:
 
     print("Generating IOS nuget...")
 
-    command= subprocess.Popen(["nuget", "pack", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.nuspec", "-Version", version, "-OutputDirectory", "./iOS/Devolutions.Crypto.iOS/package"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["nuget", "pack", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS.nuspec", "-Version", version, "-OutputDirectory", "./iOS/Devolutions.Crypto.iOS/package"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+    if("error" in output):
+        exit(1)
 
 if sys.argv[1] == "MAC-MODERN" or everything:
     print("Generating assembly manifest for MAC MODERN...")
@@ -125,10 +137,13 @@ if sys.argv[1] == "MAC-MODERN" or everything:
 
     print("Generating MAC MODERN nuget...")
 
-    command= subprocess.Popen(["nuget", "pack", "./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Modern/Devolutions.Crypto.Mac/package"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["nuget", "pack", "./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac.Modern.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Modern/Devolutions.Crypto.Mac/package"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+    if("error" in output):
+        exit(1)
 
 if sys.argv[1] == "MAC-FULL" or everything:
     print("Generating MAC FULL nuget...")
@@ -138,6 +153,9 @@ if sys.argv[1] == "MAC-FULL" or everything:
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+    if("error" in output):
+        exit(1)
 
 if sys.argv[1] == "ANDROID" or everything:
     print("Generating assembly manifest for Android...")
@@ -178,10 +196,13 @@ if sys.argv[1] == "ANDROID" or everything:
 
     print("Generating ANDROID nuget...")
 
-    command= subprocess.Popen(["nuget", "pack", "./Android/Devolutions.Crypto.Android/Devolutions.Crypto.nuspec", "-Version", version, "-OutputDirectory", "./Android/Devolutions.Crypto.Android/package"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["nuget", "pack", "./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android.nuspec", "-Version", version, "-OutputDirectory", "./Android/Devolutions.Crypto.Android/package"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+
+    if("error" in output):
+        exit(1)
 
 
 if sys.argv[1] == "DOTNET" or everything:
@@ -191,3 +212,5 @@ if sys.argv[1] == "DOTNET" or everything:
     output = command.stdout.read().decode('utf-8')
 
     print(output)
+    if("error" in output):
+        exit(1)

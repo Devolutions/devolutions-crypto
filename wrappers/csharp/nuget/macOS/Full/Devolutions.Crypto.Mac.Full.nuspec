@@ -6,11 +6,13 @@
         <authors>Devolutions Inc</authors>
         <description>Devolutions Cryptographic Library For the .NET Framework, .NET Standard platforms for the Xamarin Mac Full platform</description>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <copyright>Copyright 2019 @ Devolutions Inc</copyright>
+        <copyright>Copyright 2020 @ Devolutions Inc</copyright>
         <frameworkAssemblies>
             <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5" />
             <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.5" />
         </frameworkAssemblies>
+        <license type="expression">Apache-2.0 OR MIT</license>
+        <projectUrl>https://github.com/Devolutions/devolutions-crypto</projectUrl>
     </metadata>
     <files>
 
