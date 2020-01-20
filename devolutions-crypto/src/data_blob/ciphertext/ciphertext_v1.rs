@@ -63,7 +63,6 @@ impl DcCiphertextV1 {
         pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, signature_key);
     }
 
-    #[allow(dead_code)]
     pub fn encrypt(data: &[u8], key: &[u8], header: &DcHeader) -> Result<DcCiphertextV1> {
         // Split keys
         let mut encryption_key = vec![0u8; 32];

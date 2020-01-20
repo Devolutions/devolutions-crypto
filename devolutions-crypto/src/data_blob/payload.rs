@@ -4,13 +4,15 @@ use super::Result;
 use super::DcHeader;
 
 use super::{DcCiphertext, CIPHERTEXT};
-use super::{DcHash, HASH};
+use super::{DcPasswordHash, PASSWORD_HASH};
 use super::{DcKey, KEY};
+use super::{DcChecksum, CHECKSUM};
 
 pub enum DcPayload {
     Key(DcKey),
     Ciphertext(DcCiphertext),
-    Hash(DcHash),
+    PasswordHash(DcPasswordHash),
+    Checksum(DcChecksum),
 }
 
 impl DcPayload {
@@ -20,7 +22,8 @@ impl DcPayload {
             CIPHERTEXT => Ok(DcPayload::Ciphertext(DcCiphertext::try_from_header(
                 data, header,
             )?)),
-            HASH => Ok(DcPayload::Hash(DcHash::try_from_header(data, header)?)),
+            PASSWORD_HASH => Ok(DcPayload::PasswordHash(DcPasswordHash::try_from_header(data, header)?)),
+            CHECKSUM => Ok(DcPayload::Checksum(DcChecksum::try_from_header(data, header)?)),
             _ => Err(DevoCryptoError::UnknownType),
         }
     }
@@ -44,14 +47,15 @@ impl DcPayload {
     }
 
     pub fn hash_password(pass: &[u8], iterations: u32, header: &mut DcHeader) -> Result<DcPayload> {
-        Ok(DcPayload::Hash(DcHash::hash_password(
+        Ok(DcPayload::PasswordHash(DcPasswordHash::hash_password(
             pass, iterations, header,
         )?))
     }
 
-    pub fn verify_password(&self, pass: &[u8]) -> Result<bool> {
+    pub fn validate(&self, data: &[u8]) -> Result<bool> {
         match self {
-            DcPayload::Hash(x) => x.verify_password(pass),
+            DcPayload::PasswordHash(x) => x.verify_password(data),
+            DcPayload::Checksum(x) => x.validate_checksum(data),
             _ => Err(DevoCryptoError::InvalidDataType),
         }
     }
@@ -71,6 +75,16 @@ impl DcPayload {
             _ => Err(DevoCryptoError::InvalidDataType),
         }
     }
+
+    pub fn checksum(
+        data: &[u8],
+        header: &mut DcHeader,
+        version: Option<u16>,
+    ) -> Result<DcPayload> {
+        Ok(DcPayload::Checksum(DcChecksum::checksum(
+            data, header, version,
+        )?))
+    }
 }
 
 impl From<DcPayload> for Vec<u8> {
@@ -78,7 +92,8 @@ impl From<DcPayload> for Vec<u8> {
         match payload {
             DcPayload::Key(x) => x.into(),
             DcPayload::Ciphertext(x) => x.into(),
-            DcPayload::Hash(x) => x.into(),
+            DcPayload::PasswordHash(x) => x.into(),
+            DcPayload::Checksum(x) => x.into(),
         }
     }
 }

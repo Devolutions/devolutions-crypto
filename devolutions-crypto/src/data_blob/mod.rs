@@ -2,15 +2,17 @@ mod header;
 mod payload;
 
 mod ciphertext;
-mod hash;
+mod password_hash;
 mod key;
+mod checksum;
 
 use super::DevoCryptoError;
 use super::Result;
 
 use self::ciphertext::{DcCiphertext, CIPHERTEXT};
-use self::hash::{DcHash, HASH};
+use self::password_hash::{DcPasswordHash, PASSWORD_HASH};
 use self::key::{DcKey, KEY};
+use self::checksum::{DcChecksum, CHECKSUM};
 
 use self::header::DcHeader;
 use self::payload::DcPayload;
@@ -56,7 +58,7 @@ impl DcDataBlob {
     /// # Arguments
     ///  * `data` - Data to encrypt.
     ///  * `key` - Key to use. Can be of arbitrary size.
-    ///  * `version` - Version of the library to encrypt with. Use 0 for default.
+    ///  * `version` - Version of the library to encrypt with. Use None for default.
     /// # Returns
     /// Returns a `DcDataBlob` containing the encrypted data.
     /// # Example
@@ -95,10 +97,10 @@ impl DcDataBlob {
         self.payload.decrypt(key, &self.header)
     }
 
-    /// Creates a data blob containing a password hash.
+    /// Creates a data blob containing a password password_hash.
     /// # Arguments
-    ///  * `password` - The password to hash.
-    ///  * `iterations` - The number of iterations of the password hash.
+    ///  * `password` - The password to password_hash.
+    ///  * `iterations` - The number of iterations of the password password_hash.
     ///                     A higher number is slower but harder to brute-force.
     ///                     The recommended is 10000, but the number can be set by the user.
     /// # Returns
@@ -117,11 +119,11 @@ impl DcDataBlob {
         Ok(DcDataBlob { header, payload })
     }
 
-    /// Verify if the blob matches with the specified password. Should execute in constant time.
+    /// Verify if the blob matches with the specified data. Could be a checksum or a password hash. Should execute in constant time.
     /// # Arguments
-    ///  * `password` - Password to verify.
+    ///  * `data` - Data to verify.
     /// # Returns
-    /// Returns true if the password matches and false if it doesn't.
+    /// Returns true if the data matches and false if it doesn't.
     /// # Example
     /// ```rust
     /// use devolutions_crypto::DcDataBlob;
@@ -129,11 +131,11 @@ impl DcDataBlob {
     /// let password = b"somesuperstrongpa$$w0rd!";
     ///
     /// let hashed_password = DcDataBlob::hash_password(password, 10000).unwrap();
-    /// assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!").unwrap());
-    /// assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!").unwrap());
+    /// assert!(hashed_password.validate(b"somesuperstrongpa$$w0rd!").unwrap());
+    /// assert!(!hashed_password.validate(b"someweakpa$$w0rd!").unwrap());
     /// ```
-    pub fn verify_password(&self, password: &[u8]) -> Result<bool> {
-        self.payload.verify_password(password)
+    pub fn validate(&self, data: &[u8]) -> Result<bool> {
+        self.payload.validate(data)
     }
 
     /// Generates a key pair to use in a key exchange. See `mix_key_exchange` for a complete usage.
@@ -209,6 +211,31 @@ impl DcDataBlob {
     /// ```
     pub fn mix_key_exchange(self, public: DcDataBlob) -> Result<Vec<u8>> {
         self.payload.mix_key_exchange(public.payload)
+    }
+
+    /// Creates a data blob containing a checksum
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - The data to be hashed
+    /// * `version` - Version of the library to encrypt with. Use None for default.
+    ///
+    /// # Example
+    /// ```
+    /// use devolutions_crypto::DcDataBlob;
+    /// let checksum = DcDataBlob::checksum("test_data".as_bytes(), None).unwrap();
+    ///
+    /// assert!(checksum.validate("test_data".as_bytes()).unwrap());
+    /// assert!(!checksum.validate("data_test".as_bytes()).unwrap());
+    /// ```
+    pub fn checksum(data: &[u8], version: Option<u16>) -> Result<DcDataBlob> {
+        let mut header = DcHeader::new();
+        let payload = DcPayload::checksum(data, &mut header, version)?;
+
+        Ok(DcDataBlob {
+            header,
+            payload,
+        })
     }
 }
 
@@ -304,8 +331,8 @@ fn password_test() {
 
     let hash = DcDataBlob::hash_password(pass, iterations).unwrap();
 
-    assert!(hash.verify_password(pass).unwrap());
-    assert!(!hash.verify_password("averybadpassword".as_bytes()).unwrap())
+    assert!(hash.validate(pass).unwrap());
+    assert!(!hash.validate("averybadpassword".as_bytes()).unwrap())
 }
 
 #[test]
@@ -317,4 +344,15 @@ fn ecdh_test() {
     let alice_shared = alice_priv.mix_key_exchange(bob_pub).unwrap();
 
     assert_eq!(bob_shared, alice_shared);
+}
+
+#[test]
+fn checksum_test() {
+    let good = "thisisatest 12345".as_bytes();
+    let bad = "thisisabadtest".as_bytes();
+
+    let checksum = DcDataBlob::checksum(good, None).unwrap();
+
+    assert!(checksum.validate(good).unwrap());
+    assert!(!checksum.validate(bad).unwrap());
 }

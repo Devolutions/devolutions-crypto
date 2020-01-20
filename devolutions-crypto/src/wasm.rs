@@ -48,9 +48,14 @@ pub fn hash_password(password: &[u8], iterations: Option<u32>) -> Result<Vec<u8>
 }
 
 #[wasm_bindgen]
-pub fn verify_password(password: &[u8], hash: &[u8]) -> Result<bool, JsValue> {
+pub fn checksum(data: &[u8], version: Option<u16>) -> Result<Vec<u8>, JsValue> {
+    Ok(DcDataBlob::checksum(&data, version)?.into())
+}
+
+#[wasm_bindgen]
+pub fn validate(data: &[u8], hash: &[u8]) -> Result<bool, JsValue> {
     let data_blob = DcDataBlob::try_from(hash)?;
-    Ok(data_blob.verify_password(&password)?)
+    Ok(data_blob.validate(&data)?)
 }
 
 #[wasm_bindgen]

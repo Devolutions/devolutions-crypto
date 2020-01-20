@@ -2,7 +2,7 @@
 
 //! FFI interface for use with other languages. Mostly used for C and C#.
 //! # Safety
-//! Note that this API is unsafe by nature: Rust can do a couple of check but cannot garantee
+//! Note that this API is unsafe by nature: Rust can do a couple of check but cannot guarantee
 //!     the received pointers are valid. It is the job of the calling language to verify it passes
 //!     the right pointers and length.
 //! The Size functions must be called to get the required length of the returned array before
@@ -141,16 +141,16 @@ pub unsafe extern "C" fn Decrypt(
 
 /// Hash a password using a high-cost algorithm.
 /// # Arguments
-///  * `password` - Pointer to the password to hash.
-///  * `password_length` - Length of the password to hash.
-///  * `iterations` - Number of iterations of the password hash.
+///  * `password` - Pointer to the password to password_hash.
+///  * `password_length` - Length of the password to password_hash.
+///  * `iterations` - Number of iterations of the password password_hash.
 ///                   A higher number is slower but harder to brute-force. The recommended is 10000,
 ///                   but the number can be set by the user.
-///  * `result` - Pointer to the buffer to write the hash to.
-///  * `result_length` - Length of the buffer to write the hash to. You can get the value by
+///  * `result` - Pointer to the buffer to write the password_hash to.
+///  * `result_length` - Length of the buffer to write the password_hash to. You can get the value by
 ///                         calling HashPasswordLength() beforehand.
 /// # Returns
-/// This returns the length of the hash. If there is an error, it will return the
+/// This returns the length of the password_hash. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
 #[no_mangle]
 pub unsafe extern "C" fn HashPassword(
@@ -183,39 +183,39 @@ pub unsafe extern "C" fn HashPassword(
     }
 }
 
-/// Get the size of the resulting hash.
+/// Get the size of the resulting password_hash.
 /// # Returns
-/// Returns the length of the hash to input as `result_length` in `HashPassword()`.
+/// Returns the length of the password_hash to input as `result_length` in `HashPassword()`.
 #[no_mangle]
 pub extern "C" fn HashPasswordLength() -> i64 {
-    8 + 4 + 32 + 32 // Header + iterations + salt + hash
+    8 + 4 + 32 + 32 // Header + iterations + salt + password_hash
 }
 
-/// Verify a password against a hash with constant-time equality.
+/// Verify data against a hash with constant-time equality.
 /// # Arguments
-///  * `password` - Pointer to the password to verify.
-///  * `password_length` - Length of the password to verify.
+///  * `data` - Pointer to the data to verify.
+///  * `data_length` - Length of the data to verify.
 ///  * `hash` - Pointer to the hash to verify.
-///  * `hash_length` - Length of the hash to verify.
+///  * `hash_length` - Length of the password_hash to verify.
 /// # Returns
 /// Returns 0 if the password is invalid or 1 if the password is valid. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
 #[no_mangle]
-pub unsafe extern "C" fn VerifyPassword(
-    password: *const u8,
-    password_length: usize,
+pub unsafe extern "C" fn Validate(
+    data: *const u8,
+    data_length: usize,
     hash: *const u8,
     hash_length: usize,
 ) -> i64 {
-    if password.is_null() || hash.is_null() {
+    if data.is_null() || hash.is_null() {
         return DevoCryptoError::NullPointer.error_code();
     };
 
-    let password = slice::from_raw_parts(password, password_length);
+    let data = slice::from_raw_parts(data, data_length);
     let hash = slice::from_raw_parts(hash, hash_length);
 
     match DcDataBlob::try_from(hash) {
-        Ok(res) => match res.verify_password(password) {
+        Ok(res) => match res.validate(data) {
             Ok(res) => {
                 if res {
                     1
