@@ -3,17 +3,13 @@ namespace Devolutions.Cryptography
     using System;
     using System.Runtime.InteropServices;    
     using System.Reflection;
-  
-#if RDM
-    using System.IO;
-#endif
 
     public static partial class Native
     {
 
 #if RDM
-        private const string LibName64 = "DevolutionsCrypto";
-        private const string LibName86 = "DevolutionsCrypto";
+        private const string LibName64 = "x64/DevolutionsCrypto";
+        private const string LibName86 = "x86/DevolutionsCrypto";
 #endif
 
 #if !ANDROID && !IOS && !MAC_MODERN && !RDM
@@ -23,33 +19,6 @@ namespace Devolutions.Cryptography
 
         static Native()
         {
-#if RDM
-            // RDM Specific
-            // Load the right native DLL depending on the arch
-           Assembly assemblyRdm = Assembly.GetEntryAssembly();
-
-           if(assemblyRdm == null)
-           {
-               assemblyRdm = Assembly.GetExecutingAssembly();
-           }
-
-           if(assemblyRdm == null)
-           {
-               throw new System.ComponentModel.Win32Exception();
-           }
-
-           string path = Path.GetDirectoryName(assemblyRdm.Location);
-
-           path = Path.Combine(path, Environment.Is64BitProcess ? "x64" : "x86");
-
-           bool ok = SetDllDirectory(path);
-
-           if (!ok)
-           {
-               throw new System.ComponentModel.Win32Exception();
-           }
-#endif
-
             Assembly assembly = Assembly.GetExecutingAssembly();
 
             string managedVersion = assembly.GetName().Version.ToString();
@@ -533,11 +502,6 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName64, EntryPoint = "VersionSize", CallingConvention = CallingConvention.Cdecl)]
         public static extern long VersionSize64();
-#endif
-
-#if RDM
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern bool SetDllDirectory(string path);
 #endif
     }
 }
