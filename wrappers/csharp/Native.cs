@@ -503,10 +503,5 @@ namespace Devolutions.Cryptography
         [DllImport(LibName64, EntryPoint = "VersionSize", CallingConvention = CallingConvention.Cdecl)]
         public static extern long VersionSize64();
 #endif
-
-#if RDM
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern bool SetDllDirectory(string path);
-#endif
     }
 }
