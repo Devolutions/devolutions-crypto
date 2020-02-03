@@ -3,7 +3,7 @@ use super::Result;
 
 use std::convert::TryFrom;
 
-use sha2::{ Digest, Sha256 };
+use sha2::{Digest, Sha256};
 
 use subtle::ConstantTimeEq as _;
 use zeroize::Zeroize;
@@ -34,9 +34,7 @@ impl TryFrom<&[u8]> for DcChecksumV1 {
 
         checksum.copy_from_slice(data);
 
-        Ok(DcChecksumV1 {
-            checksum
-        })
+        Ok(DcChecksumV1 { checksum })
     }
 }
 
@@ -45,9 +43,7 @@ impl DcChecksumV1 {
         let mut hasher = HashFunction::new();
         hasher.input(data);
         let checksum = hasher.result().to_vec();
-        Ok(DcChecksumV1 {
-            checksum,
-        })
+        Ok(DcChecksumV1 { checksum })
     }
 
     pub fn validate_checksum(&self, data: &[u8]) -> Result<bool> {
@@ -58,4 +54,3 @@ impl DcChecksumV1 {
         Ok(is_equal)
     }
 }
-

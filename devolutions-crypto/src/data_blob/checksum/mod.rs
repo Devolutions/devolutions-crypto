@@ -34,14 +34,18 @@ impl From<DcChecksum> for Vec<u8> {
 }
 
 impl DcChecksum {
-    pub fn checksum(data: &[u8], header: &mut DcHeader, version: Option<u16>) -> Result<DcChecksum> {
-        header.data_type =  CHECKSUM;
+    pub fn checksum(
+        data: &[u8],
+        header: &mut DcHeader,
+        version: Option<u16>,
+    ) -> Result<DcChecksum> {
+        header.data_type = CHECKSUM;
 
         match version {
             Some(V1) | None => {
                 header.version = V1;
                 Ok(DcChecksum::V1(DcChecksumV1::checksum(data)?))
-            },
+            }
             _ => Err(DevoCryptoError::UnknownVersion),
         }
     }

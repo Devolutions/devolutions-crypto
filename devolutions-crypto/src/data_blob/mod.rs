@@ -1,18 +1,18 @@
 mod header;
 mod payload;
 
-mod ciphertext;
-mod password_hash;
-mod key;
 mod checksum;
+mod ciphertext;
+mod key;
+mod password_hash;
 
 use super::DevoCryptoError;
 use super::Result;
 
-use self::ciphertext::{DcCiphertext, CIPHERTEXT};
-use self::password_hash::{DcPasswordHash, PASSWORD_HASH};
-use self::key::{DcKey, KEY};
 use self::checksum::{DcChecksum, CHECKSUM};
+use self::ciphertext::{DcCiphertext, CIPHERTEXT};
+use self::key::{DcKey, KEY};
+use self::password_hash::{DcPasswordHash, PASSWORD_HASH};
 
 use self::header::DcHeader;
 use self::payload::DcPayload;
@@ -214,7 +214,6 @@ impl DcDataBlob {
     }
 
     /// Creates a data blob containing a checksum
-    ///
     /// # Arguments
     ///
     /// * `data` - The data to be hashed
@@ -232,10 +231,7 @@ impl DcDataBlob {
         let mut header = DcHeader::new();
         let payload = DcPayload::checksum(data, &mut header, version)?;
 
-        Ok(DcDataBlob {
-            header,
-            payload,
-        })
+        Ok(DcDataBlob { header, payload })
     }
 }
 

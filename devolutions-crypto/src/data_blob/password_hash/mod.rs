@@ -34,10 +34,16 @@ impl From<DcPasswordHash> for Vec<u8> {
 }
 
 impl DcPasswordHash {
-    pub fn hash_password(pass: &[u8], iterations: u32, header: &mut DcHeader) -> Result<DcPasswordHash> {
+    pub fn hash_password(
+        pass: &[u8],
+        iterations: u32,
+        header: &mut DcHeader,
+    ) -> Result<DcPasswordHash> {
         header.data_type = PASSWORD_HASH;
         header.version = V1;
-        Ok(DcPasswordHash::V1(DcPasswordHashV1::hash_password(pass, iterations)?))
+        Ok(DcPasswordHash::V1(DcPasswordHashV1::hash_password(
+            pass, iterations,
+        )?))
     }
 
     pub fn verify_password(&self, pass: &[u8]) -> Result<bool> {

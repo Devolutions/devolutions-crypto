@@ -3,10 +3,10 @@ use super::Result;
 
 use super::DcHeader;
 
-use super::{DcCiphertext, CIPHERTEXT};
-use super::{DcPasswordHash, PASSWORD_HASH};
-use super::{DcKey, KEY};
 use super::{DcChecksum, CHECKSUM};
+use super::{DcCiphertext, CIPHERTEXT};
+use super::{DcKey, KEY};
+use super::{DcPasswordHash, PASSWORD_HASH};
 
 pub enum DcPayload {
     Key(DcKey),
@@ -22,8 +22,12 @@ impl DcPayload {
             CIPHERTEXT => Ok(DcPayload::Ciphertext(DcCiphertext::try_from_header(
                 data, header,
             )?)),
-            PASSWORD_HASH => Ok(DcPayload::PasswordHash(DcPasswordHash::try_from_header(data, header)?)),
-            CHECKSUM => Ok(DcPayload::Checksum(DcChecksum::try_from_header(data, header)?)),
+            PASSWORD_HASH => Ok(DcPayload::PasswordHash(DcPasswordHash::try_from_header(
+                data, header,
+            )?)),
+            CHECKSUM => Ok(DcPayload::Checksum(DcChecksum::try_from_header(
+                data, header,
+            )?)),
             _ => Err(DevoCryptoError::UnknownType),
         }
     }
@@ -76,11 +80,7 @@ impl DcPayload {
         }
     }
 
-    pub fn checksum(
-        data: &[u8],
-        header: &mut DcHeader,
-        version: Option<u16>,
-    ) -> Result<DcPayload> {
+    pub fn checksum(data: &[u8], header: &mut DcHeader, version: Option<u16>) -> Result<DcPayload> {
         Ok(DcPayload::Checksum(DcChecksum::checksum(
             data, header, version,
         )?))
