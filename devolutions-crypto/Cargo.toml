@@ -1,6 +1,6 @@
 [package]
 name = "devolutions-crypto"
-version = "0.3.2"
+version = "0.3.4"
 authors = ["Philippe Dugre <pdugre@devolutions.net>", "Mathieu Morrissette <mmorrissette@devolutions.net>"]
 edition = "2018"
 readme = "../README.md"
