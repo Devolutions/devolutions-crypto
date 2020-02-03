@@ -475,7 +475,7 @@ stages:
       
       - script: |
           python Test.py DOTNET-CORE
-        workingDirectory: "./wrappers/csharp/unit-tests"
+        workingDirectory: "./wrappers/csharp/unit-tests/dotnet-core"
         displayName: "Unit tests DOTNET CORE"
 
   - job: Linux
@@ -501,8 +501,26 @@ stages:
 
       - script: |
           python Test.py DOTNET-CORE
-        workingDirectory: "./wrappers/csharp/unit-tests"
+        workingDirectory: "./wrappers/csharp/unit-tests/dotnet-core"
         displayName: "Unit tests DOTNET CORE"
+
+  - job: macOS
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: "MyBuildOutputs"
+        targetPath: "."
+    - script: |
+        sudo nuget update -self
+      displayName: "Update Nuget"
+
+    - script: |
+        python3 Test.py DOTNET-CORE
+      workingDirectory: "./wrappers/csharp/unit-tests/dotnet-core"
+      displayName: "Unit tests DOTNET CORE"
+
 
           
         

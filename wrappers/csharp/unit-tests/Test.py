@@ -33,7 +33,7 @@ if sys.argv[1] == "DOTNET-FRAMEWORK-PACKAGE-CONFIG":
 if sys.argv[1] == "DOTNET-CORE":
     print("Nuget Restore")
 
-    output = check_output(["nuget", "restore", "./dotnet-framework-package-config"]).decode(sys.stdout.encoding).strip()
+    output = check_output(["nuget", "restore"]).decode(sys.stdout.encoding).strip()
     print(output)
 
     print("Building Unit tests for DOTNET CORE")
