@@ -469,7 +469,40 @@ stages:
         displayName: "Downloading nuget"
 
       - script: |
-          python Test.py WIN
-
+          python Test.py DOTNET-FRAMEWORK-PACKAGE-CONFIG
         workingDirectory: "./wrappers/csharp/unit-tests"
-        displayName: "Unit tests"
+        displayName: "Unit tests DOTNET FRAMEWORK PACKAGE CONFIG"
+      
+      - script: |
+          python Test.py DOTNET-CORE
+        workingDirectory: "./wrappers/csharp/unit-tests"
+        displayName: "Unit tests DOTNET CORE"
+
+  - job: Linux
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - checkout: self
+        lfs: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.x'
+          addToPath: true
+          architecture: 'x64'
+
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          artifact: "MyBuildOutputs"
+          targetPath: "."
+
+      - script: |
+          sudo apt install nuget
+        displayName: "Install nuget"
+
+      - script: |
+          python Test.py DOTNET-CORE
+        workingDirectory: "./wrappers/csharp/unit-tests"
+        displayName: "Unit tests DOTNET CORE"
+
+          
+        
