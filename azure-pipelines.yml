@@ -475,7 +475,7 @@ stages:
       
       - script: |
           python Test.py DOTNET-CORE
-        workingDirectory: "./wrappers/csharp/unit-tests/dotnet-core"
+        workingDirectory: "./wrappers/csharp/unit-tests"
         displayName: "Unit tests DOTNET CORE"
 
   - job: Linux
@@ -501,7 +501,7 @@ stages:
 
       - script: |
           python Test.py DOTNET-CORE
-        workingDirectory: "./wrappers/csharp/unit-tests/dotnet-core"
+        workingDirectory: "./wrappers/csharp/unit-tests"
         displayName: "Unit tests DOTNET CORE"
 
   - job: macOS
@@ -518,7 +518,7 @@ stages:
 
     - script: |
         python3 Test.py DOTNET-CORE
-      workingDirectory: "./wrappers/csharp/unit-tests/dotnet-core"
+      workingDirectory: "./wrappers/csharp/unit-tests"
       displayName: "Unit tests DOTNET CORE"
 
 
