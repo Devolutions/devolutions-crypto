@@ -439,7 +439,7 @@ stages:
         artifactName: WebAssembly
 
 - stage: CSharpUnitTests
-  dependsOn: Native_Build
+  dependsOn: Nugets
   jobs: 
   - job: Windows
     pool:
@@ -455,8 +455,8 @@ stages:
           
       - task: DownloadPipelineArtifact@2
         inputs:
-          artifact: "MyBuildOutputs"
-          targetPath: "."
+          artifact: "Nugets"
+          targetPath: "./wrappers/csharp/unit-tests/Nugets"
 
       - bash: |
           echo "##vso[task.prependpath]c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin"
@@ -469,7 +469,7 @@ stages:
         displayName: "Downloading nuget"
 
       - script: |
-          python Test.py DOTNET-FRAMEWORK-PACKAGE-CONFIG
+          python Test.py DOTNET-FRAMEWORK
         workingDirectory: "./wrappers/csharp/unit-tests"
         displayName: "Unit tests DOTNET FRAMEWORK PACKAGE CONFIG"
       
@@ -492,8 +492,8 @@ stages:
 
       - task: DownloadPipelineArtifact@2
         inputs:
-          artifact: "MyBuildOutputs"
-          targetPath: "."
+          artifact: "Nugets"
+          targetPath: "./wrappers/csharp/unit-tests/Nugets"
 
       - script: |
           sudo apt install nuget
@@ -510,8 +510,8 @@ stages:
     steps:
     - task: DownloadPipelineArtifact@2
       inputs:
-        artifact: "MyBuildOutputs"
-        targetPath: "."
+        artifact: "Nugets"
+        targetPath: "./wrappers/csharp/unit-tests/Nugets"
     - script: |
         sudo nuget update -self
       displayName: "Update Nuget"
