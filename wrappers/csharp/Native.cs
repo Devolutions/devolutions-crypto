@@ -57,19 +57,25 @@ namespace Devolutions.Cryptography
             return result;
         }
 
-        public static byte[] DerivePassword(string password, string salt, uint iterations = 10000)
+        public static byte[] DerivePassword(string password, DeriveKeyVersion version, string salt, uint iterations = 10000)
         {
-            return DeriveKey(Utils.StringToByteArray(password), Utils.StringToByteArray(salt), iterations);
+            return DeriveKey(Utils.StringToByteArray(password), version, Utils.StringToByteArray(salt), iterations);
         }
 
-        public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000)
+        public static byte[] DeriveKey(byte[] key, DeriveKeyVersion version, byte[] salt, uint iterations = 10000)
         {
             if (key == null)
             {
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
 
-            uint keySize = KeySizeNative();
+            uint keySize;
+            if(version == DeriveKeyVersion.V1) {
+                keySize = KeySizeNative();
+            }
+            else {
+                keySize = KeySizeNative() / 8;
+            };
 
             byte[] result = new byte[keySize];
 
