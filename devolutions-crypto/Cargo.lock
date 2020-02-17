@@ -164,7 +164,7 @@ dependencies = [
 
 [[package]]
 name = "devolutions-crypto"
-version = "0.3.4"
+version = "0.4.0"
 dependencies = [
  "aead 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "aes 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
