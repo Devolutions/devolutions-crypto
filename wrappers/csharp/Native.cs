@@ -62,16 +62,14 @@ namespace Devolutions.Cryptography
             return DeriveKey(Utils.StringToByteArray(password), Utils.StringToByteArray(salt), iterations);
         }
 
-        public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000)
+        public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000, uint length = 32)
         {
             if (key == null)
             {
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
 
-            uint keySize = KeySizeNative();
-
-            byte[] result = new byte[keySize];
+            byte[] result = new byte[length];
 
             int saltLength = salt == null ? 0 : salt.Length;
 

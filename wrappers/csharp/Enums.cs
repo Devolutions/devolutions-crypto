@@ -15,6 +15,9 @@ namespace Devolutions.Cryptography
         V1 = 1,
 
         // XChaCha20Poly1305
-        V2 = 2
+        V2 = 2,
+
+        // XChaCha20Poly1305 with DeriveKey length fix
+        V2_5 = 2,
     }
 }
