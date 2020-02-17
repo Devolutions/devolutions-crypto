@@ -1,8 +1,9 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace dotnet_framework
+﻿namespace dotnet_framework
 {
+    using System;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Devolutions.Cryptography;
+
     [TestClass]
     public class UnitTest
     {
@@ -13,6 +14,18 @@ namespace dotnet_framework
 
             string decryptResult = Devolutions.Cryptography.Managed.DecryptWithPasswordAsString(encryptResult, "SomePassword");
 
+            if (decryptResult != "SomeData")
+            {
+                throw new Exception();
+            }
+
+            encryptResult = null;
+            decryptResult = null;
+
+            encryptResult = Devolutions.Cryptography.Managed.EncryptWithPasswordAsString("SomeData", "SomePassword", cipher_version: CipherVersion.V2);
+            
+            decryptResult = Devolutions.Cryptography.Managed.DecryptWithPasswordAsString(encryptResult, "SomePassword");
+            
             if (decryptResult != "SomeData")
             {
                 throw new Exception();
