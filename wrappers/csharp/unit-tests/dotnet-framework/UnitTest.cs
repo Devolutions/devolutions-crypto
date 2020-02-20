@@ -10,25 +10,42 @@
         [TestMethod]
         public void TestMethod()
         {
-            string encryptResult = Devolutions.Cryptography.Managed.EncryptWithPasswordAsString("SomeData", "SomePassword");
-
-            string decryptResult = Devolutions.Cryptography.Managed.DecryptWithPasswordAsString(encryptResult, "SomePassword");
-
-            if (decryptResult != "SomeData")
+            try
             {
-                throw new Exception();
+                string encryptResult = Devolutions.Cryptography.Managed.EncryptWithPasswordAsString("SomeData", "SomePassword");
+
+                string decryptResult = Devolutions.Cryptography.Managed.DecryptWithPasswordAsString(encryptResult, "SomePassword");
+
+                if (decryptResult != "SomeData")
+                {
+                    throw new Exception();
+                }
+
+                encryptResult = null;
+                decryptResult = null;
+
+                encryptResult = Devolutions.Cryptography.Managed.EncryptWithPasswordAsString("SomeData", "SomePassword", cipher_version: CipherVersion.V2);
+                
+                decryptResult = Devolutions.Cryptography.Managed.DecryptWithPasswordAsString(encryptResult, "SomePassword");
+                
+                if (decryptResult != "SomeData")
+                {
+                    throw new Exception();
+                }
             }
-
-            encryptResult = null;
-            decryptResult = null;
-
-            encryptResult = Devolutions.Cryptography.Managed.EncryptWithPasswordAsString("SomeData", "SomePassword", cipher_version: CipherVersion.V2);
-            
-            decryptResult = Devolutions.Cryptography.Managed.DecryptWithPasswordAsString(encryptResult, "SomePassword");
-            
-            if (decryptResult != "SomeData")
+            catch(DevolutionsCryptoException ex)
             {
-                throw new Exception();
+                if (ex.NativeError != null)
+                {
+                    Console.WriteLine(ex.NativeError.ToString());
+                }
+
+                if (ex.ManagedError != null)
+                {
+                    Console.WriteLine(ex.ManagedError.ToString());
+                }
+
+                throw ex;
             }
         }
     }
