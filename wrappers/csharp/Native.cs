@@ -17,6 +17,7 @@ namespace Devolutions.Cryptography
         private const string LibName86 = "DevolutionsCrypto-x86";
 #endif
 
+#if !DEBUG
         static Native()
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -29,6 +30,7 @@ namespace Devolutions.Cryptography
                 throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion);
             }
         }
+#endif
 
         public static byte[] Decrypt(byte[] data, byte[] key)
         {
