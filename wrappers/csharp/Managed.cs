@@ -63,11 +63,11 @@ namespace Devolutions.Cryptography
         public static string EncryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
             uint keySize;
-            if(cipher_version == CipherVersion.V2_5) {
-                keySize = 32;
+            if(cipher_version == CipherVersion.V1 || cipher_version == CIPHER_VERSION.V2) {
+                keySize = 256;
             }
             else {
-                keySize = 256;
+                keySize = 32;
             }
 
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
@@ -81,11 +81,11 @@ namespace Devolutions.Cryptography
         public static string EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
             uint keySize;
-            if(cipher_version == CipherVersion.V2_5) {
-                keySize = 32;
+            if(cipher_version == CipherVersion.V1 || cipher_version == CIPHER_VERSION.V2) {
+                keySize = 256;
             }
             else {
-                keySize = 256;
+                keySize = 32;
             }
 
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
@@ -98,11 +98,11 @@ namespace Devolutions.Cryptography
         public static string EncryptWithPasswordAsString(string data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
             uint keySize;
-            if(cipher_version == CipherVersion.V2_5) {
-                keySize = 32;
+            if(cipher_version == CipherVersion.V1 || cipher_version == CIPHER_VERSION.V2) {
+                keySize = 256;
             }
             else {
-                keySize = 256;
+                keySize = 32;
             }
 
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
@@ -116,11 +116,11 @@ namespace Devolutions.Cryptography
         public static byte[] EncryptWithPassword(byte[] data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
             uint keySize;
-            if(cipher_version == CipherVersion.V2_5) {
-                keySize = 32;
+            if(cipher_version == CipherVersion.V1 || cipher_version == CIPHER_VERSION.V2) {
+                keySize = 256;
             }
             else {
-                keySize = 256;
+                keySize = 32;
             }
 
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
@@ -134,11 +134,11 @@ namespace Devolutions.Cryptography
         public static byte[] EncryptBase64WithPassword(string b64data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
             uint keySize;
-            if(cipher_version == CipherVersion.V2_5) {
-                keySize = 32;
+            if(cipher_version == CipherVersion.V1 || cipher_version == CIPHER_VERSION.V2) {
+                keySize = 256;
             }
             else {
-                keySize = 256;
+                keySize = 32;
             }
 
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
@@ -151,11 +151,11 @@ namespace Devolutions.Cryptography
         public static byte[] EncryptWithPassword(string data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
             uint keySize;
-            if(cipher_version == CipherVersion.V2_5) {
-                keySize = 32;
+            if(cipher_version == CipherVersion.V1 || cipher_version == CIPHER_VERSION.V2) {
+                keySize = 256;
             }
             else {
-                keySize = 256;
+                keySize = 32;
             }
 
             byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
