@@ -147,7 +147,7 @@ impl From<BlockModeError> for DevoCryptoError {
 
 impl From<aead::Error> for DevoCryptoError {
     fn from(_error: aead::Error) -> DevoCryptoError {
-        DevoCryptoError::CryptoError
+        DevoCryptoError::InvalidMac
     }
 }
 
