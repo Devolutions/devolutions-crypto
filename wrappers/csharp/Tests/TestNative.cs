@@ -1,0 +1,166 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Devolutions.Cryptography;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Tests
+{
+    [TestClass]
+    public class TestNative
+    {
+        private readonly byte[] _byteArray = new byte[] { 0x41, 0x42, 0x43 };
+        private readonly string _textToTest = "QUJD";
+        private readonly string _textToTest2 = "QUJDDE";
+        private readonly string _cryptoKey = "Key123";
+        private readonly byte[] _cryptoKeyByteArray = new byte[] { 0x4b, 0x65, 0x79, 0x31, 0x32, 0x33 };
+
+        [TestMethod]
+        public void Decode86()
+        {
+            var x = Native.Decode86(_textToTest, (UIntPtr)_textToTest.Length, new byte[] { 0x00, 0x00, 0x00 }, (UIntPtr)0x00000003);
+            Assert.AreEqual((long)0x0000000000000003, x);
+        }
+
+        [TestMethod]
+        public void DecodeNative()
+        {
+            var x = Native.DecodeNative(_textToTest, (UIntPtr)_textToTest.Length, new byte[] { 0x00, 0x00, 0x00 }, (UIntPtr)0x00000003);
+            Assert.AreEqual((long)0x0000000000000003, x);
+        }
+
+        [TestMethod]
+        public void Decrypt()
+        {
+            var encryptedData = new byte[]
+            {   
+                0x0d, 0x0c, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0xa4, 0x24,
+                0x87, 0x8e, 0xa2, 0xcb, 0xd9, 0x53, 0xc4, 0x14, 0xbf, 0x9d,
+                0x56, 0x10, 0x53, 0x72, 0x75, 0xf3, 0x15, 0x2e, 0xfa, 0x55,
+                0x2a, 0xda, 0xee,  0xe7, 0x7a, 0xfd, 0x1d, 0xf0, 0xe8, 0x97,
+                0x0b, 0xc3, 0x63, 0x20, 0x07, 0x46, 0xaa, 0x14, 0x18, 0xd6,
+                0xd1, 0x4d
+            };
+
+            var y = Native.Decrypt(encryptedData, _cryptoKeyByteArray);
+            var z = Utils.ByteArrayToString(y);
+            Assert.AreEqual(z, _textToTest);
+        }
+
+        [TestMethod]
+        public void DeriveKey()
+        {
+            var derivedKey = new byte[]
+            {   
+                0xb8, 0xe8, 0xea, 0x5f, 0xe4, 0x90, 0x86, 0x28,
+                0x8d, 0x98, 0x67, 0x6c, 0xce, 0x9d, 0xd4, 0x21,
+                0x2c, 0x5a, 0xd0, 0x9b, 0x05, 0x89, 0xb3, 0x2f,
+                0xd8, 0x29, 0x7a,  0xc0, 0x67, 0xb7, 0xf3, 0xe2
+            };
+            var x = Native.DeriveKey(_cryptoKeyByteArray, null, 100);
+
+            CollectionAssert.AreEqual(derivedKey, x);
+        }
+
+        [TestMethod]
+        public void DerivePassword()
+        {
+            var derivedPassword = new byte[]
+            {   
+                0x4d, 0x42, 0x5d, 0x3b, 0x8f, 0x36, 0xe4, 0xff,
+                0xb2, 0x56, 0xa4, 0xdc, 0x7c, 0x48, 0x66, 0x17,
+                0x7e, 0x74, 0x87, 0x61, 0x62, 0x68, 0xb1, 0x2b,
+                0x54, 0x0e, 0x1a,  0xf8, 0x03, 0xbb, 0x39, 0xc4
+            };
+            var y = Native.DerivePassword(_textToTest, null, 100);
+
+            CollectionAssert.AreEqual(derivedPassword, y);
+        }
+
+        [TestMethod]
+        public void GenerateKey()
+        {
+            var y = Native.GenerateKey(32);
+            Assert.AreEqual(32, y.Length);
+            var z = Native.GenerateKey(32);
+            CollectionAssert.AreNotEqual(y, z);
+        }
+
+        [TestMethod]
+        public void HashPassword()
+        {
+            var y = Native.HashPassword(_cryptoKeyByteArray);
+            var z = Native.HashPassword(_byteArray);
+
+            Assert.IsTrue(Native.VerifyPassword(_cryptoKeyByteArray, y));
+            Assert.IsFalse(Native.VerifyPassword(z, y));
+        }
+
+        [TestMethod]
+        public void VerifyPassword()
+        {
+            var encryptedData = new byte[]
+            {
+                0x0d, 0x0c, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x10, 0x27,
+                0x00, 0x00, 0x36, 0xf8, 0x52, 0x24, 0x7a, 0x19, 0x10, 0xc5,
+                0xa4, 0x9c, 0x73, 0xec, 0x83, 0x58, 0x9b, 0xea, 0x63, 0x3a,
+                0xf1, 0xbf, 0xf6, 0xa4, 0xd8, 0xe0, 0x85, 0xc9, 0xaa, 0x9e,
+                0xe1, 0xef, 0x7f, 0x60, 0xf3, 0x3f, 0x1b, 0x6c, 0x5f, 0xce,
+                0x54, 0x55, 0xb8, 0x73, 0xc9, 0xd9, 0x22, 0xa0, 0x24, 0xca,
+                0xe8, 0xc9, 0x57, 0x96, 0x1b, 0x3d, 0xce, 0x47, 0xe5, 0xc3,
+                0x39, 0xe1, 0x0d, 0x08, 0x42, 0x70
+            };
+            Assert.IsTrue(Native.VerifyPassword(_cryptoKeyByteArray, encryptedData));
+        }
+
+        [TestMethod]
+        public void Encode86()
+        {
+            var buffer = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
+            var x = Native.Encode86(_byteArray, (UIntPtr)_byteArray.Length, buffer, (UIntPtr)buffer.Length);
+            Assert.AreEqual((long)0x0000000000000004, x);
+        }
+
+        [TestMethod]
+        public void Encode64()
+        {
+            var buffer = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
+            var x = Native.Encode64(_byteArray, (UIntPtr)_byteArray.Length, buffer, (UIntPtr)buffer.Length);
+            Assert.AreEqual((long)0x0000000000000004, x);
+        }
+
+        [TestMethod]
+        public void EncodeNative()
+        {
+            var buffer = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
+            var x = Native.EncodeNative(_byteArray, (UIntPtr)_byteArray.Length, buffer, (UIntPtr)buffer.Length);
+            Assert.AreEqual((long)0x0000000000000004, x);
+        }
+
+        [TestMethod]
+        public void GenerateKeyExchange()
+        {
+            var x = Native.GenerateKeyExchange();
+        }
+
+        [TestMethod]
+        public void MixKeyExchange()
+        {
+            //var x = Native.MixKeyExchange();
+        }
+
+        [TestMethod]
+        public void Encrypt()
+        {
+            var a = Utils.StringToByteArray(_textToTest2);
+            var x = Native.Encrypt(a, _cryptoKeyByteArray);
+            Assert.IsTrue(Utils.ValidateSignature(x, DataType.Cipher));
+
+            var y = Native.Decrypt(x, _cryptoKeyByteArray);
+            var z = Utils.ByteArrayToString(y);
+            Assert.AreEqual(z, _textToTest2);
+        }
+    }
+}
