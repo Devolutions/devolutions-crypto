@@ -136,11 +136,8 @@ namespace Devolutions.Cryptography
             }
 
             int characterCount = base64.Length;
-
             int result = Convert.ToInt32(3 * ((double)characterCount/4));
-		
             int index = characterCount - 1;
-
             int loopCount = 1;
 
             while(base64[index] == '=' && loopCount <= 2)
