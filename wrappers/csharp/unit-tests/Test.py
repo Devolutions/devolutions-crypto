@@ -1,11 +1,18 @@
 
 import subprocess
 import sys
+import os
 
 # Current dotnet bugs that prevents this code from being cleanly made
 # https://github.com/NuGet/Home/issues/7413 can't specify url as a fallback with local source
 # output = get_output(["dotnet", "restore", "--source", "../Nugets", "--source", "https://www.nuget.org/api/v3/", "--verbosity", "normal", "--no-cache", "--force"], cwd="./dotnet-framework")
 # --no-cache doesn't work https://github.com/NuGet/Home/issues/5619
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+print("script directory :")
+print(script_dir)
+
+os.chdir(script_dir)
 
 def get_output(args, cwd=None):
     try:
@@ -27,15 +34,15 @@ print("====================================================================")
 
 if sys.argv[1] == "DOTNET-FRAMEWORK":
     print("Nuget Cache Clear")
-    print("==========================================================================")
+    print("==========================================================================")    
     
+    # CLEAN
     output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./dotnet-framework")
     print(output)
 
-    print("Installing Nuget Package in Nugets folder")
+    print("Remove Local NuGet Source")
     print("==========================================================================")
-    
-    output = get_output(["nuget", "add", "./Nugets/Devolutions.Crypto.Windows." + version + ".nupkg", "-Source", "./Nugets"])
+    output = get_output(["nuget", "sources", "remove", "-Name", "LOCALDEVOCRYPTO"])
     print(output)
 
     print("Nuget Remove Nuget.org Devolutions.Crypto Package")
@@ -43,14 +50,27 @@ if sys.argv[1] == "DOTNET-FRAMEWORK":
     output = get_output(["dotnet", "remove", "package", "Devolutions.Crypto.Windows"], cwd="./dotnet-framework")
     print(output)
 
-    print("Nuget Add Package Devolutions Crypto")
-    print("==========================================================================")
-    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Windows", "--source", "../Nugets", "--version", version], cwd="./dotnet-framework")
-    print(output)
-
+    # Restore    
     print("Nuget Restore Global Packages")
     print("==========================================================================")
     output = get_output(["dotnet", "restore", "./dotnet-framework", "--verbosity", "normal"])
+    print(output)
+
+    print("Add Local NuGet Source")
+    print("==========================================================================")
+    print(os.path.join(script_dir, "Nugets"))
+    output = get_output(["nuget", "sources", "add", "-Name", "LOCALDEVOCRYPTO", "-Source", os.path.join(script_dir, "Nugets")])
+    print(output)
+
+    print("Installing Nuget Package in Nugets Source")
+    print("==========================================================================")
+    
+    output = get_output(["nuget", "add", "./Nugets/Devolutions.Crypto.Windows." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
+    print(output)
+
+    print("Nuget Add Package Devolutions Crypto to project")
+    print("==========================================================================")
+    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Windows", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./dotnet-framework")
     print(output)
 
     print("Building Unit tests for DOTNET FRAMEWORK with package config")
@@ -84,16 +104,13 @@ if sys.argv[1] == "DOTNET-FRAMEWORK":
         exit(1)
 
 if sys.argv[1] == "DOTNET-CORE":
-    print("Nuget Cache Clear")
-    print("==========================================================================")
-    
+        # CLEAN
     output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./dotnet-core")
     print(output)
 
-    print("Installing Nuget Package in Nugets folder")
+    print("Remove Local NuGet Source")
     print("==========================================================================")
-    
-    output = get_output(["nuget", "add", "./Nugets/Devolutions.Crypto.Core." + version + ".nupkg", "-Source", "./Nugets"])
+    output = get_output(["nuget", "sources", "remove", "-Name", "LOCALDEVOCRYPTO"])
     print(output)
 
     print("Nuget Remove Nuget.org Devolutions.Crypto Package")
@@ -101,14 +118,27 @@ if sys.argv[1] == "DOTNET-CORE":
     output = get_output(["dotnet", "remove", "package", "Devolutions.Crypto.Core"], cwd="./dotnet-core")
     print(output)
 
-    print("Nuget Add Package Devolutions Crypto")
-    print("==========================================================================")
-    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Core", "--source", "../Nugets", "--version", version], cwd="./dotnet-core")
-    print(output)
-
+    # Restore    
     print("Nuget Restore Global Packages")
     print("==========================================================================")
     output = get_output(["dotnet", "restore", "./dotnet-core", "--verbosity", "normal"])
+    print(output)
+
+    print("Add Local NuGet Source")
+    print("==========================================================================")
+    print(os.path.join(script_dir, "Nugets"))
+    output = get_output(["nuget", "sources", "add", "-Name", "LOCALDEVOCRYPTO", "-Source", os.path.join(script_dir, "Nugets")])
+    print(output)
+
+    print("Installing Nuget Package in Nugets Source")
+    print("==========================================================================")
+    
+    output = get_output(["nuget", "add", "./Nugets/Devolutions.Crypto.Core." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
+    print(output)
+
+    print("Nuget Add Package Devolutions Crypto to project")
+    print("==========================================================================")
+    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Core", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./dotnet-core")
     print(output)
 
     print("Building Unit tests for DOTNET CORE")

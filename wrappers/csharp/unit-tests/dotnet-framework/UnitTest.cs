@@ -24,6 +24,18 @@
                 encryptResult = null;
                 decryptResult = null;
 
+                encryptResult = Devolutions.Cryptography.Managed.EncryptWithPasswordAsString("SomeData", "SomePassword", cipher_version: CipherVersion.V1);
+
+                decryptResult = Devolutions.Cryptography.Managed.DecryptWithPasswordAsString(encryptResult, "SomePassword");
+
+                if (decryptResult != "SomeData")
+                {
+                    throw new Exception();
+                }
+
+                encryptResult = null;
+                decryptResult = null;
+
                 encryptResult = Devolutions.Cryptography.Managed.EncryptWithPasswordAsString("SomeData", "SomePassword", cipher_version: CipherVersion.V2);
                 
                 decryptResult = Devolutions.Cryptography.Managed.DecryptWithPasswordAsString(encryptResult, "SomePassword");
