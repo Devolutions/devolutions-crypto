@@ -13,6 +13,11 @@
         </frameworkAssemblies>
         <license type="expression">Apache-2.0 OR MIT</license>
         <projectUrl>https://github.com/Devolutions/devolutions-crypto</projectUrl>
+        <dependencies>
+            <group targetFramework=".NETFramework4.5" />
+            <group targetFramework=".NETStandard1.5" />
+            <group targetFramework=".NETStandard2.0" />
+        </dependencies>
     </metadata>
     <files>
 

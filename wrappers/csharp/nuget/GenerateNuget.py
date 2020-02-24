@@ -10,6 +10,11 @@ if len(sys.argv) < 2:
     print("Usage :  python GenerateNuget.py <platform>")
     exit(0)
 
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+print("script directory :")
+print(script_dir)
+
 version = ""
 
 with open('../../../devolutions-crypto/Cargo.toml', 'r') as file:

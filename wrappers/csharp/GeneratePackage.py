@@ -40,8 +40,13 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("||VERSION||")]
 """
 
-print("Generating assembly manifest...")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+print("script directory :")
+print(script_dir)
 
+os.chdir(script_dir)
+
+print("Generating assembly manifest...")
 # Generate assembly manifest with the right version
 with open('../../devolutions-crypto/Cargo.toml', 'r') as filee:
     data=filee.read()
@@ -68,13 +73,25 @@ if sys.argv[1] == "WIN":
     if rdm:
         folder = "rdm"
 
-    try:
-        shutil.rmtree("./" + folder)
-    except:
-        pass
+    # Loop because permission issues on windows
+    print("Detecting if " +folder +" directory is present...")
+    while(os.path.isdir("./" + folder)):
+        print("Deleting " + folder + " directory...")
+        try:
+            shutil.rmtree("./" + folder)
+        except:
+            print("Access denied...Retrying")
+            time.sleep(1)
 
-    os.mkdir("./" + folder)
-    os.mkdir("./" + folder + "/bin")
+
+    while(not os.path.isdir("./" + folder)):
+        try:
+            print("Creating " + folder + " directory...")
+            os.mkdir("./" + folder)
+            os.mkdir("./" + folder + "/bin")
+        except:
+            print("Access denied...Retrying")
+            time.sleep(1)
 
     with open("./" + folder + "/bin/AssemblyInfo.cs","wb+") as filee:
         filee.write(assembly_manifest.encode("utf-8"))
