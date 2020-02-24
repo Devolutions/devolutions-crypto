@@ -56,6 +56,14 @@ with open('../../devolutions-crypto/Cargo.toml', 'r') as filee:
     assembly_manifest = assembly_manifest.replace("||VERSION||", version)
 
 if sys.argv[1] == "WIN":
+    output = exec_command("csc")
+    print("output")
+
+    if("is not recognized as an internal or external command" in output):
+        print("error : make sure you have csc (c# compiler) configured in your path")
+        exit(1)
+
+
     architectures = { "arch" : 
                     [
                         {"name" : "x86", "value" : "i686-pc-windows-msvc"},
