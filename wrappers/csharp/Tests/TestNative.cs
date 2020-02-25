@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Devolutions.Cryptography;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -142,13 +138,11 @@ namespace Tests
         [TestMethod]
         public void GenerateKeyExchange()
         {
-            var x = Native.GenerateKeyExchange();
-        }
-
-        [TestMethod]
-        public void MixKeyExchange()
-        {
-            //var x = Native.MixKeyExchange();
+            var xKey = Native.GenerateKeyExchange();
+            var yKey = Native.GenerateKeyExchange();
+            var mixXKey = Native.MixKeyExchange(xKey.PrivateKey, yKey.PublicKey);
+            var mixYKey = Native.MixKeyExchange(yKey.PrivateKey, xKey.PublicKey);
+            CollectionAssert.AreEqual(mixYKey, mixXKey);
         }
 
         [TestMethod]
