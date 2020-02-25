@@ -30,6 +30,38 @@ namespace Tests
         ///
         /// </summary>
         [TestMethod]
+        public void DecryptWithPasswordAsString()
+        {
+            var x = Utils.StringToByteArray(_textToTest);
+            var y = "pwd";
+            var z = Managed.DecryptWithPasswordAsString(x, y, 100);
+            Assert.AreEqual(z, _textToTest);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void GetEncodedLength()
+        {
+            var x = Utils.GetEncodedLength(_byteArray);
+            Assert.AreEqual((int)x, 4);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void GetDecodedLength()
+        {
+            var x = Utils.GetDecodedLength(_textBase64ToTest);
+            Assert.AreEqual((int)x, 3);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
         public void DeriveKey()
         {
             var x = Utils.StringToByteArray("testpassword");
@@ -109,7 +141,7 @@ namespace Tests
         [TestMethod]
         public void StringToByteArray()
         {
-            var x = Utils.Decode(_textBase64ToTest);
+            var x = Utils.StringToByteArray(_textToTest);
             CollectionAssert.AreEqual(x, _byteArray);
         }
     }
