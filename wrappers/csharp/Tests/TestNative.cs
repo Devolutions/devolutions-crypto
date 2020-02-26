@@ -16,10 +16,10 @@ namespace Tests
         private readonly string _textToTest2 = "QUJDDE";
         private readonly byte[] _cryptoKeyByteArray = new byte[] { 0x4b, 0x65, 0x79, 0x31, 0x32, 0x33 };
 
-        /// <summary>
+       /// <summary>
         ///
         /// </summary>
-        [TestMethod]
+       [TestMethod]
         public void DecodeNative()
         {
             var x = Native.DecodeNative(_textToTest, (UIntPtr)_textToTest.Length, new byte[] { 0x00, 0x00, 0x00 }, (UIntPtr)0x00000003);

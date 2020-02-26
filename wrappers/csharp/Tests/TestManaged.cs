@@ -30,18 +30,6 @@ namespace Tests
         ///
         /// </summary>
         [TestMethod]
-        public void DecryptWithPasswordAsString()
-        {
-            var x = Utils.StringToByteArray(_textToTest);
-            var y = "pwd";
-            var z = Managed.DecryptWithPasswordAsString(x, y, 100);
-            Assert.AreEqual(z, _textToTest);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
         public void GetEncodedLength()
         {
             var x = Utils.GetEncodedLength(_byteArray);
