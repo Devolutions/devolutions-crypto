@@ -4,6 +4,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
 {
+    /// <summary>
+    ///
+    /// </summary>
     [TestClass]
     public class TestNative
     {
@@ -13,6 +16,9 @@ namespace Tests
         private readonly string _cryptoKey = "Key123";
         private readonly byte[] _cryptoKeyByteArray = new byte[] { 0x4b, 0x65, 0x79, 0x31, 0x32, 0x33 };
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void Decode86()
         {
@@ -20,6 +26,9 @@ namespace Tests
             Assert.AreEqual((long)0x0000000000000003, x);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void DecodeNative()
         {
@@ -27,6 +36,9 @@ namespace Tests
             Assert.AreEqual((long)0x0000000000000003, x);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void Decrypt()
         {
@@ -45,6 +57,9 @@ namespace Tests
             Assert.AreEqual(z, _textToTest);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void DeriveKey()
         {
@@ -60,6 +75,9 @@ namespace Tests
             CollectionAssert.AreEqual(derivedKey, x);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void DerivePassword()
         {
@@ -75,6 +93,9 @@ namespace Tests
             CollectionAssert.AreEqual(derivedPassword, y);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void GenerateKey()
         {
@@ -84,6 +105,9 @@ namespace Tests
             CollectionAssert.AreNotEqual(y, z);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void HashPassword()
         {
@@ -94,6 +118,9 @@ namespace Tests
             Assert.IsFalse(Native.VerifyPassword(z, y));
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void VerifyPassword()
         {
@@ -111,6 +138,9 @@ namespace Tests
             Assert.IsTrue(Native.VerifyPassword(_cryptoKeyByteArray, encryptedData));
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void Encode86()
         {
@@ -119,6 +149,9 @@ namespace Tests
             Assert.AreEqual((long)0x0000000000000004, x);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void Encode64()
         {
@@ -127,6 +160,9 @@ namespace Tests
             Assert.AreEqual((long)0x0000000000000004, x);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void EncodeNative()
         {
@@ -135,6 +171,9 @@ namespace Tests
             Assert.AreEqual((long)0x0000000000000004, x);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void GenerateKeyExchange()
         {
@@ -145,6 +184,9 @@ namespace Tests
             CollectionAssert.AreEqual(mixYKey, mixXKey);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void Encrypt()
         {

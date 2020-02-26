@@ -5,6 +5,9 @@ using Devolutions.Cryptography;
 
 namespace Tests
 {
+    /// <summary>
+    ///
+    /// </summary>
     [TestClass]
     public class TestUtils
     {
@@ -12,18 +15,27 @@ namespace Tests
         private readonly string _textToTest = "QUJD";
         private readonly string _cryptoKey = "Key123";
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void ToBase64String()
         {
             Assert.AreEqual(Utils.ToBase64String(_byteArray), _textToTest);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void StringToByteArray()
         {
             CollectionAssert.AreEqual(Utils.StringToByteArray(_textToTest), Encoding.UTF8.GetBytes(_textToTest));
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void Base64StringToByteArray()
         {
@@ -31,6 +43,9 @@ namespace Tests
             CollectionAssert.AreEqual(x, _byteArray);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void ByteArrayToString()
         {
@@ -39,6 +54,9 @@ namespace Tests
             Assert.AreEqual(y, _textToTest);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void GetEncodedLength()
         {
@@ -46,6 +64,9 @@ namespace Tests
             Assert.AreEqual(4, y);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void GetDecodedLength()
         {
@@ -53,6 +74,9 @@ namespace Tests
             Assert.AreEqual(3, y);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void Encode()
         {
@@ -60,6 +84,9 @@ namespace Tests
             Assert.AreEqual(y, _textToTest);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void Decode()
         {
@@ -67,6 +94,9 @@ namespace Tests
             CollectionAssert.AreEqual(x, _byteArray);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [TestMethod]
         public void ValidateSignature()
         {
