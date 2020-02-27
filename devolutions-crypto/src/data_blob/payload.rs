@@ -4,12 +4,14 @@ use super::Result;
 use super::DcHeader;
 
 use super::{DcCiphertext, CIPHERTEXT};
-use super::{DcHash, HASH};
 use super::{DcKey, KEY};
+use super::{DcSharedSecret, SHARED_SECRET};
+use super::{DcHash, HASH};
 
 pub enum DcPayload {
     Key(DcKey),
     Ciphertext(DcCiphertext),
+    SharedSecret(DcSharedSecret),
     Hash(DcHash),
 }
 
@@ -18,6 +20,9 @@ impl DcPayload {
         match header.data_type {
             KEY => Ok(DcPayload::Key(DcKey::try_from_header(data, header)?)),
             CIPHERTEXT => Ok(DcPayload::Ciphertext(DcCiphertext::try_from_header(
+                data, header,
+            )?)),
+            SHARED_SECRET => Ok(DcPayload::SharedSecret(DcSharedSecret::try_from_header(
                 data, header,
             )?)),
             HASH => Ok(DcPayload::Hash(DcHash::try_from_header(data, header)?)),
@@ -71,6 +76,39 @@ impl DcPayload {
             _ => Err(DevoCryptoError::InvalidDataType),
         }
     }
+
+    pub fn generate_shared_key(
+        n_shares: u8,
+        threshold: u8,
+        length: usize,
+        header: &mut DcHeader,
+    ) -> Result<impl Iterator<Item = DcPayload>> {
+        let shares = DcSharedSecret::generate_shared_key(n_shares, threshold, length, header)?;
+        let shares = shares.map(move |s| DcPayload::SharedSecret(s));
+        Ok(shares)
+    }
+
+    pub fn join_shares<'a, I, J>(shares: I) -> Result<Vec<u8>>
+    where
+        I: IntoIterator<Item = &'a DcPayload, IntoIter = J>,
+        J: Iterator<Item = &'a DcPayload> + Clone,
+    {
+        let shares = shares.into_iter();
+
+        if !shares.clone().all(|share| match &share {
+            &DcPayload::SharedSecret(_) => true,
+            _ => false,
+        }) {
+            return Err(DevoCryptoError::InvalidDataType);
+        }
+
+        let shares = shares.map(move |share| match share {
+            DcPayload::SharedSecret(s) => s,
+            _ => unreachable!("This case should not happen because of previous check"),
+        });
+
+        DcSharedSecret::join_shares(shares)
+    }
 }
 
 impl From<DcPayload> for Vec<u8> {
@@ -78,6 +116,7 @@ impl From<DcPayload> for Vec<u8> {
         match payload {
             DcPayload::Key(x) => x.into(),
             DcPayload::Ciphertext(x) => x.into(),
+            DcPayload::SharedSecret(x) => x.into(),
             DcPayload::Hash(x) => x.into(),
         }
     }

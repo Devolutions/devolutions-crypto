@@ -71,8 +71,8 @@ pub fn mix_key_exchange(private_key: &[u8], public_key: &[u8]) -> Result<Vec<u8>
 }
 
 #[wasm_bindgen]
-pub fn generate_key(length: Option<usize>) -> Result<Vec<u8>, JsValue> {
-    Ok(utils::generate_key(length.unwrap_or(32))?)
+pub fn generate_key(length: Option<usize>) -> Vec<u8> {
+    utils::generate_key(length.unwrap_or(32))
 }
 
 #[wasm_bindgen]

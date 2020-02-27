@@ -353,14 +353,10 @@ pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
 
     let key = slice::from_raw_parts_mut(key, key_length);
 
-    match utils::generate_key(key_length) {
-        Ok(mut k) => {
-            key.copy_from_slice(&k);
-            k.zeroize();
-            0
-        }
-        Err(e) => e.error_code(),
-    }
+    let mut k = utils::generate_key(key_length);
+    key.copy_from_slice(&k);
+    k.zeroize();
+    0
 }
 
 /// Derive a key to create a new one. Can be used with a password.
