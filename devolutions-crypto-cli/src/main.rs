@@ -116,6 +116,26 @@ fn main() {
                         .required(true)
                 )
         )
+        .subcommand(
+            SubCommand::with_name("generate-shared-key")
+                .about("Generate secret key with parts shared accross multiple parties.")
+                .arg(
+                    Arg::with_name("shares").short("s").long("shares").takes_value(true).required(true).help("The number of shares to generate.")
+                )
+                .arg(
+                    Arg::with_name("threshold").short("t").long("threshold").takes_value(true).required(true).help("The minimum number of shares required to regenerate the secret.")
+                )
+                .arg(
+                    Arg::with_name("length").short("l").long("length").takes_value(true).help("The length of the shared secret")
+                )
+        )
+        .subcommand(
+            SubCommand::with_name("join-shares")
+                .about("Regenerate a secret key from multiple shares")
+                .arg(
+                    Arg::with_name("SHARE").takes_value(true).multiple(true).required(true).help("The shares to merge")
+                )
+        )
         .get_matches();
 
     match matches.subcommand() {
@@ -127,6 +147,8 @@ fn main() {
         ("verify-password", Some(matches)) => verify_password(matches),
         ("generate-key-exchange", Some(matches)) => generate_key_exchange(matches),
         ("mix-key-exchange", Some(matches)) => mix_key_exchange(matches),
+        ("generate-shared-key", Some(matches)) => generate_shared_key(matches),
+        ("join-shares", Some(matches)) => join_shares(matches),
         _ => unreachable!(),
     }
 }
@@ -138,7 +160,7 @@ fn generate_key(matches: &ArgMatches) {
         .parse::<usize>()
         .unwrap_or(32);
 
-    let key = base64::encode(&devolutions_crypto::utils::generate_key(length).unwrap());
+    let key = base64::encode(&devolutions_crypto::utils::generate_key(length));
     println!("{}", key);
 }
 
@@ -219,4 +241,29 @@ fn mix_key_exchange(matches: &ArgMatches) {
     let public = devolutions_crypto::DcDataBlob::try_from(base64::decode(matches.value_of("PUBLIC").unwrap().as_bytes()).unwrap().as_slice()).unwrap();
 
     println!("{}", base64::encode(&devolutions_crypto::DcDataBlob::mix_key_exchange(private, public).unwrap()))
+}
+
+fn generate_shared_key(matches: &ArgMatches) {
+    let n_shares = matches.value_of("shares").unwrap().parse::<u8>().unwrap();
+    let threshold = matches.value_of("threshold").unwrap().parse::<u8>().unwrap();
+
+    let length = matches
+        .value_of("length")
+        .unwrap_or("")
+        .parse::<usize>()
+        .unwrap_or(32);
+
+    let shares = devolutions_crypto::DcDataBlob::generate_shared_key(n_shares, threshold, length).unwrap();
+
+    for (i, s) in shares.into_iter().map(Into::<Vec<u8>>::into).enumerate() {
+        let s = base64::encode(&s);
+        println!("Share {}: {}", i, s);
+    }
+}
+
+fn join_shares(matches: &ArgMatches) {
+    let shares: Vec<devolutions_crypto::DcDataBlob> = matches.values_of("SHARE").unwrap().map(|s| devolutions_crypto::DcDataBlob::try_from(base64::decode(&s).unwrap().as_slice()).unwrap()).collect();
+    let secret_key = devolutions_crypto::DcDataBlob::join_shares(&shares).unwrap();
+
+    println!("{}", base64::encode(&secret_key));
 }
