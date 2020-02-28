@@ -2,17 +2,17 @@ mod header;
 mod payload;
 
 mod ciphertext;
-mod shared_secret;
 mod hash;
 mod key;
+mod shared_secret;
 
 use super::DevoCryptoError;
 use super::Result;
 
 use self::ciphertext::{DcCiphertext, CIPHERTEXT};
+use self::hash::{DcHash, HASH};
 use self::key::{DcKey, KEY};
 use self::shared_secret::{DcSharedSecret, SHARED_SECRET};
-use self::hash::{DcHash, HASH};
 
 use self::header::DcHeader;
 use self::payload::DcPayload;
@@ -214,20 +214,20 @@ impl DcDataBlob {
     }
 
     /// Generate a key and split it in `n` shares use. You will need `threshold` shares to recover the key.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `n_shares` - Number of shares to generate
     /// * `threshold` - The number of shares needed to recover the key
     /// * `length` - The desired length of the key to generate
-    /// 
+    ///
     /// # Example
     /// ```
     /// use devolutions_crypto::DcDataBlob;
     /// let shares = DcDataBlob::generate_shared_key(5, 3, 32).unwrap();
-    /// 
+    ///
     /// assert_eq!(shares.len(), 5);
-    /// 
+    ///
     /// let key = DcDataBlob::join_shares(&shares[2..5]).unwrap();
     /// ```
     pub fn generate_shared_key(
@@ -247,18 +247,18 @@ impl DcDataBlob {
     }
 
     /// Join multiple shares to regenerate a secret key.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `shares` - The shares to join
-    /// 
+    ///
     /// # Example
     /// ```
     /// use devolutions_crypto::DcDataBlob;
     /// let shares = DcDataBlob::generate_shared_key(5, 3, 32).unwrap();
-    /// 
+    ///
     /// assert_eq!(shares.len(), 5);
-    /// 
+    ///
     /// let key = DcDataBlob::join_shares(&shares[2..5]).unwrap();
     /// ```
     pub fn join_shares<'a, I, J>(shares: I) -> Result<Vec<u8>>
@@ -381,9 +381,9 @@ fn ecdh_test() {
 #[test]
 fn secret_sharing_test() {
     let shares = DcDataBlob::generate_shared_key(5, 3, 32).unwrap();
-    
+
     assert_eq!(shares.len(), 5);
-    
+
     let key1 = DcDataBlob::join_shares(&shares[0..3]).unwrap();
     let key2 = DcDataBlob::join_shares(&shares[2..5]).unwrap();
     assert_eq!(key1.len(), 32);

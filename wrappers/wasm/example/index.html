@@ -81,6 +81,30 @@ width:50%;
       <textarea id="alicemix"></textarea>
     </div>
 
+    <h2>Secret Sharing</h2>
+    <div>
+      <h3>Shares Generation</h3>
+      <div>
+        <p>We can generate a secret key and split it into multiple "shares". At the time of generation, you can also precise a 
+        threshold which specifies the number of shares required to rebuild the secret key.</p>
+
+        Number of shares: <input id="generateSharedKeyNsharesInput"></input><br><br>
+        Threshold: <input id="generateSharedKeyThresholdInput"></input><br><br>
+        Secret length: <input id="generateSharedKeyLengthInput"></input><br><br>
+
+        <input id="btnGenerateSharedKey" type="button" value="Generate"><br>
+          
+        <textarea id="generateSharedKeyOutput"></textarea>
+      </div>
+      <h3>Join Shares</h3>
+      <div>
+        <p>You can enter the shares here, in base64, one line for each share, to regenerate the secret key.</p>
+        <textarea id="joinSharesInput"></textarea><br>
+        <input id="btnJoinShares" type="button" value="Join"><br>
+        <textarea id="joinSharesOutput"></textarea><br>
+      </div>
+    </div>
+
     <h2>Utils</h2>
     <div>
       <h3>Base64</h3>

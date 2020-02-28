@@ -4,9 +4,9 @@ use super::Result;
 use super::DcHeader;
 
 use super::{DcCiphertext, CIPHERTEXT};
+use super::{DcHash, HASH};
 use super::{DcKey, KEY};
 use super::{DcSharedSecret, SHARED_SECRET};
-use super::{DcHash, HASH};
 
 pub enum DcPayload {
     Key(DcKey),

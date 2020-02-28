@@ -32,7 +32,7 @@ sharks = "0.3.1"
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
 rand = { version = "0.7.3", features = ["wasm-bindgen"] }
-wasm-bindgen = "0.2.58"
+wasm-bindgen = { version = "0.2.58", features = ["serde-serialize"] }
 js-sys = "0.3.35"
 
 [target.'cfg(not(target_arch="wasm32"))'.dependencies]

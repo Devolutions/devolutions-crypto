@@ -42,7 +42,7 @@ cfg_if! {
 
         #[wasm_bindgen_test]
         fn test_generate_key() {
-            let key = wasm::generate_key(Some(10)).unwrap();
+            let key = wasm::generate_key(Some(10));
 
             assert_eq!(key.len(), 10);
             assert_ne!(&key, &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);

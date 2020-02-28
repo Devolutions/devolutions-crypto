@@ -2,7 +2,7 @@
 import * as devolutionsCrypto from "devolutions-crypto";
 
 // Generate a random key for the lifetime of the script
-var key = devolutionsCrypto.generate_key();
+var key = devolutionsCrypto.generateKey();
 
 // Declare a bunch of global variables to access the DOM
 var enc = new TextEncoder();
@@ -24,6 +24,14 @@ var hashPasswordOutput = document.getElementById("hashPasswordOutput");
 var verifyPasswordPasswordInput = document.getElementById("verifyPasswordPasswordInput");
 var verifyPasswordHashInput = document.getElementById("verifyPasswordHashInput");
 var verifyPasswordOutput = document.getElementById("verifyPasswordOutput");
+
+var generateSharedKeyNsharesInput = document.getElementById("generateSharedKeyNsharesInput");
+var generateSharedKeyThresholdInput = document.getElementById("generateSharedKeyThresholdInput");
+var generateSharedKeyLengthInput = document.getElementById("generateSharedKeyLengthInput");
+var generateSharedKeyOutput = document.getElementById("generateSharedKeyOutput");
+
+var joinSharesInput = document.getElementById("joinSharesInput");
+var joinSharesOutput = document.getElementById("joinSharesOutput");
 
 var outputalice = document.getElementById("alice");
 var outputbob = document.getElementById("bob");
@@ -59,7 +67,8 @@ var btnBase64Encode = document.getElementById("btnBase64Encode");
 var btnBase64Decode = document.getElementById("btnBase64Decode");
 
 var btnGenerateKey = document.getElementById("btnGenerateKey");
-
+var btnGenerateSharedKey = document.getElementById("btnGenerateSharedKey");
+var btnJoinShares = document.getElementById("btnJoinShares");
 var btnDeriveKey = document.getElementById("btnDeriveKey");
 
 // Add handlers to buttons
@@ -86,11 +95,11 @@ btnHashPassword.addEventListener("click", () => {
     let password = enc.encode(hashPasswordPasswordInput.value);
 
     let iterations = parseInt(hashPasswordIterationsInput.value);
-    if(!iterations) {
+    if(!iterations) {66
         iterations = 10000;
     }
 
-    hashPasswordOutput.value = devolutionsCrypto.base64encode(devolutionsCrypto.hash_password(password, iterations));
+    hashPasswordOutput.value = devolutionsCrypto.base64encode(devolutionsCrypto.hashPassword(password, iterations));
 });
 
 //Verify
@@ -98,12 +107,12 @@ btnVerifyPassword.addEventListener("click", () => {
     let password = enc.encode(verifyPasswordPasswordInput.value);
     let hash = devolutionsCrypto.base64decode(verifyPasswordHashInput.value);
 
-    verifyPasswordOutput.value = devolutionsCrypto.verify_password(password, hash);
+    verifyPasswordOutput.value = devolutionsCrypto.verifyPassword(password, hash);
 });
 
 // Keypair Generation
 btnBob.addEventListener("click", () => {
-    let result = devolutionsCrypto.generate_key_exchange();
+    let result = devolutionsCrypto.generateKeyExchange();
 
     publicBob = result.public();
     privateBob = result.private();
@@ -113,7 +122,7 @@ btnBob.addEventListener("click", () => {
 });
 
 btnAlice.addEventListener("click", () => {
-    let result = devolutionsCrypto.generate_key_exchange();
+    let result = devolutionsCrypto.generateKeyExchange();
 
     publicAlice = result.public();
     privateAlice = result.private();
@@ -123,13 +132,47 @@ btnAlice.addEventListener("click", () => {
 
 // Key Exchange
 btnBobMix.addEventListener("click", () => {
-    let result = devolutionsCrypto.mix_key_exchange(privateBob, publicAlice);
+    let result = devolutionsCrypto.mixKeyExchange(privateBob, publicAlice);
     outputbobmix.value = devolutionsCrypto.base64encode(result);
 });
 
 btnAliceMix.addEventListener("click", () => {
-    let result = devolutionsCrypto.mix_key_exchange(privateAlice, publicBob);
+    let result = devolutionsCrypto.mixKeyExchange(privateAlice, publicBob);
     outputalicemix.value = devolutionsCrypto.base64encode(result);
+});
+
+// Secret Sharing
+btnGenerateSharedKey.addEventListener("click", () => {
+    let nShares = parseInt(generateSharedKeyNsharesInput.value);
+    if(!nShares) {
+        nShares = 5;
+    }
+
+    let threshold = parseInt(generateSharedKeyThresholdInput.value);
+    if(!threshold) {
+        threshold = 3;
+    }
+
+    let length = parseInt(generateSharedKeyLengthInput.value);
+    if(!length) {
+        length = 32
+    }
+
+    let shares = devolutionsCrypto.generateSharedKey(nShares, threshold, length);
+    let output = ""
+    shares.forEach(s => {
+        output = output + devolutionsCrypto.base64encode(s) + "\n";
+    });
+
+    generateSharedKeyOutput.value = output.trim()
+});
+
+btnJoinShares.addEventListener("click", () => {
+    let shares = joinSharesInput.value.split("\n").map((s) => {
+        return devolutionsCrypto.base64decode(s)
+    });
+
+    joinSharesOutput.value = devolutionsCrypto.base64encode(devolutionsCrypto.joinShares(shares));
 });
 
 // Utils
@@ -149,7 +192,7 @@ btnGenerateKey.addEventListener("click", () => {
         length = 32;
     }
 
-    generateKeyOutput.value = devolutionsCrypto.base64encode(devolutionsCrypto.generate_key(length));
+    generateKeyOutput.value = devolutionsCrypto.base64encode(devolutionsCrypto.generateKey(length));
 });
 
 // Derive Key
@@ -174,5 +217,5 @@ btnDeriveKey.addEventListener("click", () => {
         length = 32;
     }
 
-    deriveKeyOutput.value = devolutionsCrypto.base64encode(devolutionsCrypto.derive_key(password, salt, iterations, length));
+    deriveKeyOutput.value = devolutionsCrypto.base64encode(devolutionsCrypto.deriveKey(password, salt, iterations, length));
 });
