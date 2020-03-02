@@ -10,8 +10,8 @@ namespace Tests
     public class TestManaged
     {
         private readonly byte[] _byteArray = new byte[] { 0x41, 0x42, 0x43 };
-        private readonly string _textToTest = "QUJD";
-        private readonly string _textBase64 = "UVVKRA==";
+        private readonly string _textToTest = "ABC";
+        private readonly string _textBase64ToTest = "QUJD";
 
         /// <summary>
         ///
@@ -19,11 +19,11 @@ namespace Tests
         [TestMethod]
         public void EncryptWithPasswordAsString_And_DecryptWithPasswordAsString()
         {
-            var x = Utils.Decode(_textToTest);
+            var x = Utils.StringToByteArray(_textBase64ToTest);
             var y = "pwd";
             var b = Managed.EncryptWithPasswordAsString(x, y, 100);
             var z = Managed.DecryptWithPasswordAsString(b, y, 100);
-            Assert.AreEqual(z, _textToTest);
+            Assert.AreEqual(z, _textBase64ToTest);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Tests
         [TestMethod]
         public void Decode()
         {
-            var x = Utils.Decode(_textToTest);
+            var x = Utils.Decode(_textBase64ToTest);
             CollectionAssert.AreEqual(x, _byteArray);
         }
 
@@ -80,7 +80,7 @@ namespace Tests
         public void Encode()
         {
             var x = Utils.Encode(_byteArray);
-            Assert.AreEqual(x, _textToTest);
+            Assert.AreEqual(x, _textBase64ToTest);
         }
 
         /// <summary>
@@ -99,8 +99,8 @@ namespace Tests
         [TestMethod]
         public void GetDecodedLength()
         {
-            var x = Utils.GetDecodedLength(_textToTest);
-            Assert.AreEqual((int)x, 4);
+            var x = Utils.GetDecodedLength(_textBase64ToTest);
+            Assert.AreEqual((int)x, 3);
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Tests
         public void ToBase64String()
         {
             var x = Utils.ToBase64String(_byteArray);
-            Assert.AreEqual(x, _textToTest);
+            Assert.AreEqual(x, _textBase64ToTest);
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace Tests
         [TestMethod]
         public void StringToByteArray()
         {
-            var x = Utils.Decode(_textToTest);
+            var x = Utils.Decode(_textBase64ToTest);
             CollectionAssert.AreEqual(x, _byteArray);
         }
     }
