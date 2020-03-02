@@ -59,7 +59,7 @@ namespace Devolutions.Cryptography
 
         public static byte[] DerivePassword(string password, string salt, uint iterations = 10000)
         {
-            return DeriveKey(Utils.StringToByteArray(password), Utils.StringToByteArray(salt), iterations);
+            return DeriveKey(Utils.StringToUtf8ByteArray(password), Utils.StringToUtf8ByteArray(salt), iterations);
         }
 
         public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000, uint length = 32)

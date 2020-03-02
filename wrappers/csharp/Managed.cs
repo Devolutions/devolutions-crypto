@@ -18,7 +18,7 @@ namespace Devolutions.Cryptography
 
         public static byte[] DeriveKey(string password, byte[] salt = null, uint iterations = 10000, uint length = 32)
         {
-            return Native.DeriveKey(Utils.StringToByteArray(password), salt, iterations, length);
+            return Native.DeriveKey(Utils.StringToUtf8ByteArray(password), salt, iterations, length);
         }
 
         public static byte[] GenerateKey(uint keySize)
@@ -34,14 +34,14 @@ namespace Devolutions.Cryptography
 
         public static string EncryptWithKeyAsString(string data, byte[] key, CipherVersion version = CIPHER_VERSION)
         {
-            byte[] cipher = Native.Encrypt(Utils.StringToByteArray(data), key, (uint)version);
+            byte[] cipher = Native.Encrypt(Utils.StringToUtf8ByteArray(data), key, (uint)version);
 
-            return Utils.ToBase64String(cipher);
+            return Utils.EncodeToBase64String(cipher);
         }
 
         public static byte[] EncryptWithKey(string data, byte[] key, CipherVersion version = CIPHER_VERSION)
         {
-            byte[] cipher = Native.Encrypt(Utils.StringToByteArray(data), key, (uint)version);
+            byte[] cipher = Native.Encrypt(Utils.StringToUtf8ByteArray(data), key, (uint)version);
 
             return cipher;
         }
@@ -50,7 +50,7 @@ namespace Devolutions.Cryptography
         {
             byte[] cipher = Native.Encrypt(data, key, (uint)version);
 
-            return Utils.ToBase64String(cipher);
+            return Utils.EncodeToBase64String(cipher);
         }
 
         public static byte[] EncryptWithKey(byte[] data, byte[] key, CipherVersion version = CIPHER_VERSION)
@@ -70,11 +70,11 @@ namespace Devolutions.Cryptography
                 keySize = 32;
             }
 
-            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
+            byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
             byte[] cipher = Native.Encrypt(data, key, (uint)cipher_version);
 
-            return Utils.ToBase64String(cipher);
+            return Utils.EncodeToBase64String(cipher);
         }
 
         // Encrypt base64 string data and return base64 string
@@ -88,11 +88,11 @@ namespace Devolutions.Cryptography
                 keySize = 32;
             }
 
-            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
+            byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
             byte[] cipher = Native.Encrypt(Utils.Base64StringToByteArray(b64data), key, (uint)cipher_version);
 
-            return Utils.ToBase64String(cipher);
+            return Utils.EncodeToBase64String(cipher);
         }
 
         public static string EncryptWithPasswordAsString(string data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
@@ -105,11 +105,11 @@ namespace Devolutions.Cryptography
                 keySize = 32;
             }
 
-            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
+            byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Native.Encrypt(Utils.StringToByteArray(data), key, (uint)cipher_version);
+            byte[] cipher = Native.Encrypt(Utils.StringToUtf8ByteArray(data), key, (uint)cipher_version);
 
-            return Utils.ToBase64String(cipher);
+            return Utils.EncodeToBase64String(cipher);
         }
         
 
@@ -123,7 +123,7 @@ namespace Devolutions.Cryptography
                 keySize = 32;
             }
 
-            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
+            byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
             byte[] cipher = Native.Encrypt(data, key, (uint)cipher_version);
 
@@ -141,7 +141,7 @@ namespace Devolutions.Cryptography
                 keySize = 32;
             }
 
-            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
+            byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
             byte[] cipher = Native.Encrypt(Utils.Base64StringToByteArray(b64data), key, (uint)cipher_version);
 
@@ -158,9 +158,9 @@ namespace Devolutions.Cryptography
                 keySize = 32;
             }
 
-            byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, keySize);
+            byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Native.Encrypt(Utils.StringToByteArray(data), key, (uint)cipher_version);
+            byte[] cipher = Native.Encrypt(Utils.StringToUtf8ByteArray(data), key, (uint)cipher_version);
 
             return cipher;
         }
@@ -176,7 +176,7 @@ namespace Devolutions.Cryptography
         {
             byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
 
-            return Utils.ByteArrayToString(result);
+            return Utils.ByteArrayToUtf8String(result);
         }
 
         public static byte[] DecryptWithKey(string data, byte[] key, uint iterations = 10000)
@@ -190,7 +190,7 @@ namespace Devolutions.Cryptography
         {
             byte[] result = Native.Decrypt(data, key);
 
-            return Utils.ByteArrayToString(result);
+            return Utils.ByteArrayToUtf8String(result);
         }
 
         public static byte[] DecryptWithKey(byte[] data, byte[] key, uint iterations = 10000)
@@ -207,7 +207,7 @@ namespace Devolutions.Cryptography
             // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
             //   we try with the buggy 256 bytes key.
             try {
-                byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, 32);
+                byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
 
                 if(key == null)
                 {
@@ -216,18 +216,18 @@ namespace Devolutions.Cryptography
 
                 byte[] result = Native.Decrypt(data, key);
 
-                return Utils.ByteArrayToString(result);
+                return Utils.ByteArrayToUtf8String(result);
             }
             catch(DevolutionsCryptoException ex) {
                 if(ex.NativeError == NativeError.InvalidMac) {
-                    byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, 256);
+                    byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
                     if(key == null)
                     {
                         return null;
                     }
 
                     byte[] result = Native.Decrypt(data, key);
-                    return Utils.ByteArrayToString(result);
+                    return Utils.ByteArrayToUtf8String(result);
                 }
                 else {
                     throw ex;
@@ -243,7 +243,7 @@ namespace Devolutions.Cryptography
             // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
             //   we try with the buggy 256 bytes key.
             try {
-                byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, 32);
+                byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
 
                 if(key == null)
                 {
@@ -252,11 +252,11 @@ namespace Devolutions.Cryptography
 
                 byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
 
-                return Utils.ByteArrayToString(result);
+                return Utils.ByteArrayToUtf8String(result);
             }
             catch(DevolutionsCryptoException ex) {
                 if(ex.NativeError == NativeError.InvalidMac) {
-                    byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, 256);
+                    byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
 
                     if(key == null)
                     {
@@ -265,7 +265,7 @@ namespace Devolutions.Cryptography
 
                     byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
 
-                    return Utils.ByteArrayToString(result);
+                    return Utils.ByteArrayToUtf8String(result);
                 }
                 else {
                     throw ex;
@@ -281,7 +281,7 @@ namespace Devolutions.Cryptography
             // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
             //   we try with the buggy 256 bytes key.
             try {
-                byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, 32);
+                byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
 
                 if(key == null)
                 {
@@ -294,7 +294,7 @@ namespace Devolutions.Cryptography
             }
             catch(DevolutionsCryptoException ex) {
                 if(ex.NativeError == NativeError.InvalidMac) {
-                    byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, 256);
+                    byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
 
                     if(key == null)
                     {
@@ -319,7 +319,7 @@ namespace Devolutions.Cryptography
             // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
             //   we try with the buggy 256 bytes key.
             try {
-                byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, 32);
+                byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
 
                 if(key == null)
                 {
@@ -332,7 +332,7 @@ namespace Devolutions.Cryptography
             }
             catch(DevolutionsCryptoException ex) {
                 if(ex.NativeError == NativeError.InvalidMac) {
-                    byte[] key = Native.DeriveKey(Utils.StringToByteArray(password), null, iterations, 256);
+                    byte[] key = Native.DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
 
                     if(key == null)
                     {
