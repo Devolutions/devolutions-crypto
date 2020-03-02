@@ -6,6 +6,20 @@ namespace Devolutions.Cryptography
     public static partial class Utils
     {
         /// <summary>
+        /// Validate that the base 64 string is from the Devolutions Crypto Library.
+        /// Performance : Use ValidateSignature(byte[], DataType) for more performance if possible.
+        /// </summary>
+        /// <param name="data">The buffer to validate.</param>
+        /// <param name="type">The data type to validate.</param>
+        /// <returns>Returns true if the base 64 string received matches the data type.</returns>
+        public static bool ValidateSignatureFromBase64(string base64, DataType type)
+        {
+            byte[] data = DecodeFromBase64(base64);
+
+            return ValidateSignature(data, type);
+        }
+
+        /// <summary>
         /// Validate that the buffer is from the Devolutions Crypto Library.
         /// </summary>
         /// <param name="data">The buffer to validate.</param>
