@@ -333,35 +333,103 @@ namespace Devolutions.Cryptography
          * 
          * **************************************************************/
         
-        public static string DecryptWithKeyAsString(string data, byte[] key, uint iterations = 10000)
+        /// <summary>
+        /// Decrypts the base64 string with the provided key.
+        /// </summary>
+        /// <param name="b64data">The base 64 string to decrypt.</param>
+        /// <param name="key">The key to use for decryption.</param>
+        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
+        [Obsolete("This method has been deprecated. Use DecryptWithKeyAsUtf8String instead.")]
+        public static string DecryptWithKeyAsString(string b64data, byte[] key)
         {
-            byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
+            return DecryptWithKeyAsUtf8String(b64data, key);
+        }
+
+        /// <summary>
+        /// Decrypts the base64 string with the provided key.
+        /// </summary>
+        /// <param name="b64data">The base 64 string to decrypt.</param>
+        /// <param name="key">The key to use for decryption.</param>
+        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
+        public static string DecryptWithKeyAsUtf8String(string b64data, byte[] key)
+        {
+            byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(b64data), key);
 
             return Utils.ByteArrayToUtf8String(result);
         }
 
-        public static byte[] DecryptWithKey(string data, byte[] key, uint iterations = 10000)
+        /// <summary>
+        /// Decrypts the base64 string with the provided key.
+        /// </summary>
+        /// <param name="b64data">The base 64 string to decrypt.</param>
+        /// <param name="key">The key to use for decryption.</param>
+        /// <returns>Returns the decryption result as a byte array.</returns>
+        public static byte[] DecryptWithKey(string b64data, byte[] key)
         {
-            byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
+            byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(b64data), key);
 
             return result;
         }
 
-        public static string DecryptWithKeyAsString(byte[] data, byte[] key, uint iterations = 10000)
+        /// <summary>
+        /// Decrypts the data with the provided key.
+        /// </summary>
+        /// <param name="data">The data to decrypt.</param>
+        /// <param name="key">The key to use for decryption.</param>
+        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
+        [Obsolete("This method has been deprecated. Use DecryptWithKeyAsUtf8String instead.")]
+        public static string DecryptWithKeyAsString(byte[] data, byte[] key)
+        {
+            return DecryptWithKeyAsUtf8String(data, key);
+        }
+
+        /// <summary>
+        /// Decrypts the data with the provided key.
+        /// </summary>
+        /// <param name="data">The data to decrypt.</param>
+        /// <param name="key">The key to use for decryption.</param>
+        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
+        public static string DecryptWithKeyAsUtf8String(byte[] data, byte[] key)
         {
             byte[] result = Native.Decrypt(data, key);
 
             return Utils.ByteArrayToUtf8String(result);
         }
 
-        public static byte[] DecryptWithKey(byte[] data, byte[] key, uint iterations = 10000)
+        /// <summary>
+        /// Decrypts the data with the provided key.
+        /// </summary>
+        /// <param name="data">The data to decrypt.</param>
+        /// <param name="key">The key to use for decryption.</param>
+        /// <returns>Returns the decryption result as a byte array.</returns>
+        public static byte[] DecryptWithKey(byte[] data, byte[] key)
         {
             byte[] result = Native.Decrypt(data, key);
 
             return result;
         }
 
+        /// <summary>
+        /// Decrypts the data with the provided password (which will be encoded into a UTF8 byte array and derived).
+        /// </summary>
+        /// <param name="data">The data to decrypt.</param>
+        /// <param name="key">The key to use for decryption.</param>
+        /// <param name="iterations">The number of iterations used to derive the password.</param>
+        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
+        [Obsolete("This method has been deprecated. Use DecryptWithPasswordAsUtf8String instead.")]
         public static string DecryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000)
+        {
+            return DecryptWithPasswordAsUtf8String(data, password, iterations);
+        }
+
+        /// <summary>
+        /// Decrypts the data with the provided password (which will be encoded into a UTF8 byte array and derived).
+        /// </summary>
+        /// <param name="data">The data to decrypt.</param>
+        /// <param name="key">The key to use for decryption.</param>
+        /// <param name="iterations">The number of iterations used to derive the password.</param>
+        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
+        public static string DecryptWithPasswordAsUtf8String(byte[] data, string password, uint iterations = 10000)
         {
             // There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#. 
             // This is unfortunatly the best way we found to fix it while keeping backward compatibility.
@@ -396,8 +464,28 @@ namespace Devolutions.Cryptography
             }
         }
 
-        // Encrypt base64 string data and return base64 string
-        public static string DecryptWithPasswordAsString(string data, string password, uint iterations = 10000)
+
+        /// <summary>
+        /// Decrypts the base 64 data (which will be decoded to the original data) with the provided password (which will be encoded into a UTF8 byte array and derived).
+        /// </summary>
+        /// <param name="b64data">The data to decrypt.</param>
+        /// <param name="password">The password to use for decryption.</param>
+        /// <param name="iterations">The number of iterations used to derive the password.</param>
+        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
+        [Obsolete("This method has been deprecated. Use DecryptWithPasswordAsUtf8String instead.")]
+        public static string DecryptWithPasswordAsString(string b64data, string password, uint iterations = 10000)
+        {
+            return DecryptWithPasswordAsUtf8String(b64data, password, iterations);
+        }
+
+        /// <summary>
+        /// Decrypts the base 64 data (which will be decoded to the original data) with the provided password (which will be encoded into a UTF8 byte array and derived).
+        /// </summary>
+        /// <param name="b64data">The data to decrypt.</param>
+        /// <param name="password">The password to use for decryption.</param>
+        /// <param name="iterations">The number of iterations used to derive the password.</param>
+        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
+        public static string DecryptWithPasswordAsUtf8String(string b64data, string password, uint iterations = 10000)
         {
             // There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#. 
             // This is unfortunatly the best way we found to fix it while keeping backward compatibility.
@@ -411,7 +499,7 @@ namespace Devolutions.Cryptography
                     return null;
                 }
 
-                byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
+                byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(b64data), key);
 
                 return Utils.ByteArrayToUtf8String(result);
             }
@@ -424,7 +512,7 @@ namespace Devolutions.Cryptography
                         return null;
                     }
 
-                    byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
+                    byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(b64data), key);
 
                     return Utils.ByteArrayToUtf8String(result);
                 }
@@ -434,7 +522,13 @@ namespace Devolutions.Cryptography
             }
         }
 
-
+        /// <summary>
+        /// Decrypts the data with the provided password (which will be encoded into a UTF8 byte array and derived).
+        /// </summary>
+        /// <param name="data">The data to decrypt.</param>
+        /// <param name="password">The password to use for decryption.</param>
+        /// <param name="iterations">The number of iterations used to derive the password.</param>
+        /// <returns>Returns the decryption result as a byte array.</returns>
         public static byte[] DecryptWithPassword(byte[] data, string password, uint iterations = 10000)
         {
             // There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#. 
@@ -472,8 +566,14 @@ namespace Devolutions.Cryptography
             }
         }
 
-        // Encrypt base64 string data and return base64 string
-        public static byte[] DecryptWithPassword(string data, string password, uint iterations = 10000)
+        /// <summary>
+        /// Decrypts the base 64 data (which will be decoded to the original data) with the provided password (which will be encoded into a UTF8 byte array and derived).
+        /// </summary>
+        /// <param name="b64data">The data to decrypt.</param>
+        /// <param name="password">The password to use for decryption.</param>
+        /// <param name="iterations">The number of iterations used to derive the password.</param>
+        /// <returns>Returns the decryption result as a byte array.</returns>
+        public static byte[] DecryptWithPassword(string b64data, string password, uint iterations = 10000)
         {
             // There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#. 
             // This is unfortunatly the best way we found to fix it while keeping backward compatibility.
@@ -487,7 +587,7 @@ namespace Devolutions.Cryptography
                     return null;
                 }
 
-                byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
+                byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(b64data), key);
 
                 return result;
             }
@@ -500,7 +600,7 @@ namespace Devolutions.Cryptography
                         return null;
                     }
 
-                    byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(data), key);
+                    byte[] result = Native.Decrypt(Utils.Base64StringToByteArray(b64data), key);
 
                     return result;
                 }
