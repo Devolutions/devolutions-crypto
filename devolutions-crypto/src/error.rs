@@ -42,6 +42,10 @@ pub enum DevoCryptoError {
     RandomError,
     /// A generic IO error has occurred. Error code: -34
     IoError(Error),
+    /// There is not enough shares to regenerate a secret: -41
+    NotEnoughShares,
+    /// The version of the multiple data is inconsistent: -42
+    InconsistentVersion,
 }
 
 impl DevoCryptoError {
@@ -62,6 +66,8 @@ impl DevoCryptoError {
             DevoCryptoError::CryptoError => -32,
             DevoCryptoError::RandomError => -33,
             DevoCryptoError::IoError(_) => -34,
+            DevoCryptoError::NotEnoughShares => -41,
+            DevoCryptoError::InconsistentVersion => -42,
         }
     }
 }
@@ -84,6 +90,8 @@ impl DevoCryptoError {
             DevoCryptoError::CryptoError => "CryptoError",
             DevoCryptoError::RandomError => "RandomError",
             DevoCryptoError::IoError(_) => "IoError",
+            DevoCryptoError::NotEnoughShares => "NotEnoughShares",
+            DevoCryptoError::InconsistentVersion => "InconsistentVersion",
         }
     }
 }
@@ -117,6 +125,10 @@ impl std::error::Error for DevoCryptoError {
             DevoCryptoError::CryptoError => "A cryptographic error occurred.",
             DevoCryptoError::RandomError => "An error with the Random Number Generator occurred.",
             DevoCryptoError::IoError(ref error) => error.description(),
+            DevoCryptoError::NotEnoughShares => {
+                "There wasn't enough share to regenerate the secret."
+            }
+            DevoCryptoError::InconsistentVersion => "The version is not the same for all the data.",
         }
     }
 }

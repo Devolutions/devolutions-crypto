@@ -6,6 +6,10 @@ use hmac::Hmac;
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
+use sharks::Sharks;
+use zeroize::Zeroize;
+
+use crate::DevoCryptoError;
 
 /// Returns a random key of the specified length.
 /// # Arguments
@@ -14,13 +18,13 @@ use sha2::Sha256;
 /// ```
 /// use devolutions_crypto::utils::generate_key;
 ///
-/// let key = generate_key(32).unwrap();
+/// let key = generate_key(32);
 /// assert_eq!(32, key.len());
 /// ```
-pub fn generate_key(length: usize) -> Result<Vec<u8>> {
+pub fn generate_key(length: usize) -> Vec<u8> {
     let mut key = vec![0u8; length];
     OsRng.fill_bytes(&mut key);
-    Ok(key)
+    key
 }
 
 /// Derives a key or password into a new one.
@@ -48,10 +52,33 @@ pub fn derive_key(key: &[u8], salt: &[u8], iterations: usize, length: usize) -> 
     new_key
 }
 
+pub fn generate_shared_key(n_shares: u8, threshold: u8, length: usize) -> Vec<Vec<u8>> {
+    let mut secret = generate_key(length);
+    let sharks = Sharks(threshold);
+    let dealer = sharks.dealer(&secret);
+
+    secret.zeroize();
+
+    dealer
+        .take(n_shares as usize)
+        .map(|s| (&s).into())
+        .collect()
+}
+
+pub fn join_secret(threshold: u8, shares: &[&[u8]]) -> Result<Vec<u8>> {
+    let sharks = Sharks(threshold);
+
+    let shares: Vec<sharks::Share> = shares.iter().map(|s| (*s).into()).collect();
+    match sharks.recover(&shares) {
+        Ok(x) => Ok(x),
+        Err(_) => Err(DevoCryptoError::NotEnoughShares),
+    }
+}
+
 #[test]
 fn test_generate_key() {
     let size = 32;
-    let key = generate_key(size).unwrap();
+    let key = generate_key(size);
 
     assert_eq!(size, key.len());
     assert_ne!(vec![0u8; size], key);

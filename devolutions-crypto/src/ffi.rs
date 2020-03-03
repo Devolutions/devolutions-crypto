@@ -12,6 +12,8 @@ use super::utils;
 use super::DcDataBlob;
 use super::DevoCryptoError;
 
+use super::Result;
+
 use std::convert::TryFrom as _;
 use std::slice;
 
@@ -338,6 +340,109 @@ pub extern "C" fn MixKeyExchangeSize() -> i64 {
     32
 }
 
+/// Generates a secret key shared amongst multiple actor.
+/// # Arguments
+///  * n_shares - The number of shares to generate.
+///  * threshold - The number of shares required to regenerate the secret.
+///  * length - The length of the generated secret
+///  * shares - The output buffers. This is a 2-dimensionnal array representing the shares.
+/// # Returns
+/// Returns 0 if the operation is successful. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+#[no_mangle]
+pub unsafe extern "C" fn GenerateSharedKey(
+    n_shares: u8,
+    threshold: u8,
+    length: usize,
+    shares: *const *mut u8,
+) -> i64 {
+    if shares.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
+
+    match DcDataBlob::generate_shared_key(n_shares, threshold, length) {
+        Ok(s) => {
+            let shares = slice::from_raw_parts(shares, n_shares as usize);
+
+            for (s, res_s) in s.into_iter().zip(shares) {
+                if res_s.is_null() {
+                    return DevoCryptoError::NullPointer.error_code();
+                };
+
+                let s: Vec<u8> = s.into();
+                let res_s =
+                    slice::from_raw_parts_mut(*res_s, GenerateSharedKeySize(length) as usize);
+                res_s.copy_from_slice(&s);
+            }
+            0
+        }
+        Err(e) => e.error_code(),
+    }
+}
+
+/// The size, in bytes, of each resulting shares
+/// # Arguments
+///  * secret_length - The length of the desired secret
+/// # Returns
+/// Returns the size, in bytes, of each resulting shares.
+#[no_mangle]
+pub extern "C" fn GenerateSharedKeySize(secret_length: usize) -> i64 {
+    (secret_length + 10) as i64
+}
+
+/// Join multiple shares to regenerate a shared secret.
+/// # Arguments
+///  * n_shares - The number of shares sent to the method
+///  * share_length - The length of each share
+///  * shares - The shares to join
+///  * secret - The output buffer to write the shared secret to.
+///  * secret_length - The length of the output buffer. Get the value with JoinSharesSize.
+/// # Returns
+/// Returns 0 if the operation is successful. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+#[no_mangle]
+pub unsafe extern "C" fn JoinShares(
+    n_shares: usize,
+    share_length: usize,
+    shares: *const *const u8,
+    secret: *mut u8,
+    secret_length: usize,
+) -> i64 {
+    if shares.is_null() || secret.is_null() {
+        return DevoCryptoError::NullPointer.error_code();
+    };
+
+    if secret_length != JoinSharesSize(share_length) as usize {
+        return DevoCryptoError::InvalidOutputLength.error_code();
+    }
+
+    let shares: Result<Vec<DcDataBlob>> = slice::from_raw_parts(shares, n_shares)
+        .into_iter()
+        .map(|s| DcDataBlob::try_from(slice::from_raw_parts(*s, share_length)))
+        .collect();
+
+    match shares {
+        Ok(shares) => match DcDataBlob::join_shares(&shares) {
+            Ok(s) => {
+                let secret = slice::from_raw_parts_mut(secret, secret_length);
+                secret.copy_from_slice(&s);
+                0
+            }
+            Err(e) => e.error_code(),
+        },
+        Err(e) => e.error_code(),
+    }
+}
+
+/// The size, in bytes, of the resulting secret
+/// # Arguments
+///  * share_length - The length of a share
+/// # Returns
+/// Returns the size, in bytes, of each resulting secret.
+pub extern "C" fn JoinSharesSize(share_length: usize) -> i64 {
+    (share_length - 10) as i64
+}
+
 /// Generate a key using a CSPRNG.
 /// # Arguments
 ///  * key - Pointer to the buffer to fill with random values.
@@ -353,14 +458,10 @@ pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
 
     let key = slice::from_raw_parts_mut(key, key_length);
 
-    match utils::generate_key(key_length) {
-        Ok(mut k) => {
-            key.copy_from_slice(&k);
-            k.zeroize();
-            0
-        }
-        Err(e) => e.error_code(),
-    }
+    let mut k = utils::generate_key(key_length);
+    key.copy_from_slice(&k);
+    k.zeroize();
+    0
 }
 
 /// Derive a key to create a new one. Can be used with a password.
