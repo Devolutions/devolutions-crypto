@@ -103,7 +103,6 @@ namespace Tests
             Assert.AreEqual(x, _textBase64ToTest);
         }
 
-
         /// <summary>
         /// Convert the Array bytes into UTF8 text
         /// </summary>

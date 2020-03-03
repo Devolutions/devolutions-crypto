@@ -16,10 +16,10 @@ namespace Tests
         private readonly string _textToTest2 = "QUJDDE";
         private readonly byte[] _cryptoKeyByteArray = new byte[] { 0x4b, 0x65, 0x79, 0x31, 0x32, 0x33 };
 
-       /// <summary>
+        /// <summary>
         ///
         /// </summary>
-       [TestMethod]
+        [TestMethod]
         public void DecodeNative()
         {
             var x = Native.DecodeNative(_textToTest, (UIntPtr)_textToTest.Length, new byte[] { 0x00, 0x00, 0x00 }, (UIntPtr)0x00000003);
@@ -143,6 +143,15 @@ namespace Tests
         ///
         /// </summary>
         [TestMethod]
+        public void GenerateKeyExchange()
+        {
+            var xKey = Native.GenerateKeyExchange();
+            var yKey = Native.GenerateKeyExchange();
+            var mixXKey = Native.MixKeyExchange(xKey.PrivateKey, yKey.PublicKey);
+            var mixYKey = Native.MixKeyExchange(yKey.PrivateKey, xKey.PublicKey);
+            CollectionAssert.AreEqual(mixYKey, mixXKey);
+        }
+
         public void VersionNative()
         {
             var assembly = Assembly.GetAssembly(typeof(Devolutions.Cryptography.Managed));
@@ -153,19 +162,6 @@ namespace Tests
             Native.VersionNative(buffer, (UIntPtr)bufferSize);
             var nativeVersion = Utils.ByteArrayToString(buffer) + ".0";
             Assert.AreEqual(nativeVersion, managedVersion);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
-        public void GenerateKeyExchange()
-        {
-            var xKey = Native.GenerateKeyExchange();
-            var yKey = Native.GenerateKeyExchange();
-            var mixXKey = Native.MixKeyExchange(xKey.PrivateKey, yKey.PublicKey);
-            var mixYKey = Native.MixKeyExchange(yKey.PrivateKey, xKey.PublicKey);
-            CollectionAssert.AreEqual(mixYKey, mixXKey);
         }
 
         /// <summary>
