@@ -51,6 +51,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Devolutions.Crypto">
+      <HintPath>windows\bin\Devolutions.Crypto.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -61,15 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums.cs" />
-    <Compile Include="KeyExchange.cs" />
-    <Compile Include="Managed.cs" />
-    <Compile Include="ManagedError.cs" />
-    <Compile Include="Native.cs" />
-    <Compile Include="Native.Xamarin.cs" />
-    <Compile Include="NativeError.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ContentWithTargetPath Include="windows\bin\DevolutionsCrypto-x86.dll">

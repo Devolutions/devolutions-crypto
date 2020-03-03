@@ -12,6 +12,7 @@ namespace Tests
     public class TestUtils
     {
         private readonly byte[] _byteArray = new byte[] {0x41, 0x42, 0x43};
+        private readonly string _text = "ABC";
         private readonly string _textToTest = "QUJD";
         private readonly string _cryptoKey = "Key123";
 
@@ -30,7 +31,8 @@ namespace Tests
         [TestMethod]
         public void StringToByteArray()
         {
-            CollectionAssert.AreEqual(Utils.StringToByteArray(_textToTest), Encoding.UTF8.GetBytes(_textToTest));
+            var x = new byte[]{ 0x51, 0x55, 0x4a, 0x44 };
+            CollectionAssert.AreEqual(Utils.StringToByteArray(_textToTest), x);
         }
 
         /// <summary>
@@ -49,7 +51,7 @@ namespace Tests
         [TestMethod]
         public void ByteArrayToString()
         {
-            var x = Utils.StringToByteArray(_textToTest);
+            var x = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
             var y = Utils.ByteArrayToString(x);
             Assert.AreEqual(y, _textToTest);
         }
@@ -70,8 +72,8 @@ namespace Tests
         [TestMethod]
         public void GetDecodedLength()
         {
-            var y = Utils.GetDecodedLength(_textToTest);
-            Assert.AreEqual(3, y);
+            var y = Utils.GetDecodedLength(_text);
+            Assert.AreEqual(2, y);
         }
 
         /// <summary>

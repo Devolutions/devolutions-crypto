@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Devolutions.Cryptography;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,16 +16,6 @@ namespace Tests
         private readonly string _textToTest2 = "QUJDDE";
         private readonly string _cryptoKey = "Key123";
         private readonly byte[] _cryptoKeyByteArray = new byte[] { 0x4b, 0x65, 0x79, 0x31, 0x32, 0x33 };
-
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
-        public void Decode86()
-        {
-            var x = Native.Decode86(_textToTest, (UIntPtr)_textToTest.Length, new byte[] { 0x00, 0x00, 0x00 }, (UIntPtr)0x00000003);
-            Assert.AreEqual((long)0x0000000000000003, x);
-        }
 
         /// <summary>
         ///
@@ -142,33 +133,27 @@ namespace Tests
         ///
         /// </summary>
         [TestMethod]
-        public void Encode86()
-        {
-            var buffer = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
-            var x = Native.Encode86(_byteArray, (UIntPtr)_byteArray.Length, buffer, (UIntPtr)buffer.Length);
-            Assert.AreEqual((long)0x0000000000000004, x);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
-        public void Encode64()
-        {
-            var buffer = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
-            var x = Native.Encode64(_byteArray, (UIntPtr)_byteArray.Length, buffer, (UIntPtr)buffer.Length);
-            Assert.AreEqual((long)0x0000000000000004, x);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
         public void EncodeNative()
         {
             var buffer = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
             var x = Native.EncodeNative(_byteArray, (UIntPtr)_byteArray.Length, buffer, (UIntPtr)buffer.Length);
             Assert.AreEqual((long)0x0000000000000004, x);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void VersionNative()
+        {
+            var assembly = Assembly.GetAssembly(typeof(Devolutions.Cryptography.Managed));
+            var managedVersion = assembly.GetName().Version.ToString();
+
+            var bufferSize = Native.VersionSizeNative();
+            var buffer = new byte[bufferSize];
+            Native.VersionNative(buffer, (UIntPtr)bufferSize);
+            var nativeVersion = Utils.ByteArrayToString(buffer) + ".0";
+            Assert.AreEqual(nativeVersion, managedVersion);
         }
 
         /// <summary>

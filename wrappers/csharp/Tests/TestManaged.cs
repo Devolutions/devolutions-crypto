@@ -84,26 +84,6 @@ namespace Tests
         }
 
         /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
-        public void GetEncodedLength()
-        {
-            var x = Utils.GetEncodedLength(_byteArray);
-            Assert.AreEqual((int)x, 4);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
-        public void GetDecodedLength()
-        {
-            var x = Utils.GetDecodedLength(_textBase64ToTest);
-            Assert.AreEqual((int)x, 3);
-        }
-
-        /// <summary>
         /// Convert the Array bytes into UTF8 text
         /// </summary>
         [TestMethod]
