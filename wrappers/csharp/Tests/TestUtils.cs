@@ -1,10 +1,8 @@
-﻿using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Devolutions.Cryptography;
-
 namespace Tests
 {
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Devolutions.Cryptography;
+
     /// <summary>
     ///
     /// </summary>

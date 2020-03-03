@@ -1,8 +1,8 @@
-﻿using Devolutions.Cryptography;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace Tests
 {
+    using Devolutions.Cryptography;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
     /// <summary>
     ///
     /// </summary>
