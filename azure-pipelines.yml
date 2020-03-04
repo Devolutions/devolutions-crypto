@@ -492,17 +492,17 @@ stages:
 
       - script: | 
           curl https://dist.nuget.org/win-x86-commandline/latest/nuget.exe --output nuget.exe
-        workingDirectory: "./wrappers/csharp/unit-tests"
+        workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Downloading nuget"
 
       - script: |
           python Test.py DOTNET-FRAMEWORK
-        workingDirectory: "./wrappers/csharp/unit-tests"
+        workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Unit tests DOTNET FRAMEWORK PACKAGE CONFIG"
       
       - script: |
           python Test.py DOTNET-CORE
-        workingDirectory: "./wrappers/csharp/unit-tests"
+        workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Unit tests DOTNET CORE"
 
   - job: Linux
@@ -528,7 +528,7 @@ stages:
 
       - script: |
           python Test.py DOTNET-CORE
-        workingDirectory: "./wrappers/csharp/unit-tests"
+        workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Unit tests DOTNET CORE"
 
   - job: macOS
@@ -545,5 +545,5 @@ stages:
 
     - script: |
         python3 Test.py DOTNET-CORE
-      workingDirectory: "./wrappers/csharp/unit-tests"
+      workingDirectory: "./wrappers/csharp/unit-tests/nugets"
       displayName: "Unit tests DOTNET CORE"
