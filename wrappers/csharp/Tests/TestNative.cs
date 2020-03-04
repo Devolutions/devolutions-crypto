@@ -51,6 +51,34 @@ namespace Tests
         ///
         /// </summary>
         [TestMethod]
+        public void Decrypt2()
+        {
+            var encryptedData = Utils.Base64StringToByteArray("DQwCAAAAAQCK1twEut+TeJfFbTWCRgHjyS6bOPOZUEQAeBtSFFRl2jHggM/34n68zIZWGbsZHkufVzU6mTN5N2Dx9bTplrycv5eNVevT4P9FdVHJ751D+A==");
+            var encryptKey = Utils.Base64StringToByteArray("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=");
+
+            var y = Native.Decrypt(encryptedData, encryptKey);
+            var z = Utils.ByteArrayToString(y);
+            Assert.AreEqual(z, "test Ciph3rtext~");
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void Decrypt3()
+        {
+            var encryptedData = Utils.Base64StringToByteArray("DQwCAAAAAgAA0iPpI4IEzcrWAQiy6tqDqLbRYduGvlMC32mVH7tpIN2CXDUu5QHF91I7pMrmjt/61pm5CeR/IcU=");
+            var encryptKey = Utils.Base64StringToByteArray("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=");
+
+            var y = Native.Decrypt(encryptedData, encryptKey);
+            var z = Utils.ByteArrayToString(y);
+            Assert.AreEqual(z, "test Ciph3rtext~2");
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
         public void DeriveKey()
         {
             var derivedKey = new byte[]
