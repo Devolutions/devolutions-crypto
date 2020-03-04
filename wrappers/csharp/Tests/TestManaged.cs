@@ -15,7 +15,6 @@ namespace Tests
         private readonly byte[] _cryptoKeyByteArray = new byte[] { 0x4b, 0x65, 0x79, 0x31, 0x32, 0x33 };
         private readonly string _cryptoKey = "Key123";
 
-
         /// <summary>
         ///
         /// </summary>
@@ -24,6 +23,9 @@ namespace Tests
         {
             var b = Managed.EncryptBase64WithPassword(_textBase64ToTest, _cryptoKey);
             Assert.IsTrue(Utils.ValidateSignature(b, DataType.Cipher));
+            var c = Managed.DecryptWithPassword(b, _cryptoKey);
+            var d = Utils.ByteArrayToString(c);
+            Assert.AreEqual(d, _textToTest);
         }
 
         /// <summary>
