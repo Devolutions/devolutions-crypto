@@ -1,0 +1,112 @@
+namespace Tests
+{
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Devolutions.Cryptography;
+
+    /// <summary>
+    ///
+    /// </summary>
+    [TestClass]
+    public class TestUtils
+    {
+        private readonly byte[] _byteArray = new byte[] {0x41, 0x42, 0x43};
+        private readonly string _text = "ABC";
+        private readonly string _textToTest = "QUJD";
+        private readonly string _cryptoKey = "Key123";
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void ToBase64String()
+        {
+            Assert.AreEqual(Utils.ToBase64String(_byteArray), _textToTest);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void StringToByteArray()
+        {
+            var x = new byte[]{ 0x51, 0x55, 0x4a, 0x44 };
+            CollectionAssert.AreEqual(Utils.StringToByteArray(_textToTest), x);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void Base64StringToByteArray()
+        {
+            var x = Utils.Base64StringToByteArray(_textToTest);
+            CollectionAssert.AreEqual(x, _byteArray);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void ByteArrayToString()
+        {
+            var x = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
+            var y = Utils.ByteArrayToString(x);
+            Assert.AreEqual(y, _textToTest);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void GetEncodedLength()
+        {
+            var y = Utils.GetEncodedLength(_byteArray);
+            Assert.AreEqual(4, y);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void GetDecodedLength()
+        {
+            var y = Utils.GetDecodedLength(_text);
+            Assert.AreEqual(2, y);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void Encode()
+        {
+            var y = Utils.Encode(_byteArray);
+            Assert.AreEqual(y, _textToTest);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void Decode()
+        {
+            var x = Utils.Decode(_textToTest);
+            CollectionAssert.AreEqual(x, _byteArray);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void ValidateSignature()
+        {
+            var textToEncrypt = Utils.StringToByteArray(_textToTest);
+            var key = Utils.StringToByteArray(_cryptoKey);
+
+            var encryptedWithDevo = Native.Encrypt(textToEncrypt, key);
+
+            Assert.IsFalse(Utils.ValidateSignature(textToEncrypt, DataType.Cipher));
+            Assert.IsTrue(Utils.ValidateSignature(encryptedWithDevo, DataType.Cipher));
+        }
+    }
+}
