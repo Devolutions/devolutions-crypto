@@ -51,8 +51,8 @@ impl From<DcHeader> for Vec<u8> {
     }
 }
 
-impl DcHeader {
-    pub fn new() -> DcHeader {
+impl Default for DcHeader {
+    fn default() -> Self {
         DcHeader {
             signature: SIGNATURE,
             data_type: 0,
@@ -60,7 +60,9 @@ impl DcHeader {
             version: 0,
         }
     }
+}
 
+impl DcHeader {
     pub fn len() -> usize {
         8
     }

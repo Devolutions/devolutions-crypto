@@ -113,11 +113,11 @@ impl TryFrom<&[u8]> for Argon2Parameters {
 
         let associated_data_length = data_cursor.read_u32::<LittleEndian>()?;
         let mut associated_data = vec![0u8; associated_data_length as usize];
-        data_cursor.read(&mut associated_data)?;
+        data_cursor.read_exact(&mut associated_data)?;
 
         let salt_length = data_cursor.read_u32::<LittleEndian>()?;
         let mut salt = vec![0u8; salt_length as usize];
-        data_cursor.read(&mut salt)?;
+        data_cursor.read_exact(&mut salt)?;
 
         Ok(Argon2Parameters {
             associated_data,

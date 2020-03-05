@@ -45,7 +45,7 @@ impl DcSharedSecret {
 
         Ok(
             DcSharedSecretV1::generate_shared_key(n_shares, threshold, length)?
-                .map(|s| DcSharedSecret::V1(s)),
+                .map(DcSharedSecret::V1),
         )
     }
 
@@ -60,8 +60,8 @@ impl DcSharedSecret {
             None => return Err(DevoCryptoError::NotEnoughShares),
         };
 
-        if !shares.clone().all(|share| match &share {
-            &DcSharedSecret::V1(_) => version == V1,
+        if !shares.clone().all(|share| match share {
+            DcSharedSecret::V1(_) => version == V1,
         }) {
             return Err(DevoCryptoError::InconsistentVersion);
         }
