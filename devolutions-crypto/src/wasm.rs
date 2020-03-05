@@ -11,6 +11,8 @@ use super::DcDataBlob;
 
 use zeroize::Zeroize as _;
 
+use argon2;
+
 #[wasm_bindgen]
 pub struct KeyPair {
     private_key: Vec<u8>,
@@ -145,16 +147,4 @@ pub fn base64decode(data: &str) -> Result<Vec<u8>, JsValue> {
             Err(error.into())
         }
     }
-}
-
-#[wasm_bindgen]
-pub fn test_serde(data: JsValue) -> Vec<u8> {
-    let data = if JsCast::is_instance_of::<Uint8Array>(&data) {
-        JsValue::from(Array::from(&data))
-    } else {
-        data
-    };
-
-    let test: Vec<u8> = data.into_serde().unwrap();
-    test
 }

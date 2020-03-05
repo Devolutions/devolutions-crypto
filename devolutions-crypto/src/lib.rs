@@ -1,9 +1,11 @@
+mod argon2parameters;
 mod data_blob;
 mod error;
 pub mod utils;
 
 use cfg_if::cfg_if;
 
+pub use argon2parameters::Argon2Parameters;
 pub use data_blob::DcDataBlob;
 pub use error::DevoCryptoError;
 

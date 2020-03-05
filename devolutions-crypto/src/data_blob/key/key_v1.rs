@@ -1,9 +1,12 @@
+use super::Argon2Parameters;
+
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
 
 use rand::rngs::OsRng;
 use x25519_dalek::{PublicKey, StaticSecret};
+use zeroize::Zeroize;
 
 const PRIVATE: u16 = 1;
 const PUBLIC: u16 = 2;
@@ -60,5 +63,31 @@ impl DcKeyV1 {
             }
             _ => Err(DevoCryptoError::InvalidDataType),
         }
+    }
+
+    pub fn derive_keypair(
+        password: &[u8],
+        parameters: &Argon2Parameters,
+        private_header: &mut DcHeader,
+        public_header: &mut DcHeader,
+    ) -> Result<(DcKeyV1, DcKeyV1)> {
+        if parameters.length != 32 {
+            return Err(DevoCryptoError::InvalidLength);
+        }
+
+        private_header.data_subtype = PRIVATE;
+        public_header.data_subtype = PUBLIC;
+
+        let mut derived_pass = parameters.compute(password)?;
+
+        let mut key_bytes = [0u8; 32];
+        key_bytes.copy_from_slice(&derived_pass[0..32]);
+
+        derived_pass.zeroize();
+
+        let private = StaticSecret::from(key_bytes);
+        let public = PublicKey::from(&private);
+
+        Ok((DcKeyV1::Private(private), DcKeyV1::Public(public)))
     }
 }

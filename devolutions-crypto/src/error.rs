@@ -34,6 +34,8 @@ pub enum DevoCryptoError {
     UnknownSubtype,
     /// The data type version is unknown. Error code: -23
     UnknownVersion,
+    /// The data is invalid. Error code: -24
+    InvalidData,
     /// A null pointer has been passed to the FFI interface. Error code: -31
     NullPointer,
     /// A cryptographic error occurred. Error code: -32
@@ -62,6 +64,7 @@ impl DevoCryptoError {
             DevoCryptoError::UnknownType => -21,
             DevoCryptoError::UnknownSubtype => -22,
             DevoCryptoError::UnknownVersion => -23,
+            DevoCryptoError::InvalidData => -24,
             DevoCryptoError::NullPointer => -31,
             DevoCryptoError::CryptoError => -32,
             DevoCryptoError::RandomError => -33,
@@ -85,6 +88,7 @@ impl DevoCryptoError {
             DevoCryptoError::InvalidDataType => "InvalidDataType",
             DevoCryptoError::UnknownType => "UnknownType",
             DevoCryptoError::UnknownSubtype => "UnknownSubtype",
+            DevoCryptoError::InvalidData => "InvalidData",
             DevoCryptoError::UnknownVersion => "UnknownVersion",
             DevoCryptoError::NullPointer => "NullPointer",
             DevoCryptoError::CryptoError => "CryptoError",
@@ -120,6 +124,7 @@ impl std::error::Error for DevoCryptoError {
             DevoCryptoError::InvalidDataType => "The operation cannot be done with this type.",
             DevoCryptoError::UnknownType => "The data type is unknown.",
             DevoCryptoError::UnknownSubtype => "The data subtype is unknown.",
+            DevoCryptoError::InvalidData => "The data is invalid.",
             DevoCryptoError::UnknownVersion => "The data type version is unknown.",
             DevoCryptoError::NullPointer => "A null pointer has been passed to the FFI interface.",
             DevoCryptoError::CryptoError => "A cryptographic error occurred.",
@@ -172,6 +177,12 @@ impl From<rand::Error> for DevoCryptoError {
 impl From<std::io::Error> for DevoCryptoError {
     fn from(_error: std::io::Error) -> DevoCryptoError {
         DevoCryptoError::RandomError
+    }
+}
+
+impl From<argon2::Error> for DevoCryptoError {
+    fn from(_error: argon2::Error) -> Self {
+        DevoCryptoError::CryptoError
     }
 }
 
