@@ -23,8 +23,35 @@ stages:
         pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: Source
 
-- stage: Native_Build
+- stage: RustCodeFormattingCheck
   dependsOn: [] 
+  jobs:
+  - job: Linux
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7'
+
+    - script: |
+        rustup update
+
+        mkdir .cargo
+      displayName: "Install rust"
+
+    - script: |
+        cargo fmt --all -- --check
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Check Format"
+
+    - script: |
+        cargo clippy -- --D warnings
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Check Clippy"
+
+- stage: Native_Build
+  dependsOn: RustCodeFormattingCheck
   jobs:
   - job: Linux
     pool:
@@ -383,7 +410,7 @@ stages:
         artifactName: AppSpecificNugets
 
 - stage: WebAssembly
-  dependsOn: [] 
+  dependsOn: RustCodeFormattingCheck
   jobs:
   - job: safari_unit_tests
     pool:
@@ -520,7 +547,3 @@ stages:
         python3 Test.py DOTNET-CORE
       workingDirectory: "./wrappers/csharp/unit-tests"
       displayName: "Unit tests DOTNET CORE"
-
-
-          
-        

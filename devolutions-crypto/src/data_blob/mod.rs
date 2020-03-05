@@ -72,7 +72,7 @@ impl DcDataBlob {
     /// let encrypted_data = DcDataBlob::encrypt(data, key, None).unwrap();
     /// ```
     pub fn encrypt(data: &[u8], key: &[u8], version: Option<u16>) -> Result<DcDataBlob> {
-        let mut header = DcHeader::new();
+        let mut header = Default::default();
         let payload = DcPayload::encrypt(data, key, &mut header, version)?;
         Ok(DcDataBlob { header, payload })
     }
@@ -115,7 +115,7 @@ impl DcDataBlob {
     /// let hashed_password = DcDataBlob::hash_password(password, 10000);
     /// ```
     pub fn hash_password(password: &[u8], iterations: u32) -> Result<DcDataBlob> {
-        let mut header = DcHeader::new();
+        let mut header = Default::default();
         let payload = DcPayload::hash_password(password, iterations, &mut header)?;
         Ok(DcDataBlob { header, payload })
     }
@@ -149,8 +149,8 @@ impl DcDataBlob {
     /// let (private, public) = DcDataBlob::generate_key_exchange().unwrap();
     /// ```
     pub fn generate_key_exchange() -> Result<(DcDataBlob, DcDataBlob)> {
-        let mut header_private = DcHeader::new();
-        let mut header_public = DcHeader::new();
+        let mut header_private = Default::default();
+        let mut header_public = Default::default();
         let (payload_private, payload_public) =
             DcPayload::generate_key_exchange(&mut header_private, &mut header_public)?;
         Ok((
@@ -236,7 +236,7 @@ impl DcDataBlob {
         threshold: u8,
         length: usize,
     ) -> Result<Vec<DcDataBlob>> {
-        let mut header = DcHeader::new();
+        let mut header = Default::default();
         Ok(
             DcPayload::generate_shared_key(n_shares, threshold, length, &mut header)?
                 .map(move |s| DcDataBlob {
@@ -282,8 +282,8 @@ impl DcDataBlob {
         password: &[u8],
         parameters: &Argon2Parameters,
     ) -> Result<(DcDataBlob, DcDataBlob)> {
-        let mut private_header = DcHeader::new();
-        let mut public_header = DcHeader::new();
+        let mut private_header = Default::default();
+        let mut public_header = Default::default();
         let (private, public) = DcPayload::derive_keypair(
             password,
             parameters,

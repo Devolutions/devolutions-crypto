@@ -41,7 +41,7 @@ impl TryFrom<&[u8]> for DcSharedSecretV1 {
 }
 
 impl DcSharedSecretV1 {
-    pub fn generate_shared_key<'a>(
+    pub fn generate_shared_key(
         n_shares: u8,
         threshold: u8,
         length: usize,

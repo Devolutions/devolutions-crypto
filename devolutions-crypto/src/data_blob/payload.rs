@@ -85,7 +85,7 @@ impl DcPayload {
         header: &mut DcHeader,
     ) -> Result<impl Iterator<Item = DcPayload>> {
         let shares = DcSharedSecret::generate_shared_key(n_shares, threshold, length, header)?;
-        let shares = shares.map(move |s| DcPayload::SharedSecret(s));
+        let shares = shares.map(DcPayload::SharedSecret);
         Ok(shares)
     }
 
@@ -96,8 +96,8 @@ impl DcPayload {
     {
         let shares = shares.into_iter();
 
-        if !shares.clone().all(|share| match &share {
-            &DcPayload::SharedSecret(_) => true,
+        if !shares.clone().all(|share| match share {
+            DcPayload::SharedSecret(_) => true,
             _ => false,
         }) {
             return Err(DevoCryptoError::InvalidDataType);
