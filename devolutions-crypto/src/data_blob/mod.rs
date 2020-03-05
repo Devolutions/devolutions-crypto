@@ -6,6 +6,7 @@ mod hash;
 mod key;
 mod shared_secret;
 
+use super::Argon2Parameters;
 use super::DevoCryptoError;
 use super::Result;
 
@@ -269,6 +270,37 @@ impl DcDataBlob {
         let shares = shares.into_iter().map(move |s| &s.payload);
         DcPayload::join_shares(shares)
     }
+
+    /// Generate a keypair from a password and parameters.
+    /// # Arguments
+    ///  * `password` - The password to derive.
+    ///  * `parameters` - The derivation  parameters to use. You should use Argon2Parameters::default() for each new
+    ///    key to generate and reuse the same parameters(including the salt) to regenerate the full key.
+    /// # Returns
+    /// A tuple containing a Private key and a Public key, in that order.
+    pub fn derive_keypair(
+        password: &[u8],
+        parameters: &Argon2Parameters,
+    ) -> Result<(DcDataBlob, DcDataBlob)> {
+        let mut private_header = DcHeader::new();
+        let mut public_header = DcHeader::new();
+        let (private, public) = DcPayload::derive_keypair(
+            password,
+            parameters,
+            &mut private_header,
+            &mut public_header,
+        )?;
+        Ok((
+            DcDataBlob {
+                header: private_header,
+                payload: private,
+            },
+            DcDataBlob {
+                header: public_header,
+                payload: public,
+            },
+        ))
+    }
 }
 
 #[test]
@@ -389,4 +421,42 @@ fn secret_sharing_test() {
     assert_eq!(key1.len(), 32);
     assert_eq!(key2.len(), 32);
     assert!(DcDataBlob::join_shares(&shares[2..4]).is_err());
+}
+
+#[test]
+fn derive_keypair_test() {
+    let mut bob_parameters = Argon2Parameters::default();
+    bob_parameters.memory = 32;
+    bob_parameters.iterations = 2;
+
+    let (bob_priv, bob_pub) =
+        DcDataBlob::derive_keypair("password1".as_bytes(), &bob_parameters).unwrap();
+    let (bob_priv2, bob_pub2) =
+        DcDataBlob::derive_keypair("password1".as_bytes(), &bob_parameters).unwrap();
+
+    // Derivation should be repeatable with the same parameters
+    assert_eq!(
+        Into::<Vec<u8>>::into(bob_priv),
+        Into::<Vec<u8>>::into(bob_priv2)
+    );
+    assert_eq!(
+        Into::<Vec<u8>>::into(bob_pub),
+        Into::<Vec<u8>>::into(bob_pub2)
+    );
+
+    let (bob_priv, bob_pub) =
+        DcDataBlob::derive_keypair("password1".as_bytes(), &bob_parameters).unwrap();
+
+    let mut alice_parameters = Argon2Parameters::default();
+    alice_parameters.memory = 64;
+    alice_parameters.iterations = 4;
+
+    let (alice_priv, alice_pub) =
+        DcDataBlob::derive_keypair("password5".as_bytes(), &alice_parameters).unwrap();
+
+    let bob_shared = bob_priv.mix_key_exchange(alice_pub).unwrap();
+    let alice_shared = alice_priv.mix_key_exchange(bob_pub).unwrap();
+
+    // Should be a regular keypair
+    assert_eq!(bob_shared, alice_shared);
 }

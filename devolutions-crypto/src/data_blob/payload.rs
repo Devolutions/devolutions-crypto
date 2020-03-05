@@ -1,6 +1,7 @@
 use super::DevoCryptoError;
 use super::Result;
 
+use super::Argon2Parameters;
 use super::DcHeader;
 
 use super::{DcCiphertext, CIPHERTEXT};
@@ -108,6 +109,17 @@ impl DcPayload {
         });
 
         DcSharedSecret::join_shares(shares)
+    }
+
+    pub fn derive_keypair(
+        password: &[u8],
+        parameters: &Argon2Parameters,
+        private_header: &mut DcHeader,
+        public_header: &mut DcHeader,
+    ) -> Result<(DcPayload, DcPayload)> {
+        let (private, public) =
+            DcKey::derive_keypair(password, parameters, private_header, public_header)?;
+        Ok((DcPayload::Key(private), DcPayload::Key(public)))
     }
 }
 
