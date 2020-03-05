@@ -483,7 +483,7 @@ stages:
       - task: DownloadPipelineArtifact@2
         inputs:
           artifact: "Nugets"
-          targetPath: "./wrappers/csharp/unit-tests/Nugets"
+          targetPath: "./wrappers/csharp/unit-tests/nugets/Nugets"
 
       - bash: |
           echo "##vso[task.prependpath]c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin"
@@ -492,17 +492,17 @@ stages:
 
       - script: | 
           curl https://dist.nuget.org/win-x86-commandline/latest/nuget.exe --output nuget.exe
-        workingDirectory: "./wrappers/csharp/unit-tests"
+        workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Downloading nuget"
 
       - script: |
           python Test.py DOTNET-FRAMEWORK
-        workingDirectory: "./wrappers/csharp/unit-tests"
+        workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Unit tests DOTNET FRAMEWORK PACKAGE CONFIG"
       
       - script: |
           python Test.py DOTNET-CORE
-        workingDirectory: "./wrappers/csharp/unit-tests"
+        workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Unit tests DOTNET CORE"
 
   - job: Linux
@@ -520,7 +520,7 @@ stages:
       - task: DownloadPipelineArtifact@2
         inputs:
           artifact: "Nugets"
-          targetPath: "./wrappers/csharp/unit-tests/Nugets"
+          targetPath: "./wrappers/csharp/unit-tests/nugets/Nugets"
 
       - script: |
           sudo apt install nuget
@@ -528,7 +528,7 @@ stages:
 
       - script: |
           python Test.py DOTNET-CORE
-        workingDirectory: "./wrappers/csharp/unit-tests"
+        workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Unit tests DOTNET CORE"
 
   - job: macOS
@@ -538,12 +538,12 @@ stages:
     - task: DownloadPipelineArtifact@2
       inputs:
         artifact: "Nugets"
-        targetPath: "./wrappers/csharp/unit-tests/Nugets"
+        targetPath: "./wrappers/csharp/unit-tests/nugets/Nugets"
     - script: |
         sudo nuget update -self
       displayName: "Update Nuget"
 
     - script: |
         python3 Test.py DOTNET-CORE
-      workingDirectory: "./wrappers/csharp/unit-tests"
+      workingDirectory: "./wrappers/csharp/unit-tests/nugets"
       displayName: "Unit tests DOTNET CORE"

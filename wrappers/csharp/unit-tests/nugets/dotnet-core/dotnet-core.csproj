@@ -7,6 +7,17 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DOTNET_CORE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\TestData.cs" Link="TestData.cs" />
+    <Compile Include="..\..\TestManaged.cs" Link="TestManaged.cs" />
+    <Compile Include="..\..\TestNative.cs" Link="TestNative.cs" />
+    <Compile Include="..\..\TestUtils.cs" Link="TestUtils.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Devolutions.Crypto.Core" Version="*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
