@@ -11,8 +11,6 @@ use super::DcDataBlob;
 
 use zeroize::Zeroize as _;
 
-use argon2;
-
 #[wasm_bindgen]
 pub struct KeyPair {
     private_key: Vec<u8>,
