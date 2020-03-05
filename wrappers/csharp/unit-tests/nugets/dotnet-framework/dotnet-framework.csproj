@@ -90,6 +90,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\TestData.cs">
+      <Link>TestData.cs</Link>
+    </Compile>
     <Compile Include="..\..\TestManaged.cs">
       <Link>TestManaged.cs</Link>
     </Compile>

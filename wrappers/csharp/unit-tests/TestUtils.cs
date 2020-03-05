@@ -12,80 +12,72 @@ namespace dotnet_core
     [TestClass]
     public class TestUtils
     {
-        private const string CryptoKey = "Key123";
-
-        private const string Text = "ABC";
-
-        private const string TextToTest = "QUJD";
-
-        private readonly byte[] byteArray = new byte[] { 0x41, 0x42, 0x43 };
-
         [TestMethod]
         public void Base64StringToByteArray()
         {
-            var x = Utils.Base64StringToByteArray(TextToTest);
-            CollectionAssert.AreEqual(x, this.byteArray);
+            byte[] data = Utils.Base64StringToByteArray(TestData.Base64TestData);
+            CollectionAssert.AreEqual(data, TestData.BytesTestData);
         }
 
         [TestMethod]
         public void ByteArrayToString()
         {
-            var x = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
-            var y = Utils.ByteArrayToUtf8String(x);
-            Assert.AreEqual(y, TextToTest);
+            byte[] data = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
+            string dataToUtf8String = Utils.ByteArrayToUtf8String(data);
+            Assert.AreEqual(dataToUtf8String, TestData.Base64TestData);
         }
 
         [TestMethod]
         public void Decode()
         {
-            var x = Utils.DecodeFromBase64(TextToTest);
-            CollectionAssert.AreEqual(x, this.byteArray);
+            byte[] decodedData = Utils.DecodeFromBase64(TestData.Base64TestData);
+            CollectionAssert.AreEqual(decodedData, TestData.BytesTestData);
         }
 
         [TestMethod]
         public void Encode()
         {
-            var y = Utils.EncodeToBase64String(this.byteArray);
-            Assert.AreEqual(y, TextToTest);
+            var y = Utils.EncodeToBase64String(TestData.BytesTestData);
+            Assert.AreEqual(y, TestData.Base64TestData);
         }
 
         [TestMethod]
         public void GetDecodedLength()
         {
-            var y = Utils.GetDecodedLength(Text);
-            Assert.AreEqual(2, y);
+            int decodedLength = Utils.GetDecodedLength(TestData.StringTestData);
+            Assert.AreEqual(2, decodedLength);
         }
 
         [TestMethod]
         public void GetEncodedLength()
         {
-            var y = Utils.GetEncodedLength(this.byteArray);
-            Assert.AreEqual(4, y);
+            int encodedLength = Utils.GetEncodedLength(TestData.BytesTestData);
+            Assert.AreEqual(4, encodedLength);
         }
 
         [TestMethod]
         public void StringToByteArray()
         {
-            var x = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
-            CollectionAssert.AreEqual(Utils.StringToUtf8ByteArray(TextToTest), x);
+            byte[] data = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
+            CollectionAssert.AreEqual(Utils.StringToUtf8ByteArray(TestData.Base64TestData), data);
         }
 
         [TestMethod]
         public void ToBase64String()
         {
-            Assert.AreEqual(Utils.EncodeToBase64String(this.byteArray), TextToTest);
+            Assert.AreEqual(Utils.EncodeToBase64String(TestData.BytesTestData), TestData.Base64TestData);
         }
 
         [TestMethod]
         public void ValidateSignature()
         {
-            var textToEncrypt = Utils.StringToUtf8ByteArray(TextToTest);
-            var key = Utils.StringToUtf8ByteArray(CryptoKey);
+            byte[] dataToEncrypt = Utils.StringToUtf8ByteArray(TestData.Base64TestData);
+            byte[] password = Utils.StringToUtf8ByteArray(TestData.TestPassword);
 
-            var encryptedWithDevo = Native.Encrypt(textToEncrypt, key);
+            byte[] encryptResult = Native.Encrypt(dataToEncrypt, password);
 
-            Assert.IsFalse(Utils.ValidateSignature(textToEncrypt, DataType.Cipher));
-            Assert.IsTrue(Utils.ValidateSignature(encryptedWithDevo, DataType.Cipher));
+            Assert.IsFalse(Utils.ValidateSignature(dataToEncrypt, DataType.Cipher));
+            Assert.IsTrue(Utils.ValidateSignature(encryptResult, DataType.Cipher));
         }
     }
 }

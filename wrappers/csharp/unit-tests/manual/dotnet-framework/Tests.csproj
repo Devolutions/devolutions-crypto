@@ -63,6 +63,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\TestData.cs">
+      <Link>TestData.cs</Link>
+    </Compile>
     <Compile Include="..\..\TestManaged.cs" />
     <Compile Include="..\..\TestNative.cs" />
     <Compile Include="..\..\TestUtils.cs" />
