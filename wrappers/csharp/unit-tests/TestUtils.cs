@@ -1,7 +1,14 @@
-namespace Tests
+#if DOTNET_FRAMEWORK
+namespace dotnet_framework
+#endif
+
+#if DOTNET_CORE
+namespace dotnet_core
+#endif
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Devolutions.Cryptography;
+
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     /// <summary>
     ///
@@ -9,29 +16,13 @@ namespace Tests
     [TestClass]
     public class TestUtils
     {
-        private readonly byte[] _byteArray = new byte[] {0x41, 0x42, 0x43};
-        private readonly string _text = "ABC";
-        private readonly string _textToTest = "QUJD";
-        private readonly string _cryptoKey = "Key123";
+        private const string CryptoKey = "Key123";
 
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
-        public void ToBase64String()
-        {
-            Assert.AreEqual(Utils.ToBase64String(_byteArray), _textToTest);
-        }
+        private const string Text = "ABC";
 
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
-        public void StringToByteArray()
-        {
-            var x = new byte[]{ 0x51, 0x55, 0x4a, 0x44 };
-            CollectionAssert.AreEqual(Utils.StringToByteArray(_textToTest), x);
-        }
+        private const string TextToTest = "QUJD";
+
+        private readonly byte[] byteArray = new byte[] { 0x41, 0x42, 0x43 };
 
         /// <summary>
         ///
@@ -39,8 +30,8 @@ namespace Tests
         [TestMethod]
         public void Base64StringToByteArray()
         {
-            var x = Utils.Base64StringToByteArray(_textToTest);
-            CollectionAssert.AreEqual(x, _byteArray);
+            var x = Utils.Base64StringToByteArray(TextToTest);
+            CollectionAssert.AreEqual(x, this.byteArray);
         }
 
         /// <summary>
@@ -50,38 +41,8 @@ namespace Tests
         public void ByteArrayToString()
         {
             var x = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
-            var y = Utils.ByteArrayToString(x);
-            Assert.AreEqual(y, _textToTest);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
-        public void GetEncodedLength()
-        {
-            var y = Utils.GetEncodedLength(_byteArray);
-            Assert.AreEqual(4, y);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
-        public void GetDecodedLength()
-        {
-            var y = Utils.GetDecodedLength(_text);
-            Assert.AreEqual(2, y);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [TestMethod]
-        public void Encode()
-        {
-            var y = Utils.Encode(_byteArray);
-            Assert.AreEqual(y, _textToTest);
+            var y = Utils.ByteArrayToUtf8String(x);
+            Assert.AreEqual(y, TextToTest);
         }
 
         /// <summary>
@@ -90,8 +51,57 @@ namespace Tests
         [TestMethod]
         public void Decode()
         {
-            var x = Utils.Decode(_textToTest);
-            CollectionAssert.AreEqual(x, _byteArray);
+            var x = Utils.DecodeFromBase64(TextToTest);
+            CollectionAssert.AreEqual(x, this.byteArray);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void Encode()
+        {
+            var y = Utils.EncodeToBase64String(this.byteArray);
+            Assert.AreEqual(y, TextToTest);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void GetDecodedLength()
+        {
+            var y = Utils.GetDecodedLength(Text);
+            Assert.AreEqual(2, y);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void GetEncodedLength()
+        {
+            var y = Utils.GetEncodedLength(this.byteArray);
+            Assert.AreEqual(4, y);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void StringToByteArray()
+        {
+            var x = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
+            CollectionAssert.AreEqual(Utils.StringToUtf8ByteArray(TextToTest), x);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [TestMethod]
+        public void ToBase64String()
+        {
+            Assert.AreEqual(Utils.EncodeToBase64String(this.byteArray), TextToTest);
         }
 
         /// <summary>
@@ -100,8 +110,8 @@ namespace Tests
         [TestMethod]
         public void ValidateSignature()
         {
-            var textToEncrypt = Utils.StringToByteArray(_textToTest);
-            var key = Utils.StringToByteArray(_cryptoKey);
+            var textToEncrypt = Utils.StringToUtf8ByteArray(TextToTest);
+            var key = Utils.StringToUtf8ByteArray(CryptoKey);
 
             var encryptedWithDevo = Native.Encrypt(textToEncrypt, key);
 
