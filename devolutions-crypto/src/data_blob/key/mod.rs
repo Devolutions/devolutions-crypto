@@ -1,5 +1,7 @@
 mod key_v1;
 
+use super::Argon2Parameters;
+
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
@@ -33,6 +35,23 @@ impl DcKey {
 
         let (private_key, public_key) =
             DcKeyV1::generate_key_exchange(private_header, public_header)?;
+
+        Ok((DcKey::V1(private_key), DcKey::V1(public_key)))
+    }
+
+    pub fn derive_keypair(
+        password: &[u8],
+        parameters: &Argon2Parameters,
+        private_header: &mut DcHeader,
+        public_header: &mut DcHeader,
+    ) -> Result<(DcKey, DcKey)> {
+        private_header.data_type = KEY;
+        public_header.data_type = KEY;
+        private_header.version = V1;
+        public_header.version = V1;
+
+        let (private_key, public_key) =
+            DcKeyV1::derive_keypair(password, parameters, private_header, public_header)?;
 
         Ok((DcKey::V1(private_key), DcKey::V1(public_key)))
     }
