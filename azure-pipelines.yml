@@ -456,7 +456,7 @@ stages:
       - task: DownloadPipelineArtifact@2
         inputs:
           artifact: "Nugets"
-          targetPath: "./wrappers/csharp/unit-tests/Nugets"
+          targetPath: "./wrappers/csharp/unit-tests/nugets/Nugets"
 
       - bash: |
           echo "##vso[task.prependpath]c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin"
@@ -493,7 +493,7 @@ stages:
       - task: DownloadPipelineArtifact@2
         inputs:
           artifact: "Nugets"
-          targetPath: "./wrappers/csharp/unit-tests/Nugets"
+          targetPath: "./wrappers/csharp/unit-tests/nugets/Nugets"
 
       - script: |
           sudo apt install nuget
@@ -511,7 +511,7 @@ stages:
     - task: DownloadPipelineArtifact@2
       inputs:
         artifact: "Nugets"
-        targetPath: "./wrappers/csharp/unit-tests/Nugets"
+        targetPath: "./wrappers/csharp/unit-tests/nugets/Nugets"
     - script: |
         sudo nuget update -self
       displayName: "Update Nuget"

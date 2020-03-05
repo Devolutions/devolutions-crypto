@@ -1,7 +1,6 @@
 #if DOTNET_FRAMEWORK
 namespace dotnet_framework
 #endif
-
 #if DOTNET_CORE
 namespace dotnet_core
 #endif
@@ -10,9 +9,6 @@ namespace dotnet_core
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    /// <summary>
-    ///
-    /// </summary>
     [TestClass]
     public class TestManaged
     {
@@ -26,9 +22,6 @@ namespace dotnet_core
 
         private readonly byte[] cryptoKeyByteArray = new byte[] { 0x4b, 0x65, 0x79, 0x31, 0x32, 0x33 };
 
-        /// <summary>
-        /// Convert the Array bytes into UTF8 text
-        /// </summary>
         [TestMethod]
         public void ByteArrayToString()
         {
@@ -36,9 +29,6 @@ namespace dotnet_core
             Assert.AreEqual(x, TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void Decode()
         {
@@ -46,9 +36,6 @@ namespace dotnet_core
             CollectionAssert.AreEqual(x, this.byteArray);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DecryptWithKey()
         {
@@ -113,9 +100,6 @@ namespace dotnet_core
             Assert.AreEqual(z, TextBase64ToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DecryptWithKeyAsString()
         {
@@ -179,9 +163,6 @@ namespace dotnet_core
             Assert.AreEqual(y, TextBase64ToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DecryptWithPassword()
         {
@@ -192,9 +173,6 @@ namespace dotnet_core
             Assert.AreEqual(b, "test Ciph3rtext");
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DecryptWithPassword2()
         {
@@ -205,9 +183,6 @@ namespace dotnet_core
             Assert.AreEqual(b, "test Ciph3rtext");
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DecryptWithPasswordAsString()
         {
@@ -217,9 +192,6 @@ namespace dotnet_core
             Assert.AreEqual(y, TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DeriveKey()
         {
@@ -229,9 +201,6 @@ namespace dotnet_core
             Assert.AreEqual(b, "ImfGCyv6PwMYaJShGxR4MfVrjuUrsI0CSarJgOApwf8=");
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DeriveKey2()
         {
@@ -241,9 +210,6 @@ namespace dotnet_core
             Assert.AreEqual(b, "ev/GiJLvOgIkkWrnIrHSi2fdZE5qJBIrW+DLeMLIXK4=");
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DeriveKey3()
         {
@@ -254,9 +220,6 @@ namespace dotnet_core
             Assert.AreEqual(b, "ZaYRZeQiIPJ+Jl511AgHZjv4/HbCFq4eUP9yNa3gowI=");
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void Encode()
         {
@@ -264,9 +227,6 @@ namespace dotnet_core
             Assert.AreEqual(x, TextBase64ToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void EncryptBase64WithPassword()
         {
@@ -277,9 +237,6 @@ namespace dotnet_core
             Assert.AreEqual(d, TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void EncryptBase64WithPasswordAsString()
         {
@@ -288,9 +245,6 @@ namespace dotnet_core
             Assert.AreEqual(c, TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void EncryptWithKeyAsStringDecryptWithKeyAsString()
         {
@@ -301,9 +255,6 @@ namespace dotnet_core
             Assert.AreEqual(c, TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void EncryptWithKeyDecryptWithKey()
         {
@@ -315,9 +266,6 @@ namespace dotnet_core
             Assert.AreEqual(d, TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void EncryptWithPasswordAsString()
         {
@@ -327,9 +275,6 @@ namespace dotnet_core
             Assert.AreEqual(z, TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void EncryptWithPasswordAsStringAndDecryptWithPasswordAsString()
         {
@@ -340,9 +285,6 @@ namespace dotnet_core
             Assert.AreEqual(z, TextBase64ToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void GetDecodedLength()
         {
@@ -350,9 +292,6 @@ namespace dotnet_core
             Assert.AreEqual((int)x, 3);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void GetEncodedLength()
         {
@@ -360,9 +299,6 @@ namespace dotnet_core
             Assert.AreEqual((int)x, 4);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void StringToByteArray()
         {
@@ -370,9 +306,6 @@ namespace dotnet_core
             CollectionAssert.AreEqual(x, this.byteArray);
         }
 
-        /// <summary>
-        /// Convert the Array bytes into string text
-        /// </summary>
         [TestMethod]
         public void ToBase64String()
         {

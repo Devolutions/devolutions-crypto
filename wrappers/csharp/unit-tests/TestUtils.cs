@@ -1,7 +1,6 @@
 #if DOTNET_FRAMEWORK
 namespace dotnet_framework
 #endif
-
 #if DOTNET_CORE
 namespace dotnet_core
 #endif
@@ -10,9 +9,6 @@ namespace dotnet_core
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    /// <summary>
-    ///
-    /// </summary>
     [TestClass]
     public class TestUtils
     {
@@ -24,9 +20,6 @@ namespace dotnet_core
 
         private readonly byte[] byteArray = new byte[] { 0x41, 0x42, 0x43 };
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void Base64StringToByteArray()
         {
@@ -34,9 +27,6 @@ namespace dotnet_core
             CollectionAssert.AreEqual(x, this.byteArray);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void ByteArrayToString()
         {
@@ -45,9 +35,6 @@ namespace dotnet_core
             Assert.AreEqual(y, TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void Decode()
         {
@@ -55,9 +42,6 @@ namespace dotnet_core
             CollectionAssert.AreEqual(x, this.byteArray);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void Encode()
         {
@@ -65,9 +49,6 @@ namespace dotnet_core
             Assert.AreEqual(y, TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void GetDecodedLength()
         {
@@ -75,9 +56,6 @@ namespace dotnet_core
             Assert.AreEqual(2, y);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void GetEncodedLength()
         {
@@ -85,9 +63,6 @@ namespace dotnet_core
             Assert.AreEqual(4, y);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void StringToByteArray()
         {
@@ -95,18 +70,12 @@ namespace dotnet_core
             CollectionAssert.AreEqual(Utils.StringToUtf8ByteArray(TextToTest), x);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void ToBase64String()
         {
             Assert.AreEqual(Utils.EncodeToBase64String(this.byteArray), TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void ValidateSignature()
         {

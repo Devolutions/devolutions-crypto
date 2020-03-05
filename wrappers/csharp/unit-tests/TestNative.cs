@@ -1,7 +1,6 @@
 #if DOTNET_FRAMEWORK
 namespace dotnet_framework
 #endif
-
 #if DOTNET_CORE
 namespace dotnet_core
 #endif
@@ -13,9 +12,6 @@ namespace dotnet_core
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    /// <summary>
-    ///
-    /// </summary>
     [TestClass]
     public class TestNative
     {
@@ -27,9 +23,6 @@ namespace dotnet_core
 
         private readonly byte[] cryptoKeyByteArray = new byte[] { 0x4b, 0x65, 0x79, 0x31, 0x32, 0x33 };
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DecodeNative()
         {
@@ -37,9 +30,6 @@ namespace dotnet_core
             Assert.AreEqual((long)0x0000000000000003, x);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void Decrypt()
         {
@@ -104,9 +94,6 @@ namespace dotnet_core
             Assert.AreEqual(z, TextToTest);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void Decrypt2()
         {
@@ -119,9 +106,6 @@ namespace dotnet_core
             Assert.AreEqual(z, "test Ciph3rtext~");
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void Decrypt3()
         {
@@ -133,9 +117,6 @@ namespace dotnet_core
             Assert.AreEqual(z, "test Ciph3rtext~2");
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DeriveKey()
         {
@@ -179,9 +160,6 @@ namespace dotnet_core
             CollectionAssert.AreEqual(derivedKey, x);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void DerivePassword()
         {
@@ -225,9 +203,6 @@ namespace dotnet_core
             CollectionAssert.AreEqual(derivedPassword, y);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void EncodeNative()
         {
@@ -236,9 +211,6 @@ namespace dotnet_core
             Assert.AreEqual((long)0x0000000000000004, x);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void Encrypt()
         {
@@ -251,9 +223,6 @@ namespace dotnet_core
             Assert.AreEqual(z, TextToTest2);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void GenerateKey()
         {
@@ -263,9 +232,6 @@ namespace dotnet_core
             CollectionAssert.AreNotEqual(y, z);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void GenerateKeyExchange()
         {
@@ -276,9 +242,6 @@ namespace dotnet_core
             CollectionAssert.AreEqual(mixYKey, mixXKey);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void HashPassword()
         {
@@ -289,9 +252,6 @@ namespace dotnet_core
             Assert.IsFalse(Native.VerifyPassword(z, y));
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void MixKeyExchange()
         {
@@ -475,9 +435,6 @@ namespace dotnet_core
             CollectionAssert.AreEqual(mixYKey, mixXKey);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         [TestMethod]
         public void VerifyPassword()
         {
