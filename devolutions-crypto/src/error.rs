@@ -8,13 +8,15 @@ use std::io::Error;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::JsValue;
 
+use strum_macros::IntoStaticStr;
+
 use block_modes::{BlockModeError, InvalidKeyIvLength};
 use hmac::crypto_mac::InvalidKeyLength;
 use hmac::crypto_mac::MacError;
 use rand;
 
 /// The enum containing the various error types.
-#[derive(Debug)]
+#[derive(Debug, IntoStaticStr)]
 pub enum DevoCryptoError {
     /// The provided data has an invalid length. Error code: -1
     InvalidLength,
@@ -71,31 +73,6 @@ impl DevoCryptoError {
             DevoCryptoError::IoError(_) => -34,
             DevoCryptoError::NotEnoughShares => -41,
             DevoCryptoError::InconsistentVersion => -42,
-        }
-    }
-}
-
-#[cfg(target_arch = "wasm32")]
-impl DevoCryptoError {
-    // Returns the error name for JavaScript error handling
-    pub fn name(&self) -> &str {
-        match *self {
-            DevoCryptoError::InvalidLength => "InvalidLength",
-            DevoCryptoError::InvalidKeyLength => "InvalidKeyLength",
-            DevoCryptoError::InvalidOutputLength => "InvalidOutputLength",
-            DevoCryptoError::InvalidSignature => "InvalidSignature",
-            DevoCryptoError::InvalidMac => "InvalidMac",
-            DevoCryptoError::InvalidDataType => "InvalidDataType",
-            DevoCryptoError::UnknownType => "UnknownType",
-            DevoCryptoError::UnknownSubtype => "UnknownSubtype",
-            DevoCryptoError::InvalidData => "InvalidData",
-            DevoCryptoError::UnknownVersion => "UnknownVersion",
-            DevoCryptoError::NullPointer => "NullPointer",
-            DevoCryptoError::CryptoError => "CryptoError",
-            DevoCryptoError::RandomError => "RandomError",
-            DevoCryptoError::IoError(_) => "IoError",
-            DevoCryptoError::NotEnoughShares => "NotEnoughShares",
-            DevoCryptoError::InconsistentVersion => "InconsistentVersion",
         }
     }
 }
@@ -191,7 +168,7 @@ impl From<DevoCryptoError> for JsValue {
     fn from(error: DevoCryptoError) -> JsValue {
         let js_error = js_sys::Error::new(error.description());
 
-        js_error.set_name(error.name());
+        js_error.set_name(error.into());
         js_error.into()
     }
 }

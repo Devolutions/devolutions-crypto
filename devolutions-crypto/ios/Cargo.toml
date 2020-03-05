@@ -32,6 +32,8 @@ aead = "0.2.0"
 rand = "0.7.3"
 sharks = "0.3.1"
 rust-argon2 = "0.8.1"
+strum = "0.18.0"
+strum_macros = "0.18.0"
 
 [profile.release]
 lto = false
