@@ -20,6 +20,8 @@ namespace Devolutions.Cryptography
         UnknownSubtype = -22,
         /// The data type version is unknown. Error code: -23
         UnknownVersion = -23,
+        /// The data is invalid. Error code: -24
+        InvalidData = -24,
         /// A null pointer has been passed to the FFI interface. Error code: -31
         NullPointer = -31,
         /// A cryptographic error occurred. Error code: -32
@@ -27,6 +29,10 @@ namespace Devolutions.Cryptography
         /// An error with the Random Number Generator occurred. Error code: -33
         RandomError = -33,
         /// A generic IO error has occurred. Error code: -34
-        IoError = -34
+        IoError = -34,
+        /// There is not enough shares to regenerate a secret: -41
+        NotEnoughShares = -41,
+        /// The version of the multiple data is inconsistent: -42
+        InconsistentVersion = -42
     }
 }
