@@ -42,7 +42,7 @@ namespace dotnet_core
         }
 
         [TestMethod]
-        public void DecryptWithPassword()
+        public void DecryptWithPassword2()
         {
             const string encrytedDataAsBase64 = "DQwCAAAAAgDsQkLRs1I3054gNOYP7ifVSpOMFEV8vTfoMuZOWAzbMR2b1QLyIe0/NFNKr8rniijd8PxHv29N";
             const string password = "testPa$$";
@@ -52,7 +52,7 @@ namespace dotnet_core
         }
 
         [TestMethod]
-        public void DecryptWithPassword2()
+        public void DecryptWithPassword2_5()
         {
             const string encrytedDataAsBase64 = "DQwCAAAAAgDutPWBLPHG0+ocNw+Yzs6xygGOeOlNPOAjbYDdbJKjPRnEP8HuDN7Y3h3dCoH81Szf3tCf3mNf";
             const string password = "testPa$$";

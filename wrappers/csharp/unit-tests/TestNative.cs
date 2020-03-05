@@ -30,7 +30,7 @@ namespace dotnet_core
         }
 
         [TestMethod]
-        public void Decrypt2()
+        public void Decrypt1()
         {
             byte[] encryptedData = Utils.Base64StringToByteArray(
                 "DQwCAAAAAQCK1twEut+TeJfFbTWCRgHjyS6bOPOZUEQAeBtSFFRl2jHggM/34n68zIZWGbsZHkufVzU6mTN5N2Dx9bTplrycv5eNVevT4P9FdVHJ751D+A==");
@@ -42,7 +42,7 @@ namespace dotnet_core
         }
 
         [TestMethod]
-        public void Decrypt3()
+        public void Decrypt2()
         {
             byte[] encryptedData = Utils.Base64StringToByteArray("DQwCAAAAAgAA0iPpI4IEzcrWAQiy6tqDqLbRYduGvlMC32mVH7tpIN2CXDUu5QHF91I7pMrmjt/61pm5CeR/IcU=");
             byte[] encryptKey = Utils.Base64StringToByteArray("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=");
