@@ -44,8 +44,8 @@ namespace dotnet_core
         [TestMethod]
         public void DecryptWithPassword2()
         {
-            const string encrytedDataAsBase64 = "DQwCAAAAAgDsQkLRs1I3054gNOYP7ifVSpOMFEV8vTfoMuZOWAzbMR2b1QLyIe0/NFNKr8rniijd8PxHv29N";
-            const string password = "testPa$$";
+            string encrytedDataAsBase64 = "DQwCAAAAAgDsQkLRs1I3054gNOYP7ifVSpOMFEV8vTfoMuZOWAzbMR2b1QLyIe0/NFNKr8rniijd8PxHv29N";
+            string password = "testPa$$";
             byte[] decryptResult = Managed.DecryptWithPassword(encrytedDataAsBase64, password);
             string decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
             Assert.AreEqual(decryptResultString, "test Ciph3rtext");
@@ -54,8 +54,8 @@ namespace dotnet_core
         [TestMethod]
         public void DecryptWithPassword2_5()
         {
-            const string encrytedDataAsBase64 = "DQwCAAAAAgDutPWBLPHG0+ocNw+Yzs6xygGOeOlNPOAjbYDdbJKjPRnEP8HuDN7Y3h3dCoH81Szf3tCf3mNf";
-            const string password = "testPa$$";
+            string encrytedDataAsBase64 = "DQwCAAAAAgDutPWBLPHG0+ocNw+Yzs6xygGOeOlNPOAjbYDdbJKjPRnEP8HuDN7Y3h3dCoH81Szf3tCf3mNf";
+            string password = "testPa$$";
             byte[] decryptResult = Managed.DecryptWithPassword(encrytedDataAsBase64, password);
             string decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
             Assert.AreEqual(decryptResultString, "test Ciph3rtext");

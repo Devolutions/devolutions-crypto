@@ -331,7 +331,7 @@ namespace dotnet_core
                 0x70
             };
 
-        public static readonly  byte[] TestDeriveBytes = new byte[]
+        public static readonly byte[] TestDeriveBytes = new byte[]
             {
                 0x4d,
                 0x42,

@@ -5,6 +5,8 @@ namespace dotnet_framework
 namespace dotnet_core
 #endif
 {
+    using System.IO;
+
     using Devolutions.Cryptography;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -78,6 +80,100 @@ namespace dotnet_core
 
             Assert.IsFalse(Utils.ValidateSignature(dataToEncrypt, DataType.Cipher));
             Assert.IsTrue(Utils.ValidateSignature(encryptResult, DataType.Cipher));
+        }
+
+        [TestMethod]
+        public void ValidateSignatureFromStream_BufferTooSmall()
+        {
+            Stream stream = new MemoryStream(new byte[] { 1, 2, 3, 4, 5 });
+
+            bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+
+            Assert.AreEqual(validationResult, false);
+        }
+
+        [TestMethod]
+        public void ValidateSignatureFromStream_ClosedStream()
+        {
+            Stream stream = new ClosedStream(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+
+            stream.Close();
+
+            DevolutionsCryptoException exception = null;
+
+            try
+            {
+                bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+            }
+            catch (DevolutionsCryptoException ex)
+            {
+                exception = ex;
+            }
+
+            bool validException = exception.ManagedException.Message.Contains("Cannot access a closed Stream.");
+
+            Assert.AreEqual(validException, true);
+        }
+
+        [TestMethod]
+        public void ValidateSignatureFromStream_OriginalPosition()
+        {
+            Stream stream = new MemoryStream(TestData.EncryptedData);
+
+            stream.Position = 12;
+
+            bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+
+            Assert.AreEqual(stream.Position, 12);
+            Assert.AreEqual(validationResult, false);
+        }
+
+        [TestMethod]
+        public void ValidateSignatureFromStream_UnReadableStream()
+        {
+            Stream stream = new UnReadableStream(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+
+            DevolutionsCryptoException exception = null;
+
+            try
+            {
+                bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+            }
+            catch (DevolutionsCryptoException ex)
+            {
+                exception = ex;
+            }
+
+            Assert.AreEqual(exception.ManagedError, ManagedError.CanNotReadStream);
+        }
+
+        [TestMethod]
+        public void ValidateSignatureFromStream_UnseekableStream()
+        {
+            Stream stream = new UnSeekableStream(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+
+            DevolutionsCryptoException exception = null;
+
+            try
+            {
+                bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+            }
+            catch (DevolutionsCryptoException ex)
+            {
+                exception = ex;
+            }
+
+            Assert.AreEqual(exception.ManagedError, ManagedError.CanNotSeekStream);
+        }
+
+        [TestMethod]
+        public void ValidateSignatureFromStream_ValidSignature()
+        {
+            Stream stream = new MemoryStream(TestData.EncryptedData);
+
+            bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+
+            Assert.AreEqual(validationResult, true);
         }
     }
 }
