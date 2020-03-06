@@ -1,5 +1,7 @@
 mod key_v1;
 
+use std::convert::TryFrom;
+
 use super::Argon2Parameters;
 
 use super::DcHeader;
@@ -59,6 +61,28 @@ impl DcKey {
     pub fn mix_key_exchange(self, public: DcKey) -> Result<Vec<u8>> {
         match (self, public) {
             (DcKey::V1(private), DcKey::V1(public)) => private.mix_key_exchange(public),
+        }
+    }
+}
+
+impl TryFrom<&DcKey> for x25519_dalek::PublicKey {
+    type Error = DevoCryptoError;
+
+    fn try_from(data: &DcKey) -> Result<Self> {
+        match data {
+            DcKey::V1(x) => Self::try_from(x),
+            //_ => Err(DevoCryptoError::InvalidDataType),
+        }
+    }
+}
+
+impl TryFrom<&DcKey> for x25519_dalek::StaticSecret {
+    type Error = DevoCryptoError;
+
+    fn try_from(data: &DcKey) -> Result<Self> {
+        match data {
+            DcKey::V1(x) => Self::try_from(x),
+            //_ => Err(DevoCryptoError::InvalidDataType),
         }
     }
 }
