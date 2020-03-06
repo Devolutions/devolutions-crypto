@@ -1,12 +1,11 @@
 namespace Devolutions.Cryptography
 {
     using System;
-    using System.Runtime.InteropServices;    
     using System.Reflection;
+    using System.Runtime.InteropServices;
 
     public static partial class Native
     {
-
 #if RDM
         private const string LibName64 = "x64/DevolutionsCrypto";
         private const string LibName86 = "x86/DevolutionsCrypto";
@@ -14,25 +13,28 @@ namespace Devolutions.Cryptography
 
 #if !ANDROID && !IOS && !MAC_MODERN && !RDM
         private const string LibName64 = "DevolutionsCrypto-x64";
+
         private const string LibName86 = "DevolutionsCrypto-x86";
 #endif
 
         static Native()
         {
+#if !DEBUG
             Assembly assembly = Assembly.GetExecutingAssembly();
 
             string managedVersion = assembly.GetName().Version.ToString();
             string nativeVersion = Utils.Version() + ".0";
 
-            if(managedVersion != nativeVersion)
+            if (managedVersion != nativeVersion)
             {
                 throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion);
             }
+#endif
         }
 
         public static byte[] Decrypt(byte[] data, byte[] key)
         {
-            if(data == null || data.Length == 0)
+            if (data == null || data.Length == 0)
             {
                 return null;
             }
@@ -85,7 +87,7 @@ namespace Devolutions.Cryptography
 
         public static byte[] Encrypt(byte[] data, byte[] key, uint version = 0)
         {
-            if(data == null || data.Length == 0)
+            if (data == null || data.Length == 0)
             {
                 return null;
             }
@@ -95,16 +97,16 @@ namespace Devolutions.Cryptography
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
 
-            long resultLength = EncryptSizeNative((UIntPtr)data.Length, (UInt16) version);
+            long resultLength = EncryptSizeNative((UIntPtr)data.Length, (ushort)version);
 
-            if(resultLength < 0)
+            if (resultLength < 0)
             {
                 Utils.HandleError(resultLength);
             }
 
             byte[] result = new byte[resultLength];
 
-            long res = EncryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length, (UInt16)version);
+            long res = EncryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length, (ushort)version);
 
             if (res < 0)
             {
@@ -116,7 +118,7 @@ namespace Devolutions.Cryptography
 
         public static byte[] GenerateKey(uint keySize)
         {
-            if(keySize == 0)
+            if (keySize == 0)
             {
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
@@ -147,7 +149,11 @@ namespace Devolutions.Cryptography
                 Utils.HandleError(res);
             }
 
-            return new KeyExchange() { PublicKey = publicKey, PrivateKey = privateKey };
+            return new KeyExchange()
+                {
+                    PublicKey = publicKey,
+                    PrivateKey = privateKey
+                };
         }
 
         public static byte[] HashPassword(byte[] password, uint iterations = 10000)
@@ -159,7 +165,7 @@ namespace Devolutions.Cryptography
 
             long hashLength = HashPasswordLengthNative();
 
-            if(hashLength < 0)
+            if (hashLength < 0)
             {
                 Utils.HandleError(hashLength);
             }
@@ -185,7 +191,7 @@ namespace Devolutions.Cryptography
 
             long sharedKeySize = MixKeyExchangeSizeNative();
 
-            if(sharedKeySize < 0)
+            if (sharedKeySize < 0)
             {
                 Utils.HandleError(sharedKeySize);
             }
@@ -211,7 +217,7 @@ namespace Devolutions.Cryptography
 
             long res = VerifyPasswordNative(password, (UIntPtr)password.Length, hash, (UIntPtr)hash.Length);
 
-            if(res == 0)
+            if (res == 0)
             {
                 return false;
             }
@@ -227,7 +233,7 @@ namespace Devolutions.Cryptography
 #if !ANDROID && !IOS && !MAC_MODERN
         private static long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return DecryptNative64(data, dataLength, key, keyLength, result, resultLength);
             }
@@ -243,13 +249,12 @@ namespace Devolutions.Cryptography
 
         private static long DeriveKeyNative(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return DeriveKeyNative64(key, keyLength, salt, saltLength, iterations, result, resultLength);
             }
 
             return DeriveKeyNative86(key, keyLength, salt, saltLength, iterations, result, resultLength);
-
         }
 
         [DllImport(LibName86, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
@@ -258,9 +263,9 @@ namespace Devolutions.Cryptography
         [DllImport(LibName64, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DeriveKeyNative64(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
 
-        private static long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, UInt16 version)
+        private static long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return EncryptNative64(data, dataLength, key, keyLength, result, resultLength, version);
             }
@@ -269,15 +274,14 @@ namespace Devolutions.Cryptography
         }
 
         [DllImport(LibName86, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, UInt16 version);
-
+        private static extern long EncryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version);
 
         [DllImport(LibName64, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, UInt16 version);
+        private static extern long EncryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version);
 
-        private static long EncryptSizeNative(UIntPtr dataLength, UInt16 version)
+        private static long EncryptSizeNative(UIntPtr dataLength, ushort version)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return EncryptSizeNative64(dataLength, version);
             }
@@ -286,20 +290,19 @@ namespace Devolutions.Cryptography
         }
 
         [DllImport(LibName86, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptSizeNative86(UIntPtr dataLength, UInt16 version);
-
+        private static extern long EncryptSizeNative86(UIntPtr dataLength, ushort version);
 
         [DllImport(LibName64, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptSizeNative64(UIntPtr dataLength, UInt16 version);
+        private static extern long EncryptSizeNative64(UIntPtr dataLength, ushort version);
 
         private static long GenerateKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
-                return GenerateKeyExchangeNative64(privateKey,privateKeySize, publicKey, publicKeySize);
+                return GenerateKeyExchangeNative64(privateKey, privateKeySize, publicKey, publicKeySize);
             }
 
-            return GenerateKeyExchangeNative86(privateKey,privateKeySize, publicKey, publicKeySize);
+            return GenerateKeyExchangeNative86(privateKey, privateKeySize, publicKey, publicKeySize);
         }
 
         [DllImport(LibName86, EntryPoint = "GenerateKeyExchange", CallingConvention = CallingConvention.Cdecl)]
@@ -310,7 +313,7 @@ namespace Devolutions.Cryptography
 
         private static long GenerateKeyExchangeSizeNative()
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return GenerateKeyExchangeSizeNative64();
             }
@@ -321,13 +324,12 @@ namespace Devolutions.Cryptography
         [DllImport(LibName86, EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long GenerateKeyExchangeSizeNative86();
 
-
         [DllImport(LibName64, EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long GenerateKeyExchangeSizeNative64();
 
         private static long GenerateKeyNative(byte[] key, UIntPtr keyLength)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return GenerateKeyNative64(key, keyLength);
             }
@@ -342,8 +344,8 @@ namespace Devolutions.Cryptography
         private static extern long GenerateKeyNative64(byte[] key, UIntPtr keyLength);
 
         private static long HashPasswordLengthNative()
-        {            
-            if(Environment.Is64BitProcess)
+        {
+            if (Environment.Is64BitProcess)
             {
                 return HashPasswordLengthNative64();
             }
@@ -359,7 +361,7 @@ namespace Devolutions.Cryptography
 
         private static long HashPasswordNative(byte[] password, UIntPtr passwordLength, uint iterations, byte[] result, UIntPtr resultLength)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return HashPasswordNative64(password, passwordLength, iterations, result, resultLength);
             }
@@ -375,14 +377,14 @@ namespace Devolutions.Cryptography
 
         private static uint KeySizeNative()
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return KeySizeNative64();
             }
 
             return KeySizeNative86();
         }
-    
+
         [DllImport(LibName86, EntryPoint = "KeySize", CallingConvention = CallingConvention.Cdecl)]
         private static extern uint KeySizeNative86();
 
@@ -391,7 +393,7 @@ namespace Devolutions.Cryptography
 
         private static long MixKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize, byte[] shared, UIntPtr sharedSize)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return MixKeyExchangeNative64(privateKey, privateKeySize, publicKey, publicKeySize, shared, sharedSize);
             }
@@ -407,7 +409,7 @@ namespace Devolutions.Cryptography
 
         private static long MixKeyExchangeSizeNative()
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return MixKeyExchangeSizeNative64();
             }
@@ -423,7 +425,7 @@ namespace Devolutions.Cryptography
 
         private static long VerifyPasswordNative(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return VerifyPasswordNative64(password, passwordLength, hash, hashLength);
             }
@@ -439,7 +441,7 @@ namespace Devolutions.Cryptography
 
         public static long DecodeNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return Decode64(input, input_length, output, output_length);
             }
@@ -455,7 +457,7 @@ namespace Devolutions.Cryptography
 
         public static long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return Encode64(input, input_length, output, output_length);
             }
@@ -471,7 +473,7 @@ namespace Devolutions.Cryptography
 
         public static long VersionNative(byte[] output, UIntPtr output_length)
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return Version64(output, output_length);
             }
@@ -487,7 +489,7 @@ namespace Devolutions.Cryptography
 
         public static long VersionSizeNative()
         {
-            if(Environment.Is64BitProcess)
+            if (Environment.Is64BitProcess)
             {
                 return VersionSize64();
             }

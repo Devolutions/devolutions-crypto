@@ -63,6 +63,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\TestClasses.cs">
+      <Link>TestClasses.cs</Link>
+    </Compile>
     <Compile Include="..\..\TestData.cs">
       <Link>TestData.cs</Link>
     </Compile>
@@ -86,14 +89,15 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Devolutions.Crypto">
-      <HintPath>..\..\..\windows\bin\Devolutions.Crypto.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\..\..\Settings.StyleCop">
       <Link>Settings.StyleCop</Link>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Devolutions.Crypto\Devolutions.Crypto.csproj">
+      <Project>{5ef8a69d-78ad-40da-8f0f-2a84557b090c}</Project>
+      <Name>Devolutions.Crypto</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
