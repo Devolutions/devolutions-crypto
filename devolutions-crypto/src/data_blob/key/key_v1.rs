@@ -4,6 +4,8 @@ use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
 
+use std::convert::TryFrom;
+
 use rand::rngs::OsRng;
 use x25519_dalek::{PublicKey, StaticSecret};
 use zeroize::Zeroize;
@@ -89,5 +91,27 @@ impl DcKeyV1 {
         let public = PublicKey::from(&private);
 
         Ok((DcKeyV1::Private(private), DcKeyV1::Public(public)))
+    }
+}
+
+impl TryFrom<&DcKeyV1> for x25519_dalek::PublicKey {
+    type Error = DevoCryptoError;
+
+    fn try_from(data: &DcKeyV1) -> Result<Self> {
+        match data {
+            DcKeyV1::Public(x) => Ok(*x),
+            _ => Err(DevoCryptoError::InvalidDataType),
+        }
+    }
+}
+
+impl TryFrom<&DcKeyV1> for x25519_dalek::StaticSecret {
+    type Error = DevoCryptoError;
+
+    fn try_from(data: &DcKeyV1) -> Result<Self> {
+        match data {
+            DcKeyV1::Private(x) => Ok(x.clone()),
+            _ => Err(DevoCryptoError::InvalidDataType),
+        }
     }
 }

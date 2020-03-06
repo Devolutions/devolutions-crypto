@@ -1,6 +1,8 @@
 mod ciphertext_v1;
 mod ciphertext_v2;
 
+use crate::DcDataBlob;
+
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
@@ -24,7 +26,9 @@ impl DcCiphertext {
     pub fn try_from_header(data: &[u8], header: &DcHeader) -> Result<DcCiphertext> {
         match header.version {
             V1 => Ok(DcCiphertext::V1(DcCiphertextV1::try_from(data)?)),
-            V2 => Ok(DcCiphertext::V2(DcCiphertextV2::try_from(data)?)),
+            V2 => Ok(DcCiphertext::V2(DcCiphertextV2::try_from_header(
+                data, header,
+            )?)),
             _ => Err(DevoCryptoError::UnknownVersion),
         }
     }
@@ -54,10 +58,40 @@ impl DcCiphertext {
         }
     }
 
+    pub fn encrypt_asymmetric(
+        data: &[u8],
+        public_key: &DcDataBlob,
+        header: &mut DcHeader,
+        version: Option<u16>,
+    ) -> Result<DcCiphertext> {
+        header.data_type = CIPHERTEXT;
+
+        match version {
+            Some(V2) | None => {
+                header.version = V2;
+                Ok(DcCiphertext::V2(DcCiphertextV2::encrypt_asymmetric(
+                    data, public_key, header,
+                )?))
+            }
+            _ => Err(DevoCryptoError::UnknownVersion),
+        }
+    }
+
     pub fn decrypt(&self, key: &[u8], header: &DcHeader) -> Result<Vec<u8>> {
         match self {
             DcCiphertext::V1(x) => x.decrypt(key, header),
             DcCiphertext::V2(x) => x.decrypt(key, header),
+        }
+    }
+
+    pub fn decrypt_asymmetric(
+        &self,
+        private_key: &DcDataBlob,
+        header: &DcHeader,
+    ) -> Result<Vec<u8>> {
+        match self {
+            DcCiphertext::V2(x) => x.decrypt_asymmetric(private_key, header),
+            _ => Err(DevoCryptoError::UnknownVersion),
         }
     }
 }
