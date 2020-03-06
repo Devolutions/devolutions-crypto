@@ -29,6 +29,8 @@ base64 = "0.11.0"
 chacha20poly1305 = "0.3.1"
 aead = "0.2.0"
 sharks = "0.3.1"
+strum = "0.18.0"
+strum_macros = "0.18.0"
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
 rand = { version = "0.7.3", features = ["wasm-bindgen"] }
