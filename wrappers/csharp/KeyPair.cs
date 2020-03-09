@@ -2,7 +2,7 @@ namespace Devolutions.Cryptography
 {
     using System;
 
-    public class KeyExchange
+    public class KeyPair
     {
         public byte[] PrivateKey { get; set; }
 

@@ -76,7 +76,7 @@ namespace dotnet_core
             byte[] dataToEncrypt = Utils.StringToUtf8ByteArray(TestData.Base64TestData);
             byte[] password = Utils.StringToUtf8ByteArray(TestData.TestPassword);
 
-            byte[] encryptResult = Native.Encrypt(dataToEncrypt, password);
+            byte[] encryptResult = Managed.Encrypt(dataToEncrypt, password);
 
             Assert.IsFalse(Utils.ValidateSignature(dataToEncrypt, DataType.Cipher));
             Assert.IsTrue(Utils.ValidateSignature(encryptResult, DataType.Cipher));

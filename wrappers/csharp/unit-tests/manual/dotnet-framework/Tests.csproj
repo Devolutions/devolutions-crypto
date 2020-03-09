@@ -63,6 +63,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\TestArgon2Parameters.cs">
+      <Link>TestArgon2Parameters.cs</Link>
+    </Compile>
     <Compile Include="..\..\TestClasses.cs">
       <Link>TestClasses.cs</Link>
     </Compile>
@@ -70,7 +73,6 @@
       <Link>TestData.cs</Link>
     </Compile>
     <Compile Include="..\..\TestManaged.cs" />
-    <Compile Include="..\..\TestNative.cs" />
     <Compile Include="..\..\TestUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,8 +1,11 @@
 namespace Devolutions.Cryptography
 {
     using System;
-    using System.Reflection;
     using System.Runtime.InteropServices;
+
+#if !DEBUG
+    using System.Reflection;
+#endif
 
     public static partial class Native
     {
@@ -17,9 +20,9 @@ namespace Devolutions.Cryptography
         private const string LibName86 = "DevolutionsCrypto-x86";
 #endif
 
+#if !DEBUG
         static Native()
         {
-#if !DEBUG
             Assembly assembly = Assembly.GetExecutingAssembly();
 
             string managedVersion = assembly.GetName().Version.ToString();
@@ -29,209 +32,58 @@ namespace Devolutions.Cryptography
             {
                 throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion);
             }
+    }
 #endif
-        }
-
+        [Obsolete("This method has been deprecated. Use Managed.Decrypt instead.")]
         public static byte[] Decrypt(byte[] data, byte[] key)
         {
-            if (data == null || data.Length == 0)
-            {
-                return null;
-            }
-
-            if (key == null)
-            {
-                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
-            }
-
-            byte[] result = new byte[data.Length];
-
-            long res = DecryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length);
-
-            if (res < 0)
-            {
-                Utils.HandleError(res);
-            }
-
-            // If success it returns the real result size, so we resize. 
-            Array.Resize(ref result, (int)res);
-
-            return result;
+            return Managed.Decrypt(data, key);
         }
 
+        [Obsolete("This method has been deprecated. Use Managed.DerivePassword instead.")]
         public static byte[] DerivePassword(string password, string salt, uint iterations = 10000)
         {
-            return DeriveKey(Utils.StringToUtf8ByteArray(password), Utils.StringToUtf8ByteArray(salt), iterations);
+            return Managed.DerivePassword(password, salt, iterations);
         }
 
+        [Obsolete("This method has been deprecated. Use Managed.DeriveKey instead.")]
         public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000, uint length = 32)
         {
-            if (key == null)
-            {
-                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
-            }
-
-            byte[] result = new byte[length];
-
-            int saltLength = salt == null ? 0 : salt.Length;
-
-            long res = DeriveKeyNative(key, (UIntPtr)key.Length, salt, (UIntPtr)saltLength, (UIntPtr)iterations, result, (UIntPtr)result.Length);
-
-            if (res < 0)
-            {
-                Utils.HandleError(res);
-            }
-
-            return result;
+            return Managed.DeriveKey(key, salt, iterations, length);
         }
 
+        [Obsolete("This method has been deprecated. Use Managed.Encrypt instead.")]
         public static byte[] Encrypt(byte[] data, byte[] key, uint version = 0)
         {
-            if (data == null || data.Length == 0)
-            {
-                return null;
-            }
-
-            if (key == null)
-            {
-                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
-            }
-
-            long resultLength = EncryptSizeNative((UIntPtr)data.Length, (ushort)version);
-
-            if (resultLength < 0)
-            {
-                Utils.HandleError(resultLength);
-            }
-
-            byte[] result = new byte[resultLength];
-
-            long res = EncryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length, (ushort)version);
-
-            if (res < 0)
-            {
-                Utils.HandleError(res);
-            }
-
-            return result;
+            return Managed.Encrypt(data, key, (CipherVersion)version);
         }
 
+        [Obsolete("This method has been deprecated. Use Managed.GenerateKey instead.")]
         public static byte[] GenerateKey(uint keySize)
         {
-            if (keySize == 0)
-            {
-                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
-            }
-
-            byte[] key = new byte[keySize];
-
-            long res = GenerateKeyNative(key, (UIntPtr)keySize);
-
-            if (res < 0)
-            {
-                Utils.HandleError(res);
-            }
-
-            return key;
+            return Managed.GenerateKey(keySize);
         }
 
-        public static KeyExchange GenerateKeyExchange()
+        [Obsolete("This method has been deprecated. Use Managed.GenerateKeyPair instead.")]
+        public static KeyPair GenerateKeyPair()
         {
-            long keySize = GenerateKeyExchangeSizeNative();
-
-            byte[] publicKey = new byte[keySize];
-            byte[] privateKey = new byte[keySize];
-
-            long res = GenerateKeyExchangeNative(privateKey, (UIntPtr)privateKey.Length, publicKey, (UIntPtr)publicKey.Length);
-
-            if (res < 0)
-            {
-                Utils.HandleError(res);
-            }
-
-            return new KeyExchange()
-                {
-                    PublicKey = publicKey,
-                    PrivateKey = privateKey
-                };
+            return Managed.GenerateKeyPair();
         }
 
+        [Obsolete("This method has been deprecated. Use Managed.HashPassword instead.")]
         public static byte[] HashPassword(byte[] password, uint iterations = 10000)
         {
-            if (password == null || password.Length == 0)
-            {
-                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
-            }
-
-            long hashLength = HashPasswordLengthNative();
-
-            if (hashLength < 0)
-            {
-                Utils.HandleError(hashLength);
-            }
-
-            byte[] result = new byte[hashLength];
-
-            long res = HashPasswordNative(password, (UIntPtr)password.Length, iterations, result, (UIntPtr)result.Length);
-
-            if (res < 0)
-            {
-                Utils.HandleError(res);
-            }
-
-            return result;
+            return Managed.HashPassword(password, iterations);
         }
 
-        public static byte[] MixKeyExchange(byte[] privatekey, byte[] publicKey)
-        {
-            if (publicKey == null || privatekey == null)
-            {
-                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
-            }
-
-            long sharedKeySize = MixKeyExchangeSizeNative();
-
-            if (sharedKeySize < 0)
-            {
-                Utils.HandleError(sharedKeySize);
-            }
-
-            byte[] shared = new byte[sharedKeySize];
-
-            long res = MixKeyExchangeNative(privatekey, (UIntPtr)privatekey.Length, publicKey, (UIntPtr)publicKey.Length, shared, (UIntPtr)shared.Length);
-
-            if (res < 0)
-            {
-                Utils.HandleError(res);
-            }
-
-            return shared;
-        }
-
+        [Obsolete("This method has been deprecated. Use Managed.HashPassword instead.")]
         public static bool VerifyPassword(byte[] password, byte[] hash)
         {
-            if (password == null || hash == null)
-            {
-                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
-            }
-
-            long res = VerifyPasswordNative(password, (UIntPtr)password.Length, hash, (UIntPtr)hash.Length);
-
-            if (res == 0)
-            {
-                return false;
-            }
-
-            if (res < 0)
-            {
-                Utils.HandleError(res);
-            }
-
-            return true;
+            return Managed.VerifyPassword(password, hash);
         }
 
 #if !ANDROID && !IOS && !MAC_MODERN
-        private static long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength)
+        internal static long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength)
         {
             if (Environment.Is64BitProcess)
             {
@@ -241,13 +93,17 @@ namespace Devolutions.Cryptography
             return DecryptNative86(data, dataLength, key, keyLength, result, resultLength);
         }
 
-        [DllImport(LibName64, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DecryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
+        internal static long DecryptAsymmetricNative(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] result, UIntPtr resultLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return DecryptAsymmetricNative64(data, dataLength, privateKey, privateKeyLength, result, resultLength);
+            }
 
-        [DllImport(LibName86, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DecryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
+            return DecryptAsymmetricNative86(data, dataLength, privateKey, privateKeyLength, result, resultLength);
+        }
 
-        private static long DeriveKeyNative(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength)
+        internal static long DeriveKeyNative(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength)
         {
             if (Environment.Is64BitProcess)
             {
@@ -257,13 +113,55 @@ namespace Devolutions.Cryptography
             return DeriveKeyNative86(key, keyLength, salt, saltLength, iterations, result, resultLength);
         }
 
-        [DllImport(LibName86, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DeriveKeyNative86(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
+        internal static long DeriveKeyPairNative(
+            byte[] password,
+            UIntPtr passwordLength,
+            byte[] parameters,
+            UIntPtr parametersLength,
+            byte[] privateKey,
+            UIntPtr privateKeyLength,
+            byte[] publicKey,
+            UIntPtr publicKeyLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return DeriveKeyPairNative64(password, passwordLength, parameters, parametersLength, privateKey, privateKeyLength, publicKey, publicKeyLength);
+            }
 
-        [DllImport(LibName64, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DeriveKeyNative64(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
+            return DeriveKeyPairNative86(password, passwordLength, parameters, parametersLength, privateKey, privateKeyLength, publicKey, publicKeyLength);
+        }
 
-        private static long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version)
+        internal static long DeriveKeyPairSizeNative()
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return DeriveKeyPairSizeNative64();
+            }
+
+            return DeriveKeyPairSizeNative86();
+        }
+
+        internal static long GetDefaultArgon2ParametersNative(byte[] argon2Parameters, UIntPtr argon2ParametersLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return GetDefaultArgon2ParametersNative64(argon2Parameters, argon2ParametersLength);
+            }
+
+            return GetDefaultArgon2ParametersNative86(argon2Parameters, argon2ParametersLength);
+        }
+
+        internal static long GetDefaultArgon2ParametersSizeNative()
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return GetDefaultArgon2ParametersSizeNative64();
+            }
+
+            return GetDefaultArgon2ParametersSizeNative86();
+        }
+
+        internal static long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version)
         {
             if (Environment.Is64BitProcess)
             {
@@ -273,13 +171,34 @@ namespace Devolutions.Cryptography
             return EncryptNative86(data, dataLength, key, keyLength, result, resultLength, version);
         }
 
-        [DllImport(LibName86, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version);
+        internal static long EncryptAsymmetricNative(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] publicKey,
+            UIntPtr publicKeyLength,
+            byte[] result,
+            UIntPtr resultLength,
+            ushort version)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return EncryptAsymmetricNative64(data, dataLength, publicKey, publicKeyLength, result, resultLength, version);
+            }
 
-        [DllImport(LibName64, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version);
+            return EncryptAsymmetricNative86(data, dataLength, publicKey, publicKeyLength, result, resultLength, version);
+        }
 
-        private static long EncryptSizeNative(UIntPtr dataLength, ushort version)
+        internal static long EncryptAsymmetricSizeNative(UIntPtr dataLength, ushort version)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return EncryptAsymmetricSizeNative64(dataLength, version);
+            }
+
+            return EncryptAsymmetricSizeNative86(dataLength, version);
+        }
+
+        internal static long EncryptSizeNative(UIntPtr dataLength, ushort version)
         {
             if (Environment.Is64BitProcess)
             {
@@ -289,45 +208,27 @@ namespace Devolutions.Cryptography
             return EncryptSizeNative86(dataLength, version);
         }
 
-        [DllImport(LibName86, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptSizeNative86(UIntPtr dataLength, ushort version);
-
-        [DllImport(LibName64, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptSizeNative64(UIntPtr dataLength, ushort version);
-
-        private static long GenerateKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize)
+        internal static long GenerateKeyPairNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize)
         {
             if (Environment.Is64BitProcess)
             {
-                return GenerateKeyExchangeNative64(privateKey, privateKeySize, publicKey, publicKeySize);
+                return GenerateKeyPairNative64(privateKey, privateKeySize, publicKey, publicKeySize);
             }
 
-            return GenerateKeyExchangeNative86(privateKey, privateKeySize, publicKey, publicKeySize);
+            return GenerateKeyPairNative86(privateKey, privateKeySize, publicKey, publicKeySize);
         }
 
-        [DllImport(LibName86, EntryPoint = "GenerateKeyExchange", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateKeyExchangeNative86(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize);
-
-        [DllImport(LibName64, EntryPoint = "GenerateKeyExchange", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateKeyExchangeNative64(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize);
-
-        private static long GenerateKeyExchangeSizeNative()
+        internal static long GenerateKeyPairSizeNative()
         {
             if (Environment.Is64BitProcess)
             {
-                return GenerateKeyExchangeSizeNative64();
+                return GenerateKeyPairSizeNative64();
             }
 
-            return GenerateKeyExchangeSizeNative86();
+            return GenerateKeyPairSizeNative86();
         }
 
-        [DllImport(LibName86, EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateKeyExchangeSizeNative86();
-
-        [DllImport(LibName64, EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateKeyExchangeSizeNative64();
-
-        private static long GenerateKeyNative(byte[] key, UIntPtr keyLength)
+        internal static long GenerateKeyNative(byte[] key, UIntPtr keyLength)
         {
             if (Environment.Is64BitProcess)
             {
@@ -337,13 +238,7 @@ namespace Devolutions.Cryptography
             return GenerateKeyNative86(key, keyLength);
         }
 
-        [DllImport(LibName86, EntryPoint = "GenerateKey", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateKeyNative86(byte[] key, UIntPtr keyLength);
-
-        [DllImport(LibName64, EntryPoint = "GenerateKey", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateKeyNative64(byte[] key, UIntPtr keyLength);
-
-        private static long HashPasswordLengthNative()
+        internal static long HashPasswordLengthNative()
         {
             if (Environment.Is64BitProcess)
             {
@@ -353,13 +248,7 @@ namespace Devolutions.Cryptography
             return HashPasswordLengthNative86();
         }
 
-        [DllImport(LibName86, EntryPoint = "HashPasswordLength", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long HashPasswordLengthNative86();
-
-        [DllImport(LibName64, EntryPoint = "HashPasswordLength", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long HashPasswordLengthNative64();
-
-        private static long HashPasswordNative(byte[] password, UIntPtr passwordLength, uint iterations, byte[] result, UIntPtr resultLength)
+        internal static long HashPasswordNative(byte[] password, UIntPtr passwordLength, uint iterations, byte[] result, UIntPtr resultLength)
         {
             if (Environment.Is64BitProcess)
             {
@@ -369,13 +258,7 @@ namespace Devolutions.Cryptography
             return HashPasswordNative86(password, passwordLength, iterations, result, resultLength);
         }
 
-        [DllImport(LibName86, EntryPoint = "HashPassword", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long HashPasswordNative86(byte[] password, UIntPtr passwordLength, uint iterations, byte[] result, UIntPtr resultLength);
-
-        [DllImport(LibName64, EntryPoint = "HashPassword", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long HashPasswordNative64(byte[] password, UIntPtr passwordLength, uint iterations, byte[] result, UIntPtr resultLength);
-
-        private static uint KeySizeNative()
+        internal static uint KeySizeNative()
         {
             if (Environment.Is64BitProcess)
             {
@@ -385,13 +268,7 @@ namespace Devolutions.Cryptography
             return KeySizeNative86();
         }
 
-        [DllImport(LibName86, EntryPoint = "KeySize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern uint KeySizeNative86();
-
-        [DllImport(LibName64, EntryPoint = "KeySize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern uint KeySizeNative64();
-
-        private static long MixKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize, byte[] shared, UIntPtr sharedSize)
+        internal static long MixKeyExchangeNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize, byte[] shared, UIntPtr sharedSize)
         {
             if (Environment.Is64BitProcess)
             {
@@ -401,13 +278,7 @@ namespace Devolutions.Cryptography
             return MixKeyExchangeNative86(privateKey, privateKeySize, publicKey, publicKeySize, shared, sharedSize);
         }
 
-        [DllImport(LibName86, EntryPoint = "MixKeyExchange", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long MixKeyExchangeNative86(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize, byte[] shared, UIntPtr sharedSize);
-
-        [DllImport(LibName64, EntryPoint = "MixKeyExchange", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long MixKeyExchangeNative64(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize, byte[] shared, UIntPtr sharedSize);
-
-        private static long MixKeyExchangeSizeNative()
+        internal static long MixKeyExchangeSizeNative()
         {
             if (Environment.Is64BitProcess)
             {
@@ -417,13 +288,7 @@ namespace Devolutions.Cryptography
             return MixKeyExchangeSizeNative86();
         }
 
-        [DllImport(LibName86, EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long MixKeyExchangeSizeNative86();
-
-        [DllImport(LibName64, EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long MixKeyExchangeSizeNative64();
-
-        private static long VerifyPasswordNative(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength)
+        internal static long VerifyPasswordNative(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength)
         {
             if (Environment.Is64BitProcess)
             {
@@ -433,13 +298,7 @@ namespace Devolutions.Cryptography
             return VerifyPasswordNative86(password, passwordLength, hash, hashLength);
         }
 
-        [DllImport(LibName86, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long VerifyPasswordNative86(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);
-
-        [DllImport(LibName64, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long VerifyPasswordNative64(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);
-
-        public static long DecodeNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length)
+        internal static long DecodeNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length)
         {
             if (Environment.Is64BitProcess)
             {
@@ -449,13 +308,7 @@ namespace Devolutions.Cryptography
             return Decode86(input, input_length, output, output_length);
         }
 
-        [DllImport(LibName86, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
-        public static extern long Decode86(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
-
-        [DllImport(LibName64, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
-        public static extern long Decode64(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
-
-        public static long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length)
+        internal static long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length)
         {
             if (Environment.Is64BitProcess)
             {
@@ -465,13 +318,7 @@ namespace Devolutions.Cryptography
             return Encode86(input, input_length, output, output_length);
         }
 
-        [DllImport(LibName86, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
-        public static extern long Encode86(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
-
-        [DllImport(LibName64, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
-        public static extern long Encode64(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
-
-        public static long VersionNative(byte[] output, UIntPtr output_length)
+        internal static long VersionNative(byte[] output, UIntPtr output_length)
         {
             if (Environment.Is64BitProcess)
             {
@@ -481,13 +328,7 @@ namespace Devolutions.Cryptography
             return Version86(output, output_length);
         }
 
-        [DllImport(LibName86, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
-        public static extern long Version86(byte[] output, UIntPtr output_length);
-
-        [DllImport(LibName64, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
-        public static extern long Version64(byte[] output, UIntPtr output_length);
-
-        public static long VersionSizeNative()
+        internal static long VersionSizeNative()
         {
             if (Environment.Is64BitProcess)
             {
@@ -497,11 +338,179 @@ namespace Devolutions.Cryptography
             return VersionSize86();
         }
 
+        [DllImport(LibName86, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long Decode86(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName64, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long Decode64(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName64, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DecryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName86, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DecryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName64, EntryPoint = "DecryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DecryptAsymmetricNative64(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName86, EntryPoint = "DecryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DecryptAsymmetricNative86(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName86, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DeriveKeyNative86(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName64, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DeriveKeyNative64(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName86, EntryPoint = "DeriveKeyPair", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DeriveKeyPairNative86(
+            byte[] password,
+            UIntPtr passwordLength,
+            byte[] parameters,
+            UIntPtr parametersLength,
+            byte[] privateKey,
+            UIntPtr privateKeyLength,
+            byte[] publicKey,
+            UIntPtr publicKeyLength);
+
+        [DllImport(LibName64, EntryPoint = "DeriveKeyPair", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DeriveKeyPairNative64(
+            byte[] password,
+            UIntPtr passwordLength,
+            byte[] parameters,
+            UIntPtr parametersLength,
+            byte[] privateKey,
+            UIntPtr privateKeyLength,
+            byte[] publicKey,
+            UIntPtr publicKeyLength);
+
+        [DllImport(LibName86, EntryPoint = "DeriveKeyPairSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DeriveKeyPairSizeNative86();
+
+        [DllImport(LibName64, EntryPoint = "DeriveKeyPairSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DeriveKeyPairSizeNative64();
+
+        [DllImport(LibName86, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long Encode86(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName64, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long Encode64(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName86, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long EncryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version);
+
+        [DllImport(LibName64, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long EncryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version);
+
+        [DllImport(LibName86, EntryPoint = "EncryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long EncryptAsymmetricNative86(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] publicKey,
+            UIntPtr publicKeyLength,
+            byte[] result,
+            UIntPtr resultLength,
+            ushort version);
+
+        [DllImport(LibName64, EntryPoint = "EncryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long EncryptAsymmetricNative64(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] publicKey,
+            UIntPtr publicKeyLength,
+            byte[] result,
+            UIntPtr resultLength,
+            ushort version);
+
+        [DllImport(LibName86, EntryPoint = "EncryptAsymmetricSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long EncryptAsymmetricSizeNative86(UIntPtr dataLength, ushort version);
+
+        [DllImport(LibName64, EntryPoint = "EncryptAsymmetricSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long EncryptAsymmetricSizeNative64(UIntPtr dataLength, ushort version);
+
+        [DllImport(LibName86, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long EncryptSizeNative86(UIntPtr dataLength, ushort version);
+
+        [DllImport(LibName64, EntryPoint = "EncryptSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long EncryptSizeNative64(UIntPtr dataLength, ushort version);
+
+        [DllImport(LibName86, EntryPoint = "GetDefaultArgon2Parameters", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GetDefaultArgon2ParametersNative86(byte[] argon2Parameters, UIntPtr argon2ParametersLength);
+
+        [DllImport(LibName64, EntryPoint = "GetDefaultArgon2Parameters", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GetDefaultArgon2ParametersNative64(byte[] argon2Parameters, UIntPtr argon2ParametersLength);
+
+        [DllImport(LibName86, EntryPoint = "GetDefaultArgon2ParametersSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GetDefaultArgon2ParametersSizeNative86();
+
+        [DllImport(LibName64, EntryPoint = "GetDefaultArgon2ParametersSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GetDefaultArgon2ParametersSizeNative64();
+
+        [DllImport(LibName86, EntryPoint = "GenerateKey", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateKeyNative86(byte[] key, UIntPtr keyLength);
+
+        [DllImport(LibName64, EntryPoint = "GenerateKey", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateKeyNative64(byte[] key, UIntPtr keyLength);
+
+        [DllImport(LibName86, EntryPoint = "GenerateKeyPair", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateKeyPairNative86(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize);
+
+        [DllImport(LibName64, EntryPoint = "GenerateKeyPair", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateKeyPairNative64(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize);
+
+        [DllImport(LibName86, EntryPoint = "GenerateKeyPairSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateKeyPairSizeNative86();
+
+        [DllImport(LibName64, EntryPoint = "GenerateKeyPairSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateKeyPairSizeNative64();
+
+        [DllImport(LibName86, EntryPoint = "HashPassword", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long HashPasswordNative86(byte[] password, UIntPtr passwordLength, uint iterations, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName64, EntryPoint = "HashPassword", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long HashPasswordNative64(byte[] password, UIntPtr passwordLength, uint iterations, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName86, EntryPoint = "HashPasswordLength", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long HashPasswordLengthNative86();
+
+        [DllImport(LibName64, EntryPoint = "HashPasswordLength", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long HashPasswordLengthNative64();
+
+        [DllImport(LibName86, EntryPoint = "KeySize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern uint KeySizeNative86();
+
+        [DllImport(LibName64, EntryPoint = "KeySize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern uint KeySizeNative64();
+
+        [DllImport(LibName86, EntryPoint = "MixKeyExchange", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long MixKeyExchangeNative86(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize, byte[] shared, UIntPtr sharedSize);
+
+        [DllImport(LibName64, EntryPoint = "MixKeyExchange", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long MixKeyExchangeNative64(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize, byte[] shared, UIntPtr sharedSize);
+
+        [DllImport(LibName86, EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long MixKeyExchangeSizeNative86();
+
+        [DllImport(LibName64, EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long MixKeyExchangeSizeNative64();
+
+        [DllImport(LibName86, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long Version86(byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName64, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long Version64(byte[] output, UIntPtr output_length);
+
         [DllImport(LibName86, EntryPoint = "VersionSize", CallingConvention = CallingConvention.Cdecl)]
-        public static extern long VersionSize86();
+        private static extern long VersionSize86();
 
         [DllImport(LibName64, EntryPoint = "VersionSize", CallingConvention = CallingConvention.Cdecl)]
-        public static extern long VersionSize64();
+        private static extern long VersionSize64();
+
+        [DllImport(LibName86, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long VerifyPasswordNative86(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);
+
+        [DllImport(LibName64, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long VerifyPasswordNative64(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);
 #endif
     }
 }

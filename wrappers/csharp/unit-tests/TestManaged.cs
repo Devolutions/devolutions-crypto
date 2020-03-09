@@ -5,7 +5,11 @@ namespace dotnet_framework
 namespace dotnet_core
 #endif
 {
+    using System;
+    using System.Text;
+
     using Devolutions.Cryptography;
+    using Devolutions.Cryptography.Argon2;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -24,6 +28,48 @@ namespace dotnet_core
         {
             byte[] data = Utils.DecodeFromBase64(TestData.Base64TestData);
             CollectionAssert.AreEqual(data, TestData.BytesTestData);
+        }
+
+        [TestMethod]
+        public void Decrypt()
+        {
+            byte[] decryptResult = Managed.Decrypt(TestData.EncryptedData, TestData.BytesTestKey);
+            string encodedByteArrayToUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
+            Assert.AreEqual(encodedByteArrayToUtf8String, TestData.Base64TestData);
+        }
+
+        [TestMethod]
+        public void Decrypt1()
+        {
+            byte[] encryptedData = Utils.Base64StringToByteArray(
+                "DQwCAAAAAQCK1twEut+TeJfFbTWCRgHjyS6bOPOZUEQAeBtSFFRl2jHggM/34n68zIZWGbsZHkufVzU6mTN5N2Dx9bTplrycv5eNVevT4P9FdVHJ751D+A==");
+            byte[] encryptKey = Utils.Base64StringToByteArray("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=");
+
+            byte[] decryptResult = Managed.Decrypt(encryptedData, encryptKey);
+            string decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
+            Assert.AreEqual(decryptResultAsUtf8String, "test Ciph3rtext~");
+        }
+
+        [TestMethod]
+        public void Decrypt2()
+        {
+            byte[] encryptedData = Utils.Base64StringToByteArray("DQwCAAAAAgAA0iPpI4IEzcrWAQiy6tqDqLbRYduGvlMC32mVH7tpIN2CXDUu5QHF91I7pMrmjt/61pm5CeR/IcU=");
+            byte[] encryptKey = Utils.Base64StringToByteArray("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=");
+
+            byte[] decryptResult = Managed.Decrypt(encryptedData, encryptKey);
+            string decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
+            Assert.AreEqual(decryptResultAsUtf8String, "test Ciph3rtext~2");
+        }
+
+        [TestMethod]
+        public void DecryptAsymmetric_Test()
+        {
+            byte[] encryptedData = Convert.FromBase64String("DQwCAAIAAgD5rUXkPQO55rzI69WSxtVTA43lDXougn6BxJ7evqf+Yq+SEGXZxpE49874fz/aEk39LTnh1yWnY2VNoAAqKVB5CWZryd6SSld8Sx8v");
+
+            byte[] decryptedData = Managed.DecryptAsymmetric(encryptedData, TestData.AlicePrivateKey);
+
+            Assert.IsTrue(decryptedData != null);
+            Assert.IsTrue(Encoding.UTF8.GetString(decryptedData) == "test");
         }
 
         [TestMethod]
@@ -98,10 +144,53 @@ namespace dotnet_core
         }
 
         [TestMethod]
+        public void DeriveKeyPair_Test()
+        {
+            KeyPair keyPair = Managed.DeriveKeyPair(new byte[] { 0, 1, 2, 3, 4, 5 }, Argon2Parameters.FromByteArray(Convert.FromBase64String(TestData.Argon2DefaultParametersb64)));
+
+            Assert.IsTrue(keyPair != null);
+            Assert.IsTrue(keyPair.PrivateKey != null);
+            Assert.IsTrue(keyPair.PublicKey != null);
+
+            Assert.IsTrue(keyPair.PrivateKeyString == "DQwBAAEAAQAgbzkrw3lP9KH/2MyTQlamDU39c5WziNWDZYMvqorEXw==");
+            Assert.IsTrue(keyPair.PublicKeyString == "DQwBAAIAAQDY3Zz8t28PsxnT+CWk1Jftz5KTXnP6Tngjnaa+IZQ5Ug==");
+        }
+
+        [TestMethod]
+        public void DerivePassword()
+        {
+            byte[] derivedPassword = Managed.DerivePassword(TestData.Base64TestData, null, 100);
+            CollectionAssert.AreEqual(TestData.TestDeriveBytes, derivedPassword);
+        }
+
+        [TestMethod]
         public void Encode()
         {
             string encodedArrayToBase64String = Utils.EncodeToBase64String(TestData.BytesTestData);
             Assert.AreEqual(encodedArrayToBase64String, TestData.Base64TestData);
+        }
+
+        [TestMethod]
+        public void Encrypt()
+        {
+            byte[] base64DataAsUtf8ByteArray = Utils.StringToUtf8ByteArray(TestData.Base64TestData2);
+            byte[] encryptResult = Managed.Encrypt(base64DataAsUtf8ByteArray, TestData.BytesTestKey);
+            Assert.IsTrue(Utils.ValidateSignature(encryptResult, DataType.Cipher));
+
+            byte[] decryptResult = Managed.Decrypt(encryptResult, TestData.BytesTestKey);
+            var decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
+            Assert.AreEqual(decryptResultAsUtf8String, TestData.Base64TestData2);
+        }
+
+        [TestMethod]
+        public void EncryptAsymmetric_Test()
+        {
+            byte[] dataToEncrypt = Encoding.UTF8.GetBytes("test");
+
+            byte[] encryptedData = Managed.EncryptAsymmetric(dataToEncrypt, TestData.AlicePublicKey);
+
+            Assert.IsTrue(encryptedData != null);
+            Assert.IsTrue(encryptedData.Length == 84);
         }
 
         [TestMethod]
@@ -163,6 +252,25 @@ namespace dotnet_core
         }
 
         [TestMethod]
+        public void GenerateKey()
+        {
+            byte[] firstKey = Managed.GenerateKey(32);
+            Assert.AreEqual(32, firstKey.Length);
+            byte[] secondKey = Managed.GenerateKey(32);
+            CollectionAssert.AreNotEqual(firstKey, secondKey);
+        }
+
+        [TestMethod]
+        public void GenerateKeyExchange()
+        {
+            KeyPair bob = Managed.GenerateKeyPair();
+            KeyPair alice = Managed.GenerateKeyPair();
+            byte[] bobMix = Managed.MixKeyExchange(bob.PrivateKey, alice.PublicKey);
+            byte[] aliceMix = Managed.MixKeyExchange(alice.PrivateKey, bob.PublicKey);
+            CollectionAssert.AreEqual(bobMix, aliceMix);
+        }
+
+        [TestMethod]
         public void GetDecodedLength()
         {
             int bufferDecodedLength = Utils.GetDecodedLength(TestData.Base64TestData);
@@ -170,10 +278,37 @@ namespace dotnet_core
         }
 
         [TestMethod]
+        public void GetDefaultArgon2ParametersSizeNative_Default()
+        {
+            Argon2Parameters defaultArgon2Parameters = Managed.GetDefaultArgon2Parameters();
+
+            Assert.IsTrue(defaultArgon2Parameters != null);
+            Assert.IsTrue(defaultArgon2Parameters.Memory == 4096);
+        }
+
+        [TestMethod]
         public void GetEncodedLength()
         {
             int stringEncodedLength = Utils.GetEncodedLength(TestData.BytesTestData);
             Assert.AreEqual(stringEncodedLength, 4);
+        }
+
+        [TestMethod]
+        public void HashPassword()
+        {
+            byte[] firstHash = Managed.HashPassword(TestData.BytesTestKey);
+            byte[] secondHash = Managed.HashPassword(TestData.BytesTestData);
+
+            Assert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, firstHash));
+            Assert.IsFalse(Managed.VerifyPassword(secondHash, firstHash));
+        }
+
+        [TestMethod]
+        public void MixKeyExchange()
+        {
+            byte[] bobMix = Managed.MixKeyExchange(TestData.BobPrivateKey, TestData.AlicePublicKey);
+            byte[] aliceMix = Managed.MixKeyExchange(TestData.AlicePrivateKey, TestData.BobPublicKey);
+            CollectionAssert.AreEqual(bobMix, aliceMix);
         }
 
         [TestMethod]
@@ -188,6 +323,12 @@ namespace dotnet_core
         {
             string dataEncodedToBase64String = Utils.EncodeToBase64String(TestData.BytesTestData);
             Assert.AreEqual(dataEncodedToBase64String, TestData.Base64TestData);
+        }
+
+        [TestMethod]
+        public void VerifyPassword()
+        {
+            Assert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, TestData.TestHash));
         }
     }
 }

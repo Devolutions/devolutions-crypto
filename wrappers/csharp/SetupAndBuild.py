@@ -59,7 +59,7 @@ if(platform == "win32" or platform == "win64"):
             print("Access denied...Retrying")
             time.sleep(1)
 
-    shutil.copyfile("./nuget/Windows/package/Devolutions.Crypto.Windows." + version + ".nupkg", "./unit-tests/Nugets/Devolutions.Crypto.Windows." + version + ".nupkg")
+    shutil.copyfile("./nuget/Windows/package/Devolutions.Crypto.Windows." + version + ".nupkg", "./unit-tests/nugets/Nugets/Devolutions.Crypto.Windows." + version + ".nupkg")
 
     output = get_output(["python", "./Test.py", "DOTNET-FRAMEWORK"], cwd="./unit-tests")
     print(output)

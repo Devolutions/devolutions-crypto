@@ -2,6 +2,7 @@ namespace Devolutions.Cryptography
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Text;
 
     public static partial class Utils
@@ -52,6 +53,23 @@ namespace Devolutions.Cryptography
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Concatenate arrays together.
+        /// </summary>
+        /// <returns>Returns the arrays concatenated into a single array </returns>
+        public static T[] ConcatArrays<T>(params T[][] list)
+        {
+            var result = new T[list.Sum(a => a.Length)];
+            int offset = 0;
+            for (int x = 0; x < list.Length; x++)
+            {
+                list[x].CopyTo(result, offset);
+                offset += list[x].Length;
+            }
+
+            return result;
         }
 
         /// <summary>

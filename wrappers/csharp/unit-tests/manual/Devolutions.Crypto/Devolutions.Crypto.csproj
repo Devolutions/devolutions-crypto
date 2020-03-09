@@ -41,11 +41,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\Argon2Parameters.cs">
+      <Link>Argon2Parameters.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Enums.Argon2.cs">
+      <Link>Enums.Argon2.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\Enums.cs">
       <Link>Enums.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\KeyExchange.cs">
-      <Link>KeyExchange.cs</Link>
+    <Compile Include="..\..\..\KeyPair.cs">
+      <Link>KeyPair.cs</Link>
     </Compile>
     <Compile Include="..\..\..\Managed.cs">
       <Link>Managed.cs</Link>

@@ -7,6 +7,8 @@ namespace dotnet_core
 {
     public static class TestData
     {
+        public const string Argon2DefaultParametersb64 = "AQAAACAAAAABAAAAABAAAAIAAAACEwAAAAAQAAAAtGY57+B0VqXmHFlvBiIBLg==";
+
         public const string Base64TestData = "QUJD";
 
         public const string Base64TestData2 = "QUJDDE";
@@ -251,6 +253,78 @@ namespace dotnet_core
                 0x4d
             };
 
+        public static readonly byte[] TestDeriveBytes = new byte[]
+            {
+                0x4d,
+                0x42,
+                0x5d,
+                0x3b,
+                0x8f,
+                0x36,
+                0xe4,
+                0xff,
+                0xb2,
+                0x56,
+                0xa4,
+                0xdc,
+                0x7c,
+                0x48,
+                0x66,
+                0x17,
+                0x7e,
+                0x74,
+                0x87,
+                0x61,
+                0x62,
+                0x68,
+                0xb1,
+                0x2b,
+                0x54,
+                0x0e,
+                0x1a,
+                0xf8,
+                0x03,
+                0xbb,
+                0x39,
+                0xc4
+            };
+
+        public static readonly byte[] TestDeriveBytes2 = new byte[]
+            {
+                0xb8,
+                0xe8,
+                0xea,
+                0x5f,
+                0xe4,
+                0x90,
+                0x86,
+                0x28,
+                0x8d,
+                0x98,
+                0x67,
+                0x6c,
+                0xce,
+                0x9d,
+                0xd4,
+                0x21,
+                0x2c,
+                0x5a,
+                0xd0,
+                0x9b,
+                0x05,
+                0x89,
+                0xb3,
+                0x2f,
+                0xd8,
+                0x29,
+                0x7a,
+                0xc0,
+                0x67,
+                0xb7,
+                0xf3,
+                0xe2
+            };
+
         public static readonly byte[] TestHash = new byte[]
             {
                 0x0d,
@@ -329,78 +403,6 @@ namespace dotnet_core
                 0x08,
                 0x42,
                 0x70
-            };
-
-        public static readonly byte[] TestDeriveBytes = new byte[]
-            {
-                0x4d,
-                0x42,
-                0x5d,
-                0x3b,
-                0x8f,
-                0x36,
-                0xe4,
-                0xff,
-                0xb2,
-                0x56,
-                0xa4,
-                0xdc,
-                0x7c,
-                0x48,
-                0x66,
-                0x17,
-                0x7e,
-                0x74,
-                0x87,
-                0x61,
-                0x62,
-                0x68,
-                0xb1,
-                0x2b,
-                0x54,
-                0x0e,
-                0x1a,
-                0xf8,
-                0x03,
-                0xbb,
-                0x39,
-                0xc4
-            };
-
-        public static readonly byte[] TestDeriveBytes2 = new byte[]
-            {
-                0xb8,
-                0xe8,
-                0xea,
-                0x5f,
-                0xe4,
-                0x90,
-                0x86,
-                0x28,
-                0x8d,
-                0x98,
-                0x67,
-                0x6c,
-                0xce,
-                0x9d,
-                0xd4,
-                0x21,
-                0x2c,
-                0x5a,
-                0xd0,
-                0x9b,
-                0x05,
-                0x89,
-                0xb3,
-                0x2f,
-                0xd8,
-                0x29,
-                0x7a,
-                0xc0,
-                0x67,
-                0xb7,
-                0xf3,
-                0xe2
             };
     }
 }
