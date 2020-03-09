@@ -6,12 +6,13 @@ use super::DevoCryptoError;
 use super::Result;
 
 use super::Argon2Parameters;
+use super::DataType;
 use super::DcHeader;
 
-use super::{DcCiphertext, CIPHERTEXT};
-use super::{DcHash, HASH};
-use super::{DcKey, KEY};
-use super::{DcSharedSecret, SHARED_SECRET};
+use super::DcCiphertext;
+use super::DcHash;
+use super::DcKey;
+use super::DcSharedSecret;
 
 #[derive(Clone)]
 pub enum DcPayload {
@@ -24,14 +25,14 @@ pub enum DcPayload {
 impl DcPayload {
     pub fn try_from_header(data: &[u8], header: &DcHeader) -> Result<DcPayload> {
         match header.data_type {
-            KEY => Ok(DcPayload::Key(DcKey::try_from_header(data, header)?)),
-            CIPHERTEXT => Ok(DcPayload::Ciphertext(DcCiphertext::try_from_header(
+            DataType::Key => Ok(DcPayload::Key(DcKey::try_from_header(data, header)?)),
+            DataType::Ciphertext => Ok(DcPayload::Ciphertext(DcCiphertext::try_from_header(
                 data, header,
             )?)),
-            SHARED_SECRET => Ok(DcPayload::SharedSecret(DcSharedSecret::try_from_header(
+            DataType::Share => Ok(DcPayload::SharedSecret(DcSharedSecret::try_from_header(
                 data, header,
             )?)),
-            HASH => Ok(DcPayload::Hash(DcHash::try_from_header(data, header)?)),
+            DataType::Hash => Ok(DcPayload::Hash(DcHash::try_from_header(data, header)?)),
             _ => Err(DevoCryptoError::UnknownType),
         }
     }

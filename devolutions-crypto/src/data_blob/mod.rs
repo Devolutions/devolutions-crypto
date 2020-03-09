@@ -7,13 +7,14 @@ mod key;
 mod shared_secret;
 
 use super::Argon2Parameters;
+use super::DataType;
 use super::DevoCryptoError;
 use super::Result;
 
-use self::ciphertext::{DcCiphertext, CIPHERTEXT};
-use self::hash::{DcHash, HASH};
-use self::key::{DcKey, KEY};
-use self::shared_secret::{DcSharedSecret, SHARED_SECRET};
+use self::ciphertext::DcCiphertext;
+use self::hash::DcHash;
+use self::key::DcKey;
+use self::shared_secret::DcSharedSecret;
 
 use self::header::DcHeader;
 use self::payload::DcPayload;
@@ -27,7 +28,7 @@ use std::convert::TryFrom;
 /// If the channel does not support raw byte, the data can be encoded easily using base64.
 #[derive(Clone)]
 pub struct DcDataBlob {
-    header: DcHeader,
+    pub header: DcHeader,
     payload: DcPayload,
 }
 

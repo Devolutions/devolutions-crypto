@@ -3,6 +3,7 @@ mod ciphertext_v2;
 
 use crate::DcDataBlob;
 
+use super::DataType;
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
@@ -11,8 +12,6 @@ use self::ciphertext_v1::DcCiphertextV1;
 use self::ciphertext_v2::DcCiphertextV2;
 
 use std::convert::TryFrom as _;
-
-pub const CIPHERTEXT: u16 = 2;
 
 const V1: u16 = 1;
 const V2: u16 = 2;
@@ -40,7 +39,7 @@ impl DcCiphertext {
         header: &mut DcHeader,
         version: Option<u16>,
     ) -> Result<DcCiphertext> {
-        header.data_type = CIPHERTEXT;
+        header.data_type = DataType::Ciphertext;
 
         match version {
             Some(V1) => {
@@ -65,7 +64,7 @@ impl DcCiphertext {
         header: &mut DcHeader,
         version: Option<u16>,
     ) -> Result<DcCiphertext> {
-        header.data_type = CIPHERTEXT;
+        header.data_type = DataType::Ciphertext;
 
         match version {
             Some(V2) | None => {
