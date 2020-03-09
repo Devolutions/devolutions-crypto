@@ -8,6 +8,9 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use rand::rngs::OsRng;
 use rand::Rng;
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+
 use super::DevoCryptoError;
 use super::Result;
 
@@ -17,11 +20,8 @@ use super::Result;
 /// You can save it along the user information.
 /// If the hash should never be computed in a non-threaded environment,
 ///  you can raise the "lanes" value to enable multi-threading.
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub struct Argon2Parameters {
-    /// Authenticated but not secret data
-    pub associated_data: Vec<u8>,
-    /// Secret key to sign the hash. Note that this is not serialized
-    pub secret_key: Vec<u8>,
     /// Length of the desired hash
     pub length: u32,
     /// Number of parallel jobs to run. Only use if always computed in a multithreaded environment.
@@ -31,11 +31,15 @@ pub struct Argon2Parameters {
     /// Number of iterations(time cost). Higher is better.
     pub iterations: u32,
     /// The variant to use. You should almost always use Argon2Id
-    pub variant: Variant,
+    variant: Variant,
     /// The version of Argon2 to use. Use the latest.
-    pub version: Version,
+    version: Version,
     /// Version of this structure in DevolutionsCrypto
     dc_version: u32,
+    /// Authenticated but not secret data
+    associated_data: Vec<u8>,
+    /// Secret key to sign the hash. Note that this is not serialized
+    secret_key: Vec<u8>,
     /// A 16-bytes salt to use. Should not be accessed directly.
     salt: Vec<u8>,
 }
@@ -51,8 +55,8 @@ impl Default for Argon2Parameters {
             secret_key: Vec::new(),
             length: 32,
             lanes: 1,
-            memory: 16384,
-            iterations: 3,
+            memory: 4096,
+            iterations: 2,
             variant: Variant::Argon2id,
             version: Version::Version13,
             dc_version: 1,
@@ -155,6 +159,15 @@ impl Argon2Parameters {
         };
 
         Ok(argon2::hash_raw(password, &self.salt, &config)?)
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+impl Argon2Parameters {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 

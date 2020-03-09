@@ -17,6 +17,7 @@ pub const CIPHERTEXT: u16 = 2;
 const V1: u16 = 1;
 const V2: u16 = 2;
 
+#[derive(Clone)]
 pub enum DcCiphertext {
     V1(DcCiphertextV1),
     V2(DcCiphertextV2),

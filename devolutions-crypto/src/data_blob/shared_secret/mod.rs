@@ -12,6 +12,7 @@ pub const SHARED_SECRET: u16 = 5;
 
 const V1: u16 = 1;
 
+#[derive(Clone)]
 pub enum DcSharedSecret {
     V1(DcSharedSecretV1),
 }

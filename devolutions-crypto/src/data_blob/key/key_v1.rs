@@ -13,6 +13,7 @@ use zeroize::Zeroize;
 const PRIVATE: u16 = 1;
 const PUBLIC: u16 = 2;
 
+#[derive(Clone)]
 pub enum DcKeyV1 {
     Private(StaticSecret),
     Public(PublicKey),
@@ -58,7 +59,7 @@ impl DcKeyV1 {
         Ok((DcKeyV1::Private(private), DcKeyV1::Public(public)))
     }
 
-    pub fn mix_key_exchange(self, public: DcKeyV1) -> Result<Vec<u8>> {
+    pub fn mix_key_exchange(&self, public: &DcKeyV1) -> Result<Vec<u8>> {
         match (self, public) {
             (DcKeyV1::Private(private), DcKeyV1::Public(public)) => {
                 Ok(private.diffie_hellman(&public).as_bytes().to_vec())

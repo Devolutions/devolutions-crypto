@@ -14,6 +14,7 @@ pub const KEY: u16 = 1;
 
 const V1: u16 = 1;
 
+#[derive(Clone)]
 pub enum DcKey {
     V1(DcKeyV1),
 }
@@ -58,7 +59,7 @@ impl DcKey {
         Ok((DcKey::V1(private_key), DcKey::V1(public_key)))
     }
 
-    pub fn mix_key_exchange(self, public: DcKey) -> Result<Vec<u8>> {
+    pub fn mix_key_exchange(&self, public: &DcKey) -> Result<Vec<u8>> {
         match (self, public) {
             (DcKey::V1(private), DcKey::V1(public)) => private.mix_key_exchange(public),
         }

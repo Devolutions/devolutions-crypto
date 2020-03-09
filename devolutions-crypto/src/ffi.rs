@@ -330,7 +330,7 @@ pub unsafe extern "C" fn MixKeyExchange(
     let shared = slice::from_raw_parts_mut(shared, shared_size);
 
     match (DcDataBlob::try_from(private), DcDataBlob::try_from(public)) {
-        (Ok(private), Ok(public)) => match private.mix_key_exchange(public) {
+        (Ok(private), Ok(public)) => match private.mix_key_exchange(&public) {
             Ok(mut res) => {
                 shared[0..res.len()].copy_from_slice(&res);
                 res.zeroize();
@@ -685,8 +685,8 @@ fn test_key_exchange_length() {
     let private_bob = DcDataBlob::try_from(private_bob.as_slice()).unwrap();
     let public_bob = DcDataBlob::try_from(public_bob.as_slice()).unwrap();
 
-    let shared_bob = private_bob.mix_key_exchange(public_alice).unwrap();
-    let shared_alice = private_alice.mix_key_exchange(public_bob).unwrap();
+    let shared_bob = private_bob.mix_key_exchange(&public_alice).unwrap();
+    let shared_alice = private_alice.mix_key_exchange(&public_bob).unwrap();
 
     assert_eq!(MixKeyExchangeSize() as usize, shared_bob.len());
     assert_eq!(MixKeyExchangeSize() as usize, shared_alice.len());
