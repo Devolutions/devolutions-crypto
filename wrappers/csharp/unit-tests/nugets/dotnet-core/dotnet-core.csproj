@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\TestArgon2Parameters.cs" Link="TestArgon2Parameters.cs" />
     <Compile Include="..\..\TestClasses.cs" Link="TestClasses.cs" />
     <Compile Include="..\..\TestData.cs" Link="TestData.cs" />
     <Compile Include="..\..\TestManaged.cs" Link="TestManaged.cs" />
