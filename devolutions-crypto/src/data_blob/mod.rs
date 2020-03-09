@@ -77,6 +77,33 @@ impl DcDataBlob {
         Ok(DcDataBlob { header, payload })
     }
 
+    /// Creates an encrypted data blob from cleartext data and a public key.
+    /// You will need the corresponding private key to decrypt it.
+    /// # Arguments
+    ///  * `data` - Data to encrypt.
+    ///  * `public_key` - The public key to use. Use either `generate_key_exchange` or `derive_keypair` for this.
+    ///  * `version` - Version of the library to encrypt with. Use 0 for default.
+    /// # Returns
+    /// Returns a `DcDataBlob` containing the encrypted data.
+    /// # Example
+    /// ```rust
+    /// use devolutions_crypto::DcDataBlob;
+    ///
+    /// let data = b"somesecretdata";
+    /// let (private, public) = DcDataBlob::generate_key_exchange().unwrap();
+    ///
+    /// let encrypted_data = DcDataBlob::encrypt_asymmetric(data, &public, None).unwrap();
+    /// ```
+    pub fn encrypt_asymmetric(
+        data: &[u8],
+        public_key: &DcDataBlob,
+        version: Option<u16>,
+    ) -> Result<DcDataBlob> {
+        let mut header = Default::default();
+        let payload = DcPayload::encrypt_asymmetric(data, public_key, &mut header, version)?;
+        Ok(DcDataBlob { header, payload })
+    }
+
     /// Decrypt the data blob using a key.
     /// # Arguments
     ///  * `key` - Key to use. Can be of arbitrary size.
@@ -96,6 +123,27 @@ impl DcDataBlob {
     ///```
     pub fn decrypt(&self, key: &[u8]) -> Result<Vec<u8>> {
         self.payload.decrypt(key, &self.header)
+    }
+
+    /// Decrypt the data blob using a private key.
+    /// # Arguments
+    ///  * `private_key` - Key to use. Must be the one in the same keypair as the public key used for encryption.
+    /// # Returns
+    /// Returns the decrypted data.
+    /// # Example
+    /// ```rust
+    /// use devolutions_crypto::DcDataBlob;
+    ///
+    /// let data = b"somesecretdata";
+    /// let (private, public) = DcDataBlob::generate_key_exchange().unwrap();
+    ///
+    /// let encrypted_data = DcDataBlob::encrypt_asymmetric(data, &public, None).unwrap();
+    /// let decrypted_data = encrypted_data.decrypt_asymmetric(&private).unwrap();
+    ///
+    /// assert_eq!(decrypted_data, data);
+    ///```
+    pub fn decrypt_asymmetric(&self, private_key: &DcDataBlob) -> Result<Vec<u8>> {
+        self.payload.decrypt_asymmetric(private_key, &self.header)
     }
 
     /// Creates a data blob containing a password hash.
@@ -303,6 +351,22 @@ impl DcDataBlob {
     }
 }
 
+impl TryFrom<&DcDataBlob> for x25519_dalek::PublicKey {
+    type Error = DevoCryptoError;
+
+    fn try_from(data: &DcDataBlob) -> Result<Self> {
+        Self::try_from(&data.payload)
+    }
+}
+
+impl TryFrom<&DcDataBlob> for x25519_dalek::StaticSecret {
+    type Error = DevoCryptoError;
+
+    fn try_from(data: &DcDataBlob) -> Result<Self> {
+        Self::try_from(&data.payload)
+    }
+}
+
 #[test]
 fn encrypt_decrypt_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
@@ -459,4 +523,28 @@ fn derive_keypair_test() {
 
     // Should be a regular keypair
     assert_eq!(bob_shared, alice_shared);
+}
+
+#[test]
+fn asymmetric_test() {
+    let test_plaintext = b"this is a test data";
+    let test_password = b"test password";
+
+    let mut params = Argon2Parameters::default();
+    params.memory = 32;
+    params.iterations = 2;
+
+    let (private, public) = DcDataBlob::derive_keypair(test_password, &params).unwrap();
+
+    let encrypted_data = DcDataBlob::encrypt_asymmetric(test_plaintext, &public, None).unwrap();
+
+    let encrypted_data_vec: Vec<u8> = encrypted_data.into();
+
+    assert_ne!(encrypted_data_vec.len(), 0);
+
+    let encrypted_data = DcDataBlob::try_from(encrypted_data_vec.as_slice()).unwrap();
+
+    let decrypted_data = encrypted_data.decrypt_asymmetric(&private).unwrap();
+
+    assert_eq!(decrypted_data, test_plaintext);
 }

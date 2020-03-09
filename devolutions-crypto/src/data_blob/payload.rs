@@ -1,3 +1,7 @@
+use std::convert::TryFrom;
+
+use crate::DcDataBlob;
+
 use super::DevoCryptoError;
 use super::Result;
 
@@ -42,9 +46,31 @@ impl DcPayload {
         )?))
     }
 
+    pub fn encrypt_asymmetric(
+        data: &[u8],
+        public_key: &DcDataBlob,
+        header: &mut DcHeader,
+        version: Option<u16>,
+    ) -> Result<DcPayload> {
+        Ok(DcPayload::Ciphertext(DcCiphertext::encrypt_asymmetric(
+            data, public_key, header, version,
+        )?))
+    }
+
     pub fn decrypt(&self, key: &[u8], header: &DcHeader) -> Result<Vec<u8>> {
         match self {
             DcPayload::Ciphertext(x) => x.decrypt(key, header),
+            _ => Err(DevoCryptoError::InvalidDataType),
+        }
+    }
+
+    pub fn decrypt_asymmetric(
+        &self,
+        private_key: &DcDataBlob,
+        header: &DcHeader,
+    ) -> Result<Vec<u8>> {
+        match self {
+            DcPayload::Ciphertext(x) => x.decrypt_asymmetric(private_key, header),
             _ => Err(DevoCryptoError::InvalidDataType),
         }
     }
@@ -120,6 +146,28 @@ impl DcPayload {
         let (private, public) =
             DcKey::derive_keypair(password, parameters, private_header, public_header)?;
         Ok((DcPayload::Key(private), DcPayload::Key(public)))
+    }
+}
+
+impl TryFrom<&DcPayload> for x25519_dalek::PublicKey {
+    type Error = DevoCryptoError;
+
+    fn try_from(data: &DcPayload) -> Result<Self> {
+        match data {
+            DcPayload::Key(x) => Self::try_from(x),
+            _ => Err(DevoCryptoError::InvalidDataType),
+        }
+    }
+}
+
+impl TryFrom<&DcPayload> for x25519_dalek::StaticSecret {
+    type Error = DevoCryptoError;
+
+    fn try_from(data: &DcPayload) -> Result<Self> {
+        match data {
+            DcPayload::Key(x) => Self::try_from(x),
+            _ => Err(DevoCryptoError::InvalidDataType),
+        }
     }
 }
 
