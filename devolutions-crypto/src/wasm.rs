@@ -87,10 +87,25 @@ pub fn encrypt(data: &[u8], key: &[u8], version: Option<u16>) -> Result<Vec<u8>,
     Ok(DcDataBlob::encrypt(&data, &key, version)?.into())
 }
 
+#[wasm_bindgen(js_name = "encryptAsymmetric")]
+pub fn encrypt_asymmetric(
+    data: &[u8],
+    public_key: PublicKey,
+    version: Option<u16>,
+) -> Result<Vec<u8>, JsValue> {
+    Ok(DcDataBlob::encrypt_asymmetric(&data, &public_key.key, version)?.into())
+}
+
 #[wasm_bindgen]
 pub fn decrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>, JsValue> {
     let data_blob = DcDataBlob::try_from(data)?;
     Ok(data_blob.decrypt(&key)?)
+}
+
+#[wasm_bindgen(js_name = "decryptAsymmetric")]
+pub fn decrypt_asymmetric(data: &[u8], private_key: PrivateKey) -> Result<Vec<u8>, JsValue> {
+    let data_blob = DcDataBlob::try_from(data)?;
+    Ok(data_blob.decrypt_asymmetric(&private_key.key)?)
 }
 
 #[wasm_bindgen(js_name = "hashPassword")]
