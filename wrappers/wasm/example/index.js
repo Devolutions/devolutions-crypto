@@ -17,6 +17,10 @@ console.log(devolutionsCrypto.base64encode(keypair.public.bytes))
 var public_key = devolutionsCrypto.PublicKey.from(keypair.public.bytes);
 var private_key = devolutionsCrypto.PrivateKey.from(keypair.private.bytes);
 
+var asymmetric_ciphertext = devolutionsCrypto.encryptAsymmetric(enc.encode("test_data"), public_key)
+console.log(devolutionsCrypto.base64encode(asymmetric_ciphertext));
+console.log(dec.decode(devolutionsCrypto.decryptAsymmetric(asymmetric_ciphertext, private_key)));
+
 var publicBob = null;
 var privateBob = null;
 
