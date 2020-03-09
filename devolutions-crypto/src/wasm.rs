@@ -8,8 +8,10 @@ use js_sys::{Array, Uint8Array};
 
 use super::utils;
 use super::DcDataBlob;
+use super::DevoCryptoError;
 
 use super::Argon2Parameters;
+use super::DataType;
 
 #[wasm_bindgen]
 pub struct KeyPair {
@@ -38,9 +40,13 @@ impl PublicKey {
 
     #[wasm_bindgen]
     pub fn from(buffer: &[u8]) -> Result<PublicKey, JsValue> {
-        Ok(PublicKey {
-            key: DcDataBlob::try_from(buffer)?,
-        })
+        let key = DcDataBlob::try_from(buffer)?;
+
+        if key.header.data_type != DataType::Key || key.header.data_subtype != 2 {
+            Err(DevoCryptoError::InvalidDataType)?
+        };
+
+        Ok(PublicKey { key })
     }
 }
 
@@ -53,9 +59,13 @@ impl PrivateKey {
 
     #[wasm_bindgen]
     pub fn from(buffer: &[u8]) -> Result<PrivateKey, JsValue> {
-        Ok(PrivateKey {
-            key: DcDataBlob::try_from(buffer)?,
-        })
+        let key = DcDataBlob::try_from(buffer)?;
+
+        if key.header.data_type != DataType::Key || key.header.data_subtype != 1 {
+            Err(DevoCryptoError::InvalidDataType)?
+        };
+
+        Ok(PrivateKey { key })
     }
 }
 

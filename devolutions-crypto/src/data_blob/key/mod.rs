@@ -4,13 +4,12 @@ use std::convert::TryFrom;
 
 use super::Argon2Parameters;
 
+use super::DataType;
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
 
 use self::key_v1::DcKeyV1;
-
-pub const KEY: u16 = 1;
 
 const V1: u16 = 1;
 
@@ -31,8 +30,8 @@ impl DcKey {
         private_header: &mut DcHeader,
         public_header: &mut DcHeader,
     ) -> Result<(DcKey, DcKey)> {
-        private_header.data_type = KEY;
-        public_header.data_type = KEY;
+        private_header.data_type = DataType::Key;
+        public_header.data_type = DataType::Key;
         private_header.version = V1;
         public_header.version = V1;
 
@@ -48,8 +47,8 @@ impl DcKey {
         private_header: &mut DcHeader,
         public_header: &mut DcHeader,
     ) -> Result<(DcKey, DcKey)> {
-        private_header.data_type = KEY;
-        public_header.data_type = KEY;
+        private_header.data_type = DataType::Key;
+        public_header.data_type = DataType::Key;
         private_header.version = V1;
         public_header.version = V1;
 
