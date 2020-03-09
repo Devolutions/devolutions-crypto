@@ -25,6 +25,7 @@ use std::convert::TryFrom;
 ///     for misuse resistance. It implements `TryFrom<&[u8]` and `Into<Vec<u8>>` to be serialized
 ///     and parsed into raw bytes for use with other language and to send over a channel.
 /// If the channel does not support raw byte, the data can be encoded easily using base64.
+#[derive(Clone)]
 pub struct DcDataBlob {
     header: DcHeader,
     payload: DcPayload,
@@ -246,20 +247,20 @@ impl DcDataBlob {
     /// # let alice_received_serialized_pub = alice_serialized_pub;
     /// let alice_received_pub = DcDataBlob::try_from(alice_received_serialized_pub.as_slice()).unwrap();
     ///
-    /// let bob_shared = bob_priv.mix_key_exchange(alice_received_pub).unwrap();
+    /// let bob_shared = bob_priv.mix_key_exchange(&alice_received_pub).unwrap();
     ///
     /// // Alice can now generate the shared secret
     /// let bob_received_serialized_pub = receive_key_from_bob();
     /// # let bob_received_serialized_pub = bob_serialized_pub;
     /// let bob_received_pub = DcDataBlob::try_from(bob_received_serialized_pub.as_slice()).unwrap();
     ///
-    /// let alice_shared = alice_priv.mix_key_exchange(bob_received_pub).unwrap();
+    /// let alice_shared = alice_priv.mix_key_exchange(&bob_received_pub).unwrap();
     ///
     /// // They now have a shared secret!
     /// assert_eq!(bob_shared, alice_shared);
     /// ```
-    pub fn mix_key_exchange(self, public: DcDataBlob) -> Result<Vec<u8>> {
-        self.payload.mix_key_exchange(public.payload)
+    pub fn mix_key_exchange(&self, public: &DcDataBlob) -> Result<Vec<u8>> {
+        self.payload.mix_key_exchange(&public.payload)
     }
 
     /// Generate a key and split it in `n` shares use. You will need `threshold` shares to recover the key.
@@ -468,8 +469,8 @@ fn ecdh_test() {
     let (bob_priv, bob_pub) = DcDataBlob::generate_key_exchange().unwrap();
     let (alice_priv, alice_pub) = DcDataBlob::generate_key_exchange().unwrap();
 
-    let bob_shared = bob_priv.mix_key_exchange(alice_pub).unwrap();
-    let alice_shared = alice_priv.mix_key_exchange(bob_pub).unwrap();
+    let bob_shared = bob_priv.mix_key_exchange(&alice_pub).unwrap();
+    let alice_shared = alice_priv.mix_key_exchange(&bob_pub).unwrap();
 
     assert_eq!(bob_shared, alice_shared);
 }
@@ -518,8 +519,8 @@ fn derive_keypair_test() {
     let (alice_priv, alice_pub) =
         DcDataBlob::derive_keypair("password5".as_bytes(), &alice_parameters).unwrap();
 
-    let bob_shared = bob_priv.mix_key_exchange(alice_pub).unwrap();
-    let alice_shared = alice_priv.mix_key_exchange(bob_pub).unwrap();
+    let bob_shared = bob_priv.mix_key_exchange(&alice_pub).unwrap();
+    let alice_shared = alice_priv.mix_key_exchange(&bob_pub).unwrap();
 
     // Should be a regular keypair
     assert_eq!(bob_shared, alice_shared);
