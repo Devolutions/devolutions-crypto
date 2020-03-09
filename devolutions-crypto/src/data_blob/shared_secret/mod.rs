@@ -1,5 +1,6 @@
 mod shared_secret_v1;
 
+use super::DataType;
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
@@ -7,8 +8,6 @@ use super::Result;
 use self::shared_secret_v1::DcSharedSecretV1;
 
 use std::convert::TryFrom as _;
-
-pub const SHARED_SECRET: u16 = 5;
 
 const V1: u16 = 1;
 
@@ -41,7 +40,7 @@ impl DcSharedSecret {
         length: usize,
         header: &mut DcHeader,
     ) -> Result<impl Iterator<Item = DcSharedSecret>> {
-        header.data_type = SHARED_SECRET;
+        header.data_type = DataType::Share;
         header.version = V1;
 
         Ok(

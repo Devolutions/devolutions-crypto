@@ -1,3 +1,5 @@
+use super::DataType;
+
 use super::DevoCryptoError;
 use super::Result;
 
@@ -13,7 +15,7 @@ const SIGNATURE: u16 = 0x0C0D;
 #[zeroize(drop)]
 pub struct DcHeader {
     pub signature: u16,
-    pub data_type: u16,
+    pub data_type: DataType,
     pub data_subtype: u16,
     pub version: u16,
 }
@@ -31,6 +33,11 @@ impl TryFrom<&[u8]> for DcHeader {
             return Err(DevoCryptoError::InvalidSignature);
         }
 
+        let data_type = match DataType::try_from(data_type) {
+            Ok(d) => d,
+            Err(_) => return Err(DevoCryptoError::UnknownType),
+        };
+
         Ok(DcHeader {
             signature,
             data_type,
@@ -44,7 +51,8 @@ impl From<DcHeader> for Vec<u8> {
     fn from(header: DcHeader) -> Vec<u8> {
         let mut data = Vec::with_capacity(8);
         data.write_u16::<LittleEndian>(header.signature).unwrap();
-        data.write_u16::<LittleEndian>(header.data_type).unwrap();
+        data.write_u16::<LittleEndian>(header.data_type.into())
+            .unwrap();
         data.write_u16::<LittleEndian>(header.data_subtype).unwrap();
         data.write_u16::<LittleEndian>(header.version).unwrap();
         data
@@ -55,7 +63,7 @@ impl Default for DcHeader {
     fn default() -> Self {
         DcHeader {
             signature: SIGNATURE,
-            data_type: 0,
+            data_type: DataType::None,
             data_subtype: 0,
             version: 0,
         }

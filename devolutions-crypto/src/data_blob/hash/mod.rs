@@ -1,5 +1,6 @@
 mod hash_v1;
 
+use super::DataType;
 use super::DcHeader;
 use super::DevoCryptoError;
 use super::Result;
@@ -7,8 +8,6 @@ use super::Result;
 use self::hash_v1::DcHashV1;
 
 use std::convert::TryFrom as _;
-
-pub const HASH: u16 = 3;
 
 const V1: u16 = 1;
 
@@ -36,7 +35,7 @@ impl From<DcHash> for Vec<u8> {
 
 impl DcHash {
     pub fn hash_password(pass: &[u8], iterations: u32, header: &mut DcHeader) -> Result<DcHash> {
-        header.data_type = HASH;
+        header.data_type = DataType::Hash;
         header.version = V1;
         Ok(DcHash::V1(DcHashV1::hash_password(pass, iterations)?))
     }
