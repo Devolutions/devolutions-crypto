@@ -13,7 +13,7 @@ use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 use zeroize::Zeroize;
 
-#[derive(Zeroize)]
+#[derive(Zeroize, Clone)]
 #[zeroize(drop)]
 pub struct DcCiphertextV1 {
     iv: Vec<u8>,

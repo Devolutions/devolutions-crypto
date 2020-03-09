@@ -13,6 +13,7 @@ use super::{DcHash, HASH};
 use super::{DcKey, KEY};
 use super::{DcSharedSecret, SHARED_SECRET};
 
+#[derive(Clone)]
 pub enum DcPayload {
     Key(DcKey),
     Ciphertext(DcCiphertext),
@@ -97,7 +98,7 @@ impl DcPayload {
         Ok((DcPayload::Key(private_key), DcPayload::Key(public_key)))
     }
 
-    pub fn mix_key_exchange(self, public: DcPayload) -> Result<Vec<u8>> {
+    pub fn mix_key_exchange(&self, public: &DcPayload) -> Result<Vec<u8>> {
         match (self, public) {
             (DcPayload::Key(private), DcPayload::Key(public)) => private.mix_key_exchange(public),
             _ => Err(DevoCryptoError::InvalidDataType),

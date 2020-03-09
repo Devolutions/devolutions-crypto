@@ -14,6 +14,18 @@ pub struct DcSharedSecretV1 {
     share: Share,
 }
 
+// Hack until Clone is implemented for Share
+impl Clone for DcSharedSecretV1 {
+    fn clone(&self) -> Self {
+        let share_vec: Vec<u8> = (&self.share).into();
+
+        Self {
+            threshold: self.threshold,
+            share: Share::from(share_vec.as_slice()),
+        }
+    }
+}
+
 impl From<DcSharedSecretV1> for Vec<u8> {
     fn from(share: DcSharedSecretV1) -> Vec<u8> {
         let mut data: Vec<u8> = Vec::new();

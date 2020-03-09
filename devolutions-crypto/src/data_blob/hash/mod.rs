@@ -12,6 +12,7 @@ pub const HASH: u16 = 3;
 
 const V1: u16 = 1;
 
+#[derive(Clone)]
 pub enum DcHash {
     V1(DcHashV1),
 }

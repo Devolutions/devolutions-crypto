@@ -12,7 +12,7 @@ use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
 use zeroize::Zeroize;
 
-#[derive(Zeroize)]
+#[derive(Zeroize, Clone)]
 #[zeroize(drop)]
 pub struct DcHashV1 {
     iterations: u32,

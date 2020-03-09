@@ -8,6 +8,15 @@ var key = devolutionsCrypto.generateKey();
 var enc = new TextEncoder();
 var dec = new TextDecoder();
 
+var params = new devolutionsCrypto.Argon2Parameters();
+var keypair = devolutionsCrypto.deriveKeyPair(enc.encode("pass123"), params);
+
+console.log(devolutionsCrypto.base64encode(keypair.private.bytes))
+console.log(devolutionsCrypto.base64encode(keypair.public.bytes))
+
+var public_key = devolutionsCrypto.PublicKey.from(keypair.public.bytes);
+var private_key = devolutionsCrypto.PrivateKey.from(keypair.private.bytes);
+
 var publicBob = null;
 var privateBob = null;
 
@@ -114,20 +123,20 @@ btnVerifyPassword.addEventListener("click", () => {
 btnBob.addEventListener("click", () => {
     let result = devolutionsCrypto.generateKeyExchange();
 
-    publicBob = result.public();
-    privateBob = result.private();
+    publicBob = result.public;
+    privateBob = result.private;
 
-    outputbob.value = devolutionsCrypto.base64encode(publicBob);
+    outputbob.value = devolutionsCrypto.base64encode(publicBob.bytes);
 
 });
 
 btnAlice.addEventListener("click", () => {
     let result = devolutionsCrypto.generateKeyExchange();
 
-    publicAlice = result.public();
-    privateAlice = result.private();
+    publicAlice = result.public;
+    privateAlice = result.private;
 
-    outputalice.value = devolutionsCrypto.base64encode(publicAlice);
+    outputalice.value = devolutionsCrypto.base64encode(publicAlice.bytes);
 });
 
 // Key Exchange

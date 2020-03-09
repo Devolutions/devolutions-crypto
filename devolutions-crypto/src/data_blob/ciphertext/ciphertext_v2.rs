@@ -20,18 +20,20 @@ use zeroize::Zeroize;
 const SYMMETRIC: u16 = 1;
 const ASYMMETRIC: u16 = 2;
 
+#[derive(Clone)]
 pub enum DcCiphertextV2 {
     Symmetric(DcCiphertextV2Symmetric),
     Asymmetric(DcCiphertextV2Asymmetric),
 }
 
-#[derive(Zeroize)]
+#[derive(Zeroize, Clone)]
 #[zeroize(drop)]
 pub struct DcCiphertextV2Symmetric {
     nonce: Vec<u8>,
     ciphertext: Vec<u8>,
 }
 
+#[derive(Clone)]
 pub struct DcCiphertextV2Asymmetric {
     public_key: PublicKey,
     ciphertext: DcCiphertextV2Symmetric,

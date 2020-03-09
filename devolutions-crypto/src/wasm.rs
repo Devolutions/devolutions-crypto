@@ -9,28 +9,66 @@ use js_sys::{Array, Uint8Array};
 use super::utils;
 use super::DcDataBlob;
 
-use zeroize::Zeroize as _;
+use super::Argon2Parameters;
 
 #[wasm_bindgen]
 pub struct KeyPair {
-    private_key: Vec<u8>,
-    public_key: Vec<u8>,
+    private_key: PrivateKey,
+    public_key: PublicKey,
+}
+
+#[wasm_bindgen]
+#[derive(Clone)]
+pub struct PublicKey {
+    key: DcDataBlob,
+}
+
+#[wasm_bindgen]
+#[derive(Clone)]
+pub struct PrivateKey {
+    key: DcDataBlob,
+}
+
+#[wasm_bindgen]
+impl PublicKey {
+    #[wasm_bindgen(getter)]
+    pub fn bytes(&self) -> Vec<u8> {
+        self.key.clone().into()
+    }
+
+    #[wasm_bindgen]
+    pub fn from(buffer: &[u8]) -> Result<PublicKey, JsValue> {
+        Ok(PublicKey {
+            key: DcDataBlob::try_from(buffer)?,
+        })
+    }
+}
+
+#[wasm_bindgen]
+impl PrivateKey {
+    #[wasm_bindgen(getter)]
+    pub fn bytes(&self) -> Vec<u8> {
+        self.key.clone().into()
+    }
+
+    #[wasm_bindgen]
+    pub fn from(buffer: &[u8]) -> Result<PrivateKey, JsValue> {
+        Ok(PrivateKey {
+            key: DcDataBlob::try_from(buffer)?,
+        })
+    }
 }
 
 #[wasm_bindgen]
 impl KeyPair {
-    pub fn private(&self) -> Vec<u8> {
+    #[wasm_bindgen(getter)]
+    pub fn private(&self) -> PrivateKey {
         self.private_key.clone()
     }
-    pub fn public(&self) -> Vec<u8> {
-        self.public_key.clone()
-    }
-}
 
-impl Drop for KeyPair {
-    fn drop(&mut self) {
-        self.private_key.zeroize();
-        self.public_key.zeroize();
+    #[wasm_bindgen(getter)]
+    pub fn public(&self) -> PublicKey {
+        self.public_key.clone()
     }
 }
 
@@ -59,18 +97,32 @@ pub fn verify_password(password: &[u8], hash: &[u8]) -> Result<bool, JsValue> {
 #[wasm_bindgen(js_name = "generateKeyExchange")]
 pub fn generate_key_exchange() -> Result<KeyPair, JsValue> {
     let (private, public) = DcDataBlob::generate_key_exchange()?;
-    let pair = KeyPair {
-        private_key: private.into(),
-        public_key: public.into(),
+
+    let keypair = KeyPair {
+        private_key: PrivateKey { key: private },
+        public_key: PublicKey { key: public },
     };
-    Ok(pair)
+    Ok(keypair)
 }
 
 #[wasm_bindgen(js_name = "mixKeyExchange")]
-pub fn mix_key_exchange(private_key: &[u8], public_key: &[u8]) -> Result<Vec<u8>, JsValue> {
-    let private = DcDataBlob::try_from(private_key)?;
-    let public = DcDataBlob::try_from(public_key)?;
-    Ok(private.mix_key_exchange(public)?)
+pub fn mix_key_exchange(
+    private_key: &PrivateKey,
+    public_key: &PublicKey,
+) -> Result<Vec<u8>, JsValue> {
+    Ok(private_key.key.mix_key_exchange(&public_key.key)?)
+}
+
+#[wasm_bindgen(js_name = "deriveKeyPair")]
+pub fn derive_keypair(password: &[u8], parameters: &Argon2Parameters) -> Result<KeyPair, JsValue> {
+    let (private, public) = DcDataBlob::derive_keypair(password, parameters)?;
+
+    let keypair = KeyPair {
+        private_key: PrivateKey { key: private },
+        public_key: PublicKey { key: public },
+    };
+
+    Ok(keypair)
 }
 
 #[wasm_bindgen(js_name = "generateSharedKey")]
