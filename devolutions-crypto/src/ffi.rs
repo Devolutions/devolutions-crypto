@@ -166,7 +166,7 @@ pub extern "C" fn EncryptSize(data_length: usize, version: u16) -> i64 {
 pub extern "C" fn EncryptAsymmetricSize(data_length: usize, version: u16) -> i64 {
     match version {
         0 | 2 => {
-            (8 + 24 + data_length + 16 + 32) as i64 // Header + nonce + data + Poly1305 tag + public key
+            (8 + 32 + 24 + data_length + 16) as i64 // Header + public_key + nonce + data + Poly1305 tag
         }
         _ => DevoCryptoError::UnknownVersion.error_code(),
     }
@@ -682,7 +682,7 @@ pub unsafe extern "C" fn GetDefaultArgon2Parameters(
     let argon2_parameters = slice::from_raw_parts_mut(argon2_parameters, argon2_parameters_length);
 
     let argon2_parameters_raw: Vec<u8> = Argon2Parameters::default().into();
-    argon2_parameters[0..46].copy_from_slice(&argon2_parameters_raw[0..46]);
+    argon2_parameters.copy_from_slice(&argon2_parameters_raw);
     0
 }
 
@@ -692,7 +692,8 @@ pub unsafe extern "C" fn GetDefaultArgon2Parameters(
 #[no_mangle]
 pub extern "C" fn GetDefaultArgon2ParametersSize() -> i64 {
     // Length is calculated this way:
-    // 5 * u32 + 2 * u8(enums) + 3 *u32(lengths) + 2 * vec.len();
+    // 5 * u32 + 2 * u8(enums) + 2 * u32(lengths) + 2 * vec.len();
+    // In case of default parameters AssociatedData is of length 0 and Salt length is 16.
     46
 }
 
@@ -931,16 +932,22 @@ fn test_get_default_argon2parameters_size() {
 
 #[test]
 fn test_get_default_argon2parameters() {
-    let mut argon2_parameters_vec: Vec<u8> = vec![0u8; 10000];
+    let mut argon2_parameters_vec: Vec<u8> = vec![0u8; GetDefaultArgon2ParametersSize() as usize];
     let argon2_parameters_raw = argon2_parameters_vec.as_mut_ptr();
 
     unsafe {
-        let result = GetDefaultArgon2Parameters(argon2_parameters_raw, 46);
+        let result = GetDefaultArgon2Parameters(
+            argon2_parameters_raw,
+            GetDefaultArgon2ParametersSize() as usize,
+        );
         assert_eq!(result, 0);
     }
 
     unsafe {
-        let argon2_parameters = slice::from_raw_parts(argon2_parameters_raw, 46);
+        let argon2_parameters = slice::from_raw_parts(
+            argon2_parameters_raw,
+            GetDefaultArgon2ParametersSize() as usize,
+        );
 
         let _params = Argon2Parameters::try_from(argon2_parameters).unwrap();
 
@@ -970,12 +977,10 @@ fn test_derive_keypair() {
     let public_key = public_key_vec.as_mut_ptr();
 
     unsafe {
-        let parameters_pointer = parameters.as_ptr();
-
         let result_small = DeriveKeyPair(
             small_password.as_ptr(),
             small_password.len(),
-            parameters_pointer,
+            parameters.as_ptr(),
             parameters.len(),
             private_key,
             DeriveKeyPairSize() as usize,
@@ -986,7 +991,7 @@ fn test_derive_keypair() {
         let result_long = DeriveKeyPair(
             long_password.as_ptr(),
             long_password.len(),
-            parameters_pointer,
+            parameters.as_ptr(),
             parameters.len(),
             private_key,
             DeriveKeyPairSize() as usize,

@@ -11,20 +11,6 @@ namespace Devolutions.Cryptography
 #else
         private const CipherVersion CIPHER_VERSION = CipherVersion.Latest;
 #endif
-
-        /// <summary>
-        /// Derives the password string (which will be encoded into a UTF8 byte array) using PBKDF2.
-        /// </summary>
-        /// <param name="password">The password to derive.</param>
-        /// <param name="salt">The salt. (Optional)</param>
-        /// <param name="iterations">The amount of iterations. 10 000 Recommended by NIST.</param>
-        /// <param name="length">The resulting key length.</param>
-        /// <returns>Returns the derived password.</returns>
-        public static byte[] DeriveKey(string password, byte[] salt = null, uint iterations = 10000, uint length = 32)
-        {
-            return DeriveKey(Utils.StringToUtf8ByteArray(password), salt, iterations, length);
-        }
-
         /// <summary>
         /// Performs a key exchange.
         /// </summary>
@@ -209,6 +195,19 @@ namespace Devolutions.Cryptography
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Derives the password string (which will be encoded into a UTF8 byte array) using PBKDF2.
+        /// </summary>
+        /// <param name="password">The password to derive.</param>
+        /// <param name="salt">The salt. (Optional)</param>
+        /// <param name="iterations">The amount of iterations. 10 000 Recommended by NIST.</param>
+        /// <param name="length">The resulting key length.</param>
+        /// <returns>Returns the derived password.</returns>
+        public static byte[] DerivePassword(string password, byte[] salt = null, uint iterations = 10000, uint length = 32)
+        {
+            return DeriveKey(Utils.StringToUtf8ByteArray(password), salt, iterations, length);
         }
 
         /// <summary>

@@ -261,7 +261,7 @@ namespace dotnet_core
         }
 
         [TestMethod]
-        public void GenerateKeyExchange()
+        public void GenerateKeyPair()
         {
             KeyPair bob = Managed.GenerateKeyPair();
             KeyPair alice = Managed.GenerateKeyPair();
