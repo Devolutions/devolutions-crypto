@@ -4,12 +4,21 @@ namespace dotnet_framework
 #if DOTNET_CORE
 namespace dotnet_core
 #endif
+#if XAMARIN_MAC_FULL
+namespace xamarin_mac_full
+#endif
 {
     using System.IO;
 
     using Devolutions.Cryptography;
 
+#if XAMARIN_MAC_FULL
+    using NUnit.Framework;
+    using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
+    using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;
+#else
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+#endif
 
     [TestClass]
     public class TestUtils
@@ -110,7 +119,8 @@ namespace dotnet_core
                 exception = ex;
             }
 
-            bool validException = exception.ManagedException.Message.Contains("Cannot access a closed Stream.");
+            // Xamarin has a space between Cannot (Can not)
+            bool validException = exception.ManagedException.Message.Contains("Cannot access a closed Stream.") || exception.ManagedException.Message.Contains("Can not access a closed Stream.");
 
             Assert.AreEqual(validException, true);
         }
