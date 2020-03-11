@@ -1,0 +1,38 @@
+{
+  "name": "devolutions-crypto-tests",
+  "version": "1.0.0",
+  "description": "Tests for the devolutions cryptographic library",
+  "main": "./src/bootstrap.js",
+  "scripts": {
+    "test": "mocha -r ts-node/register tests/**.ts",
+    "fmt": "eslint tests/**.ts --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Devolutions/devolutions-crypto.git"
+  },
+  "author": "Philippe Dugre",
+  "license": "MIT OR Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Devolutions/devolutions-crypto/issues"
+  },
+  "homepage": "https://github.com/Devolutions/devolutions-crypto#readme",
+  "devDependencies": {
+    "@types/chai": "^4.2.10",
+    "@types/jest": "^25.1.4",
+    "@types/mocha": "^7.0.2",
+    "@typescript-eslint/eslint-plugin": "^2.23.0",
+    "@typescript-eslint/parser": "^2.23.0",
+    "chai": "^4.2.0",
+    "devolutions-crypto": "file:../dist/node/",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "mocha": "^7.1.0",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.3"
+  }
+}

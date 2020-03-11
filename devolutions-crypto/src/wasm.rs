@@ -19,6 +19,25 @@ pub struct KeyPair {
     public_key: PublicKey,
 }
 
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+impl Argon2Parameters {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn bytes(&self) -> Vec<u8> {
+        self.clone().into()
+    }
+
+    #[wasm_bindgen]
+    pub fn from(buffer: &[u8]) -> Result<Argon2Parameters, JsValue> {
+        Ok(Self::try_from(buffer)?)
+    }
+}
+
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct PublicKey {
@@ -119,8 +138,8 @@ pub fn verify_password(password: &[u8], hash: &[u8]) -> Result<bool, JsValue> {
     Ok(data_blob.verify_password(&password)?)
 }
 
-#[wasm_bindgen(js_name = "generateKeyExchange")]
-pub fn generate_key_exchange() -> Result<KeyPair, JsValue> {
+#[wasm_bindgen(js_name = "generateKeyPair")]
+pub fn generate_key_pair() -> Result<KeyPair, JsValue> {
     let (private, public) = DcDataBlob::generate_key_exchange()?;
 
     let keypair = KeyPair {
@@ -203,8 +222,17 @@ pub fn generate_key(length: Option<usize>) -> Vec<u8> {
 }
 
 #[wasm_bindgen(js_name = "deriveKey")]
-pub fn derive_key(key: &[u8], salt: &[u8], iterations: usize, length: usize) -> Vec<u8> {
-    utils::derive_key(key, salt, iterations, length)
+pub fn derive_key(
+    key: &[u8],
+    salt: Option<Vec<u8>>,
+    iterations: Option<usize>,
+    length: Option<usize>,
+) -> Vec<u8> {
+    let salt = salt.unwrap_or(vec![0u8; 0]);
+    let iterations = iterations.unwrap_or(10000);
+    let length = length.unwrap_or(32);
+
+    utils::derive_key(key, &salt, iterations, length)
 }
 
 #[wasm_bindgen]

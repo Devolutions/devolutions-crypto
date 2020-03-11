@@ -58,6 +58,10 @@ impl DcSharedSecretV1 {
         threshold: u8,
         length: usize,
     ) -> Result<impl Iterator<Item = DcSharedSecretV1>> {
+        if n_shares < threshold {
+            return Err(DevoCryptoError::NotEnoughShares);
+        }
+
         let mut secret = crate::utils::generate_key(length);
         let sharks = Sharks(threshold);
         let dealer = sharks.dealer(&secret);

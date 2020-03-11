@@ -30,8 +30,8 @@ cfg_if! {
 
         #[wasm_bindgen_test]
         fn test_key_exchange() {
-            let bob_keypair = wasm::generate_key_exchange().unwrap();
-            let alice_keypair = wasm::generate_key_exchange().unwrap();
+            let bob_keypair = wasm::generate_key_pair().unwrap();
+            let alice_keypair = wasm::generate_key_pair().unwrap();
 
             let bob_key = wasm::mix_key_exchange(&bob_keypair.private(), &alice_keypair.public()).unwrap();
             let alice_key = wasm::mix_key_exchange(&alice_keypair.private(), &bob_keypair.public()).unwrap();
@@ -62,7 +62,7 @@ cfg_if! {
         fn test_derive_key() {
             let password = "ThisIsAGoodPassword123".as_bytes();
             let salt = base64::decode("u4tv/i1228VOqoZWITseoQ==").unwrap();
-            let key = wasm::derive_key(password, &salt, 123, 32);
+            let key = wasm::derive_key(password, Some(salt), Some(123), Some(32));
 
             assert_eq!(key, base64::decode("RfIYPWWXRSm/SWjVXvQq1Z3n/mzxGeu/y396bAuYWTI=").unwrap());
         }

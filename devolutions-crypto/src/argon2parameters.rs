@@ -21,6 +21,7 @@ use super::Result;
 /// If the hash should never be computed in a non-threaded environment,
 ///  you can raise the "lanes" value to enable multi-threading.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[derive(Clone)]
 pub struct Argon2Parameters {
     /// Length of the desired hash
     pub length: u32,
@@ -159,15 +160,6 @@ impl Argon2Parameters {
         };
 
         Ok(argon2::hash_raw(password, &self.salt, &config)?)
-    }
-}
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen]
-impl Argon2Parameters {
-    #[wasm_bindgen(constructor)]
-    pub fn new() -> Self {
-        Self::default()
     }
 }
 
