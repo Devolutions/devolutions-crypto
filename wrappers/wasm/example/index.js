@@ -125,7 +125,7 @@ btnVerifyPassword.addEventListener("click", () => {
 
 // Keypair Generation
 btnBob.addEventListener("click", () => {
-    let result = devolutionsCrypto.generateKeyExchange();
+    let result = devolutionsCrypto.generateKeyPair();
 
     publicBob = result.public;
     privateBob = result.private;
@@ -135,7 +135,7 @@ btnBob.addEventListener("click", () => {
 });
 
 btnAlice.addEventListener("click", () => {
-    let result = devolutionsCrypto.generateKeyExchange();
+    let result = devolutionsCrypto.generateKeyPair();
 
     publicAlice = result.public;
     privateAlice = result.private;

@@ -447,16 +447,22 @@ stages:
         wasm-pack test --firefox --headless
         wasm-pack test --chrome --headless
       workingDirectory: "./devolutions-crypto"
-      displayName: "Unit tests"
+      displayName: "Platform tests"
 
     - script: |
         sh ./wasm_build.sh
       workingDirectory: "./wrappers/wasm"
       displayName: "Generating npm package"
 
+    - script: |
+        npm install
+        npm test
+      workingDirectory: "./wrappers/wasm/tests"
+      displayName: "Integration tests"
+
     - task: CopyFiles@2
       inputs:
-        contents: 'wrappers/wasm/pkg/**'
+        contents: 'wrappers/wasm/dist/**'
         flattenFolders: true
         targetFolder: $(Build.ArtifactStagingDirectory)
 
