@@ -96,7 +96,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Devolutions.Crypto\Devolutions.Crypto.csproj">
+    <ProjectReference Include=".\devolutions-crypto\devolutions-crypto.csproj">
       <Project>{5ef8a69d-78ad-40da-8f0f-2a84557b090c}</Project>
       <Name>Devolutions.Crypto</Name>
     </ProjectReference>
