@@ -148,3 +148,69 @@ if sys.argv[1] == "DOTNET-CORE":
 
     if "Test Run Successful" not in output:
         exit(1)
+
+if sys.argv[1] == "XAMARIN-MAC-FULL":
+    print("Nuget Cache Clear")
+    print("==========================================================================")    
+    
+    # CLEAN
+    output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./xamarin-mac-full")
+    print(output)
+
+    print("Remove Local NuGet Source")
+    print("==========================================================================")
+    output = get_output(["nuget", "sources", "remove", "-Name", "LOCALDEVOCRYPTO"])
+    print(output)
+
+    print("Nuget Remove Nuget.org Devolutions.Crypto Package")
+    print("==========================================================================")
+    output = get_output(["dotnet", "remove", "package", "Devolutions.Crypto.Mac.Full"], cwd="./xamarin-mac-full")
+    print(output)
+
+    # Restore    
+    print("Nuget Restore Global Packages")
+    print("==========================================================================")
+    output = get_output(["dotnet", "restore", "./xamarin-mac-full", "--verbosity", "normal"])
+    print(output)
+
+    print("Add Local NuGet Source")
+    print("==========================================================================")
+    print(os.path.join(script_dir, "Nugets"))
+    output = get_output(["nuget", "sources", "add", "-Name", "LOCALDEVOCRYPTO", "-Source", os.path.join(script_dir, "Nugets")])
+    print(output)
+
+    print("Installing Nuget Package in Nugets Source")
+    print("==========================================================================")
+    
+    output = get_output(["nuget", "add", "./Nugets/Devolutions.Crypto.Mac.Full." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
+    print(output)
+
+    print("Nuget Add Package Devolutions Crypto to project")
+    print("==========================================================================")
+    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Mac.Full", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./xamarin-mac-full")
+    print(output)
+
+    print("Building Unit tests for XAMARIN MAC FULL")
+    print("=========================================================================")
+
+    output = get_output(["msbuild", "./xamarin-mac-full/xamarin-mac-full.csproj" , "/t:clean,build", "/p:configuration=debug;platform=AnyCPU"])
+    print(output)
+    if("FAILED" in output):
+        exit(1)
+
+    print("XAMARIN MAC FULL UNIT TEST")
+    print("=========================================================================")
+
+    print("Installing NUnitConsole")
+    output = get_output(["wget", "https://github.com/nunit/nunit-console/releases/download/v3.11.1/NUnit.Console-3.11.1.zip"])
+    print(output)
+
+    output = get_output(["unzip", "NUnit.Console-3.11.1.zip", "-d", "nunit-console"])
+    print(output)
+
+    print("Running tests")
+    output = get_output(["mono", "./nunit-console/bin/net35/nunit3-console.exe", "./xamarin-mac-full/bin/Debug/xamarin-mac-full.dll"])
+    print(output)
+
+    if "Overall result: Failed" in output:
+        exit(1)
