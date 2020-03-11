@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\NUnit.3.12.0\build\NUnit.props" Condition="Exists('..\packages\NUnit.3.12.0\build\NUnit.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -8,8 +9,10 @@
     <OutputType>Library</OutputType>
     <RootNamespace>xamarin_mac_full</RootNamespace>
     <AssemblyName>xamarin-mac-full</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <RuntimeIdentifier>win;win-x86;win-x64</RuntimeIdentifier>
+    <RuntimeIdentifiers>win;win-x86;win-x64</RuntimeIdentifiers>
     <UseXamMacFullFramework>true</UseXamMacFullFramework>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -41,10 +44,8 @@
     <AOTMode>None</AOTMode>
   </PropertyGroup>
   <ItemGroup>
+  <PackageReference Include="Devolutions.Crypto.Mac.Full" Version="*" />
     <PackageReference Include="NUnit" Version="3.12.0" />
-    <PackageReference Include="NUnit.ConsoleRunner">
-      <Version>3.11.1</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\TestArgon2Parameters.cs">
@@ -67,13 +68,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="devolutions-crypto\devolutions-crypto.csproj">
-      <Project>{0EB1CC3D-532F-4E5E-831D-14B072263774}</Project>
-      <Name>devolutions-crypto</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
+  <Import Project="/Library/Frameworks/Xamarin.Mac.framework/Versions/Current/lib/msbuild/Xamarin.Mac.CSharp.targets" />
 </Project>
