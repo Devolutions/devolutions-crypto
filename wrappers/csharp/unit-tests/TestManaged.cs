@@ -10,7 +10,6 @@ namespace xamarin_mac_full
 {
     using System;
     using System.Text;
-
     using Devolutions.Cryptography;
     using Devolutions.Cryptography.Argon2;
 
@@ -339,6 +338,44 @@ namespace xamarin_mac_full
         public void VerifyPassword()
         {
             Assert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, TestData.TestHash));
+        }
+
+        [TestMethod]
+        public void GenerateSharedKey()
+        {
+            const int nbShares = 5;
+            const int secretLength = 10;
+            const int threshold = 3;
+            var shares = new byte[nbShares][];
+            var result = Managed.GenerateSharedKey(nbShares, threshold, secretLength, ref shares);
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void JoinShares()
+        {
+            var shares = GetSharesKeys();
+            var result = Managed.JoinShares(shares);
+            Assert.AreEqual(0, result);
+        }
+
+        private static byte[][] GetSharesKeys()
+        {
+            const int nbShares = 3;
+            var shares = new byte[nbShares][];
+
+            var array0 = new byte[] { 0x0d, 0x0c, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x03, 0x01, 0x80, 0xa4, 0x08, 0x4a, 0xbb, 0xfb, 0x0e, 0x97, 0xdc, 0xa8 };
+            shares[0] = array0;
+            //var array1 = new[] { 0x0d, 0x0c, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x03, 0x02, 0x84, 0x61, 0x49, 0x6a, 0xbe, 0xc8, 0xe2, 0xf5, 0x71, 0x30 };
+            //shares[1] = array1;
+            var array2 = new byte[] { 0x0d, 0x0c, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x03, 0x03, 0xd6, 0xa9, 0x57, 0x9d, 0xda, 0xac, 0x41, 0x30, 0x57, 0x76 };
+            shares[1] = array2;
+            //var array3 = new[] { 0x0d, 0x0c, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x03, 0x04, 0x91, 0x4c, 0x39, 0x9e, 0x83, 0x77, 0x63, 0xc1, 0xca, 0x1a };
+            //shares[3] = array3;
+            var array4 = new byte[] { 0x0d, 0x0c, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x03, 0x05, 0xc3, 0x84, 0x27, 0x69, 0xe7, 0x13, 0xc0, 0x04, 0xec, 0x5c };
+            shares[2] = array4;
+
+            return shares;
         }
     }
 }

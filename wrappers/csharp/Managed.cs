@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace Devolutions.Cryptography
 {
     using System;
@@ -869,6 +871,44 @@ namespace Devolutions.Cryptography
         public static string DecryptWithPasswordAsString(string b64data, string password, uint iterations = 10000)
         {
             return DecryptWithPasswordAsUtf8String(b64data, password, iterations);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public static long JoinShares(byte[][] shares)
+        {
+            var nbShares = shares.Length;
+            var sharesLength = shares[0].Length;
+            var secretLength = (int)Native.JoinSharesSizeNative((UIntPtr)sharesLength);
+            var secret = new byte[secretLength];
+            var tempShares = shares;
+            var sharesTemp = new byte[nbShares][];
+            Array.Copy(shares, sharesTemp, shares.Length);
+            var pointers = Utils.GetArrayReferences(ref shares, nbShares, secretLength);
+            Array.Copy(sharesTemp, shares, sharesTemp.Length);
+            return Native.JoinSharesNative((UIntPtr)nbShares, (UIntPtr)sharesLength, pointers, secret, (UIntPtr)secretLength);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public static long GenerateSharedKey(int nbShares, int threshold, int secretLength, ref byte[][] shares)
+        {
+            var pointers = Utils.InitializeArray(ref shares, nbShares, secretLength);
+            var result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
+            return result;
         }
 
         /// <summary>

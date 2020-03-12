@@ -41,42 +41,44 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\Argon2Parameters.cs">
+    <Compile Include="..\..\..\..\Argon2Parameters.cs">
       <Link>Argon2Parameters.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\Enums.Argon2.cs">
+    <Compile Include="..\..\..\..\Enums.Argon2.cs">
       <Link>Enums.Argon2.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\Enums.cs">
+    <Compile Include="..\..\..\..\Enums.cs">
       <Link>Enums.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\KeyPair.cs">
+    <Compile Include="..\..\..\..\KeyPair.cs">
       <Link>KeyPair.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\Managed.cs">
+    <Compile Include="..\..\..\..\Managed.cs">
       <Link>Managed.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\ManagedError.cs">
+    <Compile Include="..\..\..\..\ManagedError.cs">
       <Link>ManagedError.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\Native.cs">
+    <Compile Include="..\..\..\..\Native.cs">
       <Link>Native.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\Native.Xamarin.cs">
+    <Compile Include="..\..\..\..\Native.Xamarin.cs">
       <Link>Native.Xamarin.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\NativeError.cs">
+    <Compile Include="..\..\..\..\NativeError.cs">
       <Link>NativeError.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\Utils.cs">
+    <Compile Include="..\..\..\..\Utils.cs">
       <Link>Utils.cs</Link>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\Settings.StyleCop">
+    <None Include="..\..\..\..\Settings.StyleCop">
       <Link>Settings.StyleCop</Link>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
