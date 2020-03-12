@@ -1,7 +1,6 @@
 //! Possible errors in the library.
 
 use std;
-use std::error::Error as _;
 use std::fmt;
 use std::io::Error;
 
@@ -75,6 +74,43 @@ impl DevoCryptoError {
             DevoCryptoError::InconsistentVersion => -42,
         }
     }
+
+    pub fn description(&self) -> String {
+        match *self {
+            DevoCryptoError::InvalidLength => {
+                "The provided data has an invalid length.".to_string()
+            }
+            DevoCryptoError::InvalidKeyLength => "The key length is invalid.".to_string(),
+            DevoCryptoError::InvalidOutputLength => {
+                "The length of the FFI output buffer is invalid.".to_string()
+            }
+            DevoCryptoError::InvalidSignature => {
+                "The signature of the data blob does not match 0x0d0c.".to_string()
+            }
+            DevoCryptoError::InvalidMac => "The MAC is invalid.".to_string(),
+            DevoCryptoError::InvalidDataType => {
+                "The operation cannot be done with this type.".to_string()
+            }
+            DevoCryptoError::UnknownType => "The data type is unknown.".to_string(),
+            DevoCryptoError::UnknownSubtype => "The data subtype is unknown.".to_string(),
+            DevoCryptoError::InvalidData => "The data is invalid.".to_string(),
+            DevoCryptoError::UnknownVersion => "The data type version is unknown.".to_string(),
+            DevoCryptoError::NullPointer => {
+                "A null pointer has been passed to the FFI interface.".to_string()
+            }
+            DevoCryptoError::CryptoError => "A cryptographic error occurred.".to_string(),
+            DevoCryptoError::RandomError => {
+                "An error with the Random Number Generator occurred.".to_string()
+            }
+            DevoCryptoError::IoError(ref error) => error.to_string(),
+            DevoCryptoError::NotEnoughShares => {
+                "There wasn't enough share to regenerate the secret.".to_string()
+            }
+            DevoCryptoError::InconsistentVersion => {
+                "The version is not the same for all the data.".to_string()
+            }
+        }
+    }
 }
 
 impl fmt::Display for DevoCryptoError {
@@ -82,35 +118,6 @@ impl fmt::Display for DevoCryptoError {
         match *self {
             DevoCryptoError::IoError(ref error) => error.fmt(f),
             _ => write!(f, "Error {}: {}", self.error_code(), self.description()),
-        }
-    }
-}
-
-impl std::error::Error for DevoCryptoError {
-    fn description(&self) -> &str {
-        match *self {
-            DevoCryptoError::InvalidLength => "The provided data has an invalid length.",
-            DevoCryptoError::InvalidKeyLength => "The key length is invalid.",
-            DevoCryptoError::InvalidOutputLength => {
-                "The length of the FFI output buffer is invalid."
-            }
-            DevoCryptoError::InvalidSignature => {
-                "The signature of the data blob does not match 0x0d0c."
-            }
-            DevoCryptoError::InvalidMac => "The MAC is invalid.",
-            DevoCryptoError::InvalidDataType => "The operation cannot be done with this type.",
-            DevoCryptoError::UnknownType => "The data type is unknown.",
-            DevoCryptoError::UnknownSubtype => "The data subtype is unknown.",
-            DevoCryptoError::InvalidData => "The data is invalid.",
-            DevoCryptoError::UnknownVersion => "The data type version is unknown.",
-            DevoCryptoError::NullPointer => "A null pointer has been passed to the FFI interface.",
-            DevoCryptoError::CryptoError => "A cryptographic error occurred.",
-            DevoCryptoError::RandomError => "An error with the Random Number Generator occurred.",
-            DevoCryptoError::IoError(ref error) => error.description(),
-            DevoCryptoError::NotEnoughShares => {
-                "There wasn't enough share to regenerate the secret."
-            }
-            DevoCryptoError::InconsistentVersion => "The version is not the same for all the data.",
         }
     }
 }
@@ -166,7 +173,7 @@ impl From<argon2::Error> for DevoCryptoError {
 #[cfg(target_arch = "wasm32")]
 impl From<DevoCryptoError> for JsValue {
     fn from(error: DevoCryptoError) -> JsValue {
-        let js_error = js_sys::Error::new(error.description());
+        let js_error = js_sys::Error::new(&error.description());
 
         js_error.set_name(error.into());
         js_error.into()
