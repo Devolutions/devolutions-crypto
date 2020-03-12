@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace Devolutions.Cryptography
 {
     using System;
@@ -1005,6 +1007,21 @@ namespace Devolutions.Cryptography
         {
             var len = shares.First().Length;
             return shares.All(x => x.Length == len);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public static long GenerateSharedKey(int nbShares, int threshold, int secretLength, ref byte[][] shares)
+        {
+            var pointers = Utils.InitializeArray(ref shares, nbShares, secretLength);
+            var result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
+            return result;
         }
 
         /// <summary>
