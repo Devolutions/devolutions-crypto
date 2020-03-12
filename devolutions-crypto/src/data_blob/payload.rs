@@ -90,12 +90,11 @@ impl DcPayload {
         }
     }
 
-    pub fn generate_key_exchange(
+    pub fn generate_keypair(
         header_private: &mut DcHeader,
         header_public: &mut DcHeader,
     ) -> Result<(DcPayload, DcPayload)> {
-        let (private_key, public_key) =
-            DcKey::generate_key_exchange(header_private, header_public)?;
+        let (private_key, public_key) = DcKey::generate_keypair(header_private, header_public)?;
         Ok((DcPayload::Key(private_key), DcPayload::Key(public_key)))
     }
 

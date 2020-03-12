@@ -83,7 +83,7 @@ impl DcDataBlob {
     /// You will need the corresponding private key to decrypt it.
     /// # Arguments
     ///  * `data` - Data to encrypt.
-    ///  * `public_key` - The public key to use. Use either `generate_key_exchange` or `derive_keypair` for this.
+    ///  * `public_key` - The public key to use. Use either `generate_keypair` or `derive_keypair` for this.
     ///  * `version` - Version of the library to encrypt with. Use 0 for default.
     /// # Returns
     /// Returns a `DcDataBlob` containing the encrypted data.
@@ -92,7 +92,7 @@ impl DcDataBlob {
     /// use devolutions_crypto::DcDataBlob;
     ///
     /// let data = b"somesecretdata";
-    /// let (private, public) = DcDataBlob::generate_key_exchange().unwrap();
+    /// let (private, public) = DcDataBlob::generate_keypair().unwrap();
     ///
     /// let encrypted_data = DcDataBlob::encrypt_asymmetric(data, &public, None).unwrap();
     /// ```
@@ -137,7 +137,7 @@ impl DcDataBlob {
     /// use devolutions_crypto::DcDataBlob;
     ///
     /// let data = b"somesecretdata";
-    /// let (private, public) = DcDataBlob::generate_key_exchange().unwrap();
+    /// let (private, public) = DcDataBlob::generate_keypair().unwrap();
     ///
     /// let encrypted_data = DcDataBlob::encrypt_asymmetric(data, &public, None).unwrap();
     /// let decrypted_data = encrypted_data.decrypt_asymmetric(&private).unwrap();
@@ -196,13 +196,13 @@ impl DcDataBlob {
     /// ```rust
     /// use devolutions_crypto::DcDataBlob;
     ///
-    /// let (private, public) = DcDataBlob::generate_key_exchange().unwrap();
+    /// let (private, public) = DcDataBlob::generate_keypair().unwrap();
     /// ```
-    pub fn generate_key_exchange() -> Result<(DcDataBlob, DcDataBlob)> {
+    pub fn generate_keypair() -> Result<(DcDataBlob, DcDataBlob)> {
         let mut header_private = Default::default();
         let mut header_public = Default::default();
         let (payload_private, payload_public) =
-            DcPayload::generate_key_exchange(&mut header_private, &mut header_public)?;
+            DcPayload::generate_keypair(&mut header_private, &mut header_public)?;
         Ok((
             DcDataBlob {
                 header: header_private,
@@ -217,7 +217,7 @@ impl DcDataBlob {
 
     /// Mix a private key with another client public key to get a shared secret.
     /// # Arguments
-    ///  * `self` - The user's private key obtained through `generate_key_exchange`.
+    ///  * `self` - The user's private key obtained through `generate_keypair`.
     ///  * `public` - The peer public key.
     /// # Returns
     /// Returns a shared secret in the form of a `Vec<u8>`, which can then be used
@@ -232,13 +232,13 @@ impl DcDataBlob {
     /// # fn receive_key_from_bob() {}
     ///
     /// // This happens on Bob's side.
-    /// let (bob_priv, bob_pub) = DcDataBlob::generate_key_exchange().unwrap();
+    /// let (bob_priv, bob_pub) = DcDataBlob::generate_keypair().unwrap();
     /// let bob_serialized_pub: Vec<u8> = bob_pub.into();
     ///
     /// send_key_to_alice(&bob_serialized_pub);
     ///
     /// // This happens on Alice's side.
-    /// let (alice_priv, alice_pub) = DcDataBlob::generate_key_exchange().unwrap();
+    /// let (alice_priv, alice_pub) = DcDataBlob::generate_keypair().unwrap();
     /// let alice_serialized_pub: Vec<u8> = alice_pub.into();
     ///
     /// send_key_to_bob(&alice_serialized_pub);
@@ -467,8 +467,8 @@ fn password_test() {
 
 #[test]
 fn ecdh_test() {
-    let (bob_priv, bob_pub) = DcDataBlob::generate_key_exchange().unwrap();
-    let (alice_priv, alice_pub) = DcDataBlob::generate_key_exchange().unwrap();
+    let (bob_priv, bob_pub) = DcDataBlob::generate_keypair().unwrap();
+    let (alice_priv, alice_pub) = DcDataBlob::generate_keypair().unwrap();
 
     let bob_shared = bob_priv.mix_key_exchange(&alice_pub).unwrap();
     let alice_shared = alice_priv.mix_key_exchange(&bob_pub).unwrap();

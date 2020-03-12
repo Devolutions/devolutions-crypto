@@ -46,7 +46,7 @@ impl DcKeyV1 {
         Ok(key)
     }
 
-    pub fn generate_key_exchange(
+    pub fn generate_keypair(
         private_header: &mut DcHeader,
         public_header: &mut DcHeader,
     ) -> Result<(DcKeyV1, DcKeyV1)> {
