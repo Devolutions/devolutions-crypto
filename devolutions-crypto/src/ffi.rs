@@ -597,6 +597,7 @@ pub unsafe extern "C" fn JoinShares(
 ///  * share_length - The length of a share
 /// # Returns
 /// Returns the size, in bytes, of each resulting secret.
+#[no_mangle]
 pub extern "C" fn JoinSharesSize(share_length: usize) -> i64 {
     (share_length - 10) as i64
 }
