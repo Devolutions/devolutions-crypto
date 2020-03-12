@@ -74,7 +74,6 @@
     </Compile>
     <Compile Include="..\..\TestManaged.cs" />
     <Compile Include="..\..\TestUtils.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MSTest.TestAdapter" Version="1.3.2" />
@@ -100,6 +99,9 @@
       <Project>{5ef8a69d-78ad-40da-8f0f-2a84557b090c}</Project>
       <Name>Devolutions.Crypto</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
