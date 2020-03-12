@@ -13,7 +13,6 @@ namespace xamarin_mac_full
     using Devolutions.Cryptography;
     using Devolutions.Cryptography.Argon2;
 
-
 #if XAMARIN_MAC_FULL
     using NUnit.Framework;
     using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
@@ -348,7 +347,7 @@ namespace xamarin_mac_full
             const int threshold = 3;
             var shares = new byte[nbShares][];
             var result = Managed.GenerateSharedKey(nbShares, threshold, secretLength, shares);
-            Assert.IsTrue(result != null && result.Length == 5);
+            Assert.IsTrue(result != null && result.Length == 5 && result[0].Length == 20);
         }
 
         [TestMethod]
@@ -356,7 +355,8 @@ namespace xamarin_mac_full
         {
             var shares = GetSharesKeys();
             var result = Managed.JoinShares(shares);
-            Assert.AreEqual(0, result);
+            var val = Utils.ByteArrayToUtf8String(result);
+            Assert.IsTrue(result != null && result.Length == 10);
         }
 
         private static byte[][] GetSharesKeys()
