@@ -405,7 +405,7 @@ pub unsafe extern "C" fn GenerateKeyPair(
     let private = slice::from_raw_parts_mut(private, private_length);
     let public = slice::from_raw_parts_mut(public, public_length);
 
-    match DcDataBlob::generate_key_exchange() {
+    match DcDataBlob::generate_keypair() {
         Ok((priv_res, pub_res)) => {
             let mut priv_res: Vec<u8> = priv_res.into();
             let mut pub_res: Vec<u8> = pub_res.into();
@@ -906,8 +906,8 @@ fn test_hash_password_length() {
 
 #[test]
 fn test_key_exchange_length() {
-    let (private_bob, public_bob) = DcDataBlob::generate_key_exchange().unwrap();
-    let (private_alice, public_alice) = DcDataBlob::generate_key_exchange().unwrap();
+    let (private_bob, public_bob) = DcDataBlob::generate_keypair().unwrap();
+    let (private_alice, public_alice) = DcDataBlob::generate_keypair().unwrap();
 
     let private_bob: Vec<u8> = private_bob.into();
     let public_bob: Vec<u8> = public_bob.into();

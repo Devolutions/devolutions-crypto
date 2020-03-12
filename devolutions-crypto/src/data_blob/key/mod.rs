@@ -26,7 +26,7 @@ impl DcKey {
         }
     }
 
-    pub fn generate_key_exchange(
+    pub fn generate_keypair(
         private_header: &mut DcHeader,
         public_header: &mut DcHeader,
     ) -> Result<(DcKey, DcKey)> {
@@ -35,8 +35,7 @@ impl DcKey {
         private_header.version = V1;
         public_header.version = V1;
 
-        let (private_key, public_key) =
-            DcKeyV1::generate_key_exchange(private_header, public_header)?;
+        let (private_key, public_key) = DcKeyV1::generate_keypair(private_header, public_header)?;
 
         Ok((DcKey::V1(private_key), DcKey::V1(public_key)))
     }
