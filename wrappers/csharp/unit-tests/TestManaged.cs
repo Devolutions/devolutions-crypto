@@ -347,7 +347,6 @@ namespace xamarin_mac_full
             const int secretLength = 10;
             const int threshold = 3;
             var shares = new byte[nbShares][];
-
             var result = Managed.GenerateSharedKey(nbShares, threshold, secretLength, shares);
             Assert.IsTrue(result != null && result.Length == 5);
         }
