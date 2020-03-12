@@ -4,6 +4,8 @@ namespace Devolutions.Cryptography
     using System.Linq;
     using System.Runtime.InteropServices;
     using Devolutions.Cryptography.Argon2;
+    using System.Linq;
+    using System.Runtime.InteropServices;
 
     public static class Managed
     {
@@ -899,30 +901,6 @@ namespace Devolutions.Cryptography
         /// <param name=""></param>
         /// <param name=""></param>
         /// <param name=""></param>
-        /// <returns></returns>
-        public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength, byte[][] shares)
-        {
-            try
-            {
-                var pointers = InitializeArray(ref shares, nbShares, secretLength);
-                var result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
-                return shares;
-            }
-            catch (DevolutionsCryptoException ex)
-            {
-                if (ex.NativeError != null) Utils.HandleError((long)ex.NativeError);
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name=""></param>
-        /// <param name=""></param>
-        /// <param name=""></param>
-        /// <param name=""></param>
         /// <param name=""></param>
         /// <returns></returns>
         public static byte[] JoinShares(byte[][] shares)
@@ -949,6 +927,22 @@ namespace Devolutions.Cryptography
             catch (DevolutionsCryptoException ex)
             {
                 if (ex.NativeError != null) Utils.HandleError((long) ex.NativeError);
+            }
+
+            return null;
+        }
+
+        public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength, byte[][] shares)
+        {
+            try
+            {
+                var pointers = InitializeArray(ref shares, nbShares, secretLength);
+                var result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
+                return shares;
+            }
+            catch (DevolutionsCryptoException ex)
+            {
+                if (ex.NativeError != null) Utils.HandleError((long)ex.NativeError);
             }
 
             return null;
