@@ -139,8 +139,8 @@ pub fn verify_password(password: &[u8], hash: &[u8]) -> Result<bool, JsValue> {
 }
 
 #[wasm_bindgen(js_name = "generateKeyPair")]
-pub fn generate_key_pair() -> Result<KeyPair, JsValue> {
-    let (private, public) = DcDataBlob::generate_key_exchange()?;
+pub fn generate_keypair() -> Result<KeyPair, JsValue> {
+    let (private, public) = DcDataBlob::generate_keypair()?;
 
     let keypair = KeyPair {
         private_key: PrivateKey { key: private },
