@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Devolutions.Cryptography
@@ -896,6 +897,22 @@ namespace Devolutions.Cryptography
             return DecryptWithPasswordAsUtf8String(b64data, password, iterations);
         }
 
+        public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength, byte[][] shares)
+        {
+            try
+            {
+                var pointers = InitializeArray(ref shares, nbShares, secretLength);
+                var result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
+                return shares;
+            }
+            catch (DevolutionsCryptoException ex)
+            {
+                if (ex.NativeError != null) Utils.HandleError((long)ex.NativeError);
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -929,22 +946,6 @@ namespace Devolutions.Cryptography
             catch (DevolutionsCryptoException ex)
             {
                 if (ex.NativeError != null) Utils.HandleError((long) ex.NativeError);
-            }
-
-            return null;
-        }
-
-        public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength, byte[][] shares)
-        {
-            try
-            {
-                var pointers = InitializeArray(ref shares, nbShares, secretLength);
-                var result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
-                return shares;
-            }
-            catch (DevolutionsCryptoException ex)
-            {
-                if (ex.NativeError != null) Utils.HandleError((long)ex.NativeError);
             }
 
             return null;
@@ -1007,21 +1008,6 @@ namespace Devolutions.Cryptography
         {
             var len = shares.First().Length;
             return shares.All(x => x.Length == len);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name=""></param>
-        /// <param name=""></param>
-        /// <param name=""></param>
-        /// <param name=""></param>
-        /// <returns></returns>
-        public static long GenerateSharedKey(int nbShares, int threshold, int secretLength, ref byte[][] shares)
-        {
-            var pointers = Utils.InitializeArray(ref shares, nbShares, secretLength);
-            var result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
-            return result;
         }
 
         /// <summary>
