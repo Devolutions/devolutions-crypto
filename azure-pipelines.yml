@@ -547,3 +547,8 @@ stages:
         python3 Test.py DOTNET-CORE
       workingDirectory: "./wrappers/csharp/unit-tests/nugets"
       displayName: "Unit tests DOTNET CORE"
+
+    - script: |
+        python3 Test.py XAMARIN-MAC-FULL
+      workingDirectory: "./wrappers/csharp/unit-tests/nugets"
+      displayName: "Unit tests XAMARIN-MAC-FULL"
