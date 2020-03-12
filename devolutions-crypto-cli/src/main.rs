@@ -240,7 +240,7 @@ fn mix_key_exchange(matches: &ArgMatches) {
     let private = devolutions_crypto::DcDataBlob::try_from(base64::decode(matches.value_of("PRIVATE").unwrap().as_bytes()).unwrap().as_slice()).unwrap();
     let public = devolutions_crypto::DcDataBlob::try_from(base64::decode(matches.value_of("PUBLIC").unwrap().as_bytes()).unwrap().as_slice()).unwrap();
 
-    println!("{}", base64::encode(&devolutions_crypto::DcDataBlob::mix_key_exchange(private, public).unwrap()))
+    println!("{}", base64::encode(&devolutions_crypto::DcDataBlob::mix_key_exchange(&private, &public).unwrap()))
 }
 
 fn generate_shared_key(matches: &ArgMatches) {
