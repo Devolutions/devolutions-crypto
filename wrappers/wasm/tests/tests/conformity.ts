@@ -55,7 +55,7 @@ describe('Conformity Tests', () => {
   it('Password Hashing V1', () => {
     const hash1: Uint8Array = base64decode('DQwDAAAAAQAQJwAAXCzLFoyeZhFSDYBAPiIWhCk04aoP/lalOoCl7D+skIY/i+3WT7dn6L8WvnfEq6flCd7i+IcKb3GEK4rCpzhDlw==')
     const hash2: Uint8Array = base64decode('DQwDAAAAAQAKAAAAmH1BBckBJYDD0xfiwkAk1xwKgw8a57YQT0Igm+Faa9LFamTeEJgqn/qHc2R/8XEyK2iLPkVy+IErdGLLtLKJ2g==')
-    expect(verifyPassword(encoder.encode('password1'), hash1))
-    expect(verifyPassword(encoder.encode('password2'), hash2))
+    expect(verifyPassword(encoder.encode('password1'), hash1)).to.eql(true)
+    expect(verifyPassword(encoder.encode('password1'), hash2)).to.eql(true)
   })
 })
