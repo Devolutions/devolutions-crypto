@@ -25,7 +25,7 @@ describe('deriveKeyPair', () => {
     const derivedKeyPair1: KeyPair = deriveKeyPair(password, parameters)
 
     const parametersBytes: Uint8Array = parameters.bytes
-    parameters = Argon2Parameters.from(parametersBytes)
+    parameters = Argon2Parameters.fromBytes(parametersBytes)
 
     const derivedKeyPair2: KeyPair = deriveKeyPair(password, parameters)
 
@@ -139,8 +139,8 @@ describe('KeyPair serialization', () => {
     const privateKeyBytes: Uint8Array = keypair.private.bytes
     const publicKeyBytes: Uint8Array = keypair.public.bytes
 
-    const privateKey: PrivateKey = PrivateKey.from(privateKeyBytes)
-    const publicKey: PublicKey = PublicKey.from(publicKeyBytes)
+    const privateKey: PrivateKey = PrivateKey.fromBytes(privateKeyBytes)
+    const publicKey: PublicKey = PublicKey.fromBytes(publicKeyBytes)
 
     expect(privateKey.bytes).to.eql(privateKeyBytes)
     expect(publicKey.bytes).to.eql(publicKeyBytes)
@@ -153,9 +153,9 @@ describe('KeyPair serialization', () => {
 
     const symmetricKey: Uint8Array = generateKey()
 
-    expect(() => PrivateKey.from(publicKeyBytes)).to.throw()
-    expect(() => PublicKey.from(privateKeyBytes)).to.throw()
-    expect(() => PrivateKey.from(symmetricKey)).to.throw()
-    expect(() => PublicKey.from(symmetricKey)).to.throw()
+    expect(() => PrivateKey.fromBytes(publicKeyBytes)).to.throw()
+    expect(() => PublicKey.fromBytes(privateKeyBytes)).to.throw()
+    expect(() => PrivateKey.fromBytes(symmetricKey)).to.throw()
+    expect(() => PublicKey.fromBytes(symmetricKey)).to.throw()
   })
 })
