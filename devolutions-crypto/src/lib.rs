@@ -17,7 +17,7 @@ cfg_if! {
     if #[cfg(target_arch = "wasm32")] {
         pub mod wasm;
     }
-    else {
+    else if #[cfg(feature = "ffi")] {
         pub mod ffi;
     }
 }
