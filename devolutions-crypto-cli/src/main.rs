@@ -20,6 +20,41 @@ fn main() {
                 ),
         )
         .subcommand(
+            SubCommand::with_name("generate-keypair")
+                .about("Generate a random keypair")
+        )
+        .subcommand(
+            SubCommand::with_name("generate-argon2parameters")
+                .about("Generate parameters to derive a password")
+                .arg(
+                    Arg::with_name("memory")
+                        .short("m")
+                        .long("memory")
+                        .takes_value(true)
+                        .help("The amount, in kilobytes, of memory to use for the derivation"),
+                )
+                .arg(
+                    Arg::with_name("lanes")
+                        .long("lanes")
+                        .takes_value(true)
+                        .help("The number lanes. Should be the same as the number of threads on the most commonly used password for the hash(1 for webassembly)"),
+                )
+                .arg(
+                    Arg::with_name("iterations")
+                        .short("i")
+                        .long("iterations")
+                        .takes_value(true)
+                        .help("The number of iteration(time parameters)"),
+                )
+                .arg(
+                    Arg::with_name("length")
+                        .short("l")
+                        .long("length")
+                        .takes_value(true)
+                        .help("The desired length of the key"),
+                ),
+        )
+        .subcommand(
             SubCommand::with_name("derive")
                 .about("Derive a password or key into an encryption key")
                 .arg(
@@ -50,6 +85,20 @@ fn main() {
                 ),
         )
         .subcommand(
+            SubCommand::with_name("derive-keypair")
+                .about("Derive a password or key into a keypair")
+                .arg(
+                    Arg::with_name("DATA")
+                        .help("The password or key to derive")
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("parameters")
+                        .required(true)
+                        .help("The parameters to use for derivation"),
+                )
+        )
+        .subcommand(
             SubCommand::with_name("encrypt")
                 .about("Encrypt data")
                 .arg(Arg::with_name("DATA").help("The plaintext").required(true))
@@ -63,10 +112,29 @@ fn main() {
                 ),
         )
         .subcommand(
+            SubCommand::with_name("encrypt-asymmetric")
+                .about("Encrypt data using a public key")
+                .arg(Arg::with_name("DATA").help("The plaintext").required(true))
+                .arg(Arg::with_name("KEY").help("The public key to use").required(true))
+                .arg(
+                    Arg::with_name("version")
+                        .short("v")
+                        .long("version")
+                        .takes_value(true)
+                        .help("The version to use"),
+                ),
+        )
+        .subcommand(
             SubCommand::with_name("decrypt")
                 .about("Decrypt data")
                 .arg(Arg::with_name("DATA").help("The ciphertext").required(true))
                 .arg(Arg::with_name("KEY").help("The key to use").required(true)),
+        )
+        .subcommand(
+            SubCommand::with_name("decrypt-asymmetric")
+                .about("Decrypt data using a private key")
+                .arg(Arg::with_name("DATA").help("The ciphertext").required(true))
+                .arg(Arg::with_name("KEY").help("The private key to use").required(true)),
         )
         .subcommand(
             SubCommand::with_name("hash-password")
@@ -97,10 +165,6 @@ fn main() {
                         .help("The hash to validate the password sagainst")
                         .required(true)
                 )
-        )
-        .subcommand(
-            SubCommand::with_name("generate-key-exchange")
-                .about("Generate a Key Exchange")
         )
         .subcommand(
             SubCommand::with_name("mix-key-exchange")
@@ -140,12 +204,16 @@ fn main() {
 
     match matches.subcommand() {
         ("generate", Some(matches)) => generate_key(matches),
+        ("generate-argon2parameters", Some(matches)) => generate_argon2parameters(matches),
         ("derive", Some(matches)) => derive_key(matches),
+        ("derive-keypair", Some(matches)) => derive_keypair(matches),
         ("encrypt", Some(matches)) => encrypt(matches),
+        ("encrypt-asymmetric", Some(matches)) => encrypt_asymmetric(matches),
         ("decrypt", Some(matches)) => decrypt(matches),
+        ("decrypt-asymmetric", Some(matches)) => decrypt_asymmetric(matches),
         ("hash-password", Some(matches)) => hash_password(matches),
         ("verify-password", Some(matches)) => verify_password(matches),
-        ("generate-key-exchange", Some(matches)) => generate_key_exchange(matches),
+        ("generate-keypair", Some(matches)) => generate_keypair(matches),
         ("mix-key-exchange", Some(matches)) => mix_key_exchange(matches),
         ("generate-shared-key", Some(matches)) => generate_shared_key(matches),
         ("join-shares", Some(matches)) => join_shares(matches),
@@ -162,6 +230,49 @@ fn generate_key(matches: &ArgMatches) {
 
     let key = base64::encode(&devolutions_crypto::utils::generate_key(length));
     println!("{}", key);
+}
+
+fn generate_argon2parameters(matches: &ArgMatches) {
+    let memory = matches
+        .value_of("memory")
+        .unwrap_or("")
+        .parse::<u32>();
+
+    let iterations = matches
+        .value_of("iterations")
+        .unwrap_or("")
+        .parse::<u32>();
+
+    let lanes = matches
+        .value_of("lanes")
+        .unwrap_or("")
+        .parse::<u32>();
+
+    let length = matches
+        .value_of("length")
+        .unwrap_or("")
+        .parse::<u32>();
+
+    let mut parameters = devolutions_crypto::Argon2Parameters::default();
+
+    if let Ok(memory) = memory {
+        parameters.memory = memory;
+    };
+
+    if let Ok(iterations) = iterations {
+        parameters.iterations = iterations;
+    };
+
+    if let Ok(lanes) = lanes {
+        parameters.lanes = lanes;
+    };
+
+    if let Ok(length) = length {
+        parameters.length = length;
+    };
+
+    let parameters: Vec<u8> = parameters.into();
+    println!("{}", base64::encode(&parameters));
 }
 
 fn derive_key(matches: &ArgMatches) {
@@ -184,6 +295,17 @@ fn derive_key(matches: &ArgMatches) {
     println!("{}", base64::encode(&key));
 }
 
+fn derive_keypair(matches: &ArgMatches) {
+    let data = matches.value_of("DATA").unwrap().as_bytes();
+    let parameters = base64::decode(&matches.value_of("parameters").unwrap()).unwrap();
+
+    let parameters = devolutions_crypto::Argon2Parameters::try_from(parameters.as_slice()).unwrap();
+    let (private_key, public_key) = devolutions_crypto::DcDataBlob::derive_keypair(data, &parameters).unwrap();
+    
+    println!("Private Key: {}\nPublic Key: {}", base64::encode(&Vec::<u8>::from(private_key)), base64::encode(&Vec::<u8>::from(public_key)));
+}
+
+
 fn encrypt(matches: &ArgMatches) {
     let data = matches.value_of("DATA").unwrap();
     let key = base64::decode(&matches.value_of("KEY").unwrap()).unwrap();
@@ -200,12 +322,40 @@ fn encrypt(matches: &ArgMatches) {
     println!("{}", base64::encode(&data));
 }
 
+fn encrypt_asymmetric(matches: &ArgMatches) {
+    let data = matches.value_of("DATA").unwrap();
+    let key = base64::decode(&matches.value_of("KEY").unwrap()).unwrap();
+
+    let version = matches
+        .value_of("version")
+        .unwrap_or("")
+        .parse::<u16>()
+        .ok();
+
+    let key = devolutions_crypto::DcDataBlob::try_from(key.as_slice()).unwrap();
+
+    let data: Vec<u8> = devolutions_crypto::DcDataBlob::encrypt_asymmetric(data.as_bytes(), &key, version)
+        .unwrap()
+        .into();
+    println!("{}", base64::encode(&data));
+}
+
 fn decrypt(matches: &ArgMatches) {
     let data = base64::decode(matches.value_of("DATA").unwrap()).unwrap();
     let data = devolutions_crypto::DcDataBlob::try_from(data.as_slice()).unwrap();
     let key = base64::decode(&matches.value_of("KEY").unwrap()).unwrap();
 
     let data: Vec<u8> = devolutions_crypto::DcDataBlob::decrypt(&data, &key).unwrap();
+    println!("{}", String::from_utf8_lossy(&data));
+}
+
+fn decrypt_asymmetric(matches: &ArgMatches) {
+    let data = base64::decode(matches.value_of("DATA").unwrap()).unwrap();
+    let data = devolutions_crypto::DcDataBlob::try_from(data.as_slice()).unwrap();
+    let key = base64::decode(&matches.value_of("KEY").unwrap()).unwrap();
+    let key = devolutions_crypto::DcDataBlob::try_from(key.as_slice()).unwrap();
+
+    let data: Vec<u8> = devolutions_crypto::DcDataBlob::decrypt_asymmetric(&data, &key).unwrap();
     println!("{}", String::from_utf8_lossy(&data));
 }
 
@@ -230,8 +380,8 @@ fn verify_password(matches: &ArgMatches) {
     println!("{}", hash.verify_password(password.as_bytes()).unwrap());
 }
 
-fn generate_key_exchange(_matches: &ArgMatches) {
-    let (private, public) = devolutions_crypto::DcDataBlob::generate_key_exchange().unwrap();
+fn generate_keypair(_matches: &ArgMatches) {
+    let (private, public) = devolutions_crypto::DcDataBlob::generate_keypair().unwrap();
 
     println!("Private Key: {}\nPublic Key: {}", base64::encode(&Vec::<u8>::from(private)), base64::encode(&Vec::<u8>::from(public)));
 }
