@@ -7,6 +7,9 @@ namespace Devolutions.Cryptography
     using System.Reflection;
 #endif
 
+    /// <summary>
+    /// Contains the bindings to the native rust library.
+    /// </summary>
     public static partial class Native
     {
 #if RDM
@@ -338,11 +341,13 @@ namespace Devolutions.Cryptography
             return VersionSize86();
         }
 
-        [DllImport(LibName86, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
+#pragma warning disable CA2101 // Specify marshaling for P/Invoke string arguments
+        [DllImport(LibName86, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern long Decode86(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
-        [DllImport(LibName64, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName64, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern long Decode64(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+#pragma warning restore CA2101 // Specify marshaling for P/Invoke string arguments
 
         [DllImport(LibName64, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DecryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);

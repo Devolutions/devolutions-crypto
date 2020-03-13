@@ -1,5 +1,9 @@
+#pragma warning disable SA1600 // Elements should be documented
+
 #if DOTNET_FRAMEWORK
+#pragma warning disable SA1300 // Element should begin with upper-case letter
 namespace dotnet_framework
+#pragma warning restore SA1300 // Element should begin with upper-case letter
 #endif
 #if DOTNET_CORE
 namespace dotnet_core
@@ -31,7 +35,7 @@ namespace xamarin_mac_full
             Assert.IsTrue(parameters.Iterations == 2);
             Assert.IsTrue(parameters.Lanes == 1);
             Assert.IsTrue(parameters.Length == 32);
-            Assert.IsTrue(parameters.Memory == (uint)4096);
+            Assert.IsTrue(parameters.Memory == 4096);
         }
 
         [TestMethod]
@@ -112,3 +116,4 @@ namespace xamarin_mac_full
         }
     }
 }
+#pragma warning restore SA1600 // Elements should be documented

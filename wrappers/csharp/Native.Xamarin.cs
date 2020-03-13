@@ -4,6 +4,9 @@ namespace Devolutions.Cryptography
     using System;
     using System.Runtime.InteropServices;
 
+    /// <summary>
+    /// Contains the bindings to the native rust library.
+    /// </summary>
     public static partial class Native
     {
 #if IOS

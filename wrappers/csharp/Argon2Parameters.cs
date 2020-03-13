@@ -48,7 +48,7 @@ namespace Devolutions.Cryptography.Argon2
         /// Deserialize the Argon2Parameters class from a little endian byte array.
         /// </summary>
         /// <param name="data">The data to deserialize.</param>
-        /// <returns>Returns the deserialized parameters</returns>
+        /// <returns>Returns the deserialized parameters.</returns>
         public static Argon2Parameters FromByteArray(byte[] data)
         {
             if (data == null)
@@ -156,6 +156,8 @@ namespace Devolutions.Cryptography.Argon2
 
                 parameters.Salt = salt;
 
+                stream.Close();
+
                 return parameters;
             }
             catch (Exception ex)
@@ -168,8 +170,7 @@ namespace Devolutions.Cryptography.Argon2
         /// <summary>
         /// Serialize the Argon2Parameters class to a little endian byte array.
         /// </summary>
-        /// <param name="argon2Parameters">The argon2Paramerters to serialize.</param>
-        /// <returns>Returns Argon2Parameters class to a little endian byte array</returns>
+        /// <returns>Returns Argon2Parameters class to a little endian byte array.</returns>
         public byte[] ToByteArray()
         {
             try
@@ -227,7 +228,7 @@ namespace Devolutions.Cryptography.Argon2
                 // === Associated Data Length ===
                 if (this.AssociatedData == null)
                 {
-                    this.AssociatedData = new byte[0];
+                    this.AssociatedData = Array.Empty<byte>();
                 }
 
                 byte[] associatedDataLength = BitConverter.GetBytes(this.AssociatedData.Length);
@@ -240,7 +241,7 @@ namespace Devolutions.Cryptography.Argon2
                 // === Salt Length ===
                 if (this.Salt == null)
                 {
-                    this.Salt = new byte[0];
+                    this.Salt = Array.Empty<byte>();
                 }
 
                 byte[] saltLength = BitConverter.GetBytes(this.Salt.Length);
