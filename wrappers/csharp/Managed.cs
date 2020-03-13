@@ -1,6 +1,3 @@
-using System.Linq;
-using System.Runtime.InteropServices;
-
 namespace Devolutions.Cryptography
 {
     using System;
@@ -897,22 +894,6 @@ namespace Devolutions.Cryptography
             return DecryptWithPasswordAsUtf8String(b64data, password, iterations);
         }
 
-        public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength, byte[][] shares)
-        {
-            try
-            {
-                var pointers = InitializeArray(ref shares, nbShares, secretLength);
-                var result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
-                return shares;
-            }
-            catch (DevolutionsCryptoException ex)
-            {
-                if (ex.NativeError != null) Utils.HandleError((long)ex.NativeError);
-            }
-
-            return null;
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -946,6 +927,22 @@ namespace Devolutions.Cryptography
             catch (DevolutionsCryptoException ex)
             {
                 if (ex.NativeError != null) Utils.HandleError((long) ex.NativeError);
+            }
+
+            return null;
+        }
+
+        public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength, byte[][] shares)
+        {
+            try
+            {
+                var pointers = InitializeArray(ref shares, nbShares, secretLength);
+                var result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
+                return shares;
+            }
+            catch (DevolutionsCryptoException ex)
+            {
+                if (ex.NativeError != null) Utils.HandleError((long)ex.NativeError);
             }
 
             return null;
