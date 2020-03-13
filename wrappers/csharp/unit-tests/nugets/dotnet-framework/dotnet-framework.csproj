@@ -90,6 +90,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Conformity.cs">
+      <Link>Conformity.cs</Link>
+    </Compile>
     <Compile Include="..\..\TestArgon2Parameters.cs">
       <Link>TestArgon2Parameters.cs</Link>
     </Compile>
