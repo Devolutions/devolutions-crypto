@@ -38,7 +38,7 @@ describe('Conformity Tests', () => {
   })
 
   it('Derive Keypair', () => {
-    const parameters: Argon2Parameters = Argon2Parameters.from(base64decode('AQAAACAAAAABAAAAIAAAAAEAAAACEwAAAAAQAAAAimFBkm3f8+f+YfLRnF5OoQ=='))
+    const parameters: Argon2Parameters = Argon2Parameters.fromBytes(base64decode('AQAAACAAAAABAAAAIAAAAAEAAAACEwAAAAAQAAAAimFBkm3f8+f+YfLRnF5OoQ=='))
     const keypair: KeyPair = deriveKeyPair(encoder.encode('password'), parameters)
 
     expect(keypair.private.bytes).to.eql(base64decode('DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ=='))
@@ -46,7 +46,7 @@ describe('Conformity Tests', () => {
   })
 
   it('Asymmetric Decrypt V2', () => {
-    const privateKey: PrivateKey = PrivateKey.from(base64decode('DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ=='))
+    const privateKey: PrivateKey = PrivateKey.fromBytes(base64decode('DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ=='))
     const result: Uint8Array = decryptAsymmetric(base64decode('DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg=='), privateKey)
 
     expect(decoder.decode(result)).to.eql('testdata')

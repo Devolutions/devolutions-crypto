@@ -13,13 +13,12 @@ use super::DevoCryptoError;
 use super::Argon2Parameters;
 use super::DataType;
 
-#[wasm_bindgen]
+#[wasm_bindgen(inspectable)]
 pub struct KeyPair {
     private_key: PrivateKey,
     public_key: PublicKey,
 }
 
-#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 impl Argon2Parameters {
     #[wasm_bindgen(constructor)]
@@ -32,19 +31,19 @@ impl Argon2Parameters {
         self.clone().into()
     }
 
-    #[wasm_bindgen]
-    pub fn from(buffer: &[u8]) -> Result<Argon2Parameters, JsValue> {
+    #[wasm_bindgen(js_name = "fromBytes")]
+    pub fn from_bytes(buffer: &[u8]) -> Result<Argon2Parameters, JsValue> {
         Ok(Self::try_from(buffer)?)
     }
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(inspectable)]
 #[derive(Clone)]
 pub struct PublicKey {
     key: DcDataBlob,
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(inspectable)]
 #[derive(Clone)]
 pub struct PrivateKey {
     key: DcDataBlob,
@@ -57,8 +56,8 @@ impl PublicKey {
         self.key.clone().into()
     }
 
-    #[wasm_bindgen]
-    pub fn from(buffer: &[u8]) -> Result<PublicKey, JsValue> {
+    #[wasm_bindgen(js_name = "fromBytes")]
+    pub fn from_bytes(buffer: &[u8]) -> Result<PublicKey, JsValue> {
         let key = DcDataBlob::try_from(buffer)?;
 
         if key.header.data_type != DataType::Key || key.header.data_subtype != 2 {
@@ -76,8 +75,8 @@ impl PrivateKey {
         self.key.clone().into()
     }
 
-    #[wasm_bindgen]
-    pub fn from(buffer: &[u8]) -> Result<PrivateKey, JsValue> {
+    #[wasm_bindgen(js_name = "fromBytes")]
+    pub fn from_bytes(buffer: &[u8]) -> Result<PrivateKey, JsValue> {
         let key = DcDataBlob::try_from(buffer)?;
 
         if key.header.data_type != DataType::Key || key.header.data_subtype != 1 {
@@ -169,7 +168,16 @@ pub fn derive_keypair(password: &[u8], parameters: &Argon2Parameters) -> Result<
     Ok(keypair)
 }
 
-#[wasm_bindgen(js_name = "generateSharedKey")]
+#[wasm_bindgen(typescript_custom_section)]
+const TS_OVERRIDE_GENERATE_SHARED_KEY: &str = r#"/**
+* @param {number} n_shares 
+* @param {number} threshold 
+* @param {number | undefined} length 
+* @returns {Uint8Array[]} 
+*/
+export function generateSharedKey(n_shares: number, threshold: number, length?: number): Uint8Array[];"#;
+
+#[wasm_bindgen(js_name = "generateSharedKey", skip_typescript)]
 pub fn generate_shared_key(
     n_shares: u8,
     threshold: u8,
@@ -188,7 +196,14 @@ pub fn generate_shared_key(
         .collect()
 }
 
-#[wasm_bindgen(js_name = "joinShares")]
+#[wasm_bindgen(typescript_custom_section)]
+const TS_OVERRIDE_JOIN_SHARES: &str = r#"/**
+* @param {Uint8Array[]} shares 
+* @returns {Uint8Array} 
+*/
+export function joinShares(shares: Uint8Array[]): Uint8Array;"#;
+
+#[wasm_bindgen(js_name = "joinShares", skip_typescript)]
 pub fn join_shares(shares: Array) -> Result<Vec<u8>, JsValue> {
     // Hack to accept both Array<Array<u8>> and Array<Uint8Array> from Javascript.
     // Issue linked here: https://github.com/rustwasm/wasm-bindgen/issues/2017

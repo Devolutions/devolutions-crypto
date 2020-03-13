@@ -20,7 +20,7 @@ use super::Result;
 /// You can save it along the user information.
 /// If the hash should never be computed in a non-threaded environment,
 ///  you can raise the "lanes" value to enable multi-threading.
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
 #[derive(Clone)]
 pub struct Argon2Parameters {
     /// Length of the desired hash

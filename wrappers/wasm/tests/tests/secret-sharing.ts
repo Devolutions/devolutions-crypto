@@ -4,11 +4,11 @@ import { describe, it } from 'mocha'
 
 describe('secretSharing', () => {
   it('should be able to retrieve the same 32 bytes shared key', () => {
-    const shares: [number][] = generateSharedKey(5, 3, 32)
+    const shares: Uint8Array[] = generateSharedKey(5, 3, 32)
 
-    const sharesGroup1: [number][] = shares.slice(0, 3)
-    const sharesGroup2: [number][] = shares.slice(1, 4)
-    const sharesGroup3: [number][] = shares.slice(2, 5)
+    const sharesGroup1: Uint8Array[] = shares.slice(0, 3)
+    const sharesGroup2: Uint8Array[] = shares.slice(1, 4)
+    const sharesGroup3: Uint8Array[] = shares.slice(2, 5)
 
     const key1: Uint8Array = joinShares(sharesGroup1)
     const key2: Uint8Array = joinShares(sharesGroup2)
@@ -21,10 +21,10 @@ describe('secretSharing', () => {
   })
 
   it('should be able to retrieve the same 41 bytes shared key', () => {
-    const shares: [number][] = generateSharedKey(5, 3, 41)
+    const shares: Uint8Array[] = generateSharedKey(5, 3, 41)
 
-    const sharesGroup1: [number][] = shares.slice(0, 3)
-    const sharesGroup2: [number][] = shares.slice(2, 5)
+    const sharesGroup1: Uint8Array[] = shares.slice(0, 3)
+    const sharesGroup2: Uint8Array[] = shares.slice(2, 5)
 
     const key1: Uint8Array = joinShares(sharesGroup1)
     const key2: Uint8Array = joinShares(sharesGroup2)
@@ -39,8 +39,8 @@ describe('secretSharing', () => {
   })
 
   it('should throw an error if there is not enough shares', () => {
-    const shares: [number][] = generateSharedKey(5, 3, 32)
-    const sharesGroup: [number][] = shares.slice(0, 2)
+    const shares: Uint8Array[] = generateSharedKey(5, 3, 32)
+    const sharesGroup: Uint8Array[] = shares.slice(0, 2)
 
     expect(() => joinShares(sharesGroup)).to.throw()
   })
