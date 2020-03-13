@@ -52,29 +52,6 @@ namespace xamarin_mac_full
         }
 
         [TestMethod]
-        public void Decrypt1()
-        {
-            byte[] encryptedData = Utils.Base64StringToByteArray(
-                "DQwCAAAAAQCK1twEut+TeJfFbTWCRgHjyS6bOPOZUEQAeBtSFFRl2jHggM/34n68zIZWGbsZHkufVzU6mTN5N2Dx9bTplrycv5eNVevT4P9FdVHJ751D+A==");
-            byte[] encryptKey = Utils.Base64StringToByteArray("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=");
-
-            byte[] decryptResult = Managed.Decrypt(encryptedData, encryptKey);
-            string decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
-            Assert.AreEqual(decryptResultAsUtf8String, "test Ciph3rtext~");
-        }
-
-        [TestMethod]
-        public void Decrypt2()
-        {
-            byte[] encryptedData = Utils.Base64StringToByteArray("DQwCAAAAAgAA0iPpI4IEzcrWAQiy6tqDqLbRYduGvlMC32mVH7tpIN2CXDUu5QHF91I7pMrmjt/61pm5CeR/IcU=");
-            byte[] encryptKey = Utils.Base64StringToByteArray("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=");
-
-            byte[] decryptResult = Managed.Decrypt(encryptedData, encryptKey);
-            string decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
-            Assert.AreEqual(decryptResultAsUtf8String, "test Ciph3rtext~2");
-        }
-
-        [TestMethod]
         public void DecryptAsymmetric_Test()
         {
             byte[] encryptedData = Convert.FromBase64String("DQwCAAIAAgD5rUXkPQO55rzI69WSxtVTA43lDXougn6BxJ7evqf+Yq+SEGXZxpE49874fz/aEk39LTnh1yWnY2VNoAAqKVB5CWZryd6SSld8Sx8v");
@@ -126,34 +103,6 @@ namespace xamarin_mac_full
             string encryptedDataAsBase64 = "DQwCAAAAAgCoE9Y3m06QaPSAiL2qegthcm0+zZWt4fXbdqcefkzD6y8pnWsMzLkx/32t";
             string decryptResultString = Managed.DecryptWithPasswordAsUtf8String(encryptedDataAsBase64, TestData.TestPassword);
             Assert.AreEqual(decryptResultString, TestData.StringTestData);
-        }
-
-        [TestMethod]
-        public void DeriveKey()
-        {
-            byte[] encodedPassword = Utils.StringToUtf8ByteArray("testpassword");
-            byte[] derivedPassword = Managed.DeriveKey(encodedPassword);
-            string derivedPasswordAsBase64String = Utils.EncodeToBase64String(derivedPassword);
-            Assert.AreEqual(derivedPasswordAsBase64String, "ImfGCyv6PwMYaJShGxR4MfVrjuUrsI0CSarJgOApwf8=");
-        }
-
-        [TestMethod]
-        public void DeriveKey2()
-        {
-            byte[] encodedPassword = Utils.StringToUtf8ByteArray("testPa$$");
-            byte[] derivedPassword = Managed.DeriveKey(encodedPassword, null, 100);
-            string derivedPasswordAsBase64String = Utils.EncodeToBase64String(derivedPassword);
-            Assert.AreEqual(derivedPasswordAsBase64String, "ev/GiJLvOgIkkWrnIrHSi2fdZE5qJBIrW+DLeMLIXK4=");
-        }
-
-        [TestMethod]
-        public void DeriveKey3()
-        {
-            byte[] encodedPassword = Utils.StringToUtf8ByteArray("testPa$$");
-            byte[] saltBytes = Utils.DecodeFromBase64("tdTt5wgeqQYLvkiXKkFirqy2hMbzadBtL+jekVeNCRA=");
-            byte[] derivedPassword = Managed.DeriveKey(encodedPassword, saltBytes, 100);
-            string derivedPasswordAsBase64String = Utils.EncodeToBase64String(derivedPassword);
-            Assert.AreEqual(derivedPasswordAsBase64String, "ZaYRZeQiIPJ+Jl511AgHZjv4/HbCFq4eUP9yNa3gowI=");
         }
 
         [TestMethod]
