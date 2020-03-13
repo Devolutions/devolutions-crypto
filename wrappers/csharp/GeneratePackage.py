@@ -115,7 +115,7 @@ if sys.argv[1] == "WIN":
 
         print("Building Native Libraries...")
 
-        output = exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
+        output = exec_command("cargo build --features ffi --release --target " + arch["value"], "../../devolutions-crypto")
         print(output)
         
         if rdm:
@@ -180,7 +180,7 @@ if sys.argv[1] == "MAC-FULL":
 
         print("Building Native Libraries...")
 
-        output = exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
+        output = exec_command("cargo build --features ffi --release --target " + arch["value"], "../../devolutions-crypto")
         print(output)
 
         os.mkdir("./macos-full/bin/" + arch["name"])
@@ -246,7 +246,7 @@ if sys.argv[1] == "MAC-MODERN":
 
         print("Building Native Libraries...")
 
-        output= exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
+        output = exec_command("cargo build --features ffi --release --target " + arch["value"], "../../devolutions-crypto")
         print(output)
 
         os.mkdir("./macos-modern/bin/" + arch["name"])
@@ -306,7 +306,7 @@ if sys.argv[1] == "IOS":
 
         print("Building Native Libraries...")
 
-        output = exec_command("cargo build --release --target " + arch["value"] + " --manifest-path ./ios/Cargo.toml", "../../devolutions-crypto")
+        output = exec_command("cargo build --features ffi --release --target " + arch["value"] + " --manifest-path ./ios/Cargo.toml", "../../devolutions-crypto")
         print(output)
 
         os.mkdir("./ios/bin/" + arch["name"])
@@ -365,7 +365,7 @@ if sys.argv[1] == "ANDROID":
 
         print("Building Native Libraries...")
 
-        output = exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
+        output = exec_command("cargo build --features ffi --release --target " + arch["value"], "../../devolutions-crypto")
         print(output)
 
         os.mkdir("./android/bin/" + arch["name"])
@@ -406,7 +406,7 @@ if sys.argv[1] == "LINUX":
 
         print("Building Native Libraries...")
 
-        output = exec_command("cargo build --release --target " + arch["value"], "../../devolutions-crypto")
+        output = exec_command("cargo build --features ffi --release --target " + arch["value"], "../../devolutions-crypto")
 
         print(output)
 
