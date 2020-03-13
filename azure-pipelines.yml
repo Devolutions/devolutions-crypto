@@ -1,6 +1,9 @@
 trigger:
 - master
 
+pr:
+- master
+
 stages:
 
 - stage: Source_Publishing
