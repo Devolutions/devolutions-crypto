@@ -62,8 +62,8 @@
     <Compile Include="..\..\..\..\Managed.cs">
       <Link>Managed.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\ManagedError.cs">
-      <Link>ManagedError.cs</Link>
+    <Compile Include="..\..\..\..\DevolutionsCryptoException.cs">
+      <Link>DevolutionsCryptoException.cs</Link>
     </Compile>
     <Compile Include="..\..\..\..\Enums.cs">
       <Link>Enums.cs</Link>

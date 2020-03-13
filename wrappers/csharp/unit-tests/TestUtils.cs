@@ -1,5 +1,9 @@
+#pragma warning disable SA1600 // Elements should be documented
+
 #if DOTNET_FRAMEWORK
+#pragma warning disable SA1300 // Element should begin with upper-case letter
 namespace dotnet_framework
+#pragma warning restore SA1300 // Element should begin with upper-case letter
 #endif
 #if DOTNET_CORE
 namespace dotnet_core
@@ -177,6 +181,7 @@ namespace xamarin_mac_full
         }
 
         [TestMethod]
+
         public void ValidateSignatureFromStream_ValidSignature()
         {
             Stream stream = new MemoryStream(TestData.EncryptedData);
@@ -187,3 +192,5 @@ namespace xamarin_mac_full
         }
     }
 }
+
+#pragma warning restore SA1600 // Elements should be documented

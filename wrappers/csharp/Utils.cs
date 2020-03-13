@@ -5,7 +5,7 @@ namespace Devolutions.Cryptography
     using System.Linq;
     using System.Text;
 
-    public static partial class Utils
+    public static class Utils
     {
         /// <summary>
         /// Converts a base 64 string to a byte array.
@@ -49,7 +49,7 @@ namespace Devolutions.Cryptography
             {
                 return Encoding.UTF8.GetString(data);
             }
-            catch
+            catch (DecoderFallbackException)
             {
                 return null;
             }
@@ -58,11 +58,13 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// Concatenate arrays together.
         /// </summary>
-        /// <returns>Returns the arrays concatenated into a single array </returns>
-        public static T[] ConcatArrays<T>(params T[][] list)
+        /// <param name="list">List of arrays to concatenate.</param>
+        /// <returns>Returns the arrays concatenated into a single array. </returns>
+        public static byte[] ConcatArrays(params byte[][] list)
         {
-            var result = new T[list.Sum(a => a.Length)];
+            byte[] result = new byte[list.Sum(a => a.Length)];
             int offset = 0;
+
             for (int x = 0; x < list.Length; x++)
             {
                 list[x].CopyTo(result, offset);
@@ -285,7 +287,7 @@ namespace Devolutions.Cryptography
         /// Validate that the base 64 string is from the Devolutions Crypto Library.
         /// Performance : Use ValidateSignature(byte[], DataType) for more performance if possible.
         /// </summary>
-        /// <param name="data">The buffer to validate.</param>
+        /// <param name="base64">The buffer to validate.</param>
         /// <param name="type">The data type to validate.</param>
         /// <returns>Returns true if the base 64 string received matches the data type.</returns>
         public static bool ValidateSignatureFromBase64(string base64, DataType type)
@@ -300,7 +302,7 @@ namespace Devolutions.Cryptography
         /// The stream must support both Seeking and Reading.
         /// Performance : Use ValidateSignature(byte[], DataType) for more performance if possible.
         /// </summary>
-        /// <param name="data">The stream to validate.</param>
+        /// <param name="stream">The stream to validate.</param>
         /// <param name="type">The data type to validate.</param>
         /// <returns>Returns true if the stream data received matches the data type.</returns>
         public static bool ValidateSignatureFromStream(Stream stream, DataType type)

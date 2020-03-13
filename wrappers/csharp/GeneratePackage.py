@@ -138,7 +138,7 @@ if sys.argv[1] == "WIN":
     if rdm:
         define += ";RDM"
 
-    output = exec_command("csc -out:./" + folder + "/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./" + folder + "/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu " + define + " NativeError.cs Native.cs Native.Xamarin.cs ManagedError.cs Managed.cs KeyPair.cs Utils.cs Enums.cs Enums.Argon2.cs Argon2Parameters.cs ./" + folder + "/bin/AssemblyInfo.cs")
+    output = exec_command("csc -out:./" + folder + "/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./" + folder + "/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu " + define + " NativeError.cs Native.cs Native.Xamarin.cs DevolutionsCryptoException.cs Managed.cs KeyPair.cs Utils.cs Enums.cs Enums.Argon2.cs Argon2Parameters.cs ./" + folder + "/bin/AssemblyInfo.cs")
     print(output)
 
     if("error" in output):
@@ -189,7 +189,7 @@ if sys.argv[1] == "MAC-FULL":
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
-    output = exec_command("csc -out:./macos-full/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./macos-full/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:MAC_FULL NativeError.cs Native.cs Native.Xamarin.cs ManagedError.cs Managed.cs KeyPair.cs Utils.cs Enums.cs Enums.Argon2.cs Argon2Parameters.cs ./macos-full/bin/AssemblyInfo.cs")
+    output = exec_command("csc -out:./macos-full/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./macos-full/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:MAC_FULL NativeError.cs Native.cs Native.Xamarin.cs DevolutionsCryptoException.cs Managed.cs KeyPair.cs Utils.cs Enums.cs Enums.Argon2.cs Argon2Parameters.cs ./macos-full/bin/AssemblyInfo.cs")
     print(output)
 
     if("error" in output):
@@ -421,7 +421,7 @@ if sys.argv[1] == "LINUX":
 
     print("Building Managed Library...")
 
-    output = exec_command("csc -out:./linux/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./linux/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:LINUX NativeError.cs Native.cs Native.Xamarin.cs ManagedError.cs Managed.cs KeyPair.cs Utils.cs Enums.cs Enums.Argon2.cs Argon2Parameters.cs ./linux/bin/AssemblyInfo.cs")
+    output = exec_command("csc -out:./linux/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./linux/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:LINUX NativeError.cs Native.cs Native.Xamarin.cs DevolutionsCryptoException.cs Managed.cs KeyPair.cs Utils.cs Enums.cs Enums.Argon2.cs Argon2Parameters.cs ./linux/bin/AssemblyInfo.cs")
     print(output)
 
     if("error" in output):

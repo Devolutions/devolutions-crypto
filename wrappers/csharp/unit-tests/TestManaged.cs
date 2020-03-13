@@ -1,5 +1,9 @@
+#pragma warning disable SA1600 // Elements should be documented
+
 #if DOTNET_FRAMEWORK
+#pragma warning disable SA1300 // Element should begin with upper-case letter
 namespace dotnet_framework
+#pragma warning restore SA1300 // Element should begin with upper-case letter
 #endif
 #if DOTNET_CORE
 namespace dotnet_core
@@ -13,7 +17,6 @@ namespace xamarin_mac_full
 
     using Devolutions.Cryptography;
     using Devolutions.Cryptography.Argon2;
-
 
 #if XAMARIN_MAC_FULL
     using NUnit.Framework;
@@ -342,3 +345,4 @@ namespace xamarin_mac_full
         }
     }
 }
+#pragma warning restore SA1600 // Elements should be documented
