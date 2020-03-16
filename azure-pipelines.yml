@@ -502,7 +502,6 @@ stages:
     - task: CopyFiles@2
       inputs:
         contents: 'wrappers/wasm/dist/**'
-        flattenFolders: true
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: PublishBuildArtifacts@1
