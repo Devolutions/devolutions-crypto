@@ -4,8 +4,6 @@ namespace Devolutions.Cryptography
     using System.Linq;
     using System.Runtime.InteropServices;
     using Devolutions.Cryptography.Argon2;
-    using System.Linq;
-    using System.Runtime.InteropServices;
 
     public static class Managed
     {
@@ -39,8 +37,7 @@ namespace Devolutions.Cryptography
 
             byte[] shared = new byte[sharedKeySize];
 
-            long res = Native.MixKeyExchangeNative(privateKey, (UIntPtr) privateKey.Length, publicKey,
-                (UIntPtr) publicKey.Length, shared, (UIntPtr) shared.Length);
+            long res = Native.MixKeyExchangeNative(privateKey, (UIntPtr)privateKey.Length, publicKey, (UIntPtr)publicKey.Length, shared, (UIntPtr)shared.Length);
 
             if (res < 0)
             {
@@ -65,7 +62,7 @@ namespace Devolutions.Cryptography
 
             byte[] rawParameters = new byte[size];
 
-            long res = Native.GetDefaultArgon2ParametersNative(rawParameters, (UIntPtr) size);
+            long res = Native.GetDefaultArgon2ParametersNative(rawParameters, (UIntPtr)size);
 
             if (res < 0)
             {
@@ -108,13 +105,13 @@ namespace Devolutions.Cryptography
 
             long res = Native.DeriveKeyPairNative(
                 password,
-                (UIntPtr) password.Length,
+                (UIntPtr)password.Length,
                 parameters_raw,
-                (UIntPtr) parameters_raw.Length,
+                (UIntPtr)parameters_raw.Length,
                 privateKey,
-                (UIntPtr) privateKey.Length,
+                (UIntPtr)privateKey.Length,
                 publicKey,
-                (UIntPtr) publicKey.Length);
+                (UIntPtr)publicKey.Length);
 
             if (res < 0)
             {
@@ -148,8 +145,7 @@ namespace Devolutions.Cryptography
         /// <param name="key">The key to use for encryption.</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptWithKeyAsBase64String(string data, byte[] key,
-            CipherVersion version = CIPHER_VERSION)
+        public static string EncryptWithKeyAsBase64String(string data, byte[] key, CipherVersion version = CIPHER_VERSION)
         {
             byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, version);
 
@@ -187,10 +183,9 @@ namespace Devolutions.Cryptography
 
             byte[] result = new byte[length];
 
-            int saltLength = salt == null ? 0 : salt.Length;
+            int saltLength = salt?.Length ?? 0;
 
-            long res = Native.DeriveKeyNative(key, (UIntPtr) key.Length, salt, (UIntPtr) saltLength,
-                (UIntPtr) iterations, result, (UIntPtr) result.Length);
+            long res = Native.DeriveKeyNative(key, (UIntPtr)key.Length, salt, (UIntPtr)saltLength, (UIntPtr)iterations, result, (UIntPtr)result.Length);
 
             if (res < 0)
             {
@@ -208,8 +203,7 @@ namespace Devolutions.Cryptography
         /// <param name="iterations">The amount of iterations. 10 000 Recommended by NIST.</param>
         /// <param name="length">The resulting key length.</param>
         /// <returns>Returns the derived password.</returns>
-        public static byte[] DerivePassword(string password, byte[] salt = null, uint iterations = 10000,
-            uint length = 32)
+        public static byte[] DerivePassword(string password, byte[] salt = null, uint iterations = 10000, uint length = 32)
         {
             return DeriveKey(Utils.StringToUtf8ByteArray(password), salt, iterations, length);
         }
@@ -245,9 +239,7 @@ namespace Devolutions.Cryptography
             }
 
             byte[] result = new byte[data.Length];
-
-            long res = Native.DecryptNative(data, (UIntPtr) data.Length, key, (UIntPtr) key.Length, result,
-                (UIntPtr) result.Length);
+            long res = Native.DecryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length);
 
             if (res < 0)
             {
@@ -280,16 +272,15 @@ namespace Devolutions.Cryptography
 
             byte[] result = new byte[data.Length];
 
-            long res = Native.DecryptAsymmetricNative(data, (UIntPtr) data.Length, privateKey,
-                (UIntPtr) privateKey.Length, result, (UIntPtr) result.Length);
+            long res = Native.DecryptAsymmetricNative(data, (UIntPtr)data.Length, privateKey, (UIntPtr)privateKey.Length, result, (UIntPtr)result.Length);
 
             if (res < 0)
             {
                 Utils.HandleError(res);
             }
 
-            // If success it returns the real result size, so we resize. 
-            Array.Resize(ref result, (int) res);
+            // If success it returns the real result size, so we resize.
+            Array.Resize(ref result, (int)res);
 
             return result;
         }
@@ -314,8 +305,7 @@ namespace Devolutions.Cryptography
         /// <param name="key">The key to use for encryption.</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptWithKeyAsBase64String(byte[] data, byte[] key,
-            CipherVersion version = CIPHER_VERSION)
+        public static string EncryptWithKeyAsBase64String(byte[] data, byte[] key, CipherVersion version = CIPHER_VERSION)
         {
             byte[] cipher = Encrypt(data, key, version);
 
@@ -342,13 +332,12 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         [Obsolete("This method has been deprecated. Use EncryptWithPasswordAsBase64String instead.")]
-        public static string EncryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000,
-            CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000, CipherVersion cipherVersion = CIPHER_VERSION)
         {
-            return EncryptWithPasswordAsBase64String(data, password, iterations, cipher_version);
+            return EncryptWithPasswordAsBase64String(data, password, iterations, cipherVersion);
         }
 
         /// <summary>
@@ -357,13 +346,12 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptWithPasswordAsBase64String(byte[] data, string password, uint iterations = 10000,
-            CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptWithPasswordAsBase64String(byte[] data, string password, uint iterations = 10000, CipherVersion cipherVersion = CIPHER_VERSION)
         {
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherVersion == CipherVersion.V1 || cipherVersion == CipherVersion.V2)
             {
                 keySize = 256;
             }
@@ -374,7 +362,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(data, key, cipher_version);
+            byte[] cipher = Encrypt(data, key, cipherVersion);
 
             return Utils.EncodeToBase64String(cipher);
         }
@@ -385,12 +373,11 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = 10000,
-            CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = 10000, CipherVersion cipherVersion = CIPHER_VERSION)
         {
-            return EncryptBase64WithPasswordAsBase64String(b64data, password, iterations, cipher_version);
+            return EncryptBase64WithPasswordAsBase64String(b64data, password, iterations, cipherVersion);
         }
 
         /// <summary>
@@ -399,13 +386,12 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptBase64WithPasswordAsBase64String(string b64data, string password,
-            uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptBase64WithPasswordAsBase64String(string b64data, string password, uint iterations = 10000, CipherVersion cipherVersion = CIPHER_VERSION)
         {
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherVersion == CipherVersion.V1 || cipherVersion == CipherVersion.V2)
             {
                 keySize = 256;
             }
@@ -416,7 +402,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(Utils.Base64StringToByteArray(b64data), key, cipher_version);
+            byte[] cipher = Encrypt(Utils.Base64StringToByteArray(b64data), key, cipherVersion);
 
             return Utils.EncodeToBase64String(cipher);
         }
@@ -434,8 +420,7 @@ namespace Devolutions.Cryptography
             }
 
             byte[] key = new byte[keySize];
-
-            long res = Native.GenerateKeyNative(key, (UIntPtr) keySize);
+            long res = Native.GenerateKeyNative(key, (UIntPtr)keySize);
 
             if (res < 0)
             {
@@ -458,7 +443,7 @@ namespace Devolutions.Cryptography
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
 
-            long res = Native.VerifyPasswordNative(password, (UIntPtr) password.Length, hash, (UIntPtr) hash.Length);
+            long res = Native.VerifyPasswordNative(password, (UIntPtr)password.Length, hash, (UIntPtr)hash.Length);
 
             if (res == 0)
             {
@@ -494,9 +479,7 @@ namespace Devolutions.Cryptography
             }
 
             byte[] result = new byte[hashLength];
-
-            long res = Native.HashPasswordNative(password, (UIntPtr) password.Length, iterations, result,
-                (UIntPtr) result.Length);
+            long res = Native.HashPasswordNative(password, (UIntPtr)password.Length, iterations, result, (UIntPtr)result.Length);
 
             if (res < 0)
             {
@@ -517,8 +500,7 @@ namespace Devolutions.Cryptography
             byte[] publicKey = new byte[keySize];
             byte[] privateKey = new byte[keySize];
 
-            long res = Native.GenerateKeyPairNative(privateKey, (UIntPtr) privateKey.Length, publicKey,
-                (UIntPtr) publicKey.Length);
+            long res = Native.GenerateKeyPairNative(privateKey, (UIntPtr)privateKey.Length, publicKey, (UIntPtr)publicKey.Length);
 
             if (res < 0)
             {
@@ -551,7 +533,7 @@ namespace Devolutions.Cryptography
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
 
-            long resultLength = Native.EncryptSizeNative((UIntPtr) data.Length, (ushort) version);
+            long resultLength = Native.EncryptSizeNative((UIntPtr)data.Length, (ushort)version);
 
             if (resultLength < 0)
             {
@@ -559,9 +541,7 @@ namespace Devolutions.Cryptography
             }
 
             byte[] result = new byte[resultLength];
-
-            long res = Native.EncryptNative(data, (UIntPtr) data.Length, key, (UIntPtr) key.Length, result,
-                (UIntPtr) result.Length, (ushort) version);
+            long res = Native.EncryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length, (ushort)version);
 
             if (res < 0)
             {
@@ -590,7 +570,7 @@ namespace Devolutions.Cryptography
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
 
-            long resultLength = Native.EncryptAsymmetricSizeNative((UIntPtr) data.Length, (ushort) version);
+            long resultLength = Native.EncryptAsymmetricSizeNative((UIntPtr)data.Length, (ushort)version);
 
             if (resultLength < 0)
             {
@@ -598,9 +578,7 @@ namespace Devolutions.Cryptography
             }
 
             byte[] result = new byte[resultLength];
-
-            long res = Native.EncryptAsymmetricNative(data, (UIntPtr) data.Length, publicKey,
-                (UIntPtr) publicKey.Length, result, (UIntPtr) result.Length, (ushort) version);
+            long res = Native.EncryptAsymmetricNative(data, (UIntPtr)data.Length, publicKey, (UIntPtr)publicKey.Length, result, (UIntPtr)result.Length, (ushort)version);
 
             if (res < 0)
             {
@@ -616,13 +594,12 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         [Obsolete("This method has been deprecated. Use EncryptWithPasswordAsBase64String instead.")]
-        public static string EncryptWithPasswordAsString(string data, string password, uint iterations = 10000,
-            CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptWithPasswordAsString(string data, string password, uint iterations = 10000, CipherVersion cipherVersion = CIPHER_VERSION)
         {
-            return EncryptWithPasswordAsBase64String(data, password, iterations, cipher_version);
+            return EncryptWithPasswordAsBase64String(data, password, iterations, cipherVersion);
         }
 
         /// <summary>
@@ -631,13 +608,12 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptWithPasswordAsBase64String(string data, string password, uint iterations = 10000,
-            CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptWithPasswordAsBase64String(string data, string password, uint iterations = 10000, CipherVersion cipherVersion = CIPHER_VERSION)
         {
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherVersion == CipherVersion.V1 || cipherVersion == CipherVersion.V2)
             {
                 keySize = 256;
             }
@@ -648,7 +624,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, cipher_version);
+            byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, cipherVersion);
 
             return Utils.EncodeToBase64String(cipher);
         }
@@ -659,13 +635,12 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[] EncryptWithPassword(byte[] data, string password, uint iterations = 10000,
-            CipherVersion cipher_version = CIPHER_VERSION)
+        public static byte[] EncryptWithPassword(byte[] data, string password, uint iterations = 10000, CipherVersion cipherVersion = CIPHER_VERSION)
         {
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherVersion == CipherVersion.V1 || cipherVersion == CipherVersion.V2)
             {
                 keySize = 256;
             }
@@ -676,7 +651,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(data, key, cipher_version);
+            byte[] cipher = Encrypt(data, key, cipherVersion);
 
             return cipher;
         }
@@ -687,13 +662,12 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[] EncryptBase64WithPassword(string b64data, string password, uint iterations = 10000,
-            CipherVersion cipher_version = CIPHER_VERSION)
+        public static byte[] EncryptBase64WithPassword(string b64data, string password, uint iterations = 10000, CipherVersion cipherVersion = CIPHER_VERSION)
         {
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherVersion == CipherVersion.V1 || cipherVersion == CipherVersion.V2)
             {
                 keySize = 256;
             }
@@ -704,7 +678,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(Utils.Base64StringToByteArray(b64data), key, cipher_version);
+            byte[] cipher = Encrypt(Utils.Base64StringToByteArray(b64data), key, cipherVersion);
 
             return cipher;
         }
@@ -715,13 +689,12 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[] EncryptWithPassword(string data, string password, uint iterations = 10000,
-            CipherVersion cipher_version = CIPHER_VERSION)
+        public static byte[] EncryptWithPassword(string data, string password, uint iterations = 10000, CipherVersion cipherVersion = CIPHER_VERSION)
         {
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherVersion == CipherVersion.V1 || cipherVersion == CipherVersion.V2)
             {
                 keySize = 256;
             }
@@ -732,7 +705,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, cipher_version);
+            byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, cipherVersion);
 
             return cipher;
         }
@@ -886,116 +859,40 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
-        /// 
+        /// Join multiple shares to regenerate a shared secret.
         /// </summary>
-        /// <param name=""></param>
-        /// <param name=""></param>
-        /// <param name=""></param>
-        /// <param name=""></param>
-        /// <param name=""></param>
-        /// <returns></returns>
+        /// <param name="shares">This is a 2-dimensional array representing the shares.</param>
+        /// <returns>The output buffer with the shared secret.</returns>
         public static byte[] JoinShares(byte[][] shares)
         {
             if (shares == null || shares.Length == 0 || !SharesAreValid(shares))
             {
-                throw new Exception("InvalidLength: Not all keys have the same length.");
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
 
             try
             {
-                var nbShares = shares.Length;
-                var sharesLength = shares[0].Length;
-                var secretLength = (int) Native.JoinSharesSizeNative((UIntPtr) sharesLength);
-                var secret = new byte[secretLength];
-                var sharesTemp = new byte[nbShares][];
+                int nbShares = shares.Length;
+                int sharesLength = shares[0].Length;
+                int secretLength = (int)Native.JoinSharesSizeNative((UIntPtr)sharesLength);
+                byte[] secret = new byte[secretLength];
+                byte[][] sharesTemp = new byte[nbShares][];
                 Array.Copy(shares, sharesTemp, shares.Length);
-                var pointers = GetArrayReferences(ref shares, nbShares, secretLength);
+                IntPtr[] pointers = GetArrayReferences(ref shares, nbShares, secretLength);
                 Array.Copy(sharesTemp, shares, sharesTemp.Length);
-                var result = Native.JoinSharesNative((UIntPtr) nbShares, (UIntPtr) sharesLength, pointers, secret, (UIntPtr) secretLength);
-                
+                long result = Native.JoinSharesNative((UIntPtr)nbShares, (UIntPtr)sharesLength, pointers, secret, (UIntPtr)secretLength);
+
                 return secret;
             }
             catch (DevolutionsCryptoException ex)
             {
-                if (ex.NativeError != null) Utils.HandleError((long) ex.NativeError);
+                if (ex.NativeError != null)
+                {
+                    Utils.HandleError((long)ex.NativeError);
+                }
             }
 
             return null;
-        }
-
-        public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength, byte[][] shares)
-        {
-            try
-            {
-                var pointers = InitializeArray(ref shares, nbShares, secretLength);
-                var result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
-                return shares;
-            }
-            catch (DevolutionsCryptoException ex)
-            {
-                if (ex.NativeError != null) Utils.HandleError((long)ex.NativeError);
-            }
-
-            return null;
-        }
-
-        private static IntPtr[] GetArrayReferences(ref byte[][] shares, int nbShares, int secretLength)
-        {
-            var uSecretLength = (int)Native.GenerateSharedKeySizeNative((UIntPtr)secretLength);
-
-            GCHandle[] handles = new GCHandle[(int)nbShares];
-            for (int i = 0; i < shares.Length; i++)
-            {
-                handles[i] = GCHandle.Alloc(shares[i], GCHandleType.Pinned);
-            }
-
-            IntPtr[] pointers = new IntPtr[(int)nbShares];
-            for (int i = 0; i < handles.Length; i++)
-            {
-                pointers[i] = handles[i].AddrOfPinnedObject();
-            }
-
-            for (int i = 0; i < handles.Length; i++)
-            {
-                handles[i].Free();
-            }
-
-            return pointers;
-        }
-
-        private static IntPtr[] InitializeArray(ref byte[][] shares, int nbShares, int secretLength)
-        {
-            var uSecretLength = (int)Native.GenerateSharedKeySizeNative((UIntPtr)secretLength);
-
-            for (int i = 0; i < nbShares; i++)
-            {
-                shares[i] = new byte[uSecretLength];
-            }
-
-            GCHandle[] handles = new GCHandle[(int)nbShares];
-            for (int i = 0; i < shares.Length; i++)
-            {
-                handles[i] = GCHandle.Alloc(shares[i], GCHandleType.Pinned);
-            }
-
-            IntPtr[] pointers = new IntPtr[(int)nbShares];
-            for (int i = 0; i < handles.Length; i++)
-            {
-                pointers[i] = handles[i].AddrOfPinnedObject();
-            }
-
-            for (int i = 0; i < handles.Length; i++)
-            {
-                handles[i].Free();
-            }
-
-            return pointers;
-        }
-
-        private static bool SharesAreValid(byte[][] shares)
-        {
-            var len = shares.First().Length;
-            return shares.All(x => x.Length == len);
         }
 
         /// <summary>
@@ -1044,6 +941,29 @@ namespace Devolutions.Cryptography
                     throw;
                 }
             }
+        }
+
+        public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength, byte[][] shares)
+        {
+            try
+            {
+                if (shares != null)
+                {
+                    IntPtr[] pointers = InitializeArray(ref shares, nbShares, secretLength);
+                    long result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
+                }
+
+                return shares;
+            }
+            catch (DevolutionsCryptoException ex)
+            {
+                if (ex.NativeError != null)
+                {
+                    Utils.HandleError((long)ex.NativeError);
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -1153,6 +1073,65 @@ namespace Devolutions.Cryptography
             }
 
             return new Guid(apiKey);
+        }
+
+        private static IntPtr[] GetArrayReferences(ref byte[][] shares, int nbShares, int secretLength)
+        {
+            int uSecretLength = (int)Native.GenerateSharedKeySizeNative((UIntPtr)secretLength);
+
+            GCHandle[] handles = new GCHandle[(int)nbShares];
+            for (int i = 0; i < shares.Length; i++)
+            {
+                handles[i] = GCHandle.Alloc(shares[i], GCHandleType.Pinned);
+            }
+
+            IntPtr[] pointers = new IntPtr[(int)nbShares];
+            for (int i = 0; i < handles.Length; i++)
+            {
+                pointers[i] = handles[i].AddrOfPinnedObject();
+            }
+
+            for (int i = 0; i < handles.Length; i++)
+            {
+                handles[i].Free();
+            }
+
+            return pointers;
+        }
+
+        private static IntPtr[] InitializeArray(ref byte[][] shares, int nbShares, int secretLength)
+        {
+            int uSecretLength = (int)Native.GenerateSharedKeySizeNative((UIntPtr)secretLength);
+
+            for (int i = 0; i < nbShares; i++)
+            {
+                shares[i] = new byte[uSecretLength];
+            }
+
+            GCHandle[] handles = new GCHandle[(int)nbShares];
+            for (int i = 0; i < shares.Length; i++)
+            {
+                handles[i] = GCHandle.Alloc(shares[i], GCHandleType.Pinned);
+            }
+
+            IntPtr[] pointers = new IntPtr[(int)nbShares];
+            for (int i = 0; i < handles.Length; i++)
+            {
+                pointers[i] = handles[i].AddrOfPinnedObject();
+            }
+
+            for (int i = 0; i < handles.Length; i++)
+            {
+                handles[i].Free();
+            }
+
+            return pointers;
+        }
+
+        private static bool SharesAreValid(byte[][] shares)
+        {
+            int len = shares.First().Length;
+            return shares.All(x => x.Length == len);
         }
     }
 }

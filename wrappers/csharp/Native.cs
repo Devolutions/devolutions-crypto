@@ -86,6 +86,46 @@ namespace Devolutions.Cryptography
         }
 
 #if !ANDROID && !IOS && !MAC_MODERN
+        public static long GenerateSharedKeyNative(UIntPtr nbShares, UIntPtr threshold, UIntPtr size, IntPtr[] shares)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return GenerateSharedKey64(nbShares, threshold, size, shares);
+            }
+
+            return GenerateSharedKey86(nbShares, threshold, size, shares);
+        }
+
+        public static long JoinSharesNative(UIntPtr nbShares, UIntPtr sharesLength, IntPtr[] shares, byte[] secret, UIntPtr secretLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return JoinShares64(nbShares, sharesLength, shares, secret, secretLength);
+            }
+
+            return JoinShares86(nbShares, sharesLength, shares, secret, secretLength);
+        }
+
+        public static long JoinSharesSizeNative(UIntPtr size)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return JoinSharesSize64(size);
+            }
+
+            return JoinSharesSize86(size);
+        }
+
+        public static long GenerateSharedKeySizeNative(UIntPtr secretLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return GenerateSharedKeySize64(secretLength);
+            }
+
+            return GenerateSharedKeySize86(secretLength);
+        }
+
         internal static long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength)
         {
             if (Environment.Is64BitProcess)
@@ -231,76 +271,6 @@ namespace Devolutions.Cryptography
             return GenerateKeyPairSizeNative86();
         }
 
-        [DllImport(LibName86, EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateKeyExchangeSizeNative86();
-
-        [DllImport(LibName64, EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateKeyExchangeSizeNative64();
-
-        public static long GenerateSharedKeyNative(UIntPtr nbShares, UIntPtr threshold, UIntPtr size, IntPtr[] shares)
-        {
-            if (Environment.Is64BitProcess)
-            {
-                return GenerateSharedKey64(nbShares, threshold, size, shares);
-            }
-
-            return GenerateSharedKey86(nbShares, threshold, size, shares);
-        }
-
-        [DllImport(LibName64, EntryPoint = "GenerateSharedKey", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateSharedKey64(UIntPtr nbShares, UIntPtr threshold, UIntPtr size, IntPtr[] shares);
-
-        [DllImport(LibName86, EntryPoint = "GenerateSharedKey", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateSharedKey86(UIntPtr nbShares, UIntPtr threshold, UIntPtr size, IntPtr[] shares);
-
-        public static long GenerateSharedKeySizeNative(UIntPtr secretLength)
-        {
-            if (Environment.Is64BitProcess)
-            {
-                return GenerateSharedKeySize64(secretLength);
-            }
-
-            return GenerateSharedKeySize86(secretLength);
-        }
-
-        [DllImport(LibName64, EntryPoint = "GenerateSharedKeySize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateSharedKeySize64(UIntPtr secretLength);
-
-        [DllImport(LibName86, EntryPoint = "GenerateSharedKeySize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long GenerateSharedKeySize86(UIntPtr secretLength);
-
-        public static long JoinSharesNative(UIntPtr nbShares, UIntPtr sharesLength, IntPtr[] shares, byte[] secret, UIntPtr secretLength)
-        {
-            if (Environment.Is64BitProcess)
-            {
-                return JoinShares64(nbShares, sharesLength, shares, secret, secretLength);
-            }
-            
-            return JoinShares86(nbShares, sharesLength, shares, secret, secretLength);
-        }
-
-        [DllImport(LibName64, EntryPoint = "JoinShares", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long JoinShares64(UIntPtr nbShares, UIntPtr sharesLength, IntPtr[] shares, byte[] secret, UIntPtr secretLength);
-
-        [DllImport(LibName86, EntryPoint = "JoinShares", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long JoinShares86(UIntPtr nbShares, UIntPtr sharesLength, IntPtr[] shares, byte[] secret, UIntPtr secretLength);
-
-        public static long JoinSharesSizeNative(UIntPtr size)
-        {
-            if (Environment.Is64BitProcess)
-            {
-                return JoinSharesSize64(size);
-            }
-
-            return JoinSharesSize86(size);
-        }
-
-        [DllImport(LibName64, EntryPoint = "JoinSharesSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long JoinSharesSize64(UIntPtr size);
-
-        [DllImport(LibName86, EntryPoint = "JoinSharesSize", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long JoinSharesSize86(UIntPtr size);
-
         internal static long GenerateKeyNative(byte[] key, UIntPtr keyLength)
         {
             if (Environment.Is64BitProcess)
@@ -410,6 +380,36 @@ namespace Devolutions.Cryptography
 
             return VersionSize86();
         }
+
+        [DllImport(LibName86, EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateKeyExchangeSizeNative86();
+
+        [DllImport(LibName64, EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateKeyExchangeSizeNative64();
+
+        [DllImport(LibName64, EntryPoint = "GenerateSharedKey", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateSharedKey64(UIntPtr nbShares, UIntPtr threshold, UIntPtr size, IntPtr[] shares);
+
+        [DllImport(LibName86, EntryPoint = "GenerateSharedKey", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateSharedKey86(UIntPtr nbShares, UIntPtr threshold, UIntPtr size, IntPtr[] shares);
+
+        [DllImport(LibName64, EntryPoint = "GenerateSharedKeySize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateSharedKeySize64(UIntPtr secretLength);
+
+        [DllImport(LibName86, EntryPoint = "GenerateSharedKeySize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateSharedKeySize86(UIntPtr secretLength);
+
+        [DllImport(LibName64, EntryPoint = "JoinShares", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long JoinShares64(UIntPtr nbShares, UIntPtr sharesLength, IntPtr[] shares, byte[] secret, UIntPtr secretLength);
+
+        [DllImport(LibName86, EntryPoint = "JoinShares", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long JoinShares86(UIntPtr nbShares, UIntPtr sharesLength, IntPtr[] shares, byte[] secret, UIntPtr secretLength);
+
+        [DllImport(LibName64, EntryPoint = "JoinSharesSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long JoinSharesSize64(UIntPtr size);
+
+        [DllImport(LibName86, EntryPoint = "JoinSharesSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long JoinSharesSize86(UIntPtr size);
 
 #pragma warning disable CA2101 // Specify marshaling for P/Invoke string arguments
         [DllImport(LibName86, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
