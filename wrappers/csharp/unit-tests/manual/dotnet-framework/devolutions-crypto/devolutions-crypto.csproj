@@ -10,6 +10,7 @@
     <RootNamespace>Devolutions.Crypto</RootNamespace>
     <AssemblyName>Devolutions.Crypto</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <SuppressLegacyCodeAnalysisDeprecatedWarning>true</SuppressLegacyCodeAnalysisDeprecatedWarning>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -21,6 +22,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>devolutions-crypto.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +32,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>devolutions-crypto.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -44,6 +49,9 @@
     <Compile Include="..\..\..\..\Argon2Parameters.cs">
       <Link>Argon2Parameters.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\..\DevolutionsCryptoException.cs">
+      <Link>DevolutionsCryptoException.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\..\Enums.Argon2.cs">
       <Link>Enums.Argon2.cs</Link>
     </Compile>
@@ -55,9 +63,6 @@
     </Compile>
     <Compile Include="..\..\..\..\Managed.cs">
       <Link>Managed.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\ManagedError.cs">
-      <Link>ManagedError.cs</Link>
     </Compile>
     <Compile Include="..\..\..\..\Native.cs">
       <Link>Native.cs</Link>
@@ -73,9 +78,23 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\Settings.StyleCop">
-      <Link>Settings.StyleCop</Link>
-    </None>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">
+      <Version>2.9.6</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="SecurityCodeScan" Version="3.5.0" />
+    <PackageReference Include="StyleCop.Analyzers">
+      <Version>1.1.118</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="devolutions-crypto.ruleset" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

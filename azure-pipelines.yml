@@ -1,6 +1,9 @@
 trigger:
 - master
 
+pr:
+- master
+
 stages:
 
 - stage: Source_Publishing
@@ -50,8 +53,45 @@ stages:
       workingDirectory: "./devolutions-crypto"
       displayName: "Check Clippy"
 
+- stage: CsharpCodeFormattingCheck
+  dependsOn: [] 
+  jobs:
+  - job: Windows
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - checkout: self
+      lfs: true
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+        addToPath: true
+        architecture: 'x64'
+
+    - bash: |
+        echo "##vso[task.prependpath]c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\Roslyn"        
+        echo "##vso[task.prependpath]c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin"
+      displayName: "Setting up PATH environment variable"
+
+    - script: |
+        rustup update
+        rustup target add x86_64-pc-windows-msvc
+        rustup target add i686-pc-windows-msvc
+      displayName: "Installing rust targets"
+
+    - script: |
+        python GeneratePackage.py WIN
+      workingDirectory: "./wrappers/csharp"
+      displayName: "Building Windows"
+
+    - script: | 
+        msbuild dotnet-framework.sln /t:restore,clean,build /p:TreatWarningsAsErrors=True;RunCodeAnalysis=true
+      workingDirectory: "./wrappers/csharp/unit-tests/manual/dotnet-framework"
+      displayName: "Code Analysis"
+
 - stage: Native_Build
-  dependsOn: RustCodeFormattingCheck
+  dependsOn: [RustCodeFormattingCheck, CsharpCodeFormattingCheck]
   jobs:
   - job: Linux
     pool:
@@ -462,7 +502,6 @@ stages:
     - task: CopyFiles@2
       inputs:
         contents: 'wrappers/wasm/dist/**'
-        flattenFolders: true
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: PublishBuildArtifacts@1

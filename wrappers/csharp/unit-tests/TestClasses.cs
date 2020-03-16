@@ -1,5 +1,9 @@
+#pragma warning disable SA1600 // Elements should be documented
+
 #if DOTNET_FRAMEWORK
+#pragma warning disable SA1300 // Element should begin with upper-case letter
 namespace dotnet_framework
+#pragma warning restore SA1300 // Element should begin with upper-case letter
 #endif
 #if DOTNET_CORE
 namespace dotnet_core
@@ -12,6 +16,7 @@ namespace xamarin_mac_full
     using System.IO;
 
     [SuppressMessage("Microsoft.StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", Justification = "Test Class")]
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1649:File name should match first type name", Justification = "Test Class")]
     public class UnSeekableStream : MemoryStream
     {
         public UnSeekableStream(byte[] buffer) : base(buffer)
@@ -67,3 +72,4 @@ namespace xamarin_mac_full
         }
     }
 }
+#pragma warning restore SA1600 // Elements should be documented

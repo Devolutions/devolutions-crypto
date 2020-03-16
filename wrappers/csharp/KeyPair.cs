@@ -2,10 +2,19 @@ namespace Devolutions.Cryptography
 {
     using System;
 
+    /// <summary>
+    /// Utilitary class to contain both the private and public key.
+    /// </summary>
     public class KeyPair
     {
+        /// <summary>
+        /// The private key.
+        /// </summary>
         public byte[] PrivateKey { get; set; }
 
+        /// <summary>
+        /// The private key as base 64 string.
+        /// </summary>
         public string PrivateKeyString
         {
             get
@@ -19,8 +28,14 @@ namespace Devolutions.Cryptography
             }
         }
 
+        /// <summary>
+        /// The public key.
+        /// </summary>
         public byte[] PublicKey { get; set; }
 
+        /// <summary>
+        /// The public key key as base 64 string.
+        /// </summary>
         public string PublicKeyString
         {
             get

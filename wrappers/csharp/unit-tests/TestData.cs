@@ -1,5 +1,9 @@
+#pragma warning disable SA1600 // Elements should be documented
+
 #if DOTNET_FRAMEWORK
+#pragma warning disable SA1300 // Element should begin with upper-case letter
 namespace dotnet_framework
+#pragma warning restore SA1300 // Element should begin with upper-case letter
 #endif
 #if DOTNET_CORE
 namespace dotnet_core
@@ -149,7 +153,7 @@ namespace xamarin_mac_full
                 0x30,
                 0x37,
                 0xf2,
-                0x49
+                0x49,
             };
 
         public static readonly byte[] BobPublicKey = new byte[]
@@ -253,7 +257,7 @@ namespace xamarin_mac_full
                 0x18,
                 0xd6,
                 0xd1,
-                0x4d
+                0x4d,
             };
 
         public static readonly byte[] TestDeriveBytes = new byte[]
@@ -289,7 +293,7 @@ namespace xamarin_mac_full
                 0x03,
                 0xbb,
                 0x39,
-                0xc4
+                0xc4,
             };
 
         public static readonly byte[] TestDeriveBytes2 = new byte[]
@@ -325,7 +329,7 @@ namespace xamarin_mac_full
                 0x67,
                 0xb7,
                 0xf3,
-                0xe2
+                0xe2,
             };
 
         public static readonly byte[] TestHash = new byte[]
@@ -405,7 +409,8 @@ namespace xamarin_mac_full
                 0x0d,
                 0x08,
                 0x42,
-                0x70
+                0x70,
             };
     }
 }
+#pragma warning restore SA1600 // Elements should be documented
