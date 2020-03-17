@@ -1,16 +1,20 @@
 namespace Devolutions.Cryptography
 {
     using System;
-
+    using System.Runtime.InteropServices;
     using Devolutions.Cryptography.Argon2;
 
     public static class Managed
     {
 #if RDM
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:Field names should not contain underscore", Justification = "Preprocessor directive")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:Field names should not contain underscore", Justification =
+ "Preprocessor directive")]
         private const CipherVersion CIPHER_VERSION = CipherVersion.V1;
 #else
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:Field names should not contain underscore", Justification = "Preprocessor directive")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "StyleCop.CSharp.NamingRules",
+            "SA1310:Field names should not contain underscore",
+            Justification = "Preprocessor directive")]
         private const CipherVersion CIPHER_VERSION = CipherVersion.Latest;
 #endif
 
@@ -182,7 +186,7 @@ namespace Devolutions.Cryptography
 
             byte[] result = new byte[length];
 
-            int saltLength = salt == null ? 0 : salt.Length;
+            int saltLength = salt?.Length ?? 0;
 
             long res = Native.DeriveKeyNative(key, (UIntPtr)key.Length, salt, (UIntPtr)saltLength, (UIntPtr)iterations, result, (UIntPtr)result.Length);
 
@@ -238,7 +242,6 @@ namespace Devolutions.Cryptography
             }
 
             byte[] result = new byte[data.Length];
-
             long res = Native.DecryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length);
 
             if (res < 0)
@@ -420,7 +423,6 @@ namespace Devolutions.Cryptography
             }
 
             byte[] key = new byte[keySize];
-
             long res = Native.GenerateKeyNative(key, (UIntPtr)keySize);
 
             if (res < 0)
@@ -480,7 +482,6 @@ namespace Devolutions.Cryptography
             }
 
             byte[] result = new byte[hashLength];
-
             long res = Native.HashPasswordNative(password, (UIntPtr)password.Length, iterations, result, (UIntPtr)result.Length);
 
             if (res < 0)
@@ -543,7 +544,6 @@ namespace Devolutions.Cryptography
             }
 
             byte[] result = new byte[resultLength];
-
             long res = Native.EncryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length, (ushort)version);
 
             if (res < 0)
@@ -581,7 +581,6 @@ namespace Devolutions.Cryptography
             }
 
             byte[] result = new byte[resultLength];
-
             long res = Native.EncryptAsymmetricNative(data, (UIntPtr)data.Length, publicKey, (UIntPtr)publicKey.Length, result, (UIntPtr)result.Length, (ushort)version);
 
             if (res < 0)
@@ -863,6 +862,58 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// Join multiple shares to regenerate a shared secret.
+        /// </summary>
+        /// <param name="shares">This is a 2-dimensional array representing the shares.</param>
+        /// <returns>The output buffer with the shared secret.</returns>
+        public static byte[] JoinShares(byte[][] shares)
+        {
+            if (!SharesLengthAreValid(shares))
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+#pragma warning disable CA1062 // null-check is already done in SharesLengthAreValid
+            int nbShares = shares.Length;
+#pragma warning restore CA1062 // null-check is already done in SharesLengthAreValid
+
+            int sharesLength = shares[0].Length;
+            int secretLength = (int)Native.JoinSharesSizeNative((UIntPtr)sharesLength);
+
+            byte[] secret = new byte[secretLength];
+
+            // Get unmanaged references
+            GCHandle[] handles = new GCHandle[(int)nbShares];
+            for (int i = 0; i < shares.Length; i++)
+            {
+                handles[i] = GCHandle.Alloc(shares[i], GCHandleType.Pinned);
+            }
+
+            IntPtr[] pointers = new IntPtr[(int)nbShares];
+            for (int i = 0; i < handles.Length; i++)
+            {
+                pointers[i] = handles[i].AddrOfPinnedObject();
+            }
+
+            // Call the native method
+            long result = Native.JoinSharesNative((UIntPtr)nbShares, (UIntPtr)sharesLength, pointers, secret, (UIntPtr)secretLength);
+
+            // Free the pointers
+            for (int i = 0; i < handles.Length; i++)
+            {
+                handles[i].Free();
+            }
+
+            // Handle errors
+            if (result < 0)
+            {
+                Utils.HandleError(result);
+            }
+
+            return secret;
+        }
+
+        /// <summary>
         /// Decrypts the base 64 data (which will be decoded to the original data) with the provided password (which will be encoded into a UTF8 byte array and derived).
         /// </summary>
         /// <param name="b64data">The data to decrypt.</param>
@@ -908,6 +959,44 @@ namespace Devolutions.Cryptography
                     throw;
                 }
             }
+        }
+
+        public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength)
+        {
+            int sharesLength = (int)Native.GenerateSharedKeySizeNative((UIntPtr)secretLength);
+
+            byte[][] shares = new byte[nbShares][];
+
+            for (int i = 0; i < nbShares; i++)
+            {
+                shares[i] = new byte[sharesLength];
+            }
+
+            GCHandle[] handles = new GCHandle[(int)nbShares];
+            for (int i = 0; i < shares.Length; i++)
+            {
+                handles[i] = GCHandle.Alloc(shares[i], GCHandleType.Pinned);
+            }
+
+            IntPtr[] pointers = new IntPtr[(int)nbShares];
+            for (int i = 0; i < handles.Length; i++)
+            {
+                pointers[i] = handles[i].AddrOfPinnedObject();
+            }
+
+            long result = Native.GenerateSharedKeyNative((UIntPtr)nbShares, (UIntPtr)threshold, (UIntPtr)secretLength, pointers);
+            for (int i = 0; i < handles.Length; i++)
+            {
+                handles[i].Free();
+            }
+
+            // Handle errors
+            if (result < 0)
+            {
+                Utils.HandleError(result);
+            }
+
+            return shares;
         }
 
         /// <summary>
@@ -1017,6 +1106,28 @@ namespace Devolutions.Cryptography
             }
 
             return new Guid(apiKey);
+        }
+
+        private static bool SharesLengthAreValid(byte[][] shares)
+        {
+            if (shares == null || shares.Length == 0)
+            {
+                return false;
+            }
+
+            int len = shares[0].Length;
+            bool lengthIsValid = true;
+
+            for (int j = 1; j < shares.Length; j++)
+            {
+                if (shares[j].Length != len)
+                {
+                    lengthIsValid = false;
+                    break;
+                }
+            }
+
+            return lengthIsValid;
         }
     }
 }

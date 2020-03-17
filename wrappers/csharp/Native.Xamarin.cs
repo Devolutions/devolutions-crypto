@@ -14,6 +14,18 @@ namespace Devolutions.Cryptography
 #else
         private const string LibName = "DevolutionsCrypto";
 #endif
+        [DllImport(LibName, EntryPoint = "GenerateSharedKeySize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GenerateSharedKeySizeNative(UIntPtr secretLength);
+
+        [DllImport(LibName, EntryPoint = "GenerateSharedKey", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GenerateSharedKeyNative(UIntPtr nbShares, UIntPtr threshold, UIntPtr size, IntPtr[] shares);
+
+        [DllImport(LibName, EntryPoint = "JoinShares", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long JoinSharesNative(UIntPtr nbShares, UIntPtr sharesLength, IntPtr[] shares, byte[] secret, UIntPtr secretLength);
+
+        [DllImport(LibName, EntryPoint = "JoinSharesSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long JoinSharesSizeNative(UIntPtr size);
+
         [DllImport(LibName, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long DecodeNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
