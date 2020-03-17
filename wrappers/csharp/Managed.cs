@@ -2,6 +2,7 @@ namespace Devolutions.Cryptography
 {
     using System;
     using System.Runtime.InteropServices;
+
     using Devolutions.Cryptography.Argon2;
 
     public static class Managed
@@ -815,37 +816,35 @@ namespace Devolutions.Cryptography
             // This is unfortunatly the best way we found to fix it while keeping backward compatibility.
             // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
             //   we try with the buggy 256 bytes key.
-            try
-            {
-                byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
+            byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
 
+            if (key == null)
+            {
+                return null;
+            }
+
+            byte[] result = DecryptSafe(data, key, out DevolutionsCryptoException exception);
+
+            if (exception != null && exception.NativeError == NativeError.InvalidMac)
+            {
+                key = null;
+                result = null;
+
+                key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
                 if (key == null)
                 {
                     return null;
                 }
 
-                byte[] result = Decrypt(data, key);
-
+                result = Decrypt(data, key);
                 return Utils.ByteArrayToUtf8String(result);
             }
-            catch (DevolutionsCryptoException ex)
+            else if (exception != null)
             {
-                if (ex.NativeError == NativeError.InvalidMac)
-                {
-                    byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
-                    if (key == null)
-                    {
-                        return null;
-                    }
-
-                    byte[] result = Decrypt(data, key);
-                    return Utils.ByteArrayToUtf8String(result);
-                }
-                else
-                {
-                    throw;
-                }
+                throw exception;
             }
+
+            return Utils.ByteArrayToUtf8String(result);
         }
 
         /// <summary>
@@ -926,39 +925,35 @@ namespace Devolutions.Cryptography
             // This is unfortunatly the best way we found to fix it while keeping backward compatibility.
             // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
             //   we try with the buggy 256 bytes key.
-            try
+            byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
+
+            if (key == null)
             {
-                byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
+                return null;
+            }
+
+            byte[] result = DecryptSafe(Utils.Base64StringToByteArray(b64data), key, out DevolutionsCryptoException exception);
+
+            if (exception != null && exception.NativeError == NativeError.InvalidMac)
+            {
+                key = null;
+                result = null;
+
+                key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
 
                 if (key == null)
                 {
                     return null;
                 }
 
-                byte[] result = Decrypt(Utils.Base64StringToByteArray(b64data), key);
-
-                return Utils.ByteArrayToUtf8String(result);
+                result = Decrypt(Utils.Base64StringToByteArray(b64data), key);
             }
-            catch (DevolutionsCryptoException ex)
+            else if (exception != null)
             {
-                if (ex.NativeError == NativeError.InvalidMac)
-                {
-                    byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
-
-                    if (key == null)
-                    {
-                        return null;
-                    }
-
-                    byte[] result = Decrypt(Utils.Base64StringToByteArray(b64data), key);
-
-                    return Utils.ByteArrayToUtf8String(result);
-                }
-                else
-                {
-                    throw;
-                }
+                throw exception;
             }
+
+            return Utils.ByteArrayToUtf8String(result);
         }
 
         public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength)
@@ -1012,39 +1007,35 @@ namespace Devolutions.Cryptography
             //// This is unfortunatly the best way we found to fix it while keeping backward compatibility.
             //// We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
             ////   we try with the buggy 256 bytes key.
-            try
+            byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
+
+            if (key == null)
             {
-                byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
+                return null;
+            }
+
+            byte[] result = DecryptSafe(data, key, out DevolutionsCryptoException exception);
+
+            if (exception != null && exception.NativeError == NativeError.InvalidMac)
+            {
+                key = null;
+                result = null;
+
+                key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
 
                 if (key == null)
                 {
                     return null;
                 }
 
-                byte[] result = Decrypt(data, key);
-
-                return result;
+                result = Decrypt(data, key);
             }
-            catch (DevolutionsCryptoException ex)
+            else if (exception != null)
             {
-                if (ex.NativeError == NativeError.InvalidMac)
-                {
-                    byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
-
-                    if (key == null)
-                    {
-                        return null;
-                    }
-
-                    byte[] result = Decrypt(data, key);
-
-                    return result;
-                }
-                else
-                {
-                    throw;
-                }
+                throw exception;
             }
+
+            return result;
         }
 
         /// <summary>
@@ -1060,39 +1051,35 @@ namespace Devolutions.Cryptography
             // This is unfortunatly the best way we found to fix it while keeping backward compatibility.
             // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
             //   we try with the buggy 256 bytes key.
-            try
+            byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
+
+            if (key == null)
             {
-                byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
+                return null;
+            }
+
+            byte[] result = DecryptSafe(Utils.Base64StringToByteArray(b64data), key, out DevolutionsCryptoException exception);
+
+            if (exception != null && exception.NativeError == NativeError.InvalidMac)
+            {
+                key = null;
+                result = null;
+
+                key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
 
                 if (key == null)
                 {
                     return null;
                 }
 
-                byte[] result = Decrypt(Utils.Base64StringToByteArray(b64data), key);
-
-                return result;
+                result = Decrypt(Utils.Base64StringToByteArray(b64data), key);
             }
-            catch (DevolutionsCryptoException ex)
+            else if (exception != null)
             {
-                if (ex.NativeError == NativeError.InvalidMac)
-                {
-                    byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
-
-                    if (key == null)
-                    {
-                        return null;
-                    }
-
-                    byte[] result = Decrypt(Utils.Base64StringToByteArray(b64data), key);
-
-                    return result;
-                }
-                else
-                {
-                    throw;
-                }
+                throw exception;
             }
+
+            return result;
         }
 
         [Obsolete("This method has been deprecated. Use Managed.GenerateKey instead.")]
@@ -1106,6 +1093,44 @@ namespace Devolutions.Cryptography
             }
 
             return new Guid(apiKey);
+        }
+
+        /// <summary>
+        /// Decrypts the data with the provided key. No exceptions are thrown in case of failure.
+        /// </summary>
+        /// <param name="data">The data to decrypt.</param>
+        /// <param name="key">The key to use for decryption.</param>
+        /// <param name="exception">The exception if an error occurs.</param>
+        /// <returns>Returns the decryption result in a byte array.</returns>
+        internal static byte[] DecryptSafe(byte[] data, byte[] key, out DevolutionsCryptoException exception)
+        {
+            exception = null;
+
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+
+            if (key == null)
+            {
+                exception = new DevolutionsCryptoException(ManagedError.InvalidParameter);
+
+                return null;
+            }
+
+            byte[] result = new byte[data.Length];
+            long res = Native.DecryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length);
+
+            if (res < 0)
+            {
+                exception = Utils.GetDevolutionsCryptoException(res);
+                return null;
+            }
+
+            // If success it returns the real result size, so we resize.
+            Array.Resize(ref result, (int)res);
+
+            return result;
         }
 
         private static bool SharesLengthAreValid(byte[][] shares)
