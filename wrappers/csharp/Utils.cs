@@ -2,7 +2,6 @@ namespace Devolutions.Cryptography
 {
     using System;
     using System.IO;
-    using System.Linq;
     using System.Text;
 
     public static class Utils
@@ -62,7 +61,14 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the arrays concatenated into a single array. </returns>
         public static byte[] ConcatArrays(params byte[][] list)
         {
-            byte[] result = new byte[list.Sum(a => a.Length)];
+            int length = 0;
+
+            for (int i = 0; i < list.Length; i++)
+            {
+                length += list[i].Length;
+            }
+
+            byte[] result = new byte[length];
             int offset = 0;
 
             for (int x = 0; x < list.Length; x++)
@@ -92,7 +98,7 @@ namespace Devolutions.Cryptography
         /// <returns>A byte array.</returns>
         public static byte[] DecodeFromBase64(string base64)
         {
-            if (base64 == null || base64.Length == 0)
+            if (string.IsNullOrEmpty(base64))
             {
                 return null;
             }
@@ -196,22 +202,6 @@ namespace Devolutions.Cryptography
             }
 
             return ((4 * buffer.Length / 3) + 3) & ~3;
-        }
-
-        /// <summary>
-        /// Method used to throw the right exception depending on the error code.
-        /// </summary>
-        /// <param name="errorCode">The error code to handle.</param>
-        public static void HandleError(long errorCode)
-        {
-            if (Enum.IsDefined(typeof(NativeError), (int)errorCode))
-            {
-                throw new DevolutionsCryptoException((NativeError)errorCode);
-            }
-            else
-            {
-                throw new DevolutionsCryptoException(ManagedError.Error);
-            }
         }
 
         /// <summary>
@@ -373,6 +363,37 @@ namespace Devolutions.Cryptography
             }
 
             return Encoding.UTF8.GetString(versionBytes);
+        }
+
+        /// <summary>
+        /// Method used to throw the right exception depending on the error code.
+        /// </summary>
+        /// <param name="errorCode">The error code to handle.</param>
+        internal static void HandleError(long errorCode)
+        {
+            if (Enum.IsDefined(typeof(NativeError), (int)errorCode))
+            {
+                throw new DevolutionsCryptoException((NativeError)errorCode);
+            }
+            else
+            {
+                throw new DevolutionsCryptoException(ManagedError.Error);
+            }
+        }
+
+        /// <summary>
+        /// Method used to return the right exception depending on the error code.
+        /// </summary>
+        /// <param name="errorCode">The error code to handle.</param>
+        /// <returns>The exception matching the error code.</returns>
+        internal static DevolutionsCryptoException GetDevolutionsCryptoException(long errorCode)
+        {
+            if (Enum.IsDefined(typeof(NativeError), (int)errorCode))
+            {
+                return new DevolutionsCryptoException((NativeError)errorCode);
+            }
+
+            return new DevolutionsCryptoException(ManagedError.Error);
         }
     }
 }
