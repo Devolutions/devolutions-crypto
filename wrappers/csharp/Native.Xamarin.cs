@@ -68,7 +68,7 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "GenerateKey", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long GenerateKeyNative(byte[] key, UIntPtr keyLength);
 
-        [DllImport(LibName, EntryPoint = "GetDefaultArgon2ParametersNative", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibName, EntryPoint = "GetDefaultArgon2Parameters", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long GetDefaultArgon2ParametersNative(byte[] argon2Parameters, UIntPtr argon2ParametersLength);
 
         [DllImport(LibName, EntryPoint = "GetDefaultArgon2ParametersSize", CallingConvention = CallingConvention.Cdecl)]
