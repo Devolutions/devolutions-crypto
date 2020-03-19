@@ -1,5 +1,7 @@
 namespace Devolutions.Cryptography
 {
+    using System;
+
     /// <summary>
     /// Devolutions Crypto Data Type.
     /// </summary>
@@ -16,9 +18,15 @@ namespace Devolutions.Cryptography
         Cipher = 2,
 
         /// <summary>
-        /// Hash
+        /// Password Hash
         /// </summary>
-        Hash = 3
+        PasswordHash = 3,
+
+        /// <summary>
+        /// Password Hash
+        /// </summary>
+        [Obsolete("This value has been deprecated. Use DataType.PasswordHash instead.")]
+        Hash = 3,
     }
 
     /// <summary>
