@@ -11,13 +11,16 @@ namespace dotnet_core
 #if XAMARIN_MAC_FULL
 namespace xamarin_mac_full
 #endif
+#if XAMARIN_MAC_MODERN
+namespace xamarin_mac_modern
+#endif
 {
     using System;
     using System.IO;
 
     using Devolutions.Cryptography.Argon2;
 
-#if XAMARIN_MAC_FULL
+#if XAMARIN_MAC_FULL || XAMARIN_MAC_MODERN
     using NUnit.Framework;
     using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
     using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;

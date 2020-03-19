@@ -222,7 +222,7 @@ if sys.argv[1] == "MAC-FULL":
 if sys.argv[1] == "MAC-MODERN":
     architectures = { "arch" : 
                     [
-                        #{"name" : "i686", "value" : "i686-apple-darwin"}, # 32 bit no longer supported by mac
+                        #{"name" : "i686", "value" : "i686-apple-darwin"}, # no longer supported in stable (Tier 3)
                         {"name" : "x86_64", "value" : "x86_64-apple-darwin"}
                     ]
             }
@@ -280,10 +280,10 @@ if sys.argv[1] == "IOS":
     architectures = { "arch" : 
                 [
                     {"name" : "aarch64", "value" : "aarch64-apple-ios"},
-                    {"name" : "armv7", "value" : "armv7-apple-ios"},
-                    {"name" : "armv7s", "value" : "armv7s-apple-ios"},
+                    # {"name" : "armv7", "value" : "armv7-apple-ios"}, no longer supported in stable (Tier 3)
+                    # {"name" : "armv7s", "value" : "armv7s-apple-ios"}, no longer supported in stable (Tier 3)
                     {"name" : "x86_64", "value" : "x86_64-apple-ios"},
-                    {"name" : "i386", "value" : "i386-apple-ios"},
+                    # {"name" : "i386", "value" : "i386-apple-ios"}, no longer supported in stable (Tier 3)
                 ]
         }
 

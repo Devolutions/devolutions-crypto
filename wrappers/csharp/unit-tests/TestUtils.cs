@@ -11,12 +11,16 @@ namespace dotnet_core
 #if XAMARIN_MAC_FULL
 namespace xamarin_mac_full
 #endif
+#if XAMARIN_MAC_MODERN
+namespace xamarin_mac_modern
+#endif
 {
+    using System;
     using System.IO;
 
     using Devolutions.Cryptography;
 
-#if XAMARIN_MAC_FULL
+#if XAMARIN_MAC_FULL || XAMARIN_MAC_MODERN
     using NUnit.Framework;
     using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
     using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;
@@ -31,7 +35,7 @@ namespace xamarin_mac_full
         public void Base64StringToByteArray()
         {
             byte[] data = Utils.Base64StringToByteArray(TestData.Base64TestData);
-            CollectionAssert.AreEqual(data, TestData.BytesTestData);
+            Assert.AreEqual(Convert.ToBase64String(data),  Convert.ToBase64String(TestData.BytesTestData));
         }
 
         [TestMethod]
@@ -46,7 +50,7 @@ namespace xamarin_mac_full
         public void Decode()
         {
             byte[] decodedData = Utils.DecodeFromBase64(TestData.Base64TestData);
-            CollectionAssert.AreEqual(decodedData, TestData.BytesTestData);
+            Assert.AreEqual(Convert.ToBase64String(decodedData), Convert.ToBase64String(TestData.BytesTestData));
         }
 
         [TestMethod]
@@ -74,7 +78,7 @@ namespace xamarin_mac_full
         public void StringToByteArray()
         {
             byte[] data = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
-            CollectionAssert.AreEqual(Utils.StringToUtf8ByteArray(TestData.Base64TestData), data);
+            Assert.AreEqual(Convert.ToBase64String(Utils.StringToUtf8ByteArray(TestData.Base64TestData)), Convert.ToBase64String(data));
         }
 
         [TestMethod]

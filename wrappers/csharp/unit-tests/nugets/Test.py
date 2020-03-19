@@ -214,3 +214,111 @@ if sys.argv[1] == "XAMARIN-MAC-FULL":
 
     if "Overall result: Failed" in output:
         exit(1)
+
+if sys.argv[1] == "XAMARIN-MAC-MODERN":
+    # Patch submodule for pipeline (MSBuildExtensionsPath is wrong)
+    print("patching submodule")
+    filedata = ""
+    with open('./xamarin-mac-modern/guiunit/src/framework/GuiUnit_xammac_mobile.csproj','r') as file:
+        filedata = file.read()
+        filedata = filedata.replace("""<Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />""", """<Import Project="/Library/Frameworks/Xamarin.Mac.framework/Versions/Current/lib/msbuild/Xamarin.Mac.CSharp.targets" />""")
+
+    with open('./xamarin-mac-modern/guiunit/src/framework/GuiUnit_xammac_mobile.csproj','w') as file:
+        file.write(filedata)
+
+    print("Nuget Cache Clear")
+    print("==========================================================================")    
+    
+    # CLEAN
+    output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./xamarin-mac-modern")
+    print(output)
+
+    print("Remove Local NuGet Source")
+    print("==========================================================================")
+    output = get_output(["nuget", "sources", "remove", "-Name", "LOCALDEVOCRYPTO"])
+    print(output)
+
+    print("Nuget Remove Nuget.org Devolutions.Crypto Package")
+    print("==========================================================================")
+    output = get_output(["dotnet", "remove", "package", "Devolutions.Crypto.Mac.Modern"], cwd="./xamarin-mac-modern")
+    print(output)
+
+    # Restore    
+    print("Nuget Restore Global Packages")
+    print("==========================================================================")
+    output = get_output(["dotnet", "restore", "./xamarin-mac-modern", "--verbosity", "normal"])
+    print(output)
+
+    print("Add Local NuGet Source")
+    print("==========================================================================")
+    print(os.path.join(script_dir, "Nugets"))
+    output = get_output(["nuget", "sources", "add", "-Name", "LOCALDEVOCRYPTO", "-Source", os.path.join(script_dir, "Nugets")])
+    print(output)
+
+    print("Installing Nuget Package in Nugets Source")
+    print("==========================================================================")
+    
+    output = get_output(["nuget", "add", "./Nugets/Devolutions.Crypto.Mac.Modern." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
+    print(output)
+
+    # Small hack to fix broken xamarin support
+    # If a PackageReference element is not present in the csproj
+    # The dotnet add package will fail with an unsupported project error.
+    print("hack csproj")
+
+    fixdata = """
+        <Reference Include="Xamarin.Mac" />
+  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Devolutions.Crypto.Mac.Modern" Version="*" />
+    </ItemGroup>
+  """
+
+    filedata = ""
+    with open('./xamarin-mac-modern/xamarin-mac-modern.csproj','r') as file:
+        filedata = file.read()
+        filedata = filedata.replace("""    <Reference Include="Xamarin.Mac" />
+  </ItemGroup>""", fixdata)
+
+    with open('./xamarin-mac-modern/xamarin-mac-modern.csproj','w') as file:
+        file.write(filedata)
+
+    print("Nuget Add Package Devolutions Crypto to project")
+    print("==========================================================================")
+    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Mac.Modern", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./xamarin-mac-modern")
+    print(output)
+
+    # Remove the package reference
+    # It will leave the one that was added using dotnet add packge
+    filedata = ""
+    with open('./xamarin-mac-modern/xamarin-mac-modern.csproj','r') as file:
+        filedata = file.read()
+        filedata = filedata.replace("""<PackageReference Include="Devolutions.Crypto.Mac.Modern" Version="*" />""", "")
+
+    with open('./xamarin-mac-modern/xamarin-mac-modern.csproj','w') as file:
+        file.write(filedata)
+
+    print("Building Unit tests")
+    print("=========================================================================")
+
+    output = get_output(["msbuild", "./xamarin-mac-modern/xamarin-mac-modern.csproj" , "/t:clean,build", "/p:configuration=debug;platform=AnyCPU"])
+    print(output)
+    if("FAILED" in output):
+        exit(1)
+
+    print("UNIT TESTING")
+    print("=========================================================================")
+
+    print("Running tests")
+    output = get_output(["./xamarin-mac-modern/bin/Debug/xamarin-mac-modern.app/Contents/MacOS/xamarin-mac-modern"])
+    print(output)
+
+    if(not os.path.exists("./xamarin-mac-modern/TestResult.xml")):
+        print("test result not created assume failed!")
+        exit(1)
+
+    with open("./xamarin-mac-modern/TestResult.xml", "r") as testResult:
+        output = testResult.read()
+
+        if "success=\"False\"" in output:
+            exit(1)
