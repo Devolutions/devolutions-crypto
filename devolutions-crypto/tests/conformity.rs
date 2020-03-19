@@ -1,5 +1,11 @@
 use base64;
-use devolutions_crypto::{utils::derive_key, Argon2Parameters, DcDataBlob};
+use devolutions_crypto::{
+    ciphertext::Ciphertext,
+    key::{derive_keypair, KeyVersion, PrivateKey},
+    password_hash::PasswordHash,
+    utils::derive_key,
+    Argon2Parameters,
+};
 
 use std::convert::TryFrom as _;
 
@@ -44,7 +50,7 @@ fn test_symmetric_decrypt_v1() {
     let key = base64::decode("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=").unwrap();
     let ciphertext = base64::decode("DQwCAAAAAQCK1twEut+TeJfFbTWCRgHjyS6bOPOZUEQAeBtSFFRl2jHggM/34n68zIZWGbsZHkufVzU6mTN5N2Dx9bTplrycv5eNVevT4P9FdVHJ751D+A==").unwrap();
 
-    let ciphertext = DcDataBlob::try_from(ciphertext.as_slice()).unwrap();
+    let ciphertext = Ciphertext::try_from(ciphertext.as_slice()).unwrap();
     let result = ciphertext.decrypt(&key).unwrap();
 
     assert_eq!(result, b"test Ciph3rtext~");
@@ -58,14 +64,14 @@ fn test_symmetric_decrypt_v2() {
     )
     .unwrap();
 
-    let ciphertext = DcDataBlob::try_from(ciphertext.as_slice()).unwrap();
+    let ciphertext = Ciphertext::try_from(ciphertext.as_slice()).unwrap();
     let result = ciphertext.decrypt(&key).unwrap();
 
     assert_eq!(result, b"test Ciph3rtext~2");
 }
 
 #[test]
-fn test_derive_keypair() {
+fn test_derive_keypair_v1() {
     let params = Argon2Parameters::try_from(
         base64::decode("AQAAACAAAAABAAAAIAAAAAEAAAACEwAAAAAQAAAAimFBkm3f8+f+YfLRnF5OoQ==")
             .unwrap()
@@ -73,10 +79,10 @@ fn test_derive_keypair() {
     )
     .unwrap();
 
-    let (private_key, public_key) = DcDataBlob::derive_keypair(b"password", &params).unwrap();
+    let keypair = derive_keypair(b"password", &params, KeyVersion::V1).unwrap();
 
-    let private_key: Vec<u8> = private_key.into();
-    let public_key: Vec<u8> = public_key.into();
+    let private_key: Vec<u8> = keypair.private_key.into();
+    let public_key: Vec<u8> = keypair.public_key.into();
 
     assert_eq!(
         private_key,
@@ -90,13 +96,13 @@ fn test_derive_keypair() {
 
 #[test]
 fn test_asymmetric_decrypt_v2() {
-    let private_key = DcDataBlob::try_from(
+    let private_key = PrivateKey::try_from(
         base64::decode("DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ==")
             .unwrap()
             .as_slice(),
     )
     .unwrap();
-    let ciphertext = DcDataBlob::try_from(base64::decode("DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg==").unwrap().as_slice()).unwrap();
+    let ciphertext = Ciphertext::try_from(base64::decode("DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg==").unwrap().as_slice()).unwrap();
 
     let result = ciphertext.decrypt_asymmetric(&private_key).unwrap();
 
@@ -105,9 +111,9 @@ fn test_asymmetric_decrypt_v2() {
 
 #[test]
 fn test_password_hashing_v1() {
-    let hash1 = DcDataBlob::try_from(base64::decode("DQwDAAAAAQAQJwAAXCzLFoyeZhFSDYBAPiIWhCk04aoP/lalOoCl7D+skIY/i+3WT7dn6L8WvnfEq6flCd7i+IcKb3GEK4rCpzhDlw==").unwrap().as_slice()).unwrap();
-    let hash2 = DcDataBlob::try_from(base64::decode("DQwDAAAAAQAKAAAAmH1BBckBJYDD0xfiwkAk1xwKgw8a57YQT0Igm+Faa9LFamTeEJgqn/qHc2R/8XEyK2iLPkVy+IErdGLLtLKJ2g==").unwrap().as_slice()).unwrap();
+    let hash1 = PasswordHash::try_from(base64::decode("DQwDAAAAAQAQJwAAXCzLFoyeZhFSDYBAPiIWhCk04aoP/lalOoCl7D+skIY/i+3WT7dn6L8WvnfEq6flCd7i+IcKb3GEK4rCpzhDlw==").unwrap().as_slice()).unwrap();
+    let hash2 = PasswordHash::try_from(base64::decode("DQwDAAAAAQAKAAAAmH1BBckBJYDD0xfiwkAk1xwKgw8a57YQT0Igm+Faa9LFamTeEJgqn/qHc2R/8XEyK2iLPkVy+IErdGLLtLKJ2g==").unwrap().as_slice()).unwrap();
 
-    assert!(hash1.verify_password(b"password1").unwrap());
-    assert!(hash2.verify_password(b"password1").unwrap());
+    assert!(hash1.verify_password(b"password1"));
+    assert!(hash2.verify_password(b"password1"));
 }

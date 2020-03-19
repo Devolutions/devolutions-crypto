@@ -10,8 +10,14 @@
 
 use super::utils;
 use super::Argon2Parameters;
-use super::DcDataBlob;
 use super::DevoCryptoError;
+
+use super::ciphertext::{encrypt, encrypt_asymmetric, Ciphertext, CiphertextVersion};
+use super::key::{
+    derive_keypair, generate_keypair, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
+};
+use super::password_hash::{hash_password, PasswordHash, PasswordHashVersion};
+use super::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion, Share};
 
 use super::Result;
 
@@ -61,12 +67,12 @@ pub unsafe extern "C" fn Encrypt(
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    let version = match version {
-        0 => None,
-        v => Some(v),
+    let version = match CiphertextVersion::try_from(version) {
+        Ok(v) => v,
+        Err(_) => return DevoCryptoError::UnknownVersion.error_code(),
     };
 
-    match DcDataBlob::encrypt(data, key, version) {
+    match encrypt(data, key, version) {
         Ok(res) => {
             let mut res: Vec<u8> = res.into();
             let length = res.len();
@@ -112,18 +118,18 @@ pub unsafe extern "C" fn EncryptAsymmetric(
     }
 
     let data = slice::from_raw_parts(data, data_length);
-    let public_key = DcDataBlob::try_from(slice::from_raw_parts(public_key, public_key_length));
+    let public_key = PublicKey::try_from(slice::from_raw_parts(public_key, public_key_length));
 
     match public_key {
         Ok(public_key) => {
             let result = slice::from_raw_parts_mut(result, result_length);
 
-            let version = match version {
-                0 => None,
-                v => Some(v),
+            let version = match CiphertextVersion::try_from(version) {
+                Ok(v) => v,
+                Err(_) => return DevoCryptoError::UnknownVersion.error_code(),
             };
 
-            match DcDataBlob::encrypt_asymmetric(data, &public_key, version) {
+            match encrypt_asymmetric(data, &public_key, version) {
                 Ok(res) => {
                     let mut res: Vec<u8> = res.into();
                     let length = res.len();
@@ -203,7 +209,7 @@ pub unsafe extern "C" fn Decrypt(
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    match DcDataBlob::try_from(data) {
+    match Ciphertext::try_from(data) {
         Ok(res) => match res.decrypt(key) {
             Ok(mut res) => {
                 if result.len() >= res.len() {
@@ -250,13 +256,13 @@ pub unsafe extern "C" fn DecryptAsymmetric(
     };
 
     let data = slice::from_raw_parts(data, data_length);
-    let private_key = DcDataBlob::try_from(slice::from_raw_parts(private_key, private_key_length));
+    let private_key = PrivateKey::try_from(slice::from_raw_parts(private_key, private_key_length));
 
     match private_key {
         Ok(private_key) => {
             let result = slice::from_raw_parts_mut(result, result_length);
 
-            match DcDataBlob::try_from(data) {
+            match Ciphertext::try_from(data) {
                 Ok(res) => match res.decrypt_asymmetric(&private_key) {
                     Ok(mut res) => {
                         if result.len() >= res.len() {
@@ -312,16 +318,11 @@ pub unsafe extern "C" fn HashPassword(
     let password = slice::from_raw_parts(password, password_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    match DcDataBlob::hash_password(password, iterations) {
-        Ok(res) => {
-            let mut res: Vec<u8> = res.into();
-            let length = res.len();
-            result[0..length].copy_from_slice(&res);
-            res.zeroize();
-            length as i64
-        }
-        Err(e) => e.error_code(),
-    }
+    let mut res: Vec<u8> = hash_password(password, iterations, PasswordHashVersion::Latest).into();
+    let length = res.len();
+    result[0..length].copy_from_slice(&res);
+    res.zeroize();
+    length as i64
 }
 
 /// Get the size of the resulting hash.
@@ -357,17 +358,14 @@ pub unsafe extern "C" fn VerifyPassword(
     let password = slice::from_raw_parts(password, password_length);
     let hash = slice::from_raw_parts(hash, hash_length);
 
-    match DcDataBlob::try_from(hash) {
-        Ok(res) => match res.verify_password(password) {
-            Ok(res) => {
-                if res {
-                    1
-                } else {
-                    0
-                }
+    match PasswordHash::try_from(hash) {
+        Ok(res) => {
+            if res.verify_password(password) {
+                1
+            } else {
+                0
             }
-            Err(e) => e.error_code(),
-        },
+        }
         Err(e) => e.error_code(),
     }
 }
@@ -405,18 +403,14 @@ pub unsafe extern "C" fn GenerateKeyPair(
     let private = slice::from_raw_parts_mut(private, private_length);
     let public = slice::from_raw_parts_mut(public, public_length);
 
-    match DcDataBlob::generate_keypair() {
-        Ok((priv_res, pub_res)) => {
-            let mut priv_res: Vec<u8> = priv_res.into();
-            let mut pub_res: Vec<u8> = pub_res.into();
-            public[0..pub_res.len()].copy_from_slice(&pub_res);
-            private[0..priv_res.len()].copy_from_slice(&priv_res);
-            priv_res.zeroize();
-            pub_res.zeroize();
-            0
-        }
-        Err(e) => e.error_code(),
-    }
+    let keypair = generate_keypair(KeyVersion::Latest);
+    let mut priv_res: Vec<u8> = keypair.private_key.into();
+    let mut pub_res: Vec<u8> = keypair.public_key.into();
+    public[0..pub_res.len()].copy_from_slice(&pub_res);
+    private[0..priv_res.len()].copy_from_slice(&priv_res);
+    priv_res.zeroize();
+    pub_res.zeroize();
+    0
 }
 
 /// Get the size of the keys in the key exchange key pair.
@@ -471,8 +465,8 @@ pub unsafe extern "C" fn MixKeyExchange(
     let private = slice::from_raw_parts(private, private_size);
     let shared = slice::from_raw_parts_mut(shared, shared_size);
 
-    match (DcDataBlob::try_from(private), DcDataBlob::try_from(public)) {
-        (Ok(private), Ok(public)) => match private.mix_key_exchange(&public) {
+    match (PrivateKey::try_from(private), PublicKey::try_from(public)) {
+        (Ok(private), Ok(public)) => match mix_key_exchange(&private, &public) {
             Ok(mut res) => {
                 shared[0..res.len()].copy_from_slice(&res);
                 res.zeroize();
@@ -516,7 +510,7 @@ pub unsafe extern "C" fn GenerateSharedKey(
         return DevoCryptoError::NullPointer.error_code();
     };
 
-    match DcDataBlob::generate_shared_key(n_shares, threshold, length) {
+    match generate_shared_key(n_shares, threshold, length, SecretSharingVersion::Latest) {
         Ok(s) => {
             let shares = slice::from_raw_parts(shares, n_shares as usize);
 
@@ -574,13 +568,13 @@ pub unsafe extern "C" fn JoinShares(
         return DevoCryptoError::InvalidOutputLength.error_code();
     }
 
-    let shares: Result<Vec<DcDataBlob>> = slice::from_raw_parts(shares, n_shares)
+    let shares: Result<Vec<Share>> = slice::from_raw_parts(shares, n_shares)
         .iter()
-        .map(|s| DcDataBlob::try_from(slice::from_raw_parts(*s, share_length)))
+        .map(|s| Share::try_from(slice::from_raw_parts(*s, share_length)))
         .collect();
 
     match shares {
-        Ok(shares) => match DcDataBlob::join_shares(&shares) {
+        Ok(shares) => match join_shares(&shares) {
             Ok(s) => {
                 let secret = slice::from_raw_parts_mut(secret, secret_length);
                 secret.copy_from_slice(&s);
@@ -746,10 +740,10 @@ pub unsafe extern "C" fn DeriveKeyPair(
         Err(e) => return e.error_code(),
     };
 
-    match DcDataBlob::derive_keypair(password, &parameters) {
-        Ok(keypairs) => {
-            let private: Vec<u8> = keypairs.0.into();
-            let public: Vec<u8> = keypairs.1.into();
+    match derive_keypair(password, &parameters, KeyVersion::Latest) {
+        Ok(keypair) => {
+            let private: Vec<u8> = keypair.private_key.into();
+            let public: Vec<u8> = keypair.public_key.into();
             private_key.copy_from_slice(&private);
             public_key.copy_from_slice(&public);
             0
@@ -859,14 +853,16 @@ fn test_encrypt_length() {
     let one_full_block = b"0123456789abcdef";
     let multiple_blocks = b"0123456789abcdefghijkl";
 
-    let length_zero_enc: Vec<u8> = DcDataBlob::encrypt(length_zero, key, None).unwrap().into();
-    let length_one_block_enc: Vec<u8> = DcDataBlob::encrypt(length_one_block, key, None)
+    let length_zero_enc: Vec<u8> = encrypt(length_zero, key, CiphertextVersion::Latest)
         .unwrap()
         .into();
-    let one_full_block_enc: Vec<u8> = DcDataBlob::encrypt(one_full_block, key, None)
+    let length_one_block_enc: Vec<u8> = encrypt(length_one_block, key, CiphertextVersion::Latest)
         .unwrap()
         .into();
-    let multiple_blocks_enc: Vec<u8> = DcDataBlob::encrypt(multiple_blocks, key, None)
+    let one_full_block_enc: Vec<u8> = encrypt(one_full_block, key, CiphertextVersion::Latest)
+        .unwrap()
+        .into();
+    let multiple_blocks_enc: Vec<u8> = encrypt(multiple_blocks, key, CiphertextVersion::Latest)
         .unwrap()
         .into();
 
@@ -894,12 +890,10 @@ fn test_hash_password_length() {
     let long_password = b"this is a very long and complicated password that is, I hope,\
      longer than the length of the actual hash. It also contains we1rd pa$$w0rd///s.\\";
 
-    let small_password_hash: Vec<u8> = DcDataBlob::hash_password(small_password, 100)
-        .unwrap()
-        .into();
-    let long_password_hash: Vec<u8> = DcDataBlob::hash_password(long_password, 2642)
-        .unwrap()
-        .into();
+    let small_password_hash: Vec<u8> =
+        hash_password(small_password, 100, PasswordHashVersion::Latest).into();
+    let long_password_hash: Vec<u8> =
+        hash_password(long_password, 2642, PasswordHashVersion::Latest).into();
 
     assert_eq!(HashPasswordLength() as usize, small_password_hash.len());
     assert_eq!(HashPasswordLength() as usize, long_password_hash.len());
@@ -907,20 +901,20 @@ fn test_hash_password_length() {
 
 #[test]
 fn test_key_exchange_length() {
-    let (private_bob, public_bob) = DcDataBlob::generate_keypair().unwrap();
-    let (private_alice, public_alice) = DcDataBlob::generate_keypair().unwrap();
+    let bob_keypair = generate_keypair(KeyVersion::Latest);
+    let alice_keypair = generate_keypair(KeyVersion::Latest);
 
-    let private_bob: Vec<u8> = private_bob.into();
-    let public_bob: Vec<u8> = public_bob.into();
+    let private_bob: Vec<u8> = bob_keypair.private_key.into();
+    let public_bob: Vec<u8> = bob_keypair.public_key.into();
 
     assert_eq!(GenerateKeyPairSize() as usize, private_bob.len());
     assert_eq!(GenerateKeyPairSize() as usize, public_bob.len());
 
-    let private_bob = DcDataBlob::try_from(private_bob.as_slice()).unwrap();
-    let public_bob = DcDataBlob::try_from(public_bob.as_slice()).unwrap();
+    let private_bob = PrivateKey::try_from(private_bob.as_slice()).unwrap();
+    let public_bob = PublicKey::try_from(public_bob.as_slice()).unwrap();
 
-    let shared_bob = private_bob.mix_key_exchange(&public_alice).unwrap();
-    let shared_alice = private_alice.mix_key_exchange(&public_bob).unwrap();
+    let shared_bob = mix_key_exchange(&private_bob, &alice_keypair.public_key).unwrap();
+    let shared_alice = mix_key_exchange(&alice_keypair.private_key, &public_bob).unwrap();
 
     assert_eq!(MixKeyExchangeSize() as usize, shared_bob.len());
     assert_eq!(MixKeyExchangeSize() as usize, shared_alice.len());

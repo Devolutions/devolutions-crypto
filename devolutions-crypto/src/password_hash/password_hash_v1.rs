@@ -14,14 +14,14 @@ use zeroize::Zeroize;
 
 #[derive(Zeroize, Clone)]
 #[zeroize(drop)]
-pub struct DcHashV1 {
+pub struct PasswordHashV1 {
     iterations: u32,
     salt: Vec<u8>,
     hash: Vec<u8>,
 }
 
-impl From<DcHashV1> for Vec<u8> {
-    fn from(mut hash: DcHashV1) -> Vec<u8> {
+impl From<PasswordHashV1> for Vec<u8> {
+    fn from(mut hash: PasswordHashV1) -> Vec<u8> {
         let iterations = hash.iterations;
         let mut data = Vec::with_capacity(4);
         data.write_u32::<LittleEndian>(iterations).unwrap();
@@ -33,10 +33,10 @@ impl From<DcHashV1> for Vec<u8> {
     }
 }
 
-impl TryFrom<&[u8]> for DcHashV1 {
+impl TryFrom<&[u8]> for PasswordHashV1 {
     type Error = DevoCryptoError;
 
-    fn try_from(data: &[u8]) -> Result<DcHashV1> {
+    fn try_from(data: &[u8]) -> Result<PasswordHashV1> {
         if data.len() != 68 {
             return Err(DevoCryptoError::InvalidLength);
         };
@@ -49,7 +49,7 @@ impl TryFrom<&[u8]> for DcHashV1 {
         salt.copy_from_slice(&data[4..36]);
         hash.copy_from_slice(&data[36..]);
 
-        Ok(DcHashV1 {
+        Ok(PasswordHashV1 {
             iterations,
             salt,
             hash,
@@ -57,8 +57,8 @@ impl TryFrom<&[u8]> for DcHashV1 {
     }
 }
 
-impl DcHashV1 {
-    pub fn hash_password(pass: &[u8], iterations: u32) -> Result<DcHashV1> {
+impl PasswordHashV1 {
+    pub fn hash_password(pass: &[u8], iterations: u32) -> PasswordHashV1 {
         // Generate salt
         let mut salt = vec![0u8; 32];
         OsRng.fill_bytes(&mut salt);
@@ -67,20 +67,20 @@ impl DcHashV1 {
         let mut hash = vec![0u8; 32];
         pbkdf2::<Hmac<Sha256>>(pass, &salt, iterations as usize, &mut hash);
 
-        Ok(DcHashV1 {
+        PasswordHashV1 {
             iterations,
             salt,
             hash,
-        })
+        }
     }
 
-    pub fn verify_password(&self, pass: &[u8]) -> Result<bool> {
+    pub fn verify_password(&self, pass: &[u8]) -> bool {
         let mut res = vec![0u8; 32];
         pbkdf2::<Hmac<Sha256>>(pass, &self.salt, self.iterations as usize, &mut res);
 
         let is_equal = res.ct_eq(&self.hash).into();
 
         res.zeroize();
-        Ok(is_equal)
+        is_equal
     }
 }
