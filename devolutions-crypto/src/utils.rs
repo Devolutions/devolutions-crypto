@@ -9,7 +9,7 @@ use sha2::Sha256;
 use sharks::Sharks;
 use zeroize::Zeroize;
 
-use crate::DevoCryptoError;
+use crate::Error;
 
 /// Returns a random key of the specified length.
 /// # Arguments
@@ -71,7 +71,7 @@ pub fn join_secret(threshold: u8, shares: &[&[u8]]) -> Result<Vec<u8>> {
     let shares: Vec<sharks::Share> = shares.iter().map(|s| (*s).into()).collect();
     match sharks.recover(&shares) {
         Ok(x) => Ok(x),
-        Err(_) => Err(DevoCryptoError::NotEnoughShares),
+        Err(_) => Err(Error::NotEnoughShares),
     }
 }
 

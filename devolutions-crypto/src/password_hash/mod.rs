@@ -1,7 +1,7 @@
 mod password_hash_v1;
 
 use super::DataType;
-use super::DevoCryptoError;
+use super::Error;
 use super::Header;
 use super::PasswordHashSubtype;
 pub use super::PasswordHashVersion;
@@ -91,25 +91,25 @@ impl From<PasswordHash> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for PasswordHash {
-    type Error = DevoCryptoError;
+    type Error = Error;
 
     /// Parses the data. Can return an Error of the data is invalid or unrecognized.
     fn try_from(data: &[u8]) -> Result<Self> {
         if data.len() < Header::len() {
-            return Err(DevoCryptoError::InvalidLength);
+            return Err(Error::InvalidLength);
         };
 
         let header = Header::try_from(&data[0..Header::len()])?;
 
         if header.data_type != DataType::PasswordHash {
-            return Err(DevoCryptoError::InvalidDataType);
+            return Err(Error::InvalidDataType);
         }
 
         let payload = match PasswordHashVersion::try_from(header.version) {
             Ok(PasswordHashVersion::V1) => {
                 PasswordHashPayload::V1(PasswordHashV1::try_from(&data[Header::len()..])?)
             }
-            _ => return Err(DevoCryptoError::UnknownVersion),
+            _ => return Err(Error::UnknownVersion),
         };
 
         Ok(Self { header, payload })

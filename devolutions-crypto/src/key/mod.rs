@@ -2,7 +2,7 @@ mod key_v1;
 
 use super::Argon2Parameters;
 use super::DataType;
-use super::DevoCryptoError;
+use super::Error;
 use super::Header;
 use super::KeySubtype;
 pub use super::KeyVersion;
@@ -204,23 +204,23 @@ impl From<PublicKey> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for PublicKey {
-    type Error = DevoCryptoError;
+    type Error = Error;
 
     /// Parses the data. Can return an Error of the data is invalid or unrecognized.
     fn try_from(data: &[u8]) -> Result<Self> {
         if data.len() < Header::len() {
-            return Err(DevoCryptoError::InvalidLength);
+            return Err(Error::InvalidLength);
         };
 
         let header = Header::try_from(&data[0..Header::len()])?;
 
         if header.data_type != DataType::Key || header.data_subtype != KeySubtype::Public {
-            return Err(DevoCryptoError::InvalidDataType);
+            return Err(Error::InvalidDataType);
         }
 
         let payload = match KeyVersion::try_from(header.version) {
             Ok(KeyVersion::V1) => PublicKeyPayload::V1(KeyV1Public::from(&data[Header::len()..])),
-            _ => return Err(DevoCryptoError::UnknownVersion),
+            _ => return Err(Error::UnknownVersion),
         };
 
         Ok(Self { header, payload })
@@ -238,23 +238,23 @@ impl From<PrivateKey> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for PrivateKey {
-    type Error = DevoCryptoError;
+    type Error = Error;
 
     /// Parses the data. Can return an Error of the data is invalid or unrecognized.
     fn try_from(data: &[u8]) -> Result<Self> {
         if data.len() < Header::len() {
-            return Err(DevoCryptoError::InvalidLength);
+            return Err(Error::InvalidLength);
         };
 
         let header = Header::try_from(&data[0..Header::len()])?;
 
         if header.data_type != DataType::Key || header.data_subtype != KeySubtype::Private {
-            return Err(DevoCryptoError::InvalidDataType);
+            return Err(Error::InvalidDataType);
         }
 
         let payload = match KeyVersion::try_from(header.version) {
             Ok(KeyVersion::V1) => PrivateKeyPayload::V1(KeyV1Private::from(&data[Header::len()..])),
-            _ => return Err(DevoCryptoError::UnknownVersion),
+            _ => return Err(Error::UnknownVersion),
         };
 
         Ok(Self { header, payload })

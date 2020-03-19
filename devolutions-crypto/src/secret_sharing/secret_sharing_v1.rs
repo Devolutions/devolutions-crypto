@@ -1,4 +1,4 @@
-use super::DevoCryptoError;
+use super::Error;
 use super::Result;
 
 use std::convert::TryFrom;
@@ -27,11 +27,11 @@ impl From<ShareV1> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for ShareV1 {
-    type Error = DevoCryptoError;
+    type Error = Error;
 
     fn try_from(data: &[u8]) -> Result<ShareV1> {
         if data.len() < 3 {
-            return Err(DevoCryptoError::InvalidLength);
+            return Err(Error::InvalidLength);
         };
 
         let threshold = data[0];
@@ -48,7 +48,7 @@ impl ShareV1 {
         length: usize,
     ) -> Result<impl Iterator<Item = ShareV1>> {
         if n_shares < threshold {
-            return Err(DevoCryptoError::NotEnoughShares);
+            return Err(Error::NotEnoughShares);
         }
 
         let mut secret = crate::utils::generate_key(length);
@@ -71,7 +71,7 @@ impl ShareV1 {
         let shares = shares.into_iter();
         let threshold = match shares.clone().peekable().peek() {
             Some(x) => x.threshold,
-            None => return Err(DevoCryptoError::NotEnoughShares),
+            None => return Err(Error::NotEnoughShares),
         };
 
         let sharks = Sharks(threshold);
@@ -79,7 +79,7 @@ impl ShareV1 {
         let shares = shares.map(|s| &s.share);
         match sharks.recover(shares) {
             Ok(x) => Ok(x),
-            Err(_) => Err(DevoCryptoError::NotEnoughShares),
+            Err(_) => Err(Error::NotEnoughShares),
         }
     }
 }

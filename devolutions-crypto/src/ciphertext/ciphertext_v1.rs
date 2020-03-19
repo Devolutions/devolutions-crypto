@@ -1,5 +1,5 @@
 /// Ciphertext V1: AES256-CBC with HMAC-SHA256
-use super::DevoCryptoError;
+use super::Error;
 use super::Header;
 use super::Result;
 
@@ -34,10 +34,10 @@ impl From<CiphertextV1> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for CiphertextV1 {
-    type Error = DevoCryptoError;
+    type Error = Error;
     fn try_from(data: &[u8]) -> Result<CiphertextV1> {
         if data.len() <= 48 {
-            return Err(DevoCryptoError::InvalidLength);
+            return Err(Error::InvalidLength);
         };
 
         let mut iv = vec![0u8; 16];

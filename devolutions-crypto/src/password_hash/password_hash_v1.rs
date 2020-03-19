@@ -1,4 +1,4 @@
-use super::DevoCryptoError;
+use super::Error;
 use super::Result;
 
 use std::convert::TryFrom;
@@ -34,11 +34,11 @@ impl From<PasswordHashV1> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for PasswordHashV1 {
-    type Error = DevoCryptoError;
+    type Error = Error;
 
     fn try_from(data: &[u8]) -> Result<PasswordHashV1> {
         if data.len() != 68 {
-            return Err(DevoCryptoError::InvalidLength);
+            return Err(Error::InvalidLength);
         };
 
         let mut vec_iterations = Cursor::new(&data[0..4]);

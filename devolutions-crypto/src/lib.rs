@@ -15,10 +15,10 @@ use enums::{CiphertextSubtype, DataType, KeySubtype, PasswordHashSubtype, ShareS
 pub use enums::{CiphertextVersion, KeyVersion, PasswordHashVersion, SecretSharingVersion};
 
 pub use argon2parameters::Argon2Parameters;
-pub use error::DevoCryptoError;
+pub use error::Error;
 pub use header::Header;
 
-type Result<T> = std::result::Result<T, error::DevoCryptoError>;
+type Result<T> = std::result::Result<T, error::Error>;
 
 cfg_if! {
     if #[cfg(target_arch = "wasm32")] {

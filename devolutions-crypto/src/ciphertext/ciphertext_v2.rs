@@ -1,7 +1,7 @@
 /// Ciphertext V2: XChaCha20Poly1305
 use super::{PrivateKey, PublicKey};
 
-use super::DevoCryptoError;
+use super::Error;
 use super::Header;
 use super::Result;
 
@@ -42,10 +42,10 @@ impl From<CiphertextV2Symmetric> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for CiphertextV2Symmetric {
-    type Error = DevoCryptoError;
+    type Error = Error;
     fn try_from(data: &[u8]) -> Result<Self> {
         if data.len() <= 24 {
-            return Err(DevoCryptoError::InvalidLength);
+            return Err(Error::InvalidLength);
         };
 
         let mut nonce = vec![0u8; 24];
@@ -132,10 +132,10 @@ impl From<CiphertextV2Asymmetric> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for CiphertextV2Asymmetric {
-    type Error = DevoCryptoError;
+    type Error = Error;
     fn try_from(data: &[u8]) -> Result<Self> {
         if data.len() <= 32 {
-            return Err(DevoCryptoError::InvalidLength);
+            return Err(Error::InvalidLength);
         };
 
         let mut public_key = [0u8; 32];

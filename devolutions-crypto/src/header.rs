@@ -1,6 +1,6 @@
 use super::DataType;
 
-use super::DevoCryptoError;
+use super::Error;
 use super::Result;
 
 use std::convert::TryFrom;
@@ -28,7 +28,7 @@ where
     S: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
     V: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
 {
-    type Error = crate::error::DevoCryptoError;
+    type Error = crate::error::Error;
     fn try_from(data: &[u8]) -> Result<Self> {
         let mut data_cursor = Cursor::new(data);
         let signature = data_cursor.read_u16::<LittleEndian>()?;
@@ -37,22 +37,22 @@ where
         let version = data_cursor.read_u16::<LittleEndian>()?;
 
         if signature != SIGNATURE {
-            return Err(DevoCryptoError::InvalidSignature);
+            return Err(Error::InvalidSignature);
         }
 
         let data_type = match DataType::try_from(data_type) {
             Ok(d) => d,
-            Err(_) => return Err(DevoCryptoError::UnknownType),
+            Err(_) => return Err(Error::UnknownType),
         };
 
         let data_subtype = match S::try_from(data_subtype) {
             Ok(d) => d,
-            Err(_) => return Err(DevoCryptoError::UnknownSubtype),
+            Err(_) => return Err(Error::UnknownSubtype),
         };
 
         let version = match V::try_from(version) {
             Ok(d) => d,
-            Err(_) => return Err(DevoCryptoError::UnknownVersion),
+            Err(_) => return Err(Error::UnknownVersion),
         };
 
         Ok(Header {

@@ -1,6 +1,6 @@
 use super::Argon2Parameters;
 
-use super::DevoCryptoError;
+use super::Error;
 use super::Result;
 
 use rand::rngs::OsRng;
@@ -67,7 +67,7 @@ pub fn generate_keypair() -> KeyV1Pair {
 
 pub fn derive_keypair(password: &[u8], parameters: &Argon2Parameters) -> Result<KeyV1Pair> {
     if parameters.length != 32 {
-        return Err(DevoCryptoError::InvalidLength);
+        return Err(Error::InvalidLength);
     }
     let mut derived_pass = parameters.compute(password)?;
 
