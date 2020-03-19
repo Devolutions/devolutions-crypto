@@ -13,7 +13,7 @@ use hmac::crypto_mac::InvalidKeyLength;
 use hmac::crypto_mac::MacError;
 use rand;
 
-/// The enum containing the various error types.
+/// This crate's error type.
 #[derive(Debug, IntoStaticStr)]
 pub enum Error {
     /// The provided data has an invalid length. Error code: -1
@@ -74,6 +74,7 @@ impl Error {
         }
     }
 
+    /// Returns a description of the error
     pub fn description(&self) -> String {
         match *self {
             Error::InvalidLength => "The provided data has an invalid length.".to_string(),

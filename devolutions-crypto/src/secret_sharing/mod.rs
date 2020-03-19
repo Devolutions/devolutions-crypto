@@ -1,3 +1,25 @@
+//! Module for creating keys splitted between multiple parties.
+//! Use this for "Break The Glass" scenarios or when you want to cryptographically enforce
+//! approval of multiple users.
+//!
+//! This module is used to generate a key that is splitted in multiple `Share`
+//! and that requires a specific amount of them to regenerate the key.
+//! You can think of it as a "Break The Glass" scenario. You can
+//! generate a key using this, lock your entire data by encrypting it
+//! and then you will need, let's say, 3 out of the 5 administrators to decrypt
+//! the data. That data could also be an API key or password of a super admin account.
+//!
+//! ```rust
+//! use devolutions_crypto::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion, Share};
+//!
+//! // You want a key of 32 bytes, splitted between 5 people, and I want a
+//! // minimum of 3 of these shares to regenerate the key.
+//! let shares: Vec<Share> = generate_shared_key(5, 3, 32, SecretSharingVersion::Latest).expect("generation shouldn't fail with the right parameters");
+//!
+//! assert_eq!(shares.len(), 5);
+//! let key = join_shares(&shares[2..5]).expect("joining shouldn't fail with the right shares");
+//! ```
+
 mod secret_sharing_v1;
 
 use super::DataType;
@@ -11,6 +33,7 @@ use secret_sharing_v1::ShareV1;
 
 use std::convert::TryFrom;
 
+/// A part of the secret key. You need multiple of them to recompute the secret key.
 #[derive(Clone)]
 pub struct Share {
     pub(crate) header: Header<ShareSubtype, SecretSharingVersion>,
@@ -22,13 +45,17 @@ enum SharePayload {
     V1(ShareV1),
 }
 
-/// Generate a key and split it in `n` shares use. You will need `threshold` shares to recover the key.
+/// Generate a key and split it in `n_shares`. You will need `threshold` shares to recover the key.
 ///
 /// # Arguments
 ///
 /// * `n_shares` - Number of shares to generate
 /// * `threshold` - The number of shares needed to recover the key
 /// * `length` - The desired length of the key to generate
+///  * `version` - Version of the secret sharing scheme to use. Use `SecretSharingVersion::Latest` if you're not dealing with shared data.
+///
+/// # Returns
+/// Returns an array of `Share`.
 ///
 /// # Example
 /// ```
@@ -61,11 +88,11 @@ pub fn generate_shared_key(
     }
 }
 
-/// Join multiple shares to regenerate a secret key.
+/// Join multiple `Share` to regenerate a secret key.
 ///
 /// # Arguments
 ///
-/// * `shares` - The shares to join
+/// * `shares` - The `Share`s to join
 ///
 /// # Example
 /// ```

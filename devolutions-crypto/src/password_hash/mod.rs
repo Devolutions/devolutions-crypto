@@ -1,3 +1,17 @@
+//! Module for password hashing and verification. Use this if you need to store user passwords.
+//!
+//! You can use this module to hash a password and validate it afterward. This is the recommended way to verify a user password on login.
+//! ```rust
+//! use devolutions_crypto::password_hash::{hash_password, PasswordHashVersion};
+//!
+//! let password = b"somesuperstrongpa$$w0rd!";
+//!
+//! let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest);
+//!
+//! assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!"));
+//! assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));
+//! ```
+
 mod password_hash_v1;
 
 use super::DataType;
@@ -11,6 +25,7 @@ use password_hash_v1::PasswordHashV1;
 
 use std::convert::TryFrom;
 
+/// A versionned password hash. Can be used to validate a password without storing the password.
 #[derive(Clone)]
 pub struct PasswordHash {
     pub(crate) header: Header<PasswordHashSubtype, PasswordHashVersion>,
@@ -22,14 +37,15 @@ enum PasswordHashPayload {
     V1(PasswordHashV1),
 }
 
-/// Creates a data blob containing a password hash.
+/// Creates a `PasswordHash` containing the password verifier.
 /// # Arguments
 ///  * `password` - The password to hash.
 ///  * `iterations` - The number of iterations of the password hash.
 ///                     A higher number is slower but harder to brute-force.
 ///                     The recommended is 10000, but the number can be set by the user.
+///  * `version` - Version of the library to hash the password with. Use `PasswordHashVersion::Latest` if you're not dealing with shared data.
 /// # Returns
-/// Returns the hashed password.
+/// Returns the `PasswordHash` containing the password verifier.
 /// # Example
 /// ```rust
 /// use devolutions_crypto::password_hash::{hash_password, PasswordHashVersion};
@@ -58,9 +74,9 @@ pub fn hash_password(
 }
 
 impl PasswordHash {
-    /// Verify if the blob matches with the specified password. Should execute in constant time.
+    /// Verify if the `PasswordHash` matches with the specified password. Should execute in constant time.
     /// # Arguments
-    ///  * `password` - Password to verify.
+    ///  * `password` - The password to verify.
     /// # Returns
     /// Returns true if the password matches and false if it doesn't.
     /// # Example

@@ -1,3 +1,54 @@
+//! Module for dealing with wrapped keys and key exchange.
+//!
+//! For now, this module only deal with keypairs, as the symmetric keys are not wrapped yet.
+//!
+//! ### Generation/Derivation
+//!
+//! You have two ways to generate a `KeyPair`: Using `generate_keypair` will generate a random one, using `derive_keypair` will derive one from another password or key along with derivation parameters(including salt). Except in specific circumstances, you should use `generate_keypair`.
+//!
+//! Asymmetric keys have two uses. They can be used to [encrypt and decrypt data](##asymmetric) and to perform a [key exchange](#key-exchange).
+//!
+//! #### `generate_keypair`
+//! ```rust
+//! use devolutions_crypto::key::{generate_keypair, KeyVersion, KeyPair};
+//!
+//! let keypair: KeyPair = generate_keypair(KeyVersion::Latest);
+//! ```
+//!
+//! #### `derive_keypair`
+//! ```rust
+//! use devolutions_crypto::Argon2Parameters;
+//! use devolutions_crypto::key::{KeyVersion, KeyPair, derive_keypair};
+//!
+//! let parameters: Argon2Parameters = Default::default();
+//! let keypair: KeyPair = derive_keypair(b"thisisapassword", &parameters, KeyVersion::Latest).expect("derivation should not fail");
+//! ```
+//!
+//! ### Key Exchange
+//!
+//! The goal of using a key exchange is to get a shared secret key between
+//! two parties without making it possible for users listening on the conversation
+//! to guess that shared key.
+//! 1. Alice and Bob generates a `KeyPair` each.
+//! 2. Alice and Bob exchanges their `PublicKey`.
+//! 3. Alice mix her `PrivateKey` with Bob's `PublicKey`. This gives her the shared key.
+//! 4. Bob mixes his `PrivateKey` with Alice's `PublicKey`. This gives him the shared key.
+//! 5. Both Bob and Alice has the same shared key, which they can use for symmetric encryption for further communications.
+//!
+//! ```rust
+//! use devolutions_crypto::key::{generate_keypair, mix_key_exchange, KeyVersion, KeyPair};
+//!
+//! let bob_keypair: KeyPair = generate_keypair(KeyVersion::Latest);
+//! let alice_keypair: KeyPair = generate_keypair(KeyVersion::Latest);
+//!
+//! let bob_shared = mix_key_exchange(&bob_keypair.private_key, &alice_keypair.public_key).expect("key exchange should not fail");
+//!
+//! let alice_shared = mix_key_exchange(&alice_keypair.private_key, &bob_keypair.public_key).expect("key exchange should not fail");
+//!
+//! // They now have a shared secret!
+//! assert_eq!(bob_shared, alice_shared);
+//! ```
+
 mod key_v1;
 
 use super::Argon2Parameters;
@@ -15,12 +66,16 @@ use std::convert::TryFrom;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+/// An asymmetric keypair.
 #[derive(Clone)]
 pub struct KeyPair {
+    /// The private key of this pair.
     pub private_key: PrivateKey,
+    /// The public key of this pair.
     pub public_key: PublicKey,
 }
 
+/// A public key. This key can be sent in clear on unsecured channels and stored publicly.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
 #[derive(Clone)]
 pub struct PublicKey {
@@ -28,6 +83,7 @@ pub struct PublicKey {
     payload: PublicKeyPayload,
 }
 
+/// A private key. This key should never be sent over an insecure channel or stored unsecurely.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
 #[derive(Clone)]
 pub struct PrivateKey {
@@ -45,9 +101,11 @@ enum PublicKeyPayload {
     V1(KeyV1Public),
 }
 
-/// Generates a key pair to use in a key exchange or to encrypt data.
+/// Generates a `KeyPair` to use in a key exchange or to encrypt data.
+/// # Arguments
+///  * `version` - Version of the key scheme to use. Use `KeyVersion::Latest` if you're not dealing with shared data.
 /// # Returns
-/// Returns a KeyPair containing the private key and the public key.
+/// Returns a `KeyPair` containing the private key and the public key.
 /// # Example
 /// ```rust
 /// use devolutions_crypto::key::{generate_keypair, KeyVersion};
@@ -79,13 +137,22 @@ pub fn generate_keypair(version: KeyVersion) -> KeyPair {
     }
 }
 
-/// Generate a keypair from a password and parameters.
+/// Derive a `KeyPair` from a password and parameters to use in a key exchange or to encrypt data.
 /// # Arguments
 ///  * `password` - The password to derive.
 ///  * `parameters` - The derivation  parameters to use. You should use Argon2Parameters::default() for each new
 ///    key to generate and reuse the same parameters(including the salt) to regenerate the full key.
+///  * `version` - Version of the key scheme to use. Use `KeyVersion::Latest` if you're not dealing with shared data.
 /// # Returns
-/// A tuple containing a Private key and a Public key, in that order.
+/// Returns a `KeyPair` containing the private key and the public key.
+/// # Example
+/// ```rust
+/// use devolutions_crypto::Argon2Parameters;
+/// use devolutions_crypto::key::{KeyVersion, KeyPair, derive_keypair};
+///
+/// let parameters: Argon2Parameters = Default::default();
+/// let keypair: KeyPair = derive_keypair(b"thisisapassword", &parameters, KeyVersion::Latest).expect("derivation should not fail");
+/// ```
 pub fn derive_keypair(
     password: &[u8],
     parameters: &Argon2Parameters,
@@ -115,13 +182,13 @@ pub fn derive_keypair(
     })
 }
 
-/// Mix a private key with another client public key to get a shared secret.
+/// Mix a `PrivateKey` with another client `PublicKey` to get a secret shared between the two parties.
 /// # Arguments
-///  * `self` - The user's private key obtained through `generate_keypair`.
-///  * `public` - The peer public key.
+///  * `private_key` - The user's `PrivateKey` obtained through `generate_keypair()`.
+///  * `public_key` - The peer's `PublicKey`.
 /// # Returns
 /// Returns a shared secret in the form of a `Vec<u8>`, which can then be used
-///     as an encryption key between the two peers.
+///     as an encryption key between the two parties.
 /// # Example
 /// ```rust
 /// use std::convert::TryFrom as _;

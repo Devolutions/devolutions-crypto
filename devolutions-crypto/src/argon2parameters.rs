@@ -14,16 +14,19 @@ use wasm_bindgen::prelude::*;
 use super::Error;
 use super::Result;
 
-/// Parameters used to derive the password into an argon2 hash.
-/// Used to derive a password into a keypair.
-/// It is recommended to use the default.
-/// You can save it along the user information.
+/// Parameters used to derive the password into an Argon2 hash.
+/// It is used to derive a password into a keypair.
+/// You should use the default, although this may be tweakable by the user in some cases.
+/// Once serialized, you can save it along the user information as it is not sensitive data.
 /// If the hash should never be computed in a non-threaded environment,
 ///  you can raise the "lanes" value to enable multi-threading.
+///
+/// Note that calling `default()` will also generate a new random salt,
+///  so two calls to `default()` will not generate the same structure.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
 #[derive(Clone)]
 pub struct Argon2Parameters {
-    /// Length of the desired hash
+    /// Length of the desired hash. Should be 32 in most case.
     pub length: u32,
     /// Number of parallel jobs to run. Only use if always computed in a multithreaded environment.
     pub lanes: u32,
@@ -31,15 +34,15 @@ pub struct Argon2Parameters {
     pub memory: u32,
     /// Number of iterations(time cost). Higher is better.
     pub iterations: u32,
-    /// The variant to use. You should almost always use Argon2Id
+    /// The variant to use. You should almost always use Argon2Id.
     variant: Variant,
     /// The version of Argon2 to use. Use the latest.
     version: Version,
-    /// Version of this structure in DevolutionsCrypto
+    /// Version of this structure in DevolutionsCrypto.
     dc_version: u32,
-    /// Authenticated but not secret data
+    /// Authenticated but not secret data.
     associated_data: Vec<u8>,
-    /// Secret key to sign the hash. Note that this is not serialized
+    /// Secret key to sign the hash. Note that this is not serialized.
     secret_key: Vec<u8>,
     /// A 16-bytes salt to use. Should not be accessed directly.
     salt: Vec<u8>,
