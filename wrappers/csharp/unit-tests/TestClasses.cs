@@ -11,6 +11,9 @@ namespace dotnet_core
 #if XAMARIN_MAC_FULL
 namespace xamarin_mac_full
 #endif
+#if XAMARIN_MAC_MODERN
+namespace xamarin_mac_modern
+#endif
 {
     using System.Diagnostics.CodeAnalysis;
     using System.IO;

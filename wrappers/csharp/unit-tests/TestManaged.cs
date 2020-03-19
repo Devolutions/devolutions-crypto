@@ -11,8 +11,11 @@ namespace dotnet_core
 #if XAMARIN_MAC_FULL
 namespace xamarin_mac_full
 #endif
+#if XAMARIN_MAC_MODERN
+namespace xamarin_mac_modern
+#endif
 {
-#if XAMARIN_MAC_FULL
+#if XAMARIN_MAC_FULL || XAMARIN_MAC_MODERN
     using NUnit.Framework;
     using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
     using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;
@@ -39,7 +42,7 @@ namespace xamarin_mac_full
         public void Decode()
         {
             byte[] data = Utils.DecodeFromBase64(TestData.Base64TestData);
-            CollectionAssert.AreEqual(data, TestData.BytesTestData);
+            Assert.AreEqual(Convert.ToBase64String(data), Convert.ToBase64String(TestData.BytesTestData));
         }
 
         [TestMethod]
@@ -121,7 +124,7 @@ namespace xamarin_mac_full
         public void DerivePassword()
         {
             byte[] derivedPassword = Managed.DerivePassword(TestData.Base64TestData, null, 100);
-            CollectionAssert.AreEqual(TestData.TestDeriveBytes, derivedPassword);
+            Assert.AreEqual(Convert.ToBase64String(TestData.TestDeriveBytes), Convert.ToBase64String(derivedPassword));
         }
 
         [TestMethod]
@@ -218,7 +221,7 @@ namespace xamarin_mac_full
             byte[] firstKey = Managed.GenerateKey(32);
             Assert.AreEqual(32, firstKey.Length);
             byte[] secondKey = Managed.GenerateKey(32);
-            CollectionAssert.AreNotEqual(firstKey, secondKey);
+            Assert.AreNotEqual(firstKey, secondKey);
         }
 
         [TestMethod]
@@ -228,7 +231,7 @@ namespace xamarin_mac_full
             KeyPair alice = Managed.GenerateKeyPair();
             byte[] bobMix = Managed.MixKeyExchange(bob.PrivateKey, alice.PublicKey);
             byte[] aliceMix = Managed.MixKeyExchange(alice.PrivateKey, bob.PublicKey);
-            CollectionAssert.AreEqual(bobMix, aliceMix);
+            Assert.AreEqual(Convert.ToBase64String(bobMix), Convert.ToBase64String(aliceMix));
         }
 
         [TestMethod]
@@ -295,14 +298,14 @@ namespace xamarin_mac_full
         {
             byte[] bobMix = Managed.MixKeyExchange(TestData.BobPrivateKey, TestData.AlicePublicKey);
             byte[] aliceMix = Managed.MixKeyExchange(TestData.AlicePrivateKey, TestData.BobPublicKey);
-            CollectionAssert.AreEqual(bobMix, aliceMix);
+            Assert.AreEqual(Convert.ToBase64String(bobMix), Convert.ToBase64String(aliceMix));
         }
 
         [TestMethod]
         public void StringToByteArray()
         {
             byte[] dataEncodedToUtf8ByteArray = Utils.StringToUtf8ByteArray(TestData.StringTestData);
-            CollectionAssert.AreEqual(dataEncodedToUtf8ByteArray, TestData.BytesTestData);
+            Assert.AreEqual(Convert.ToBase64String(dataEncodedToUtf8ByteArray), Convert.ToBase64String(TestData.BytesTestData));
         }
 
         [TestMethod]
