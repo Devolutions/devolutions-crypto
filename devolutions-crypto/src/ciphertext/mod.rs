@@ -4,7 +4,7 @@ mod ciphertext_v2;
 use super::CiphertextSubtype;
 pub use super::CiphertextVersion;
 use super::DataType;
-use super::DevoCryptoError;
+use super::Error;
 use super::Header;
 use super::Result;
 
@@ -99,7 +99,7 @@ pub fn encrypt_asymmetric(
                 data, public_key, &header,
             )?)
         }
-        _ => return Err(DevoCryptoError::UnknownVersion),
+        _ => return Err(Error::UnknownVersion),
     };
 
     Ok(Ciphertext { header, payload })
@@ -127,7 +127,7 @@ impl Ciphertext {
         match &self.payload {
             CiphertextPayload::V1(x) => x.decrypt(key, &self.header),
             CiphertextPayload::V2Symmetric(x) => x.decrypt(key, &self.header),
-            _ => Err(DevoCryptoError::InvalidDataType),
+            _ => Err(Error::InvalidDataType),
         }
     }
 
@@ -152,8 +152,8 @@ impl Ciphertext {
     pub fn decrypt_asymmetric(&self, private_key: &PrivateKey) -> Result<Vec<u8>> {
         match &self.payload {
             CiphertextPayload::V2Asymmetric(x) => x.decrypt(private_key, &self.header),
-            CiphertextPayload::V1(_) => Err(DevoCryptoError::UnknownVersion),
-            _ => Err(DevoCryptoError::InvalidDataType),
+            CiphertextPayload::V1(_) => Err(Error::UnknownVersion),
+            _ => Err(Error::InvalidDataType),
         }
     }
 }
@@ -169,18 +169,18 @@ impl From<Ciphertext> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for Ciphertext {
-    type Error = DevoCryptoError;
+    type Error = Error;
 
     /// Parses the data. Can return an Error of the data is invalid or unrecognized.
     fn try_from(data: &[u8]) -> Result<Self> {
         if data.len() < Header::len() {
-            return Err(DevoCryptoError::InvalidLength);
+            return Err(Error::InvalidLength);
         };
 
         let header = Header::try_from(&data[0..Header::len()])?;
 
         if header.data_type != DataType::Ciphertext {
-            return Err(DevoCryptoError::InvalidDataType);
+            return Err(Error::InvalidDataType);
         }
 
         let payload = match header.version {
@@ -197,7 +197,7 @@ impl TryFrom<&[u8]> for Ciphertext {
                     CiphertextV2Asymmetric::try_from(&data[Header::len()..])?,
                 ),
             },
-            _ => return Err(DevoCryptoError::UnknownVersion),
+            _ => return Err(Error::UnknownVersion),
         };
 
         Ok(Self { header, payload })

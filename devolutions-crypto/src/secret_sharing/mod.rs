@@ -1,7 +1,7 @@
 mod secret_sharing_v1;
 
 use super::DataType;
-use super::DevoCryptoError;
+use super::Error;
 use super::Header;
 use super::Result;
 pub use super::SecretSharingVersion;
@@ -85,13 +85,13 @@ where
 
     let version = match shares.clone().peekable().peek() {
         Some(x) => x.header.version,
-        None => return Err(DevoCryptoError::NotEnoughShares),
+        None => return Err(Error::NotEnoughShares),
     };
 
     if !shares.clone().all(|share| match share.payload {
         SharePayload::V1(_) => version == SecretSharingVersion::V1,
     }) {
-        return Err(DevoCryptoError::InconsistentVersion);
+        return Err(Error::InconsistentVersion);
     }
 
     match version {
@@ -103,7 +103,7 @@ where
 
             ShareV1::join_shares(shares)
         }
-        _ => Err(DevoCryptoError::UnknownVersion),
+        _ => Err(Error::UnknownVersion),
     }
 }
 
@@ -118,25 +118,25 @@ impl From<Share> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for Share {
-    type Error = DevoCryptoError;
+    type Error = Error;
 
     /// Parses the data. Can return an Error of the data is invalid or unrecognized.
     fn try_from(data: &[u8]) -> Result<Self> {
         if data.len() < Header::len() {
-            return Err(DevoCryptoError::InvalidLength);
+            return Err(Error::InvalidLength);
         };
 
         let header = Header::try_from(&data[0..Header::len()])?;
 
         if header.data_type != DataType::Share {
-            return Err(DevoCryptoError::InvalidDataType);
+            return Err(Error::InvalidDataType);
         }
 
         let payload = match SecretSharingVersion::try_from(header.version) {
             Ok(SecretSharingVersion::V1) => {
                 SharePayload::V1(ShareV1::try_from(&data[Header::len()..])?)
             }
-            _ => return Err(DevoCryptoError::UnknownVersion),
+            _ => return Err(Error::UnknownVersion),
         };
 
         Ok(Self { header, payload })

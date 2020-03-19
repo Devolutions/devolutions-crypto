@@ -11,7 +11,7 @@ use rand::Rng;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-use super::DevoCryptoError;
+use super::Error;
 use super::Result;
 
 /// Parameters used to derive the password into an argon2 hash.
@@ -97,7 +97,7 @@ impl From<Argon2Parameters> for Vec<u8> {
 }
 
 impl TryFrom<&[u8]> for Argon2Parameters {
-    type Error = DevoCryptoError;
+    type Error = Error;
 
     fn try_from(data: &[u8]) -> Result<Self> {
         let mut data_cursor = Cursor::new(data);
@@ -113,7 +113,7 @@ impl TryFrom<&[u8]> for Argon2Parameters {
             Version::from_u32(data_cursor.read_u8()? as u32),
         ) {
             (Ok(variant), Ok(version)) => (variant, version),
-            _ => return Err(DevoCryptoError::InvalidData),
+            _ => return Err(Error::InvalidData),
         };
 
         let associated_data_length = data_cursor.read_u32::<LittleEndian>()?;

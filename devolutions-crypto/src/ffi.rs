@@ -10,7 +10,7 @@
 
 use super::utils;
 use super::Argon2Parameters;
-use super::DevoCryptoError;
+use super::Error;
 
 use super::ciphertext::{encrypt, encrypt_asymmetric, Ciphertext, CiphertextVersion};
 use super::key::{
@@ -56,11 +56,11 @@ pub unsafe extern "C" fn Encrypt(
     version: u16,
 ) -> i64 {
     if data.is_null() || key.is_null() || result.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     if result_length != EncryptSize(data_length, version) as usize {
-        return DevoCryptoError::InvalidOutputLength.error_code();
+        return Error::InvalidOutputLength.error_code();
     }
 
     let data = slice::from_raw_parts(data, data_length);
@@ -69,7 +69,7 @@ pub unsafe extern "C" fn Encrypt(
 
     let version = match CiphertextVersion::try_from(version) {
         Ok(v) => v,
-        Err(_) => return DevoCryptoError::UnknownVersion.error_code(),
+        Err(_) => return Error::UnknownVersion.error_code(),
     };
 
     match encrypt(data, key, version) {
@@ -110,11 +110,11 @@ pub unsafe extern "C" fn EncryptAsymmetric(
     version: u16,
 ) -> i64 {
     if data.is_null() || public_key.is_null() || result.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     if result_length != EncryptAsymmetricSize(data_length, version) as usize {
-        return DevoCryptoError::InvalidOutputLength.error_code();
+        return Error::InvalidOutputLength.error_code();
     }
 
     let data = slice::from_raw_parts(data, data_length);
@@ -126,7 +126,7 @@ pub unsafe extern "C" fn EncryptAsymmetric(
 
             let version = match CiphertextVersion::try_from(version) {
                 Ok(v) => v,
-                Err(_) => return DevoCryptoError::UnknownVersion.error_code(),
+                Err(_) => return Error::UnknownVersion.error_code(),
             };
 
             match encrypt_asymmetric(data, &public_key, version) {
@@ -159,7 +159,7 @@ pub extern "C" fn EncryptSize(data_length: usize, version: u16) -> i64 {
         0 | 2 => {
             (8 + 24 + data_length + 16) as i64 // Header + nonce + data + Poly1305 tag
         }
-        _ => DevoCryptoError::UnknownVersion.error_code(),
+        _ => Error::UnknownVersion.error_code(),
     }
 }
 
@@ -174,7 +174,7 @@ pub extern "C" fn EncryptAsymmetricSize(data_length: usize, version: u16) -> i64
         0 | 2 => {
             (8 + 32 + 24 + data_length + 16) as i64 // Header + public_key + nonce + data + Poly1305 tag
         }
-        _ => DevoCryptoError::UnknownVersion.error_code(),
+        _ => Error::UnknownVersion.error_code(),
     }
 }
 
@@ -202,7 +202,7 @@ pub unsafe extern "C" fn Decrypt(
     result_length: usize,
 ) -> i64 {
     if data.is_null() || key.is_null() || result.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     let data = slice::from_raw_parts(data, data_length);
@@ -219,7 +219,7 @@ pub unsafe extern "C" fn Decrypt(
                     length as i64
                 } else {
                     res.zeroize();
-                    DevoCryptoError::InvalidOutputLength.error_code()
+                    Error::InvalidOutputLength.error_code()
                 }
             }
             Err(e) => e.error_code(),
@@ -252,7 +252,7 @@ pub unsafe extern "C" fn DecryptAsymmetric(
     result_length: usize,
 ) -> i64 {
     if data.is_null() || private_key.is_null() || result.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     let data = slice::from_raw_parts(data, data_length);
@@ -272,7 +272,7 @@ pub unsafe extern "C" fn DecryptAsymmetric(
                             length as i64
                         } else {
                             res.zeroize();
-                            DevoCryptoError::InvalidOutputLength.error_code()
+                            Error::InvalidOutputLength.error_code()
                         }
                     }
                     Err(e) => e.error_code(),
@@ -308,11 +308,11 @@ pub unsafe extern "C" fn HashPassword(
     result_length: usize,
 ) -> i64 {
     if password.is_null() || result.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     if result_length != HashPasswordLength() as usize {
-        return DevoCryptoError::InvalidOutputLength.error_code();
+        return Error::InvalidOutputLength.error_code();
     };
 
     let password = slice::from_raw_parts(password, password_length);
@@ -352,7 +352,7 @@ pub unsafe extern "C" fn VerifyPassword(
     hash_length: usize,
 ) -> i64 {
     if password.is_null() || hash.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     let password = slice::from_raw_parts(password, password_length);
@@ -391,13 +391,13 @@ pub unsafe extern "C" fn GenerateKeyPair(
     public_length: usize,
 ) -> i64 {
     if private.is_null() || public.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     if private_length != GenerateKeyPairSize() as usize
         || public_length != GenerateKeyPairSize() as usize
     {
-        return DevoCryptoError::InvalidOutputLength.error_code();
+        return Error::InvalidOutputLength.error_code();
     }
 
     let private = slice::from_raw_parts_mut(private, private_length);
@@ -454,11 +454,11 @@ pub unsafe extern "C" fn MixKeyExchange(
     shared_size: usize,
 ) -> i64 {
     if private.is_null() || public.is_null() || shared.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     if shared_size != MixKeyExchangeSize() as usize {
-        return DevoCryptoError::InvalidOutputLength.error_code();
+        return Error::InvalidOutputLength.error_code();
     }
 
     let public = slice::from_raw_parts(public, public_size);
@@ -507,7 +507,7 @@ pub unsafe extern "C" fn GenerateSharedKey(
     shares: *const *mut u8,
 ) -> i64 {
     if shares.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     match generate_shared_key(n_shares, threshold, length, SecretSharingVersion::Latest) {
@@ -516,7 +516,7 @@ pub unsafe extern "C" fn GenerateSharedKey(
 
             for (s, res_s) in s.into_iter().zip(shares) {
                 if res_s.is_null() {
-                    return DevoCryptoError::NullPointer.error_code();
+                    return Error::NullPointer.error_code();
                 };
 
                 let s: Vec<u8> = s.into();
@@ -561,11 +561,11 @@ pub unsafe extern "C" fn JoinShares(
     secret_length: usize,
 ) -> i64 {
     if shares.is_null() || secret.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     if secret_length != JoinSharesSize(share_length) as usize {
-        return DevoCryptoError::InvalidOutputLength.error_code();
+        return Error::InvalidOutputLength.error_code();
     }
 
     let shares: Result<Vec<Share>> = slice::from_raw_parts(shares, n_shares)
@@ -608,7 +608,7 @@ pub extern "C" fn JoinSharesSize(share_length: usize) -> i64 {
 #[no_mangle]
 pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
     if key.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     let key = slice::from_raw_parts_mut(key, key_length);
@@ -643,7 +643,7 @@ pub unsafe extern "C" fn DeriveKey(
     result_length: usize,
 ) -> i64 {
     if key.is_null() || result.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     let salt = if salt.is_null() || salt_length == 0 {
@@ -719,13 +719,13 @@ pub unsafe extern "C" fn DeriveKeyPair(
     public_key_length: usize,
 ) -> i64 {
     if password.is_null() || parameters.is_null() || private_key.is_null() || public_key.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     if private_key_length != DeriveKeyPairSize() as usize
         || public_key_length != DeriveKeyPairSize() as usize
     {
-        return DevoCryptoError::InvalidOutputLength.error_code();
+        return Error::InvalidOutputLength.error_code();
     }
 
     let password = slice::from_raw_parts(password, password_length);
@@ -778,7 +778,7 @@ pub unsafe extern "C" fn Decode(
     output_length: usize,
 ) -> i64 {
     if input.is_null() || output.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
@@ -808,7 +808,7 @@ pub unsafe extern "C" fn Encode(
     output_length: usize,
 ) -> i64 {
     if input.is_null() || output.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     let input = slice::from_raw_parts(input, input_length);
@@ -836,7 +836,7 @@ pub extern "C" fn VersionSize() -> i64 {
 #[no_mangle]
 pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
     if output.is_null() {
-        return DevoCryptoError::NullPointer.error_code();
+        return Error::NullPointer.error_code();
     };
 
     let output = slice::from_raw_parts_mut(output, output_length);
