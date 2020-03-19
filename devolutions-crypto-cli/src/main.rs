@@ -233,25 +233,13 @@ fn generate_key(matches: &ArgMatches) {
 }
 
 fn generate_argon2parameters(matches: &ArgMatches) {
-    let memory = matches
-        .value_of("memory")
-        .unwrap_or("")
-        .parse::<u32>();
+    let memory = matches.value_of("memory").unwrap_or("").parse::<u32>();
 
-    let iterations = matches
-        .value_of("iterations")
-        .unwrap_or("")
-        .parse::<u32>();
+    let iterations = matches.value_of("iterations").unwrap_or("").parse::<u32>();
 
-    let lanes = matches
-        .value_of("lanes")
-        .unwrap_or("")
-        .parse::<u32>();
+    let lanes = matches.value_of("lanes").unwrap_or("").parse::<u32>();
 
-    let length = matches
-        .value_of("length")
-        .unwrap_or("")
-        .parse::<u32>();
+    let length = matches.value_of("length").unwrap_or("").parse::<u32>();
 
     let mut parameters = devolutions_crypto::Argon2Parameters::default();
 
@@ -277,7 +265,8 @@ fn generate_argon2parameters(matches: &ArgMatches) {
 
 fn derive_key(matches: &ArgMatches) {
     let data = matches.value_of("DATA").unwrap().as_bytes();
-    let salt = base64::decode(&matches.value_of("salt").unwrap_or("")).unwrap_or(vec![0u8; 0]);
+    let salt =
+        base64::decode(&matches.value_of("salt").unwrap_or("")).unwrap_or_else(|_| vec![0u8; 0]);
 
     let iterations = matches
         .value_of("iterations")
@@ -300,11 +289,15 @@ fn derive_keypair(matches: &ArgMatches) {
     let parameters = base64::decode(&matches.value_of("parameters").unwrap()).unwrap();
 
     let parameters = devolutions_crypto::Argon2Parameters::try_from(parameters.as_slice()).unwrap();
-    let (private_key, public_key) = devolutions_crypto::DcDataBlob::derive_keypair(data, &parameters).unwrap();
-    
-    println!("Private Key: {}\nPublic Key: {}", base64::encode(&Vec::<u8>::from(private_key)), base64::encode(&Vec::<u8>::from(public_key)));
-}
+    let keypair =
+        devolutions_crypto::key::derive_keypair(data, &parameters, Default::default()).unwrap();
 
+    println!(
+        "Private Key: {}\nPublic Key: {}",
+        base64::encode(&Vec::<u8>::from(keypair.private_key)),
+        base64::encode(&Vec::<u8>::from(keypair.public_key))
+    );
+}
 
 fn encrypt(matches: &ArgMatches) {
     let data = matches.value_of("DATA").unwrap();
@@ -314,9 +307,11 @@ fn encrypt(matches: &ArgMatches) {
         .value_of("version")
         .unwrap_or("")
         .parse::<u16>()
-        .ok();
+        .unwrap();
 
-    let data: Vec<u8> = devolutions_crypto::DcDataBlob::encrypt(data.as_bytes(), &key, version)
+    let version = devolutions_crypto::CiphertextVersion::try_from(version).unwrap();
+
+    let data: Vec<u8> = devolutions_crypto::ciphertext::encrypt(data.as_bytes(), &key, version)
         .unwrap()
         .into();
     println!("{}", base64::encode(&data));
@@ -330,32 +325,35 @@ fn encrypt_asymmetric(matches: &ArgMatches) {
         .value_of("version")
         .unwrap_or("")
         .parse::<u16>()
-        .ok();
+        .unwrap();
 
-    let key = devolutions_crypto::DcDataBlob::try_from(key.as_slice()).unwrap();
+    let version = devolutions_crypto::CiphertextVersion::try_from(version).unwrap();
 
-    let data: Vec<u8> = devolutions_crypto::DcDataBlob::encrypt_asymmetric(data.as_bytes(), &key, version)
-        .unwrap()
-        .into();
+    let key = devolutions_crypto::key::PublicKey::try_from(key.as_slice()).unwrap();
+
+    let data: Vec<u8> =
+        devolutions_crypto::ciphertext::encrypt_asymmetric(data.as_bytes(), &key, version)
+            .unwrap()
+            .into();
     println!("{}", base64::encode(&data));
 }
 
 fn decrypt(matches: &ArgMatches) {
     let data = base64::decode(matches.value_of("DATA").unwrap()).unwrap();
-    let data = devolutions_crypto::DcDataBlob::try_from(data.as_slice()).unwrap();
+    let data = devolutions_crypto::ciphertext::Ciphertext::try_from(data.as_slice()).unwrap();
     let key = base64::decode(&matches.value_of("KEY").unwrap()).unwrap();
 
-    let data: Vec<u8> = devolutions_crypto::DcDataBlob::decrypt(&data, &key).unwrap();
+    let data: Vec<u8> = data.decrypt(&key).unwrap();
     println!("{}", String::from_utf8_lossy(&data));
 }
 
 fn decrypt_asymmetric(matches: &ArgMatches) {
     let data = base64::decode(matches.value_of("DATA").unwrap()).unwrap();
-    let data = devolutions_crypto::DcDataBlob::try_from(data.as_slice()).unwrap();
+    let data = devolutions_crypto::ciphertext::Ciphertext::try_from(data.as_slice()).unwrap();
     let key = base64::decode(&matches.value_of("KEY").unwrap()).unwrap();
-    let key = devolutions_crypto::DcDataBlob::try_from(key.as_slice()).unwrap();
+    let key = devolutions_crypto::key::PrivateKey::try_from(key.as_slice()).unwrap();
 
-    let data: Vec<u8> = devolutions_crypto::DcDataBlob::decrypt_asymmetric(&data, &key).unwrap();
+    let data: Vec<u8> = data.decrypt_asymmetric(&key).unwrap();
     println!("{}", String::from_utf8_lossy(&data));
 }
 
@@ -368,34 +366,65 @@ fn hash_password(matches: &ArgMatches) {
 
     let password = matches.value_of("PASSWORD").unwrap();
 
-    let hash: Vec<u8> = devolutions_crypto::DcDataBlob::hash_password(&password.as_bytes(), iterations).unwrap().into();
+    let hash: Vec<u8> = devolutions_crypto::password_hash::hash_password(
+        &password.as_bytes(),
+        iterations,
+        Default::default(),
+    )
+    .into();
     println!("{}", base64::encode(&hash));
 }
 
 fn verify_password(matches: &ArgMatches) {
     let password = matches.value_of("PASSWORD").unwrap();
 
-    let hash = devolutions_crypto::DcDataBlob::try_from(base64::decode(matches.value_of("HASH").unwrap()).unwrap().as_slice()).unwrap();
+    let hash = devolutions_crypto::password_hash::PasswordHash::try_from(
+        base64::decode(matches.value_of("HASH").unwrap())
+            .unwrap()
+            .as_slice(),
+    )
+    .unwrap();
 
-    println!("{}", hash.verify_password(password.as_bytes()).unwrap());
+    println!("{}", hash.verify_password(password.as_bytes()));
 }
 
 fn generate_keypair(_matches: &ArgMatches) {
-    let (private, public) = devolutions_crypto::DcDataBlob::generate_keypair().unwrap();
+    let keypair = devolutions_crypto::key::generate_keypair(Default::default());
 
-    println!("Private Key: {}\nPublic Key: {}", base64::encode(&Vec::<u8>::from(private)), base64::encode(&Vec::<u8>::from(public)));
+    println!(
+        "Private Key: {}\nPublic Key: {}",
+        base64::encode(&Vec::<u8>::from(keypair.private_key)),
+        base64::encode(&Vec::<u8>::from(keypair.public_key))
+    );
 }
 
 fn mix_key_exchange(matches: &ArgMatches) {
-    let private = devolutions_crypto::DcDataBlob::try_from(base64::decode(matches.value_of("PRIVATE").unwrap().as_bytes()).unwrap().as_slice()).unwrap();
-    let public = devolutions_crypto::DcDataBlob::try_from(base64::decode(matches.value_of("PUBLIC").unwrap().as_bytes()).unwrap().as_slice()).unwrap();
+    let private = devolutions_crypto::key::PrivateKey::try_from(
+        base64::decode(matches.value_of("PRIVATE").unwrap().as_bytes())
+            .unwrap()
+            .as_slice(),
+    )
+    .unwrap();
+    let public = devolutions_crypto::key::PublicKey::try_from(
+        base64::decode(matches.value_of("PUBLIC").unwrap().as_bytes())
+            .unwrap()
+            .as_slice(),
+    )
+    .unwrap();
 
-    println!("{}", base64::encode(&devolutions_crypto::DcDataBlob::mix_key_exchange(&private, &public).unwrap()))
+    println!(
+        "{}",
+        base64::encode(&devolutions_crypto::key::mix_key_exchange(&private, &public).unwrap())
+    )
 }
 
 fn generate_shared_key(matches: &ArgMatches) {
     let n_shares = matches.value_of("shares").unwrap().parse::<u8>().unwrap();
-    let threshold = matches.value_of("threshold").unwrap().parse::<u8>().unwrap();
+    let threshold = matches
+        .value_of("threshold")
+        .unwrap()
+        .parse::<u8>()
+        .unwrap();
 
     let length = matches
         .value_of("length")
@@ -403,7 +432,13 @@ fn generate_shared_key(matches: &ArgMatches) {
         .parse::<usize>()
         .unwrap_or(32);
 
-    let shares = devolutions_crypto::DcDataBlob::generate_shared_key(n_shares, threshold, length).unwrap();
+    let shares = devolutions_crypto::secret_sharing::generate_shared_key(
+        n_shares,
+        threshold,
+        length,
+        Default::default(),
+    )
+    .unwrap();
 
     for (i, s) in shares.into_iter().map(Into::<Vec<u8>>::into).enumerate() {
         let s = base64::encode(&s);
@@ -412,8 +447,17 @@ fn generate_shared_key(matches: &ArgMatches) {
 }
 
 fn join_shares(matches: &ArgMatches) {
-    let shares: Vec<devolutions_crypto::DcDataBlob> = matches.values_of("SHARE").unwrap().map(|s| devolutions_crypto::DcDataBlob::try_from(base64::decode(&s).unwrap().as_slice()).unwrap()).collect();
-    let secret_key = devolutions_crypto::DcDataBlob::join_shares(&shares).unwrap();
+    let shares: Vec<devolutions_crypto::secret_sharing::Share> = matches
+        .values_of("SHARE")
+        .unwrap()
+        .map(|s| {
+            devolutions_crypto::secret_sharing::Share::try_from(
+                base64::decode(&s).unwrap().as_slice(),
+            )
+            .unwrap()
+        })
+        .collect();
+    let secret_key = devolutions_crypto::secret_sharing::join_shares(&shares).unwrap();
 
     println!("{}", base64::encode(&secret_key));
 }

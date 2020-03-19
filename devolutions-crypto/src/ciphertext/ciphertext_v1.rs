@@ -1,7 +1,9 @@
 /// Ciphertext V1: AES256-CBC with HMAC-SHA256
-use super::DcHeader;
 use super::DevoCryptoError;
+use super::Header;
 use super::Result;
+
+use super::{CiphertextSubtype, CiphertextVersion};
 
 use std::convert::TryFrom;
 
@@ -15,14 +17,14 @@ use zeroize::Zeroize;
 
 #[derive(Zeroize, Clone)]
 #[zeroize(drop)]
-pub struct DcCiphertextV1 {
+pub struct CiphertextV1 {
     iv: Vec<u8>,
     ciphertext: Vec<u8>,
     hmac: Vec<u8>,
 }
 
-impl From<DcCiphertextV1> for Vec<u8> {
-    fn from(mut cipher: DcCiphertextV1) -> Vec<u8> {
+impl From<CiphertextV1> for Vec<u8> {
+    fn from(mut cipher: CiphertextV1) -> Vec<u8> {
         let mut data = Vec::new();
         data.append(&mut cipher.iv);
         data.append(&mut cipher.ciphertext);
@@ -31,9 +33,9 @@ impl From<DcCiphertextV1> for Vec<u8> {
     }
 }
 
-impl TryFrom<&[u8]> for DcCiphertextV1 {
+impl TryFrom<&[u8]> for CiphertextV1 {
     type Error = DevoCryptoError;
-    fn try_from(data: &[u8]) -> Result<DcCiphertextV1> {
+    fn try_from(data: &[u8]) -> Result<CiphertextV1> {
         if data.len() <= 48 {
             return Err(DevoCryptoError::InvalidLength);
         };
@@ -46,7 +48,7 @@ impl TryFrom<&[u8]> for DcCiphertextV1 {
         ciphertext.copy_from_slice(&data[16..data.len() - 32]);
         hmac.copy_from_slice(&data[data.len() - 32..]);
 
-        Ok(DcCiphertextV1 {
+        Ok(CiphertextV1 {
             iv,
             ciphertext,
             hmac,
@@ -54,7 +56,7 @@ impl TryFrom<&[u8]> for DcCiphertextV1 {
     }
 }
 
-impl DcCiphertextV1 {
+impl CiphertextV1 {
     fn split_key(secret: &[u8], encryption_key: &mut [u8], signature_key: &mut [u8]) {
         let salt = b"\x00";
         pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, encryption_key);
@@ -63,12 +65,15 @@ impl DcCiphertextV1 {
         pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, signature_key);
     }
 
-    #[allow(dead_code)]
-    pub fn encrypt(data: &[u8], key: &[u8], header: &DcHeader) -> Result<DcCiphertextV1> {
+    pub fn encrypt(
+        data: &[u8],
+        key: &[u8],
+        header: &Header<CiphertextSubtype, CiphertextVersion>,
+    ) -> Result<CiphertextV1> {
         // Split keys
         let mut encryption_key = vec![0u8; 32];
         let mut signature_key = vec![0u8; 32];
-        DcCiphertextV1::split_key(key, &mut encryption_key, &mut signature_key);
+        CiphertextV1::split_key(key, &mut encryption_key, &mut signature_key);
 
         // Generate IV
         let mut iv = vec![0u8; 16];
@@ -95,18 +100,22 @@ impl DcCiphertextV1 {
         // Zero out the key
         signature_key.zeroize();
 
-        Ok(DcCiphertextV1 {
+        Ok(CiphertextV1 {
             iv,
             ciphertext,
             hmac,
         })
     }
 
-    pub fn decrypt(&self, key: &[u8], header: &DcHeader) -> Result<Vec<u8>> {
+    pub fn decrypt(
+        &self,
+        key: &[u8],
+        header: &Header<CiphertextSubtype, CiphertextVersion>,
+    ) -> Result<Vec<u8>> {
         // Split keys
         let mut encryption_key = vec![0u8; 32];
         let mut signature_key = vec![0u8; 32];
-        DcCiphertextV1::split_key(key, &mut encryption_key, &mut signature_key);
+        CiphertextV1::split_key(key, &mut encryption_key, &mut signature_key);
 
         // Verify HMAC
         let mut mac_data: Vec<u8> = (*header).clone().into();

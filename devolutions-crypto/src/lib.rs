@@ -1,15 +1,22 @@
 mod argon2parameters;
-mod data_blob;
 mod enums;
 mod error;
+mod header;
+
+pub mod ciphertext;
+pub mod key;
+pub mod password_hash;
+pub mod secret_sharing;
 pub mod utils;
 
 use cfg_if::cfg_if;
-use enums::DataType;
+use enums::{CiphertextSubtype, DataType, KeySubtype, PasswordHashSubtype, ShareSubtype};
+
+pub use enums::{CiphertextVersion, KeyVersion, PasswordHashVersion, SecretSharingVersion};
 
 pub use argon2parameters::Argon2Parameters;
-pub use data_blob::DcDataBlob;
 pub use error::DevoCryptoError;
+pub use header::Header;
 
 type Result<T> = std::result::Result<T, error::DevoCryptoError>;
 

@@ -22,7 +22,7 @@ cfg_if! {
         fn test_hash_password() {
             let password = "ThisIsAGoodPassword123".as_bytes();
 
-            let hash = wasm::hash_password(password, Some(123)).unwrap();
+            let hash = wasm::hash_password(password, Some(123), None);
             assert!(wasm::verify_password(password, &hash).unwrap());
 
             let bad_password = "thisisabadpassword1234".as_bytes();
@@ -31,8 +31,8 @@ cfg_if! {
 
         #[wasm_bindgen_test]
         fn test_key_exchange() {
-            let bob_keypair = wasm::generate_keypair().unwrap();
-            let alice_keypair = wasm::generate_keypair().unwrap();
+            let bob_keypair = wasm::generate_keypair(None);
+            let alice_keypair = wasm::generate_keypair(None);
 
             let bob_key = wasm::mix_key_exchange(&bob_keypair.private(), &alice_keypair.public()).unwrap();
             let alice_key = wasm::mix_key_exchange(&alice_keypair.private(), &bob_keypair.public()).unwrap();

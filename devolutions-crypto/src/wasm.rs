@@ -7,16 +7,63 @@ use wasm_bindgen::JsCast;
 use js_sys::{Array, Uint8Array};
 
 use super::utils;
-use super::DcDataBlob;
-use super::DevoCryptoError;
+
+use super::{
+    ciphertext,
+    ciphertext::{Ciphertext, CiphertextVersion},
+};
+use super::{
+    key,
+    key::{KeyVersion, PrivateKey, PublicKey},
+};
+use super::{
+    password_hash,
+    password_hash::{PasswordHash, PasswordHashVersion},
+};
+use super::{
+    secret_sharing,
+    secret_sharing::{SecretSharingVersion, Share},
+};
 
 use super::Argon2Parameters;
-use super::DataType;
 
+// Local KeyPair have private fields with getters instead of public field, for wasm_bindgen
 #[wasm_bindgen(inspectable)]
+#[derive(Clone)]
 pub struct KeyPair {
     private_key: PrivateKey,
     public_key: PublicKey,
+}
+
+#[wasm_bindgen]
+impl KeyPair {
+    #[wasm_bindgen(getter)]
+    pub fn private(&self) -> PrivateKey {
+        self.private_key.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn public(&self) -> PublicKey {
+        self.public_key.clone()
+    }
+}
+
+impl From<key::KeyPair> for KeyPair {
+    fn from(keypair: key::KeyPair) -> Self {
+        Self {
+            private_key: keypair.private_key,
+            public_key: keypair.public_key,
+        }
+    }
+}
+
+impl From<KeyPair> for key::KeyPair {
+    fn from(keypair: KeyPair) -> Self {
+        Self {
+            private_key: keypair.private_key,
+            public_key: keypair.public_key,
+        }
+    }
 }
 
 #[wasm_bindgen]
@@ -37,34 +84,16 @@ impl Argon2Parameters {
     }
 }
 
-#[wasm_bindgen(inspectable)]
-#[derive(Clone)]
-pub struct PublicKey {
-    key: DcDataBlob,
-}
-
-#[wasm_bindgen(inspectable)]
-#[derive(Clone)]
-pub struct PrivateKey {
-    key: DcDataBlob,
-}
-
 #[wasm_bindgen]
 impl PublicKey {
     #[wasm_bindgen(getter)]
     pub fn bytes(&self) -> Vec<u8> {
-        self.key.clone().into()
+        self.clone().into()
     }
 
     #[wasm_bindgen(js_name = "fromBytes")]
     pub fn from_bytes(buffer: &[u8]) -> Result<PublicKey, JsValue> {
-        let key = DcDataBlob::try_from(buffer)?;
-
-        if key.header.data_type != DataType::Key || key.header.data_subtype != 2 {
-            Err(DevoCryptoError::InvalidDataType)?
-        };
-
-        Ok(PublicKey { key })
+        Ok(PublicKey::try_from(buffer)?)
     }
 }
 
@@ -72,80 +101,73 @@ impl PublicKey {
 impl PrivateKey {
     #[wasm_bindgen(getter)]
     pub fn bytes(&self) -> Vec<u8> {
-        self.key.clone().into()
+        self.clone().into()
     }
 
     #[wasm_bindgen(js_name = "fromBytes")]
     pub fn from_bytes(buffer: &[u8]) -> Result<PrivateKey, JsValue> {
-        let key = DcDataBlob::try_from(buffer)?;
-
-        if key.header.data_type != DataType::Key || key.header.data_subtype != 1 {
-            Err(DevoCryptoError::InvalidDataType)?
-        };
-
-        Ok(PrivateKey { key })
+        Ok(PrivateKey::try_from(buffer)?)
     }
 }
 
 #[wasm_bindgen]
-impl KeyPair {
-    #[wasm_bindgen(getter)]
-    pub fn private(&self) -> PrivateKey {
-        self.private_key.clone()
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn public(&self) -> PublicKey {
-        self.public_key.clone()
-    }
-}
-
-#[wasm_bindgen]
-pub fn encrypt(data: &[u8], key: &[u8], version: Option<u16>) -> Result<Vec<u8>, JsValue> {
-    Ok(DcDataBlob::encrypt(&data, &key, version)?.into())
+pub fn encrypt(
+    data: &[u8],
+    key: &[u8],
+    version: Option<CiphertextVersion>,
+) -> Result<Vec<u8>, JsValue> {
+    Ok(ciphertext::encrypt(&data, &key, version.unwrap_or(CiphertextVersion::Latest))?.into())
 }
 
 #[wasm_bindgen(js_name = "encryptAsymmetric")]
 pub fn encrypt_asymmetric(
     data: &[u8],
     public_key: PublicKey,
-    version: Option<u16>,
+    version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>, JsValue> {
-    Ok(DcDataBlob::encrypt_asymmetric(&data, &public_key.key, version)?.into())
+    Ok(ciphertext::encrypt_asymmetric(
+        &data,
+        &public_key,
+        version.unwrap_or(CiphertextVersion::Latest),
+    )?
+    .into())
 }
 
 #[wasm_bindgen]
 pub fn decrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>, JsValue> {
-    let data_blob = DcDataBlob::try_from(data)?;
+    let data_blob = Ciphertext::try_from(data)?;
     Ok(data_blob.decrypt(&key)?)
 }
 
 #[wasm_bindgen(js_name = "decryptAsymmetric")]
 pub fn decrypt_asymmetric(data: &[u8], private_key: PrivateKey) -> Result<Vec<u8>, JsValue> {
-    let data_blob = DcDataBlob::try_from(data)?;
-    Ok(data_blob.decrypt_asymmetric(&private_key.key)?)
+    let data_blob = Ciphertext::try_from(data)?;
+    Ok(data_blob.decrypt_asymmetric(&private_key)?)
 }
 
 #[wasm_bindgen(js_name = "hashPassword")]
-pub fn hash_password(password: &[u8], iterations: Option<u32>) -> Result<Vec<u8>, JsValue> {
-    Ok(DcDataBlob::hash_password(&password, iterations.unwrap_or(10000))?.into())
+pub fn hash_password(
+    password: &[u8],
+    iterations: Option<u32>,
+    version: Option<PasswordHashVersion>,
+) -> Vec<u8> {
+    password_hash::hash_password(
+        &password,
+        iterations.unwrap_or(10000),
+        version.unwrap_or(PasswordHashVersion::Latest),
+    )
+    .into()
 }
 
 #[wasm_bindgen(js_name = "verifyPassword")]
 pub fn verify_password(password: &[u8], hash: &[u8]) -> Result<bool, JsValue> {
-    let data_blob = DcDataBlob::try_from(hash)?;
-    Ok(data_blob.verify_password(&password)?)
+    let password_hash = PasswordHash::try_from(hash)?;
+    Ok(password_hash.verify_password(&password))
 }
 
 #[wasm_bindgen(js_name = "generateKeyPair")]
-pub fn generate_keypair() -> Result<KeyPair, JsValue> {
-    let (private, public) = DcDataBlob::generate_keypair()?;
-
-    let keypair = KeyPair {
-        private_key: PrivateKey { key: private },
-        public_key: PublicKey { key: public },
-    };
-    Ok(keypair)
+pub fn generate_keypair(version: Option<KeyVersion>) -> KeyPair {
+    key::generate_keypair(version.unwrap_or(KeyVersion::Latest)).into()
 }
 
 #[wasm_bindgen(js_name = "mixKeyExchange")]
@@ -153,19 +175,16 @@ pub fn mix_key_exchange(
     private_key: &PrivateKey,
     public_key: &PublicKey,
 ) -> Result<Vec<u8>, JsValue> {
-    Ok(private_key.key.mix_key_exchange(&public_key.key)?)
+    Ok(key::mix_key_exchange(private_key, public_key)?)
 }
 
 #[wasm_bindgen(js_name = "deriveKeyPair")]
-pub fn derive_keypair(password: &[u8], parameters: &Argon2Parameters) -> Result<KeyPair, JsValue> {
-    let (private, public) = DcDataBlob::derive_keypair(password, parameters)?;
-
-    let keypair = KeyPair {
-        private_key: PrivateKey { key: private },
-        public_key: PublicKey { key: public },
-    };
-
-    Ok(keypair)
+pub fn derive_keypair(
+    password: &[u8],
+    parameters: &Argon2Parameters,
+    version: Option<KeyVersion>,
+) -> Result<KeyPair, JsValue> {
+    Ok(key::derive_keypair(password, parameters, version.unwrap_or(KeyVersion::Latest))?.into())
 }
 
 #[wasm_bindgen(typescript_custom_section)]
@@ -182,18 +201,24 @@ pub fn generate_shared_key(
     n_shares: u8,
     threshold: u8,
     length: Option<usize>,
+    version: Option<SecretSharingVersion>,
 ) -> Result<Array, JsValue> {
-    DcDataBlob::generate_shared_key(n_shares, threshold, length.unwrap_or(32))?
-        .into_iter()
-        .map(|x| match JsValue::from_serde(&Into::<Vec<u8>>::into(x)) {
-            Ok(s) => Ok(s),
-            Err(e) => {
-                let error = js_sys::Error::new(&format!("{}", e));
-                error.set_name("SerializationError");
-                Err(error.into())
-            }
-        })
-        .collect()
+    secret_sharing::generate_shared_key(
+        n_shares,
+        threshold,
+        length.unwrap_or(32),
+        version.unwrap_or(SecretSharingVersion::Latest),
+    )?
+    .into_iter()
+    .map(|x| match JsValue::from_serde(&Into::<Vec<u8>>::into(x)) {
+        Ok(s) => Ok(s),
+        Err(e) => {
+            let error = js_sys::Error::new(&format!("{}", e));
+            error.set_name("SerializationError");
+            Err(error.into())
+        }
+    })
+    .collect()
 }
 
 #[wasm_bindgen(typescript_custom_section)]
@@ -226,9 +251,9 @@ pub fn join_shares(shares: Array) -> Result<Vec<u8>, JsValue> {
 
     let shares: Result<Vec<_>, _> = shares
         .iter()
-        .map(|x| DcDataBlob::try_from(x.as_slice()))
+        .map(|x| Share::try_from(x.as_slice()))
         .collect();
-    Ok(DcDataBlob::join_shares(&shares?)?)
+    Ok(secret_sharing::join_shares(&shares?)?)
 }
 
 #[wasm_bindgen(js_name = "generateKey")]
@@ -243,7 +268,7 @@ pub fn derive_key(
     iterations: Option<usize>,
     length: Option<usize>,
 ) -> Vec<u8> {
-    let salt = salt.unwrap_or(vec![0u8; 0]);
+    let salt = salt.unwrap_or_else(|| vec![0u8; 0]);
     let iterations = iterations.unwrap_or(10000);
     let length = length.unwrap_or(32);
 

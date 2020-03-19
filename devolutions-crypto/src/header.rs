@@ -11,18 +11,25 @@ use zeroize::Zeroize;
 
 const SIGNATURE: u16 = 0x0C0D;
 
-#[derive(Clone, Zeroize)]
-#[zeroize(drop)]
-pub struct DcHeader {
+#[derive(Clone)]
+pub struct Header<S, V>
+where
+    S: Clone + Default,
+    V: Clone + Default,
+{
     pub signature: u16,
     pub data_type: DataType,
-    pub data_subtype: u16,
-    pub version: u16,
+    pub data_subtype: S,
+    pub version: V,
 }
 
-impl TryFrom<&[u8]> for DcHeader {
+impl<S, V> TryFrom<&[u8]> for Header<S, V>
+where
+    S: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
+    V: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
+{
     type Error = crate::error::DevoCryptoError;
-    fn try_from(data: &[u8]) -> Result<DcHeader> {
+    fn try_from(data: &[u8]) -> Result<Self> {
         let mut data_cursor = Cursor::new(data);
         let signature = data_cursor.read_u16::<LittleEndian>()?;
         let data_type = data_cursor.read_u16::<LittleEndian>()?;
@@ -38,7 +45,17 @@ impl TryFrom<&[u8]> for DcHeader {
             Err(_) => return Err(DevoCryptoError::UnknownType),
         };
 
-        Ok(DcHeader {
+        let data_subtype = match S::try_from(data_subtype) {
+            Ok(d) => d,
+            Err(_) => return Err(DevoCryptoError::UnknownSubtype),
+        };
+
+        let version = match V::try_from(version) {
+            Ok(d) => d,
+            Err(_) => return Err(DevoCryptoError::UnknownVersion),
+        };
+
+        Ok(Header {
             signature,
             data_type,
             data_subtype,
@@ -47,30 +64,40 @@ impl TryFrom<&[u8]> for DcHeader {
     }
 }
 
-impl From<DcHeader> for Vec<u8> {
-    fn from(header: DcHeader) -> Vec<u8> {
+impl<S, V> From<Header<S, V>> for Vec<u8>
+where
+    S: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
+    V: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
+{
+    fn from(header: Header<S, V>) -> Vec<u8> {
         let mut data = Vec::with_capacity(8);
         data.write_u16::<LittleEndian>(header.signature).unwrap();
         data.write_u16::<LittleEndian>(header.data_type.into())
             .unwrap();
-        data.write_u16::<LittleEndian>(header.data_subtype).unwrap();
-        data.write_u16::<LittleEndian>(header.version).unwrap();
+        data.write_u16::<LittleEndian>(header.data_subtype.into())
+            .unwrap();
+        data.write_u16::<LittleEndian>(header.version.into())
+            .unwrap();
         data
     }
 }
 
-impl Default for DcHeader {
+impl<S, V> Default for Header<S, V>
+where
+    S: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
+    V: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
+{
     fn default() -> Self {
-        DcHeader {
+        Header {
             signature: SIGNATURE,
             data_type: DataType::None,
-            data_subtype: 0,
-            version: 0,
+            data_subtype: S::default(),
+            version: V::default(),
         }
     }
 }
 
-impl DcHeader {
+impl Header<(), ()> {
     pub fn len() -> usize {
         8
     }

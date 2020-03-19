@@ -4,6 +4,8 @@ import * as devolutionsCrypto from "devolutions-crypto";
 // Generate a random key for the lifetime of the script
 var key = devolutionsCrypto.generateKey();
 
+var test = devolutionsCrypto.DataType.Ciphertext;
+
 // Declare a bunch of global variables to access the DOM
 var enc = new TextEncoder();
 var dec = new TextDecoder();
