@@ -11,22 +11,45 @@ use zeroize::Zeroize;
 
 const SIGNATURE: u16 = 0x0C0D;
 
+pub trait HeaderType {
+    type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize;
+    type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize;
+
+    fn datatype() -> DataType;
+
+    fn default_version() -> Self::Version {
+        Default::default()
+    }
+
+    fn subtype() -> Self::Subtype {
+        Default::default()
+    }
+}
+
+// Default values, used for len()
+impl HeaderType for () {
+    type Version = super::CiphertextVersion;
+    type Subtype = super::CiphertextSubtype;
+
+    fn datatype() -> DataType {
+        super::DataType::Ciphertext
+    }
+}
+
 #[derive(Clone)]
-pub struct Header<S, V>
+pub struct Header<M>
 where
-    S: Clone + Default,
-    V: Clone + Default,
+    M: HeaderType,
 {
     pub signature: u16,
     pub data_type: DataType,
-    pub data_subtype: S,
-    pub version: V,
+    pub data_subtype: M::Subtype,
+    pub version: M::Version,
 }
 
-impl<S, V> TryFrom<&[u8]> for Header<S, V>
+impl<M> TryFrom<&[u8]> for Header<M>
 where
-    S: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
-    V: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
+    M: HeaderType,
 {
     type Error = crate::error::Error;
     fn try_from(data: &[u8]) -> Result<Self> {
@@ -45,12 +68,12 @@ where
             Err(_) => return Err(Error::UnknownType),
         };
 
-        let data_subtype = match S::try_from(data_subtype) {
+        let data_subtype = match M::Subtype::try_from(data_subtype) {
             Ok(d) => d,
             Err(_) => return Err(Error::UnknownSubtype),
         };
 
-        let version = match V::try_from(version) {
+        let version = match M::Version::try_from(version) {
             Ok(d) => d,
             Err(_) => return Err(Error::UnknownVersion),
         };
@@ -64,12 +87,11 @@ where
     }
 }
 
-impl<S, V> From<Header<S, V>> for Vec<u8>
+impl<M> From<Header<M>> for Vec<u8>
 where
-    S: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
-    V: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
+    M: HeaderType,
 {
-    fn from(header: Header<S, V>) -> Vec<u8> {
+    fn from(header: Header<M>) -> Vec<u8> {
         let mut data = Vec::with_capacity(8);
         data.write_u16::<LittleEndian>(header.signature).unwrap();
         data.write_u16::<LittleEndian>(header.data_type.into())
@@ -82,22 +104,21 @@ where
     }
 }
 
-impl<S, V> Default for Header<S, V>
+impl<M> Default for Header<M>
 where
-    S: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
-    V: Into<u16> + TryFrom<u16> + Clone + Zeroize + Default,
+    M: HeaderType,
 {
     fn default() -> Self {
         Header {
             signature: SIGNATURE,
-            data_type: DataType::None,
-            data_subtype: S::default(),
-            version: V::default(),
+            data_type: M::datatype(),
+            data_subtype: M::subtype(),
+            version: M::default_version(),
         }
     }
 }
 
-impl Header<(), ()> {
+impl Header<()> {
     pub fn len() -> usize {
         8
     }

@@ -55,6 +55,7 @@ use super::Argon2Parameters;
 use super::DataType;
 use super::Error;
 use super::Header;
+use super::HeaderType;
 use super::KeySubtype;
 pub use super::KeyVersion;
 use super::Result;
@@ -79,7 +80,7 @@ pub struct KeyPair {
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
 #[derive(Clone)]
 pub struct PublicKey {
-    pub(crate) header: Header<KeySubtype, KeyVersion>,
+    pub(crate) header: Header<PublicKey>,
     payload: PublicKeyPayload,
 }
 
@@ -87,8 +88,34 @@ pub struct PublicKey {
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
 #[derive(Clone)]
 pub struct PrivateKey {
-    pub(crate) header: Header<KeySubtype, KeyVersion>,
+    pub(crate) header: Header<PrivateKey>,
     payload: PrivateKeyPayload,
+}
+
+impl HeaderType for PublicKey {
+    type Version = KeyVersion;
+    type Subtype = KeySubtype;
+
+    fn datatype() -> DataType {
+        DataType::Key
+    }
+
+    fn subtype() -> Self::Subtype {
+        KeySubtype::Public
+    }
+}
+
+impl HeaderType for PrivateKey {
+    type Version = KeyVersion;
+    type Subtype = KeySubtype;
+
+    fn datatype() -> DataType {
+        DataType::Key
+    }
+
+    fn subtype() -> Self::Subtype {
+        KeySubtype::Private
+    }
 }
 
 #[derive(Clone)]
@@ -235,20 +262,9 @@ pub fn mix_key_exchange(private_key: &PrivateKey, public_key: &PublicKey) -> Res
     })
 }
 
-fn keypair_headers(
-    version: KeyVersion,
-) -> (
-    Header<KeySubtype, KeyVersion>,
-    Header<KeySubtype, KeyVersion>,
-) {
+fn keypair_headers(version: KeyVersion) -> (Header<PrivateKey>, Header<PublicKey>) {
     let mut private_header = Header::default();
     let mut public_header = Header::default();
-
-    private_header.data_type = DataType::Key;
-    public_header.data_type = DataType::Key;
-
-    private_header.data_subtype = KeySubtype::Private;
-    public_header.data_subtype = KeySubtype::Public;
 
     match version {
         KeyVersion::V1 | KeyVersion::Latest => {

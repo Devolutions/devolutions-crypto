@@ -48,6 +48,7 @@ pub use super::CiphertextVersion;
 use super::DataType;
 use super::Error;
 use super::Header;
+use super::HeaderType;
 use super::Result;
 
 use super::key::{PrivateKey, PublicKey};
@@ -60,8 +61,17 @@ use std::convert::TryFrom;
 /// A versionned ciphertext. Can be either symmetric or asymmetric.
 #[derive(Clone)]
 pub struct Ciphertext {
-    pub(crate) header: Header<CiphertextSubtype, CiphertextVersion>,
+    pub(crate) header: Header<Ciphertext>,
     payload: CiphertextPayload,
+}
+
+impl HeaderType for Ciphertext {
+    type Version = CiphertextVersion;
+    type Subtype = CiphertextSubtype;
+
+    fn datatype() -> DataType {
+        DataType::Ciphertext
+    }
 }
 
 #[derive(Clone)]
@@ -90,7 +100,6 @@ enum CiphertextPayload {
 pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ciphertext> {
     let mut header = Header::default();
 
-    header.data_type = DataType::Ciphertext;
     header.data_subtype = CiphertextSubtype::Symmetric;
 
     let payload = match version {
@@ -132,7 +141,6 @@ pub fn encrypt_asymmetric(
 ) -> Result<Ciphertext> {
     let mut header = Header::default();
 
-    header.data_type = DataType::Ciphertext;
     header.data_subtype = CiphertextSubtype::Asymmetric;
 
     let payload = match version {
