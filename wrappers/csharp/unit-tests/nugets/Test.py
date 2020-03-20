@@ -319,6 +319,103 @@ if sys.argv[1] == "XAMARIN-MAC-MODERN":
 
     with open("./xamarin-mac-modern/TestResult.xml", "r") as testResult:
         output = testResult.read()
-
+        print(output)
         if "success=\"False\"" in output:
             exit(1)
+
+if sys.argv[1] == "XAMARIN-IOS":
+    print("Nuget Cache Clear")
+    print("==========================================================================")    
+    
+    # CLEAN
+    output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./xamarin-ios")
+    print(output)
+
+    print("Remove Local NuGet Source")
+    print("==========================================================================")
+    output = get_output(["nuget", "sources", "remove", "-Name", "LOCALDEVOCRYPTO"])
+    print(output)
+
+    print("Nuget Remove Nuget.org Devolutions.Crypto Package")
+    print("==========================================================================")
+    output = get_output(["dotnet", "remove", "package", "Devolutions.Crypto.iOS"], cwd="./xamarin-ios")
+    print(output)
+
+    # Restore    
+    print("Nuget Restore Global Packages")
+    print("==========================================================================")
+    output = get_output(["dotnet", "restore", "./xamarin-ios", "--verbosity", "normal"])
+    print(output)
+
+    print("Add Local NuGet Source")
+    print("==========================================================================")
+    print(os.path.join(script_dir, "Nugets"))
+    output = get_output(["nuget", "sources", "add", "-Name", "LOCALDEVOCRYPTO", "-Source", os.path.join(script_dir, "Nugets")])
+    print(output)
+
+    print("Installing Nuget Package in Nugets Source")
+    print("==========================================================================")
+    
+    output = get_output(["nuget", "add", "./Nugets/Devolutions.Crypto.iOS." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
+    print(output)
+
+    # Small hack to fix broken xamarin support
+    # If a PackageReference element is not present in the csproj
+    # The dotnet add package will fail with an unsupported project error.
+    print("hack csproj")
+
+    fixdata = """
+    <Reference Include="MonoTouch.NUnitLite" />
+  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Devolutions.Crypto.iOS" Version="*" />
+    </ItemGroup>
+  """
+
+    filedata = ""
+    with open('./xamarin-ios/xamarin-ios.csproj','r') as file:
+        filedata = file.read()
+        filedata = filedata.replace("""    <Reference Include="MonoTouch.NUnitLite" />
+  </ItemGroup>""", fixdata)
+
+    with open('./xamarin-ios/xamarin-ios.csproj','w') as file:
+        file.write(filedata)
+
+    print("Nuget Add Package Devolutions Crypto to project")
+    print("==========================================================================")
+    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.iOS", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./xamarin-ios")
+    print(output)
+
+    # Remove the package reference
+    # It will leave the one that was added using dotnet add packge
+    filedata = ""
+    with open('./xamarin-ios/xamarin-ios.csproj','r') as file:
+        filedata = file.read()
+        filedata = filedata.replace("""<PackageReference Include="Devolutions.Crypto.iOS" Version="*" />""", "")
+
+    with open('./xamarin-ios/xamarin-ios.csproj','w') as file:
+        file.write(filedata)
+
+
+    print("Building Unit tests for XAMARIN IOS")
+    print("=========================================================================")
+
+    output = get_output(["msbuild", "./xamarin-ios/xamarin-ios.csproj" , "/t:clean,build", "/p:configuration=debug;platform=iPhoneSimulator"])
+    print(output)
+    if("FAILED" in output):
+        exit(1)
+
+    print("XAMARIN IOS UNIT TEST")
+    print("=========================================================================")
+
+
+    print("Running tests")
+    output = get_output(["./xamarin-ios/test.sh"])
+    print(output)
+
+    with open("./xamarin-ios/test_results.xml", "r") as testResult:
+        output = testResult.read()
+        print(output)
+        if "success=\"False\"" in output:
+            exit(1)
+

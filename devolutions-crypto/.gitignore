@@ -8,3 +8,4 @@ obj
 packages
 .DS_Store
 .idea
+/ios/target

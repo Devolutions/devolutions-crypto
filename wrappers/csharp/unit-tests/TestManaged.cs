@@ -14,8 +14,11 @@ namespace xamarin_mac_full
 #if XAMARIN_MAC_MODERN
 namespace xamarin_mac_modern
 #endif
+#if XAMARIN_IOS
+namespace xamarin_ios
+#endif
 {
-#if XAMARIN_MAC_FULL || XAMARIN_MAC_MODERN
+#if XAMARIN_MAC_FULL || XAMARIN_MAC_MODERN || XAMARIN_IOS
     using NUnit.Framework;
     using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
     using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;
