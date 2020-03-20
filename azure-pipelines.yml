@@ -600,3 +600,8 @@ stages:
         python3 Test.py XAMARIN-MAC-MODERN
       workingDirectory: "./wrappers/csharp/unit-tests/nugets"
       displayName: "Unit tests XAMARIN-MAC-MODERN"
+
+    - script: |
+        python3 Test.py XAMARIN-IOS
+      workingDirectory: "./wrappers/csharp/unit-tests/nugets"
+      displayName: "Unit tests XAMARIN-IOS"
