@@ -1,3 +1,45 @@
+//! Module for symmetric/asymmetric encryption/decryption.
+//!
+//! This module contains everything related to encryption. You can use it to encrypt and decrypt data using either a shared key of a keypair.
+//! Either way, the encryption will give you a `Ciphertext`, which has a method to decrypt it.
+//!
+//! ### Symmetric
+//!
+//! ```rust
+//! use devolutions_crypto::utils::generate_key;
+//! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
+//!
+//! let key: Vec<u8> = generate_key(32);
+//!
+//! let data = b"somesecretdata";
+//!
+//! let encrypted_data: Ciphertext = encrypt(data, &key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
+//!
+//! let decrypted_data = encrypted_data.decrypt(&key).expect("The decryption shouldn't fail");
+//!
+//! assert_eq!(decrypted_data, data);
+//! ```
+//!
+//! ### Asymmetric
+//! Here, you will need a `PublicKey` to encrypt data and the corresponding
+//! `PrivateKey` to decrypt it. You can generate them by using `generate_keypair`
+//! or `derive_keypair` in the [Key module](#key).
+//!
+//! ```rust
+//! use devolutions_crypto::key::{generate_keypair, KeyVersion, KeyPair};
+//! use devolutions_crypto::ciphertext::{ encrypt_asymmetric, CiphertextVersion, Ciphertext };
+//!
+//! let keypair: KeyPair = generate_keypair(KeyVersion::Latest);
+//!
+//! let data = b"somesecretdata";
+//!
+//! let encrypted_data: Ciphertext = encrypt_asymmetric(data, &keypair.public_key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
+//!
+//! let decrypted_data = encrypted_data.decrypt_asymmetric(&keypair.private_key).expect("The decryption shouldn't fail");
+//!
+//! assert_eq!(decrypted_data, data);
+//! ```
+
 mod ciphertext_v1;
 mod ciphertext_v2;
 
@@ -15,6 +57,7 @@ use ciphertext_v2::{CiphertextV2Asymmetric, CiphertextV2Symmetric};
 
 use std::convert::TryFrom;
 
+/// A versionned ciphertext. Can be either symmetric or asymmetric.
 #[derive(Clone)]
 pub struct Ciphertext {
     pub(crate) header: Header<CiphertextSubtype, CiphertextVersion>,
@@ -28,13 +71,13 @@ enum CiphertextPayload {
     V2Asymmetric(CiphertextV2Asymmetric),
 }
 
-/// Creates an encrypted data blob from cleartext data and a key.
+/// Returns an `Ciphertext` from cleartext data and a key.
 /// # Arguments
-///  * `data` - Data to encrypt.
-///  * `key` - Key to use. Can be of arbitrary size.
-///  * `version` - Version of the library to encrypt with. Use 0 for default.
+///  * `data` - The data to encrypt.
+///  * `key` - The key to use. The recommended size is 32 bytes.
+///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
-/// Returns a `DcDataBlob` containing the encrypted data.
+/// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
 /// ```rust
 /// use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion };
@@ -64,14 +107,14 @@ pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ci
     Ok(Ciphertext { header, payload })
 }
 
-/// Creates an encrypted data blob from cleartext data and a public key.
-/// You will need the corresponding private key to decrypt it.
+/// Returns an `Ciphertext` from cleartext data and a `PublicKey`.
+/// You will need the corresponding `PrivateKey` to decrypt it.
 /// # Arguments
-///  * `data` - Data to encrypt.
-///  * `public_key` - The public key to use. Use either `generate_keypair` or `derive_keypair` for this.
-///  * `version` - Version of the library to encrypt with. Use 0 for default.
+///  * `data` - The data to encrypt.
+///  * `public_key` - The `PublicKey` to use. Use either `generate_keypair` or `derive_keypair` to generate a keypair.
+///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
-/// Returns a `DcDataBlob` containing the encrypted data.
+/// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
 /// ```rust
 /// use devolutions_crypto::ciphertext::{ encrypt_asymmetric, CiphertextVersion };
@@ -108,7 +151,7 @@ pub fn encrypt_asymmetric(
 impl Ciphertext {
     /// Decrypt the data blob using a key.
     /// # Arguments
-    ///  * `key` - Key to use. Can be of arbitrary size.
+    ///  * `key` - Key to use. The recommended size is 32 bytes.
     /// # Returns
     /// Returns the decrypted data.
     /// # Example
@@ -131,9 +174,9 @@ impl Ciphertext {
         }
     }
 
-    /// Decrypt the data blob using a private key.
+    /// Decrypt the data blob using a `PrivateKey`.
     /// # Arguments
-    ///  * `private_key` - Key to use. Must be the one in the same keypair as the public key used for encryption.
+    ///  * `private_key` - Key to use. Must be the one in the same keypair as the `PublicKey` used for encryption.
     /// # Returns
     /// Returns the decrypted data.
     /// # Example
