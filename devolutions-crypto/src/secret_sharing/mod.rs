@@ -25,6 +25,7 @@ mod secret_sharing_v1;
 use super::DataType;
 use super::Error;
 use super::Header;
+use super::HeaderType;
 use super::Result;
 pub use super::SecretSharingVersion;
 use super::ShareSubtype;
@@ -36,8 +37,17 @@ use std::convert::TryFrom;
 /// A part of the secret key. You need multiple of them to recompute the secret key.
 #[derive(Clone)]
 pub struct Share {
-    pub(crate) header: Header<ShareSubtype, SecretSharingVersion>,
+    pub(crate) header: Header<Share>,
     payload: SharePayload,
+}
+
+impl HeaderType for Share {
+    type Version = SecretSharingVersion;
+    type Subtype = ShareSubtype;
+
+    fn datatype() -> DataType {
+        DataType::Share
+    }
 }
 
 #[derive(Clone)]
@@ -69,8 +79,6 @@ pub fn generate_shared_key(
     version: SecretSharingVersion,
 ) -> Result<Vec<Share>> {
     let mut header = Header::default();
-
-    header.data_type = DataType::Share;
 
     match version {
         SecretSharingVersion::V1 | SecretSharingVersion::Latest => {

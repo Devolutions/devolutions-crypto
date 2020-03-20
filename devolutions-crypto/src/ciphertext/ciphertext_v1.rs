@@ -3,7 +3,7 @@ use super::Error;
 use super::Header;
 use super::Result;
 
-use super::{CiphertextSubtype, CiphertextVersion};
+use super::Ciphertext;
 
 use std::convert::TryFrom;
 
@@ -65,11 +65,7 @@ impl CiphertextV1 {
         pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, signature_key);
     }
 
-    pub fn encrypt(
-        data: &[u8],
-        key: &[u8],
-        header: &Header<CiphertextSubtype, CiphertextVersion>,
-    ) -> Result<CiphertextV1> {
+    pub fn encrypt(data: &[u8], key: &[u8], header: &Header<Ciphertext>) -> Result<CiphertextV1> {
         // Split keys
         let mut encryption_key = vec![0u8; 32];
         let mut signature_key = vec![0u8; 32];
@@ -107,11 +103,7 @@ impl CiphertextV1 {
         })
     }
 
-    pub fn decrypt(
-        &self,
-        key: &[u8],
-        header: &Header<CiphertextSubtype, CiphertextVersion>,
-    ) -> Result<Vec<u8>> {
+    pub fn decrypt(&self, key: &[u8], header: &Header<Ciphertext>) -> Result<Vec<u8>> {
         // Split keys
         let mut encryption_key = vec![0u8; 32];
         let mut signature_key = vec![0u8; 32];

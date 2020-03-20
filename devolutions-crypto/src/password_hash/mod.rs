@@ -17,6 +17,7 @@ mod password_hash_v1;
 use super::DataType;
 use super::Error;
 use super::Header;
+use super::HeaderType;
 use super::PasswordHashSubtype;
 pub use super::PasswordHashVersion;
 use super::Result;
@@ -28,8 +29,17 @@ use std::convert::TryFrom;
 /// A versionned password hash. Can be used to validate a password without storing the password.
 #[derive(Clone)]
 pub struct PasswordHash {
-    pub(crate) header: Header<PasswordHashSubtype, PasswordHashVersion>,
+    pub(crate) header: Header<PasswordHash>,
     payload: PasswordHashPayload,
+}
+
+impl HeaderType for PasswordHash {
+    type Version = PasswordHashVersion;
+    type Subtype = PasswordHashSubtype;
+
+    fn datatype() -> DataType {
+        DataType::PasswordHash
+    }
 }
 
 #[derive(Clone)]
@@ -60,8 +70,6 @@ pub fn hash_password(
     version: PasswordHashVersion,
 ) -> PasswordHash {
     let mut header = Header::default();
-
-    header.data_type = DataType::PasswordHash;
 
     let payload = match version {
         PasswordHashVersion::V1 | PasswordHashVersion::Latest => {

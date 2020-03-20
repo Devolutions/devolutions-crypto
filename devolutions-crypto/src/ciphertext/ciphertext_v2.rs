@@ -5,7 +5,7 @@ use super::Error;
 use super::Header;
 use super::Result;
 
-use super::{CiphertextSubtype, CiphertextVersion};
+use super::Ciphertext;
 
 use std::convert::TryFrom;
 
@@ -65,11 +65,7 @@ impl CiphertextV2Symmetric {
         hasher.result()
     }
 
-    pub fn encrypt(
-        data: &[u8],
-        key: &[u8],
-        header: &Header<CiphertextSubtype, CiphertextVersion>,
-    ) -> Result<Self> {
+    pub fn encrypt(data: &[u8], key: &[u8], header: &Header<Ciphertext>) -> Result<Self> {
         // Derive key
         let mut key = CiphertextV2Symmetric::derive_key(&key);
 
@@ -94,11 +90,7 @@ impl CiphertextV2Symmetric {
         Ok(CiphertextV2Symmetric { nonce, ciphertext })
     }
 
-    pub fn decrypt(
-        &self,
-        key: &[u8],
-        header: &Header<CiphertextSubtype, CiphertextVersion>,
-    ) -> Result<Vec<u8>> {
+    pub fn decrypt(&self, key: &[u8], header: &Header<Ciphertext>) -> Result<Vec<u8>> {
         // Derive key
         let mut key = CiphertextV2Symmetric::derive_key(&key);
 
@@ -154,7 +146,7 @@ impl CiphertextV2Asymmetric {
     pub fn encrypt(
         data: &[u8],
         public_key: &PublicKey,
-        header: &Header<CiphertextSubtype, CiphertextVersion>,
+        header: &Header<Ciphertext>,
     ) -> Result<Self> {
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
@@ -174,7 +166,7 @@ impl CiphertextV2Asymmetric {
     pub fn decrypt(
         &self,
         private_key: &PrivateKey,
-        header: &Header<CiphertextSubtype, CiphertextVersion>,
+        header: &Header<Ciphertext>,
     ) -> Result<Vec<u8>> {
         let private_key = StaticSecret::from(private_key);
 
