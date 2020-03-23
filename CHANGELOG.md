@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
+## [0.5.0] - 2020-03-23
+
+### Added
+#### C#
+ - Wrapper for the shamir secret sharing feature.
+
+#### Rust
+ - `utils::validate_header()`
+
+#### Javascript/Typescript
+ - `validateHeader()`
+ -  Enumerations for versions instead of numbers.
+
+### Changed
+#### C#
+ - Fixed the Argon2Parameters for the Xamarin Mac Modern, iOS, Android caused by a typo in the entry point.
+ - ```DataType.Hash``` is now deprecated and has been replaced by ```DataType.PasswordHash```.
+ - ```Managed.ValidateSignature``` is now deprecated and has been replaced by ```Managed.ValidateHeader```
+ - Performance improvements for the Derive Key bug.
+
+#### Rust
+ - The entire API has been changed. Please refer to the documentation and the README.
+ - iOS 32 bit platforms no longer supported. They are now Tier 3. (i386, armv7, armv7s)
+
+
+### Testing
+#### C#
+ - The Xamarin Mac Modern platform is now tested.
+ - The Xamarin iOS platform is now tested.
 
 ## [0.4.0] - 2020-03-15
 
