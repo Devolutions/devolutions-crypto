@@ -276,9 +276,9 @@ pub fn derive_key(
     utils::derive_key(key, &salt, iterations, length)
 }
 
-#[wasm_bindgen(js_name = "validateSignature")]
-pub fn validate_signature(data: &[u8], data_type: DataType) -> bool {
-    utils::validate_signature(data, data_type)
+#[wasm_bindgen(js_name = "validateHeader")]
+pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
+    utils::validate_header(data, data_type)
 }
 
 #[wasm_bindgen]

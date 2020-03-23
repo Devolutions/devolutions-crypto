@@ -59,15 +59,15 @@ pub fn derive_key(key: &[u8], salt: &[u8], iterations: usize, length: usize) -> 
 /// # Example
 /// use devolutions_crypto::DataType;
 /// use devolutions_crypto::ciphertext::{encrypt, CiphertextVersion};
-/// use devolutions_crypto::utils::{generate_key, validate_signature};
+/// use devolutions_crypto::utils::{generate_key, validate_header};
 ///
 /// let key = generate_key(32);
 /// let ciphertext: Vec<u8> = encrypt(b"test", &key, CiphertextVersion::Latest).unwrap().into();
 ///
-/// assert!(validate_signature(&ciphertext, DataType::Ciphertext);
-/// assert!(!validate_signature(&ciphertext, DataType::PasswordHash);
-/// assert!(!validate_signature(&key, DataType::Ciphertext);
-pub fn validate_signature(data: &[u8], data_type: DataType) -> bool {
+/// assert!(validate_header(&ciphertext, DataType::Ciphertext);
+/// assert!(!validate_header(&ciphertext, DataType::PasswordHash);
+/// assert!(!validate_header(&key, DataType::Ciphertext);
+pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
     use super::ciphertext::Ciphertext;
     use super::key::{PrivateKey, PublicKey};
     use super::password_hash::PasswordHash;
@@ -113,7 +113,7 @@ fn test_derive_key() {
 }
 
 #[test]
-fn test_validate_signature() {
+fn test_validate_header() {
     use base64::decode;
 
     let valid_ciphertext = decode("DQwCAAAAAQA=").unwrap();
@@ -122,31 +122,28 @@ fn test_validate_signature() {
     let valid_private_key = decode("DQwBAAEAAQA=").unwrap();
     let valid_public_key = decode("DQwBAAEAAQA=").unwrap();
 
-    assert!(validate_signature(&valid_ciphertext, DataType::Ciphertext));
-    assert!(validate_signature(
+    assert!(validate_header(&valid_ciphertext, DataType::Ciphertext));
+    assert!(validate_header(
         &valid_password_hash,
         DataType::PasswordHash
     ));
-    assert!(validate_signature(&valid_share, DataType::Share));
-    assert!(validate_signature(&valid_private_key, DataType::Key));
-    assert!(validate_signature(&valid_public_key, DataType::Key));
+    assert!(validate_header(&valid_share, DataType::Share));
+    assert!(validate_header(&valid_private_key, DataType::Key));
+    assert!(validate_header(&valid_public_key, DataType::Key));
 
-    assert!(!validate_signature(
-        &valid_ciphertext,
-        DataType::PasswordHash
-    ));
+    assert!(!validate_header(&valid_ciphertext, DataType::PasswordHash));
 
     let invalid_signature = decode("DAwBAAEAAQA=").unwrap();
     let invalid_type = decode("DQwIAAEAAQA=").unwrap();
     let invalid_subtype = decode("DQwBAAgAAQA=").unwrap();
     let invalid_version = decode("DQwBAAEACAA=").unwrap();
 
-    assert!(!validate_signature(&invalid_signature, DataType::Key));
-    assert!(!validate_signature(&invalid_type, DataType::Key));
-    assert!(!validate_signature(&invalid_subtype, DataType::Key));
-    assert!(!validate_signature(&invalid_version, DataType::Key));
+    assert!(!validate_header(&invalid_signature, DataType::Key));
+    assert!(!validate_header(&invalid_type, DataType::Key));
+    assert!(!validate_header(&invalid_subtype, DataType::Key));
+    assert!(!validate_header(&invalid_version, DataType::Key));
 
     let not_long_enough = decode("DQwBAAEAAQ==").unwrap();
 
-    assert!(!validate_signature(&not_long_enough, DataType::Key));
+    assert!(!validate_header(&not_long_enough, DataType::Key));
 }

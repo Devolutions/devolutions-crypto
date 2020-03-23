@@ -672,7 +672,7 @@ pub unsafe extern "C" fn DeriveKey(
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
-pub unsafe extern "C" fn ValidateSignature(
+pub unsafe extern "C" fn ValidateHeader(
     data: *const u8,
     data_length: usize,
     data_type: u16,
@@ -685,7 +685,7 @@ pub unsafe extern "C" fn ValidateSignature(
 
     match DataType::try_from(data_type) {
         Ok(t) => {
-            if utils::validate_signature(data, t) {
+            if utils::validate_header(data, t) {
                 1
             } else {
                 0
