@@ -259,18 +259,14 @@ namespace Devolutions.Cryptography
                 return false;
             }
 
-            if (data.Length >= 8)
-            {
-                byte[] typeBytes = BitConverter.GetBytes((ushort)type);
-                if (!BitConverter.IsLittleEndian)
-                {
-                    Array.Reverse(typeBytes);
-                }
+            long result = Native.ValidateSignature(data, (UIntPtr)data.Length, (ushort)type);
 
-                return data[0] == '\xD' && data[1] == '\xC' && data[2] == typeBytes[0] && data[3] == typeBytes[1];
+            if (result < 0)
+            {
+                HandleError(result);
             }
 
-            return false;
+            return Convert.ToBoolean(result);
         }
 
         /// <summary>
