@@ -89,8 +89,8 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long MixKeyExchangeSizeNative();
 
-        [DllImport(LibName, EntryPoint = "ValidateSignature", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long ValidateSignature(byte[] data, UIntPtr dataLength, ushort dataType);
+        [DllImport(LibName, EntryPoint = "ValidateHeader", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long ValidateHeader(byte[] data, UIntPtr dataLength, ushort dataType);
 
         [DllImport(LibName, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long VerifyPasswordNative(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);

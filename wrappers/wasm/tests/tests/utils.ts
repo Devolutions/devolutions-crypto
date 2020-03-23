@@ -1,4 +1,4 @@
-import { generateKey, deriveKey, validateSignature, base64encode, base64decode, DataType } from 'devolutions-crypto'
+import { generateKey, deriveKey, validateHeader, base64encode, base64decode, DataType } from 'devolutions-crypto'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
@@ -65,31 +65,31 @@ describe('validateSignature', () => {
     const validPrivateKey: Uint8Array = base64decode('DQwBAAEAAQA=')
     const validPublicKey: Uint8Array = base64decode('DQwBAAEAAQA=')
 
-    expect(validateSignature(validCiphertext, DataType.Ciphertext)).to.eql(true)
-    expect(validateSignature(validPasswordHash, DataType.PasswordHash)).to.eql(true)
-    expect(validateSignature(validShare, DataType.Share)).to.eql(true)
-    expect(validateSignature(validPrivateKey, DataType.Key)).to.eql(true)
-    expect(validateSignature(validPublicKey, DataType.Key)).to.eql(true)
+    expect(validateHeader(validCiphertext, DataType.Ciphertext)).to.eql(true)
+    expect(validateHeader(validPasswordHash, DataType.PasswordHash)).to.eql(true)
+    expect(validateHeader(validShare, DataType.Share)).to.eql(true)
+    expect(validateHeader(validPrivateKey, DataType.Key)).to.eql(true)
+    expect(validateHeader(validPublicKey, DataType.Key)).to.eql(true)
   })
 
   it('should return false', () => {
     const validCiphertext: Uint8Array = base64decode('DQwCAAAAAQA=')
 
-    expect(validateSignature(validCiphertext, DataType.PasswordHash)).to.eql(false)
+    expect(validateHeader(validCiphertext, DataType.PasswordHash)).to.eql(false)
 
     const invalidSignature: Uint8Array = base64decode('DAwBAAEAAQA=')
     const invalidType: Uint8Array = base64decode('DQwIAAEAAQA=')
     const invalidSubtype: Uint8Array = base64decode('DQwBAAgAAQA=')
     const invalidVersion: Uint8Array = base64decode('DQwBAAEACAA=')
 
-    expect(validateSignature(invalidSignature, DataType.Key)).to.eql(false)
-    expect(validateSignature(invalidType, DataType.Key)).to.eql(false)
-    expect(validateSignature(invalidSubtype, DataType.Key)).to.eql(false)
-    expect(validateSignature(invalidVersion, DataType.Key)).to.eql(false)
+    expect(validateHeader(invalidSignature, DataType.Key)).to.eql(false)
+    expect(validateHeader(invalidType, DataType.Key)).to.eql(false)
+    expect(validateHeader(invalidSubtype, DataType.Key)).to.eql(false)
+    expect(validateHeader(invalidVersion, DataType.Key)).to.eql(false)
 
     const notLongEnough: Uint8Array = base64decode('DQwBAAEAAQ==')
 
-    expect(validateSignature(notLongEnough, DataType.Key)).to.eql(false)
+    expect(validateHeader(notLongEnough, DataType.Key)).to.eql(false)
   })
 })
 

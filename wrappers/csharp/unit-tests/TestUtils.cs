@@ -98,8 +98,8 @@ namespace xamarin_ios
 
             byte[] encryptResult = Managed.Encrypt(dataToEncrypt, password);
 
-            Assert.IsFalse(Utils.ValidateSignature(dataToEncrypt, DataType.Cipher));
-            Assert.IsTrue(Utils.ValidateSignature(encryptResult, DataType.Cipher));
+            Assert.IsFalse(Utils.ValidateHeader(dataToEncrypt, DataType.Cipher));
+            Assert.IsTrue(Utils.ValidateHeader(encryptResult, DataType.Cipher));
         }
 
         [TestMethod]
@@ -107,7 +107,7 @@ namespace xamarin_ios
         {
             Stream stream = new MemoryStream(new byte[] { 1, 2, 3, 4, 5 });
 
-            bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+            bool validationResult = Utils.ValidateHeaderFromStream(stream, DataType.Cipher);
 
             Assert.AreEqual(validationResult, false);
         }
@@ -123,7 +123,7 @@ namespace xamarin_ios
 
             try
             {
-                bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+                bool validationResult = Utils.ValidateHeaderFromStream(stream, DataType.Cipher);
             }
             catch (DevolutionsCryptoException ex)
             {
@@ -143,7 +143,7 @@ namespace xamarin_ios
 
             stream.Position = 12;
 
-            bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+            bool validationResult = Utils.ValidateHeaderFromStream(stream, DataType.Cipher);
 
             Assert.AreEqual(stream.Position, 12);
             Assert.AreEqual(validationResult, false);
@@ -158,7 +158,7 @@ namespace xamarin_ios
 
             try
             {
-                bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+                bool validationResult = Utils.ValidateHeaderFromStream(stream, DataType.Cipher);
             }
             catch (DevolutionsCryptoException ex)
             {
@@ -177,7 +177,7 @@ namespace xamarin_ios
 
             try
             {
-                bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+                bool validationResult = Utils.ValidateHeaderFromStream(stream, DataType.Cipher);
             }
             catch (DevolutionsCryptoException ex)
             {
@@ -193,7 +193,7 @@ namespace xamarin_ios
         {
             Stream stream = new MemoryStream(TestData.EncryptedData);
 
-            bool validationResult = Utils.ValidateSignatureFromStream(stream, DataType.Cipher);
+            bool validationResult = Utils.ValidateHeaderFromStream(stream, DataType.Cipher);
 
             Assert.AreEqual(validationResult, true);
         }
