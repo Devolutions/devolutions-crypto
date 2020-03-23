@@ -252,14 +252,26 @@ namespace Devolutions.Cryptography
         /// <param name="data">The buffer to validate.</param>
         /// <param name="type">The data type to validate.</param>
         /// <returns>Returns true if the buffer received matches the data type.</returns>
+        [Obsolete("This method has been deprecated. Use ValidateHeader instead.")]
         public static bool ValidateSignature(byte[] data, DataType type)
+        {
+            return ValidateHeader(data, type);
+        }
+
+        /// <summary>
+        /// Validate that the buffer is from the Devolutions Crypto Library.
+        /// </summary>
+        /// <param name="data">The buffer to validate.</param>
+        /// <param name="type">The data type to validate.</param>
+        /// <returns>Returns true if the buffer received matches the data type.</returns>
+        public static bool ValidateHeader(byte[] data, DataType type)
         {
             if (data == null)
             {
                 return false;
             }
 
-            long result = Native.ValidateSignature(data, (UIntPtr)data.Length, (ushort)type);
+            long result = Native.ValidateHeader(data, (UIntPtr)data.Length, (ushort)type);
 
             if (result < 0)
             {
@@ -271,27 +283,54 @@ namespace Devolutions.Cryptography
 
         /// <summary>
         /// Validate that the base 64 string is from the Devolutions Crypto Library.
-        /// Performance : Use ValidateSignature(byte[], DataType) for more performance if possible.
+        /// Performance : Use ValidateHeader(byte[], DataType) for more performance if possible.
         /// </summary>
         /// <param name="base64">The buffer to validate.</param>
         /// <param name="type">The data type to validate.</param>
         /// <returns>Returns true if the base 64 string received matches the data type.</returns>
+        [Obsolete("This method has been deprecated. Use ValidateHeaderFromBase64 instead.")]
         public static bool ValidateSignatureFromBase64(string base64, DataType type)
+        {
+            return ValidateHeaderFromBase64(base64, type);
+        }
+
+        /// <summary>
+        /// Validate that the base 64 string is from the Devolutions Crypto Library.
+        /// Performance : Use ValidateHeader(byte[], DataType) for more performance if possible.
+        /// </summary>
+        /// <param name="base64">The buffer to validate.</param>
+        /// <param name="type">The data type to validate.</param>
+        /// <returns>Returns true if the base 64 string received matches the data type.</returns>
+        public static bool ValidateHeaderFromBase64(string base64, DataType type)
         {
             byte[] data = DecodeFromBase64(base64);
 
-            return ValidateSignature(data, type);
+            return ValidateHeader(data, type);
         }
 
         /// <summary>
         /// Validate that the stream data is from the Devolutions Crypto Library.
         /// The stream must support both Seeking and Reading.
-        /// Performance : Use ValidateSignature(byte[], DataType) for more performance if possible.
+        /// Performance : Use ValidateHeader(byte[], DataType) for more performance if possible.
         /// </summary>
         /// <param name="stream">The stream to validate.</param>
         /// <param name="type">The data type to validate.</param>
         /// <returns>Returns true if the stream data received matches the data type.</returns>
+        [Obsolete("This method has been deprecated. Use ValidateHeaderFromStream instead.")]
         public static bool ValidateSignatureFromStream(Stream stream, DataType type)
+        {
+            return ValidateHeaderFromStream(stream, type);
+        }
+
+        /// <summary>
+        /// Validate that the stream data is from the Devolutions Crypto Library.
+        /// The stream must support both Seeking and Reading.
+        /// Performance : Use ValidateHeader(byte[], DataType) for more performance if possible.
+        /// </summary>
+        /// <param name="stream">The stream to validate.</param>
+        /// <param name="type">The data type to validate.</param>
+        /// <returns>Returns true if the stream data received matches the data type.</returns>
+        public static bool ValidateHeaderFromStream(Stream stream, DataType type)
         {
             if (stream == null)
             {
@@ -323,7 +362,7 @@ namespace Devolutions.Cryptography
                     return false;
                 }
 
-                return ValidateSignature(buffer, type);
+                return ValidateHeader(buffer, type);
             }
             catch (DevolutionsCryptoException)
             {

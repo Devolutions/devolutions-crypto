@@ -142,7 +142,7 @@ namespace xamarin_ios
         {
             byte[] base64DataAsUtf8ByteArray = Utils.StringToUtf8ByteArray(TestData.Base64TestData2);
             byte[] encryptResult = Managed.Encrypt(base64DataAsUtf8ByteArray, TestData.BytesTestKey);
-            Assert.IsTrue(Utils.ValidateSignature(encryptResult, DataType.Cipher));
+            Assert.IsTrue(Utils.ValidateHeader(encryptResult, DataType.Cipher));
 
             byte[] decryptResult = Managed.Decrypt(encryptResult, TestData.BytesTestKey);
             var decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
@@ -164,7 +164,7 @@ namespace xamarin_ios
         public void EncryptBase64WithPassword()
         {
             byte[] encryptedData = Managed.EncryptBase64WithPassword(TestData.Base64TestData, TestData.TestPassword);
-            Assert.IsTrue(Utils.ValidateSignature(encryptedData, DataType.Cipher));
+            Assert.IsTrue(Utils.ValidateHeader(encryptedData, DataType.Cipher));
             byte[] decryptResult = Managed.DecryptWithPassword(encryptedData, TestData.TestPassword);
             string decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
             Assert.AreEqual(decryptResultString, TestData.StringTestData);
