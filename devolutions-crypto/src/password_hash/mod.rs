@@ -37,7 +37,7 @@ impl HeaderType for PasswordHash {
     type Version = PasswordHashVersion;
     type Subtype = PasswordHashSubtype;
 
-    fn datatype() -> DataType {
+    fn data_type() -> DataType {
         DataType::PasswordHash
     }
 }
@@ -124,10 +124,6 @@ impl TryFrom<&[u8]> for PasswordHash {
         };
 
         let header = Header::try_from(&data[0..Header::len()])?;
-
-        if header.data_type != DataType::PasswordHash {
-            return Err(Error::InvalidDataType);
-        }
 
         let payload = match PasswordHashVersion::try_from(header.version) {
             Ok(PasswordHashVersion::V1) => {

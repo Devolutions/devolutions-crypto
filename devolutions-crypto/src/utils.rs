@@ -5,6 +5,9 @@ use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 
+use super::DataType;
+use super::Header;
+
 /// Returns a random key of the specified length. Can also be used
 ///  whenever you need a random byte array, like for a salt.
 /// # Arguments
@@ -47,6 +50,46 @@ pub fn derive_key(key: &[u8], salt: &[u8], iterations: usize, length: usize) -> 
     new_key
 }
 
+/// Only validate the header to make sure it is valid. Used to quickly determine if the data comes from the library.
+/// # Arguments
+///  * `data` - The data to verify.
+///  * `data_type` - The type of the data.
+/// # Returns
+/// `true` if the header is valid, `false` if it is not.
+/// # Example
+/// use devolutions_crypto::DataType;
+/// use devolutions_crypto::ciphertext::{encrypt, CiphertextVersion};
+/// use devolutions_crypto::utils::{generate_key, validate_signature};
+///
+/// let key = generate_key(32);
+/// let ciphertext: Vec<u8> = encrypt(b"test", &key, CiphertextVersion::Latest).unwrap().into();
+///
+/// assert!(validate_signature(&ciphertext, DataType::Ciphertext);
+/// assert!(!validate_signature(&ciphertext, DataType::PasswordHash);
+/// assert!(!validate_signature(&key, DataType::Ciphertext);
+pub fn validate_signature(data: &[u8], data_type: DataType) -> bool {
+    use super::ciphertext::Ciphertext;
+    use super::key::{PrivateKey, PublicKey};
+    use super::password_hash::PasswordHash;
+    use super::secret_sharing::Share;
+    use std::convert::TryFrom;
+
+    if data.len() < Header::len() {
+        return false;
+    }
+
+    match data_type {
+        DataType::None => false,
+        DataType::Ciphertext => Header::<Ciphertext>::try_from(&data[0..Header::len()]).is_ok(),
+        DataType::PasswordHash => Header::<PasswordHash>::try_from(&data[0..Header::len()]).is_ok(),
+        DataType::Key => {
+            Header::<PrivateKey>::try_from(&data[0..Header::len()]).is_ok()
+                || Header::<PublicKey>::try_from(&data[0..Header::len()]).is_ok()
+        }
+        DataType::Share => Header::<Share>::try_from(&data[0..Header::len()]).is_ok(),
+    }
+}
+
 #[test]
 fn test_generate_key() {
     let size = 32;
@@ -67,4 +110,43 @@ fn test_derive_key() {
 
     assert_eq!(size, derived.len());
     assert_ne!(vec![0u8; size], derived);
+}
+
+#[test]
+fn test_validate_signature() {
+    use base64::decode;
+
+    let valid_ciphertext = decode("DQwCAAAAAQA=").unwrap();
+    let valid_password_hash = decode("DQwDAAAAAQA=").unwrap();
+    let valid_share = decode("DQwEAAAAAQA=").unwrap();
+    let valid_private_key = decode("DQwBAAEAAQA=").unwrap();
+    let valid_public_key = decode("DQwBAAEAAQA=").unwrap();
+
+    assert!(validate_signature(&valid_ciphertext, DataType::Ciphertext));
+    assert!(validate_signature(
+        &valid_password_hash,
+        DataType::PasswordHash
+    ));
+    assert!(validate_signature(&valid_share, DataType::Share));
+    assert!(validate_signature(&valid_private_key, DataType::Key));
+    assert!(validate_signature(&valid_public_key, DataType::Key));
+
+    assert!(!validate_signature(
+        &valid_ciphertext,
+        DataType::PasswordHash
+    ));
+
+    let invalid_signature = decode("DAwBAAEAAQA=").unwrap();
+    let invalid_type = decode("DQwIAAEAAQA=").unwrap();
+    let invalid_subtype = decode("DQwBAAgAAQA=").unwrap();
+    let invalid_version = decode("DQwBAAEACAA=").unwrap();
+
+    assert!(!validate_signature(&invalid_signature, DataType::Key));
+    assert!(!validate_signature(&invalid_type, DataType::Key));
+    assert!(!validate_signature(&invalid_subtype, DataType::Key));
+    assert!(!validate_signature(&invalid_version, DataType::Key));
+
+    let not_long_enough = decode("DQwBAAEAAQ==").unwrap();
+
+    assert!(!validate_signature(&not_long_enough, DataType::Key));
 }

@@ -45,7 +45,7 @@ impl HeaderType for Share {
     type Version = SecretSharingVersion;
     type Subtype = ShareSubtype;
 
-    fn datatype() -> DataType {
+    fn data_type() -> DataType {
         DataType::Share
     }
 }
@@ -162,10 +162,6 @@ impl TryFrom<&[u8]> for Share {
         };
 
         let header = Header::try_from(&data[0..Header::len()])?;
-
-        if header.data_type != DataType::Share {
-            return Err(Error::InvalidDataType);
-        }
 
         let payload = match SecretSharingVersion::try_from(header.version) {
             Ok(SecretSharingVersion::V1) => {

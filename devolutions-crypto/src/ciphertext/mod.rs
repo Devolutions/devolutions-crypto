@@ -69,7 +69,7 @@ impl HeaderType for Ciphertext {
     type Version = CiphertextVersion;
     type Subtype = CiphertextSubtype;
 
-    fn datatype() -> DataType {
+    fn data_type() -> DataType {
         DataType::Ciphertext
     }
 }
@@ -229,10 +229,6 @@ impl TryFrom<&[u8]> for Ciphertext {
         };
 
         let header = Header::try_from(&data[0..Header::len()])?;
-
-        if header.data_type != DataType::Ciphertext {
-            return Err(Error::InvalidDataType);
-        }
 
         let payload = match header.version {
             CiphertextVersion::V1 => {

@@ -96,7 +96,7 @@ impl HeaderType for PublicKey {
     type Version = KeyVersion;
     type Subtype = KeySubtype;
 
-    fn datatype() -> DataType {
+    fn data_type() -> DataType {
         DataType::Key
     }
 
@@ -109,7 +109,7 @@ impl HeaderType for PrivateKey {
     type Version = KeyVersion;
     type Subtype = KeySubtype;
 
-    fn datatype() -> DataType {
+    fn data_type() -> DataType {
         DataType::Key
     }
 
@@ -297,7 +297,7 @@ impl TryFrom<&[u8]> for PublicKey {
 
         let header = Header::try_from(&data[0..Header::len()])?;
 
-        if header.data_type != DataType::Key || header.data_subtype != KeySubtype::Public {
+        if header.data_subtype != KeySubtype::Public {
             return Err(Error::InvalidDataType);
         }
 
@@ -331,7 +331,7 @@ impl TryFrom<&[u8]> for PrivateKey {
 
         let header = Header::try_from(&data[0..Header::len()])?;
 
-        if header.data_type != DataType::Key || header.data_subtype != KeySubtype::Private {
+        if header.data_subtype != KeySubtype::Private {
             return Err(Error::InvalidDataType);
         }
 

@@ -10,6 +10,7 @@
 
 use super::utils;
 use super::Argon2Parameters;
+use super::DataType;
 use super::Error;
 
 use super::ciphertext::{encrypt, encrypt_asymmetric, Ciphertext, CiphertextVersion};
@@ -659,6 +660,39 @@ pub unsafe extern "C" fn DeriveKey(
     result.copy_from_slice(&native_result);
     native_result.zeroize();
     0
+}
+
+/// Validate if the header of the data is valid and consistant.
+/// # Arguments
+///  * `data` - Pointer to the input buffer.
+///  * `data_length` - Length of the input buffer.
+///  * `data_type` - Type of the data.
+/// # Returns
+/// 1 if the header is valid, 0 if it's not, and a negative value if there is an error.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn ValidateSignature(
+    data: *const u8,
+    data_length: usize,
+    data_type: u16,
+) -> i64 {
+    if data.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let data = slice::from_raw_parts(data, data_length);
+
+    match DataType::try_from(data_type) {
+        Ok(t) => {
+            if utils::validate_signature(data, t) {
+                1
+            } else {
+                0
+            }
+        }
+        Err(_) => Error::UnknownType.error_code(),
+    }
 }
 
 /// Get the default Argon2Parameters struct values.
