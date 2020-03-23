@@ -361,6 +361,16 @@ namespace Devolutions.Cryptography
             return Encode86(input, input_length, output, output_length);
         }
 
+        internal static long ValidateSignature(byte[] data, UIntPtr dataLength, ushort dataType)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return ValidateSignature64(data, dataLength, dataType);
+            }
+
+            return ValidateSignature86(data, dataLength, dataType);
+        }
+
         internal static long VersionNative(byte[] output, UIntPtr output_length)
         {
             if (Environment.Is64BitProcess)
@@ -568,6 +578,12 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName64, EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long MixKeyExchangeSizeNative64();
+
+        [DllImport(LibName86, EntryPoint = "ValidateSignature", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long ValidateSignature86(byte[] data, UIntPtr dataLength, ushort dataType);
+
+        [DllImport(LibName64, EntryPoint = "ValidateSignature", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long ValidateSignature64(byte[] data, UIntPtr dataLength, ushort dataType);
 
         [DllImport(LibName86, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
         private static extern long Version86(byte[] output, UIntPtr output_length);
