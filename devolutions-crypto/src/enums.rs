@@ -5,6 +5,7 @@ use zeroize::Zeroize;
 use wasm_bindgen::prelude::*;
 
 /// The different data types.
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 pub enum DataType {

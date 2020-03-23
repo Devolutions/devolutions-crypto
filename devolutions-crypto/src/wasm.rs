@@ -26,6 +26,7 @@ use super::{
 };
 
 use super::Argon2Parameters;
+use super::DataType;
 
 // Local KeyPair have private fields with getters instead of public field, for wasm_bindgen
 #[wasm_bindgen(inspectable)]
@@ -273,6 +274,11 @@ pub fn derive_key(
     let length = length.unwrap_or(32);
 
     utils::derive_key(key, &salt, iterations, length)
+}
+
+#[wasm_bindgen(js_name = "validateSignature")]
+pub fn validate_signature(data: &[u8], data_type: DataType) -> bool {
+    utils::validate_signature(data, data_type)
 }
 
 #[wasm_bindgen]

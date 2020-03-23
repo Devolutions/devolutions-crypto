@@ -15,7 +15,7 @@ pub trait HeaderType {
     type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize;
     type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize;
 
-    fn datatype() -> DataType;
+    fn data_type() -> DataType;
 
     fn default_version() -> Self::Version {
         Default::default()
@@ -31,8 +31,8 @@ impl HeaderType for () {
     type Version = super::CiphertextVersion;
     type Subtype = super::CiphertextSubtype;
 
-    fn datatype() -> DataType {
-        super::DataType::Ciphertext
+    fn data_type() -> DataType {
+        super::DataType::None
     }
 }
 
@@ -78,6 +78,10 @@ where
             Err(_) => return Err(Error::UnknownVersion),
         };
 
+        if data_type != M::data_type() {
+            return Err(Error::InvalidData);
+        };
+
         Ok(Header {
             signature,
             data_type,
@@ -111,7 +115,7 @@ where
     fn default() -> Self {
         Header {
             signature: SIGNATURE,
-            data_type: M::datatype(),
+            data_type: M::data_type(),
             data_subtype: M::subtype(),
             version: M::default_version(),
         }
