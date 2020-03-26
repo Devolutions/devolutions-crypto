@@ -17,6 +17,9 @@ namespace xamarin_mac_modern
 #if XAMARIN_IOS
 namespace xamarin_ios
 #endif
+#if XAMARIN_ANDROID
+namespace xamarin_android
+#endif
 {
     public static class TestData
     {

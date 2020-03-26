@@ -1,0 +1,23 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "devolutions-crypto", "devolutions-crypto\devolutions-crypto.csproj", "{2FE99B5D-EA97-4701-B004-F2F59E6EEB64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xamarin-android", "xamarin-android\xamarin-android.csproj", "{87D2024D-F4EB-49F8-920E-E8EC055BB65A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2FE99B5D-EA97-4701-B004-F2F59E6EEB64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FE99B5D-EA97-4701-B004-F2F59E6EEB64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FE99B5D-EA97-4701-B004-F2F59E6EEB64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FE99B5D-EA97-4701-B004-F2F59E6EEB64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87D2024D-F4EB-49F8-920E-E8EC055BB65A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87D2024D-F4EB-49F8-920E-E8EC055BB65A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87D2024D-F4EB-49F8-920E-E8EC055BB65A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87D2024D-F4EB-49F8-920E-E8EC055BB65A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
