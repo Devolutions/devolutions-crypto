@@ -1,3 +1,5 @@
+import argparse
+import platform
 import sys
 import subprocess
 import os
@@ -5,25 +7,50 @@ import datetime
 import time
 import shutil
 
+platforms = { }
 
-if len(sys.argv) < 2:
-    print("Usage :  python GenerateNuget.py <platform>")
-    exit(0)
+def main():
+    global platforms
+    platforms = {
+        "all": build_all,
+        "windows": build_windows,
+        "rdm": build_rdm,
+        "linux": build_linux,
+        "mac": build_mac_full,
+        "mac-modern": build_mac_modern,
+        "ios": build_ios,
+        "android": build_android,
+        "core": build_dotnet_core,
+    }
 
+    parser = argparse.ArgumentParser()
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-print("script directory :")
-print(script_dir)
+    parser.add_argument("-p", "--platform", default=platform.system().lower(), 
+        choices=platforms.keys(), 
+        help="The platform to build for.")
 
-version = ""
+    parser.add_argument("-o", "--output", default=None, help="Output folder")
+    
+    args = parser.parse_args()
 
-with open('../../../devolutions-crypto/Cargo.toml', 'r') as file:
-    data=file.read()
-    version = data.split("version = \"")[1].split("\"", 1)[0]
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    print("script directory :")
+    print(script_dir)
 
-everything = sys.argv[1] == "ALL"
+    version = ""
 
-if sys.argv[1] == "WIN" or everything:
+    with open('../../../devolutions-crypto/Cargo.toml', 'r') as file:
+        data=file.read()
+        version = data.split("version = \"")[1].split("\"", 1)[0]
+
+    platforms.get(args.platform)(version, args)
+
+def build_all(version, args):
+    for name, handler in platforms.items():
+        if name != "all":
+            handler(version, args)
+
+def build_windows(version, args):
     print("Generating WINDOWS nuget...")
 
     command= subprocess.Popen(["nuget", "pack", "./Windows/Devolutions.Crypto.Windows.nuspec", "-Version", version, "-OutputDirectory", "./Windows/package", "-Properties", "platform=windows"], stdout=subprocess.PIPE)
@@ -34,7 +61,7 @@ if sys.argv[1] == "WIN" or everything:
     if("error" in output):
         exit(1)
 
-if sys.argv[1] == "RDM" or everything:
+def build_rdm(version, args):
     print("Generating WINDOWS RDM nuget...")
 
     command= subprocess.Popen(["nuget", "pack", "./rdm/Devolutions.Crypto.Windows.RDM.nuspec", "-Version", version, "-OutputDirectory", "./rdm/package"], stdout=subprocess.PIPE)
@@ -45,7 +72,7 @@ if sys.argv[1] == "RDM" or everything:
     if("error" in output):
         exit(1)
 
-if sys.argv[1] == "LINUX" or everything:
+def build_linux(version, args):
     print("Generating LINUX nuget...")
 
     command= subprocess.Popen(["nuget", "pack", "./Linux/Devolutions.Crypto.Linux.nuspec", "-Version", version, "-OutputDirectory", "./Linux/package", "-Properties", "platform=linux"], stdout=subprocess.PIPE)
@@ -56,7 +83,7 @@ if sys.argv[1] == "LINUX" or everything:
     if("error" in output):
         exit(1)
 
-if sys.argv[1] == "IOS" or everything:
+def build_ios(version, args):
     print("Generating assembly manifest for IOS...")
     # Assembly manifest IOS template
     assembly_manifest_ios = """
@@ -70,7 +97,6 @@ if sys.argv[1] == "IOS" or everything:
     [assembly: AssemblyTitle("DevolutionsCrypto")]
     [assembly: AssemblyCompany("Devolutions Inc.")]
     [assembly: AssemblyCopyright("Copyright ©  ||YEAR||")]
-
     [assembly: AssemblyVersion("||VERSION||")]
     """
 
@@ -103,7 +129,7 @@ if sys.argv[1] == "IOS" or everything:
     if("error" in output):
         exit(1)
 
-if sys.argv[1] == "MAC-MODERN" or everything:
+def build_mac_modern(version, args):
     print("Generating assembly manifest for MAC MODERN...")
     # Assembly manifest Mac Modern template
     assembly_manifest_mac_modern = """
@@ -150,7 +176,7 @@ if sys.argv[1] == "MAC-MODERN" or everything:
     if("error" in output):
         exit(1)
 
-if sys.argv[1] == "MAC-FULL" or everything:
+def build_mac_full(version, args):
     print("Generating MAC FULL nuget...")
 
     # platform windows (since the managed mac dll only supports xamarin modern, windows managed dll is compatible)
@@ -162,7 +188,7 @@ if sys.argv[1] == "MAC-FULL" or everything:
     if("error" in output):
         exit(1)
 
-if sys.argv[1] == "ANDROID" or everything:
+def build_android(version, args):
     print("Generating assembly manifest for Android...")
     # Assembly manifest Android template
     assembly_manifest_android = """
@@ -209,8 +235,7 @@ if sys.argv[1] == "ANDROID" or everything:
     if("error" in output):
         exit(1)
 
-
-if sys.argv[1] == "DOTNET" or everything:
+def build_dotnet_core(version, args):
     print("Generating DOTNET CORE nuget...")
 
     command= subprocess.Popen(["nuget", "pack", "./dotnet-core/Devolutions.Crypto.Core.nuspec", "-Version", version, "-OutputDirectory", "./dotnet-core/package"], stdout=subprocess.PIPE)
@@ -219,3 +244,6 @@ if sys.argv[1] == "DOTNET" or everything:
     print(output)
     if("error" in output):
         exit(1)
+
+if __name__=="__main__":
+    main()

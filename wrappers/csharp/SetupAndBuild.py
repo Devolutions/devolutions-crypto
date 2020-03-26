@@ -30,7 +30,7 @@ platform = sys.platform
 if(platform == "win32" or platform == "win64"):
     print("Building native and managed library")
     print("===================================")
-    output = get_output(["python", "./GeneratePackage.py", "WIN"])
+    output = get_output(["python", "./GeneratePackage.py", "-p", "windows"])
     print(output)
 
     if("Access is denied" in output or "error : make sure you have csc (c# compiler) configured in your path" in output):
@@ -64,6 +64,8 @@ if(platform == "win32" or platform == "win64"):
     output = get_output(["python", "./Test.py", "DOTNET-FRAMEWORK"], cwd="./unit-tests")
     print(output)
 
-
+else:
+    print("this is only available on windows for now.")
+    exit(1)
 
     
