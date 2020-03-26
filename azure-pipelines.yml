@@ -605,3 +605,30 @@ stages:
         python3 Test.py -p ios
       workingDirectory: "./wrappers/csharp/unit-tests/nugets"
       displayName: "Unit tests XAMARIN-IOS"
+
+    - script: |
+        adb start-server
+      displayName: "Starting ADB Server"
+      
+    - script: |
+        /Users/runner/Library/Android/sdk/tools/bin/sdkmanager "system-images;android-29;google_apis;x86_64"
+      displayName: "Installing SDK Android-29 x86_64"
+      
+    - script: |
+        echo "no" | /Users/runner/Library/Android/sdk/tools/bin/avdmanager create avd --force -n test_64 -k "system-images;android-29;google_apis;x86_64"
+      displayName: "Creating Android device"
+
+    - script: |
+        emulator @test_64 &       
+      
+      workingDirectory: "/Users/runner/Library/Android/sdk/tools/"
+      displayName: "Starting emulator"
+      
+    - script: |
+        adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+      displayName: "Waiting for emulator to boot"
+      
+    - script: |
+        python3 Test.py -p android
+      workingDirectory: "./wrappers/csharp/unit-tests/nugets"
+      displayName: "Unit tests XAMARIN-ANDROID"
