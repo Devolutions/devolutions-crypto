@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>dotnet_core</RootNamespace>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DOTNET_CORE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Conformity.cs" Link="Conformity.cs" />
+    <Compile Include="..\..\TestArgon2Parameters.cs" Link="TestArgon2Parameters.cs" />
+    <Compile Include="..\..\TestClasses.cs" Link="TestClasses.cs" />
+    <Compile Include="..\..\TestData.cs" Link="TestData.cs" />
+    <Compile Include="..\..\TestManaged.cs" Link="TestManaged.cs" />
+    <Compile Include="..\..\TestNative.cs" Link="TestNative.cs" />
+    <Compile Include="..\..\TestUtils.cs" Link="TestUtils.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.0.0" />
+    <PackageReference Include="coverlet.collector" Version="1.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="devolutions-crypto\devolutions-crypto.csproj" />
+  </ItemGroup>
+</Project>
