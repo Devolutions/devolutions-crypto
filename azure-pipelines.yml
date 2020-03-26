@@ -81,7 +81,7 @@ stages:
       displayName: "Installing rust targets"
 
     - script: |
-        python GeneratePackage.py WIN
+        python GeneratePackage.py -p windows
       workingDirectory: "./wrappers/csharp"
       displayName: "Building Windows"
 
@@ -125,7 +125,7 @@ stages:
       displayName: "Unit tests"  
 
     - script: |
-        python GeneratePackage.py LINUX
+        python GeneratePackage.py -p linux
       workingDirectory: "./wrappers/csharp"
       displayName: "Building Linux"
 
@@ -150,7 +150,7 @@ stages:
         export ANDROID_HOME=/usr/local/lib/android/sdk        
         export NDK_HOME=$ANDROID_HOME/ndk-bundle
 
-        python GeneratePackage.py ANDROID
+        python GeneratePackage.py -p android
       workingDirectory: "./wrappers/csharp"
       displayName: "Building Android"
 
@@ -195,21 +195,21 @@ stages:
     - script: |
         source $HOME/.cargo/env
         
-        python3 GeneratePackage.py MAC-FULL
+        python3 GeneratePackage.py -p mac
       workingDirectory: "./wrappers/csharp"
       displayName: "Building Mac Full"
 
     - script: |
         source $HOME/.cargo/env
         
-        python3 GeneratePackage.py MAC-MODERN
+        python3 GeneratePackage.py -p mac-modern
       workingDirectory: "./wrappers/csharp"
       displayName: "Building Mac Modern"
 
     - script: |
         source $HOME/.cargo/env
 
-        python3 GeneratePackage.py IOS
+        python3 GeneratePackage.py -p ios
       workingDirectory: "./wrappers/csharp"
       displayName: "Building IOS"
 
@@ -261,12 +261,12 @@ stages:
       displayName: "Unit tests"
 
     - script: |
-        python GeneratePackage.py WIN
+        python GeneratePackage.py -p windows
       workingDirectory: "./wrappers/csharp"
       displayName: "Building WIN"
 
     - script: |
-        python GeneratePackage.py WIN RDM
+        python GeneratePackage.py -p windows --rdm
       workingDirectory: "./wrappers/csharp"
       displayName: "Building WIN"
 
@@ -302,7 +302,7 @@ stages:
       displayName: "Install nuget"
 
     - script: |
-        python3 GenerateNuget.py LINUX
+        python3 GenerateNuget.py -p linux
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating Linux Nuget"
 
@@ -330,22 +330,22 @@ stages:
       displayName: "Update Nuget"
 
     - script: |
-        python3 GenerateNuget.py IOS
+        python3 GenerateNuget.py -p ios
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating IOS Nuget"
 
     - script: |
-        python3 GenerateNuget.py MAC-MODERN
+        python3 GenerateNuget.py -p mac-modern
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating MAC-MODERN Nuget"
 
     - script: |
-        python3 GenerateNuget.py MAC-FULL
+        python3 GenerateNuget.py -p mac
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating MAC-FULL Nuget"
 
     - script: |
-        python3 GenerateNuget.py ANDROID
+        python3 GenerateNuget.py -p android
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating Android Nuget"
     
@@ -403,17 +403,17 @@ stages:
       displayName: "Downloading nuget"
 
     - script: |
-        python GenerateNuget.py WIN
+        python GenerateNuget.py -p windows
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating WIN Nuget"
 
     - script: |
-        python GenerateNuget.py RDM
+        python GenerateNuget.py -p rdm
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating WIN RDM Nuget"
 
     - script: |
-        python GenerateNuget.py DOTNET
+        python GenerateNuget.py -p core
       workingDirectory: "./wrappers/csharp/nuget"
       displayName: "Generating DOTNET Nuget"
 
@@ -536,12 +536,12 @@ stages:
         displayName: "Downloading nuget"
 
       - script: |
-          python Test.py DOTNET-FRAMEWORK
+          python Test.py -p framework
         workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Unit tests DOTNET FRAMEWORK PACKAGE CONFIG"
       
       - script: |
-          python Test.py DOTNET-CORE
+          python Test.py -p core
         workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Unit tests DOTNET CORE"
 
@@ -567,7 +567,7 @@ stages:
         displayName: "Install nuget"
 
       - script: |
-          python Test.py DOTNET-CORE
+          python Test.py -p core
         workingDirectory: "./wrappers/csharp/unit-tests/nugets"
         displayName: "Unit tests DOTNET CORE"
 
@@ -587,21 +587,21 @@ stages:
       displayName: "Update Nuget"
 
     - script: |
-        python3 Test.py DOTNET-CORE
+        python3 Test.py -p core
       workingDirectory: "./wrappers/csharp/unit-tests/nugets"
       displayName: "Unit tests DOTNET CORE"
 
     - script: |
-        python3 Test.py XAMARIN-MAC-FULL
+        python3 Test.py -p mac
       workingDirectory: "./wrappers/csharp/unit-tests/nugets"
       displayName: "Unit tests XAMARIN-MAC-FULL"
 
     - script: |
-        python3 Test.py XAMARIN-MAC-MODERN
+        python3 Test.py -p mac-modern
       workingDirectory: "./wrappers/csharp/unit-tests/nugets"
       displayName: "Unit tests XAMARIN-MAC-MODERN"
 
     - script: |
-        python3 Test.py XAMARIN-IOS
+        python3 Test.py -p ios
       workingDirectory: "./wrappers/csharp/unit-tests/nugets"
       displayName: "Unit tests XAMARIN-IOS"

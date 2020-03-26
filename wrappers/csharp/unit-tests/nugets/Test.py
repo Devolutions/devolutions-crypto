@@ -1,4 +1,5 @@
-
+import argparse
+import platform
 import subprocess
 import sys
 import os
@@ -8,12 +9,6 @@ import os
 # output = get_output(["dotnet", "restore", "--source", "../Nugets", "--source", "https://www.nuget.org/api/v3/", "--verbosity", "normal", "--no-cache", "--force"], cwd="./dotnet-framework")
 # --no-cache doesn't work https://github.com/NuGet/Home/issues/5619
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-print("script directory :")
-print(script_dir)
-
-os.chdir(script_dir)
-
 def get_output(args, cwd=None):
     try:
         result = subprocess.check_output(args, cwd=cwd, stderr=subprocess.STDOUT).decode(sys.stdout.encoding).strip()
@@ -22,17 +17,44 @@ def get_output(args, cwd=None):
         result = exc.output.decode(sys.stdout.encoding).strip()
         return result
 
-version = ""
+def main():
+    platforms = {
+        "framework": test_dotnet_framework,
+        "core": test_dotnet_core,
+        "mac": test_mac_full,
+        "mac-modern": test_mac_modern,
+        "ios": test_ios,
+    }
 
-with open('../../../../devolutions-crypto/Cargo.toml', 'r') as filee:
-    data=filee.read()
-    version = data.split("version = \"")[1].split("\"", 1)[0]
+    parser = argparse.ArgumentParser()
 
-print("Current Devolutions Crypto Version :")
-print(version)
-print("====================================================================")
+    parser.add_argument("-p", "--platform", default=platform.system().lower(), 
+        choices=platforms.keys(), 
+        help="The platform to build for.")
 
-if sys.argv[1] == "DOTNET-FRAMEWORK":
+    args = parser.parse_args()
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    print("script directory :")
+    print(script_dir)
+
+    os.chdir(script_dir)
+
+    version = ""
+
+    with open('../../../../devolutions-crypto/Cargo.toml', 'r') as filee:
+        data=filee.read()
+        version = data.split("version = \"")[1].split("\"", 1)[0]
+
+    print("Current Devolutions Crypto Version :")
+    print(version)
+    print("====================================================================")
+
+    platforms.get(args.platform)(script_dir, version, args)
+
+
+
+def test_dotnet_framework(script_dir, version, args):
     print("Nuget Cache Clear")
     print("==========================================================================")    
     
@@ -103,8 +125,8 @@ if sys.argv[1] == "DOTNET-FRAMEWORK":
     if "Test Run Successful" not in output:
         exit(1)
 
-if sys.argv[1] == "DOTNET-CORE":
-        # CLEAN
+def test_dotnet_core(script_dir, version, args):
+    # CLEAN
     output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./dotnet-core")
     print(output)
 
@@ -149,7 +171,7 @@ if sys.argv[1] == "DOTNET-CORE":
     if "Test Run Successful" not in output:
         exit(1)
 
-if sys.argv[1] == "XAMARIN-MAC-FULL":
+def test_mac_full(script_dir, version, args):
     print("Nuget Cache Clear")
     print("==========================================================================")    
     
@@ -215,7 +237,7 @@ if sys.argv[1] == "XAMARIN-MAC-FULL":
     if "Overall result: Failed" in output:
         exit(1)
 
-if sys.argv[1] == "XAMARIN-MAC-MODERN":
+def test_mac_modern(script_dir, version, args):
     # Patch submodule for pipeline (MSBuildExtensionsPath is wrong)
     print("patching submodule")
     filedata = ""
@@ -266,6 +288,7 @@ if sys.argv[1] == "XAMARIN-MAC-MODERN":
     # The dotnet add package will fail with an unsupported project error.
     print("hack csproj")
 
+    # DON'T TOUCH THE STRINGS!!!
     fixdata = """
         <Reference Include="Xamarin.Mac" />
   </ItemGroup>
@@ -323,7 +346,7 @@ if sys.argv[1] == "XAMARIN-MAC-MODERN":
         if "success=\"False\"" in output:
             exit(1)
 
-if sys.argv[1] == "XAMARIN-IOS":
+def test_ios(script_dir, version, args):
     print("Nuget Cache Clear")
     print("==========================================================================")    
     
@@ -419,3 +442,5 @@ if sys.argv[1] == "XAMARIN-IOS":
         if "success=\"False\"" in output:
             exit(1)
 
+if __name__=="__main__":
+    main()
