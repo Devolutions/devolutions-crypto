@@ -297,3 +297,22 @@ pub fn base64decode(data: &str) -> Result<Vec<u8>, JsValue> {
         }
     }
 }
+
+#[wasm_bindgen(js_name = "base64urlEncode")]
+pub fn base64url_encode(data: &[u8]) -> String {
+    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
+    base64::encode_config(data, config)
+}
+
+#[wasm_bindgen(js_name = "base64urlDecode")]
+pub fn base64url_decode(data: &str) -> Result<Vec<u8>, JsValue> {
+    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
+    match base64::decode_config(&data, config) {
+        Ok(res) => Ok(res),
+        Err(e) => {
+            let error = js_sys::Error::new(&format!("{}", e));
+            error.set_name("Base64Error");
+            Err(error.into())
+        }
+    }
+}
