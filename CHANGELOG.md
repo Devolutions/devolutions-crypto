@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [Unreleased]
+
+## [0.5.1] - 2020-03-27
+
+### Added
+#### Javascript/Typescript
+ - `base64urlEncode` and `base64urlDecode` methods to encode data to be passed by a URL.
+
 ## [0.5.0] - 2020-03-23
 
 ### Added
