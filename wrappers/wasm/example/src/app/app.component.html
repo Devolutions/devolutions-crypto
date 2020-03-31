@@ -1,0 +1,22 @@
+<!-- Sidebar/menu -->
+<nav style="background-image: url('https://www.google.ca/url?sa=i&url=https%3A%2F%2Ftamuk.quickstart.com%2Fblog%2Fthe-basic-principles-of-cybersecurity-you-need-to-know%2F&psig=AOvVaw138mW9cSGO_ZOkOs8S0V3_&ust=1585258441066000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCKDtmo3KtugCFQAAAAAdAAAAABAJ');" class="w3-sidebar w3-red w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:300px;font-weight:bold;"
+  id="mySidebar"><br>
+  <a href="javascript:void(0)" (click)="w3Close()" class="w3-button w3-hide-large w3-display-topleft"
+    style="width:100%;font-size:22px">Close Menu</a>
+  <div class="w3-container" style="text-align: center;background-image:linear-gradient(brown, green)">
+    <h1 class="w3-padding-64"><fa-icon [icon]="faLock"></fa-icon><h1>Devolutions-Crypto</h1></h1>
+  </div>
+  <div class="w3-bar-block">
+    <a routerLink="/encryption" class="w3-bar-item w3-button w3-hover-white">Encryption</a>
+    <a routerLink="/secret-sharing" class="w3-bar-item w3-button w3-hover-white">Secret Sharing</a>
+    <a routerLink="/password" class="w3-bar-item w3-button w3-hover-white">Password Hashing</a>
+    <a routerLink="/asymmetric" class="w3-bar-item w3-button w3-hover-white">Asymmetric</a>
+    <a routerLink="/utilities" class="w3-bar-item w3-button w3-hover-white">Utilities</a>
+  </div>
+</nav>
+
+<div class="content" role="main">
+  <router-outlet></router-outlet>
+</div>
+
+
