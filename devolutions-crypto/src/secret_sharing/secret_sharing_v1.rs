@@ -15,6 +15,29 @@ pub struct ShareV1 {
     share: Share,
 }
 
+impl core::fmt::Debug for ShareV1 {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> std::result::Result<(), core::fmt::Error> {
+        write!(f, "Share with threshold {}", self.threshold)
+    }
+}
+
+#[cfg(feature = "fuzz")]
+impl arbitrary::Arbitrary for ShareV1 {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+        let threshold: u8 = arbitrary::Arbitrary::arbitrary(u)?;
+        let num: [u8; 2] = arbitrary::Arbitrary::arbitrary(u)?;
+        let mut share: Vec<u8> = arbitrary::Arbitrary::arbitrary(u)?;
+
+        let mut full_share = num.to_vec();
+        full_share.append(&mut share);
+
+        Ok(Self {
+            threshold,
+            share: Share::from(full_share.as_slice()),
+        })
+    }
+}
+
 impl From<ShareV1> for Vec<u8> {
     fn from(share: ShareV1) -> Vec<u8> {
         let mut data: Vec<u8> = Vec::new();

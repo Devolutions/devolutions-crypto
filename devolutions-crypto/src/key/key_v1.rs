@@ -7,6 +7,8 @@ use rand::rngs::OsRng;
 use x25519_dalek::{PublicKey, StaticSecret};
 use zeroize::Zeroize;
 
+use std::convert::TryFrom;
+
 #[derive(Clone)]
 pub struct KeyV1Pair {
     pub private_key: KeyV1Private,
@@ -18,9 +20,35 @@ pub struct KeyV1Private {
     key: StaticSecret,
 }
 
-#[derive(Clone)]
+impl core::fmt::Debug for KeyV1Private {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> std::result::Result<(), core::fmt::Error> {
+        write!(f, "Private Key")
+    }
+}
+
+#[cfg(feature = "fuzz")]
+impl arbitrary::Arbitrary for KeyV1Private {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+        let private_key: [u8; 32] = arbitrary::Arbitrary::arbitrary(u)?;
+        Ok(Self {
+            key: x25519_dalek::StaticSecret::from(private_key),
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct KeyV1Public {
     key: PublicKey,
+}
+
+#[cfg(feature = "fuzz")]
+impl arbitrary::Arbitrary for KeyV1Public {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+        let public_key: [u8; 32] = arbitrary::Arbitrary::arbitrary(u)?;
+        Ok(Self {
+            key: x25519_dalek::PublicKey::from(public_key),
+        })
+    }
 }
 
 impl From<KeyV1Private> for Vec<u8> {
@@ -35,23 +63,35 @@ impl From<KeyV1Public> for Vec<u8> {
     }
 }
 
-impl From<&[u8]> for KeyV1Private {
-    fn from(key: &[u8]) -> Self {
+impl TryFrom<&[u8]> for KeyV1Private {
+    type Error = Error;
+
+    fn try_from(key: &[u8]) -> Result<Self> {
+        if key.len() != 32 {
+            return Err(Error::InvalidLength);
+        }
+
         let mut key_bytes = [0u8; 32];
         key_bytes.copy_from_slice(&key[0..32]);
-        Self {
+        Ok(Self {
             key: StaticSecret::from(key_bytes),
-        }
+        })
     }
 }
 
-impl From<&[u8]> for KeyV1Public {
-    fn from(key: &[u8]) -> Self {
+impl TryFrom<&[u8]> for KeyV1Public {
+    type Error = Error;
+
+    fn try_from(key: &[u8]) -> Result<Self> {
+        if key.len() != 32 {
+            return Err(Error::InvalidLength);
+        }
+
         let mut key_bytes = [0u8; 32];
         key_bytes.copy_from_slice(&key[0..32]);
-        Self {
+        Ok(Self {
             key: PublicKey::from(key_bytes),
-        }
+        })
     }
 }
 

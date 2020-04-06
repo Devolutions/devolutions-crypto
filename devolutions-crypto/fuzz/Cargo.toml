@@ -1,0 +1,78 @@
+
+[package]
+name = "devolutions-crypto-fuzz"
+version = "0.0.0"
+authors = ["Automatically generated"]
+publish = false
+edition = "2018"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.3"
+arbitrary = { version = "0.4.1", features = ["derive"] }
+
+[dependencies.devolutions-crypto]
+path = ".."
+features = ["fuzz"]
+
+# Prevent this from interfering with workspaces
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "ciphertext_deserialization"
+path = "fuzz_targets/ciphertext_deserialization.rs"
+
+[[bin]]
+name = "password_hash_deserialization"
+path = "fuzz_targets/password_hash_deserialization.rs"
+
+[[bin]]
+name = "public_key_deserialization"
+path = "fuzz_targets/public_key_deserialization.rs"
+
+[[bin]]
+name = "private_key_deserialization"
+path = "fuzz_targets/private_key_deserialization.rs"
+
+[[bin]]
+name = "share_deserialization"
+path = "fuzz_targets/share_deserialization.rs"
+
+[[bin]]
+name = "argon2parameters_deserialization"
+path = "fuzz_targets/argon2parameters_deserialization.rs"
+
+[[bin]]
+name = "encrypt"
+path = "fuzz_targets/encrypt.rs"
+
+[[bin]]
+name = "encrypt_asymmetric"
+path = "fuzz_targets/encrypt_asymmetric.rs"
+
+[[bin]]
+name = "decrypt"
+path = "fuzz_targets/decrypt.rs"
+
+[[bin]]
+name = "decrypt_asymmetric"
+path = "fuzz_targets/decrypt_asymmetric.rs"
+
+[[bin]]
+name = "hash_password"
+path = "fuzz_targets/hash_password.rs"
+
+[[bin]]
+name = "verify_password"
+path = "fuzz_targets/verify_password.rs"
+
+[[bin]]
+name = "generate_shared_key"
+path = "fuzz_targets/generate_shared_key.rs"
+
+[[bin]]
+name = "join_shares"
+path = "fuzz_targets/join_shares.rs"

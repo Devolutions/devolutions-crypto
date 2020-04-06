@@ -119,12 +119,22 @@ impl TryFrom<&[u8]> for Argon2Parameters {
             _ => return Err(Error::InvalidData),
         };
 
-        let associated_data_length = data_cursor.read_u32::<LittleEndian>()?;
-        let mut associated_data = vec![0u8; associated_data_length as usize];
+        let associated_data_length = data_cursor.read_u32::<LittleEndian>()? as usize;
+        let remaining = data.len() - (data_cursor.position() as usize);
+        if remaining < associated_data_length {
+            return Err(Error::InvalidLength);
+        }
+
+        let mut associated_data = vec![0u8; associated_data_length];
         data_cursor.read_exact(&mut associated_data)?;
 
-        let salt_length = data_cursor.read_u32::<LittleEndian>()?;
-        let mut salt = vec![0u8; salt_length as usize];
+        let salt_length = data_cursor.read_u32::<LittleEndian>()? as usize;
+        let remaining = data.len() - (data_cursor.position() as usize);
+        if remaining < salt_length {
+            return Err(Error::InvalidLength);
+        }
+
+        let mut salt = vec![0u8; salt_length];
         data_cursor.read_exact(&mut salt)?;
 
         Ok(Argon2Parameters {

@@ -27,7 +27,8 @@ use password_hash_v1::PasswordHashV1;
 use std::convert::TryFrom;
 
 /// A versionned password hash. Can be used to validate a password without storing the password.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
 pub struct PasswordHash {
     pub(crate) header: Header<PasswordHash>,
     payload: PasswordHashPayload,
@@ -42,7 +43,8 @@ impl HeaderType for PasswordHash {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
 enum PasswordHashPayload {
     V1(PasswordHashV1),
 }
