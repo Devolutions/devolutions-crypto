@@ -3,6 +3,7 @@ use super::DataType;
 use super::Error;
 use super::Result;
 
+use cfg_if::cfg_if;
 use std::convert::TryFrom;
 use std::io::Cursor;
 
@@ -12,8 +13,16 @@ use zeroize::Zeroize;
 const SIGNATURE: u16 = 0x0C0D;
 
 pub trait HeaderType {
-    type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize;
-    type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize;
+    cfg_if! {
+        if #[cfg(feature = "fuzz")] {
+            type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + arbitrary::Arbitrary;
+            type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + arbitrary::Arbitrary;
+        }
+        else {
+            type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug;
+            type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug;
+        }
+    }
 
     fn data_type() -> DataType;
 
@@ -36,7 +45,8 @@ impl HeaderType for () {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
 pub struct Header<M>
 where
     M: HeaderType,

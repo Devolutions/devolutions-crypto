@@ -200,6 +200,13 @@ fn main() {
                     Arg::with_name("SHARE").takes_value(true).multiple(true).required(true).help("The shares to merge")
                 )
         )
+        .subcommand(
+            SubCommand::with_name("print-header")
+                .about("Print the header information")
+                .arg(
+                    Arg::with_name("DATA").takes_value(true).required(true).help("The data to check, in base64")
+                )
+        )
         .get_matches();
 
     match matches.subcommand() {
@@ -217,6 +224,7 @@ fn main() {
         ("mix-key-exchange", Some(matches)) => mix_key_exchange(matches),
         ("generate-shared-key", Some(matches)) => generate_shared_key(matches),
         ("join-shares", Some(matches)) => join_shares(matches),
+        ("print-header", Some(matches)) => print_header(matches),
         _ => unreachable!(),
     }
 }
@@ -305,7 +313,7 @@ fn encrypt(matches: &ArgMatches) {
 
     let version = matches
         .value_of("version")
-        .unwrap_or("")
+        .unwrap_or("0")
         .parse::<u16>()
         .unwrap();
 
@@ -323,7 +331,7 @@ fn encrypt_asymmetric(matches: &ArgMatches) {
 
     let version = matches
         .value_of("version")
-        .unwrap_or("")
+        .unwrap_or("0")
         .parse::<u16>()
         .unwrap();
 
@@ -460,4 +468,59 @@ fn join_shares(matches: &ArgMatches) {
     let secret_key = devolutions_crypto::secret_sharing::join_shares(&shares).unwrap();
 
     println!("{}", base64::encode(&secret_key));
+}
+
+fn print_header(matches: &ArgMatches) {
+    let data = base64::decode(matches.value_of("DATA").unwrap().as_bytes()).unwrap();
+
+    match devolutions_crypto::DataType::try_from(data[2] as u16) {
+        Ok(devolutions_crypto::DataType::Ciphertext) => {
+            if let Ok(header) = devolutions_crypto::Header::<
+                devolutions_crypto::ciphertext::Ciphertext,
+            >::try_from(&data[0..8])
+            {
+                println!("{:?}", &header);
+            } else {
+                println!("Invalid Header");
+            }
+        }
+        Ok(devolutions_crypto::DataType::PasswordHash) => {
+            if let Ok(header) = devolutions_crypto::Header::<
+                devolutions_crypto::password_hash::PasswordHash,
+            >::try_from(&data[0..8])
+            {
+                println!("{:?}", &header);
+            } else {
+                println!("Invalid Header");
+            }
+        }
+        Ok(devolutions_crypto::DataType::Share) => {
+            if let Ok(header) = devolutions_crypto::Header::<
+                devolutions_crypto::secret_sharing::Share,
+            >::try_from(&data[0..8])
+            {
+                println!("{:?}", &header);
+            } else {
+                println!("Invalid Header");
+            }
+        }
+        Ok(devolutions_crypto::DataType::Key) => {
+            if let Ok(h) =
+                devolutions_crypto::Header::<devolutions_crypto::key::PublicKey>::try_from(
+                    &data[0..8],
+                )
+            {
+                println!("{:?}", &h);
+            } else if let Ok(h) =
+                devolutions_crypto::Header::<devolutions_crypto::key::PrivateKey>::try_from(
+                    &data[0..8],
+                )
+            {
+                println!("{:?}", &h);
+            } else {
+                println!("Invalid Header");
+            }
+        }
+        _ => println!("Invalid Header"),
+    }
 }

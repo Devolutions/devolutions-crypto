@@ -12,22 +12,35 @@ use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
 use zeroize::Zeroize;
 
-#[derive(Zeroize, Clone)]
+#[derive(Zeroize, Clone, Debug)]
 #[zeroize(drop)]
 pub struct PasswordHashV1 {
     iterations: u32,
-    salt: Vec<u8>,
-    hash: Vec<u8>,
+    salt: [u8; 32],
+    hash: [u8; 32],
+}
+
+#[cfg(feature = "fuzz")]
+impl arbitrary::Arbitrary for PasswordHashV1 {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+        let salt: [u8; 32] = arbitrary::Arbitrary::arbitrary(u)?;
+        let hash: [u8; 32] = arbitrary::Arbitrary::arbitrary(u)?;
+        Ok(Self {
+            iterations: 2,
+            salt,
+            hash,
+        })
+    }
 }
 
 impl From<PasswordHashV1> for Vec<u8> {
-    fn from(mut hash: PasswordHashV1) -> Vec<u8> {
+    fn from(hash: PasswordHashV1) -> Vec<u8> {
         let iterations = hash.iterations;
         let mut data = Vec::with_capacity(4);
         data.write_u32::<LittleEndian>(iterations).unwrap();
 
-        data.append(&mut hash.salt);
-        data.append(&mut hash.hash);
+        data.extend_from_slice(&hash.salt);
+        data.extend_from_slice(&hash.hash);
 
         data
     }
@@ -42,8 +55,8 @@ impl TryFrom<&[u8]> for PasswordHashV1 {
         };
 
         let mut vec_iterations = Cursor::new(&data[0..4]);
-        let mut salt = vec![0u8; 32];
-        let mut hash = vec![0u8; 32];
+        let mut salt = [0u8; 32];
+        let mut hash = [0u8; 32];
 
         let iterations = vec_iterations.read_u32::<LittleEndian>()?;
         salt.copy_from_slice(&data[4..36]);
@@ -60,11 +73,11 @@ impl TryFrom<&[u8]> for PasswordHashV1 {
 impl PasswordHashV1 {
     pub fn hash_password(pass: &[u8], iterations: u32) -> PasswordHashV1 {
         // Generate salt
-        let mut salt = vec![0u8; 32];
+        let mut salt = [0u8; 32];
         OsRng.fill_bytes(&mut salt);
 
         // Generate hash
-        let mut hash = vec![0u8; 32];
+        let mut hash = [0u8; 32];
         pbkdf2::<Hmac<Sha256>>(pass, &salt, iterations as usize, &mut hash);
 
         PasswordHashV1 {

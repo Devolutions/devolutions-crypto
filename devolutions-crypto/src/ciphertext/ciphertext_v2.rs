@@ -19,23 +19,37 @@ use sha2::{Digest, Sha256};
 use x25519_dalek::StaticSecret;
 use zeroize::Zeroize;
 
-#[derive(Zeroize, Clone)]
+#[derive(Zeroize, Clone, Debug)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
 #[zeroize(drop)]
 pub struct CiphertextV2Symmetric {
-    nonce: Vec<u8>,
+    nonce: [u8; 24],
     ciphertext: Vec<u8>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CiphertextV2Asymmetric {
     public_key: x25519_dalek::PublicKey,
     ciphertext: CiphertextV2Symmetric,
 }
 
+#[cfg(feature = "fuzz")]
+impl arbitrary::Arbitrary for CiphertextV2Asymmetric {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+        let public_key: [u8; 32] = arbitrary::Arbitrary::arbitrary(u)?;
+        let public_key = x25519_dalek::PublicKey::from(public_key);
+        let ciphertext = CiphertextV2Symmetric::arbitrary(u)?;
+        Ok(Self {
+            public_key,
+            ciphertext,
+        })
+    }
+}
+
 impl From<CiphertextV2Symmetric> for Vec<u8> {
     fn from(mut cipher: CiphertextV2Symmetric) -> Vec<u8> {
         let mut data = Vec::new();
-        data.append(&mut cipher.nonce);
+        data.extend_from_slice(&cipher.nonce);
         data.append(&mut cipher.ciphertext);
         data
     }
@@ -48,7 +62,7 @@ impl TryFrom<&[u8]> for CiphertextV2Symmetric {
             return Err(Error::InvalidLength);
         };
 
-        let mut nonce = vec![0u8; 24];
+        let mut nonce = [0u8; 24];
         let mut ciphertext = vec![0u8; data.len() - 24];
 
         nonce.copy_from_slice(&data[0..24]);
@@ -70,7 +84,7 @@ impl CiphertextV2Symmetric {
         let mut key = CiphertextV2Symmetric::derive_key(&key);
 
         // Generate nonce
-        let mut nonce = vec![0u8; 24];
+        let mut nonce = [0u8; 24];
         OsRng.fill_bytes(&mut nonce);
 
         // Authenticate the header

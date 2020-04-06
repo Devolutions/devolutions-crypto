@@ -227,7 +227,7 @@ pub mod utils;
 
 use cfg_if::cfg_if;
 use enums::{CiphertextSubtype, KeySubtype, PasswordHashSubtype, ShareSubtype};
-use header::{Header, HeaderType};
+pub use header::{Header, HeaderType};
 
 pub use enums::{
     CiphertextVersion, DataType, KeyVersion, PasswordHashVersion, SecretSharingVersion,

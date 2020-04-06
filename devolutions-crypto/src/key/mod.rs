@@ -78,7 +78,8 @@ pub struct KeyPair {
 
 /// A public key. This key can be sent in clear on unsecured channels and stored publicly.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
-#[derive(Clone)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[derive(Clone, Debug)]
 pub struct PublicKey {
     pub(crate) header: Header<PublicKey>,
     payload: PublicKeyPayload,
@@ -86,7 +87,8 @@ pub struct PublicKey {
 
 /// A private key. This key should never be sent over an insecure channel or stored unsecurely.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
-#[derive(Clone)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[derive(Clone, Debug)]
 pub struct PrivateKey {
     pub(crate) header: Header<PrivateKey>,
     payload: PrivateKeyPayload,
@@ -118,12 +120,14 @@ impl HeaderType for PrivateKey {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
 enum PrivateKeyPayload {
     V1(KeyV1Private),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
 enum PublicKeyPayload {
     V1(KeyV1Public),
 }
@@ -302,7 +306,9 @@ impl TryFrom<&[u8]> for PublicKey {
         }
 
         let payload = match KeyVersion::try_from(header.version) {
-            Ok(KeyVersion::V1) => PublicKeyPayload::V1(KeyV1Public::from(&data[Header::len()..])),
+            Ok(KeyVersion::V1) => {
+                PublicKeyPayload::V1(KeyV1Public::try_from(&data[Header::len()..])?)
+            }
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -336,7 +342,9 @@ impl TryFrom<&[u8]> for PrivateKey {
         }
 
         let payload = match KeyVersion::try_from(header.version) {
-            Ok(KeyVersion::V1) => PrivateKeyPayload::V1(KeyV1Private::from(&data[Header::len()..])),
+            Ok(KeyVersion::V1) => {
+                PrivateKeyPayload::V1(KeyV1Private::try_from(&data[Header::len()..])?)
+            }
             _ => return Err(Error::UnknownVersion),
         };
 

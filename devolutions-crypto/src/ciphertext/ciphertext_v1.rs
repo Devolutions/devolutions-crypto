@@ -15,20 +15,21 @@ use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 use zeroize::Zeroize;
 
-#[derive(Zeroize, Clone)]
+#[derive(Zeroize, Clone, Debug)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
 #[zeroize(drop)]
 pub struct CiphertextV1 {
-    iv: Vec<u8>,
+    iv: [u8; 16],
     ciphertext: Vec<u8>,
-    hmac: Vec<u8>,
+    hmac: [u8; 32],
 }
 
 impl From<CiphertextV1> for Vec<u8> {
     fn from(mut cipher: CiphertextV1) -> Vec<u8> {
         let mut data = Vec::new();
-        data.append(&mut cipher.iv);
+        data.extend_from_slice(&cipher.iv);
         data.append(&mut cipher.ciphertext);
-        data.append(&mut cipher.hmac);
+        data.extend_from_slice(&cipher.hmac);
         data
     }
 }
@@ -40,9 +41,9 @@ impl TryFrom<&[u8]> for CiphertextV1 {
             return Err(Error::InvalidLength);
         };
 
-        let mut iv = vec![0u8; 16];
+        let mut iv = [0u8; 16];
         let mut ciphertext = vec![0u8; data.len() - 16 - 32];
-        let mut hmac = vec![0u8; 32];
+        let mut hmac = [0u8; 32];
 
         iv.copy_from_slice(&data[0..16]);
         ciphertext.copy_from_slice(&data[16..data.len() - 32]);
@@ -72,7 +73,7 @@ impl CiphertextV1 {
         CiphertextV1::split_key(key, &mut encryption_key, &mut signature_key);
 
         // Generate IV
-        let mut iv = vec![0u8; 16];
+        let mut iv = [0u8; 16];
         OsRng.fill_bytes(&mut iv);
 
         // Create cipher object
@@ -84,14 +85,14 @@ impl CiphertextV1 {
 
         // Append MAC data
         let mut mac_data: Vec<u8> = (*header).clone().into();
-        mac_data.append(&mut iv.clone());
+        mac_data.extend_from_slice(&iv);
         mac_data.append(&mut ciphertext.clone());
 
         // HMAC
         let mut mac = Hmac::<Sha256>::new_varkey(&signature_key)?;
         mac.input(&mac_data);
 
-        let hmac = mac.result().code().to_vec();
+        let hmac: [u8; 32] = mac.result().code().into();
 
         // Zero out the key
         signature_key.zeroize();
@@ -111,7 +112,7 @@ impl CiphertextV1 {
 
         // Verify HMAC
         let mut mac_data: Vec<u8> = (*header).clone().into();
-        mac_data.append(&mut self.iv.clone());
+        mac_data.extend_from_slice(&self.iv);
         mac_data.append(&mut self.ciphertext.clone());
 
         let mut mac = Hmac::<Sha256>::new_varkey(&signature_key)?;

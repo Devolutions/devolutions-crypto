@@ -59,7 +59,8 @@ use ciphertext_v2::{CiphertextV2Asymmetric, CiphertextV2Symmetric};
 use std::convert::TryFrom;
 
 /// A versionned ciphertext. Can be either symmetric or asymmetric.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
 pub struct Ciphertext {
     pub(crate) header: Header<Ciphertext>,
     payload: CiphertextPayload,
@@ -74,7 +75,8 @@ impl HeaderType for Ciphertext {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
 enum CiphertextPayload {
     V1(CiphertextV1),
     V2Symmetric(CiphertextV2Symmetric),
