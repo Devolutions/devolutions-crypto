@@ -344,6 +344,27 @@ def build_ios(assembly_manifest, version, args):
 
     for arch in architectures:
         libs = libs + " ./ios/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.a"
+
+        # Hack : This is wrong on so many levels
+        # Rename __rust_eh_personality symbols (which conflicts with other rust libraries on iOS)
+        # https://github.com/rust-lang/rust/issues/44322
+        os.environ["LANG"]=""
+
+        # Extract static library.
+        output = exec_command("ar x " + "libDevolutionsCrypto.a", cwd="./ios/bin/" + arch["name"] + "/")
+        print(output)
+
+        # Rename symbol in the corresponding object file.
+        output = exec_command("bash -c \"LC_ALL=C sed -i '' 's/rust_eh_personality/rust_eh_personaliti/g' $(ls devolutions_crypto-*.rcgu.o)\"", cwd="./ios/bin/" + arch["name"] + "/")
+        print(output)
+
+        # Repackage the statuc library with the renamed symbol.
+        output = exec_command("bash -c \"ar cr libDevolutionsCrypto.a *.o\"", cwd="./ios/bin/" + arch["name"] + "/")
+        print(output)
+
+        # Clean up object files left when extracting the static library.
+        output = exec_command("bash -c \"find . ! -name '*.a' -type f -exec rm -rf {} +\"", cwd="./ios/bin/" + arch["name"] + "/")
+        print(output)
     
     args = "lipo -create "
     args = args + libs
