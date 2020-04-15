@@ -37,7 +37,7 @@ strum_macros = "0.18.0"
 num_enum = "0.4.3"
 
 [profile.release]
-lto = false
+lto = true
 
 [features]
 default = []
