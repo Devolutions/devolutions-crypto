@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 
-## [0.5.1] - 2020-03-27
+## [0.5.1] - 2020-04-15 - C# iOS
+
+### Changed
+#### C#
+ - Fixed iOS linking issue with multiple rust libraries.
+
+## [0.5.1] - 2020-03-27 - Javascript/Typescript
 
 ### Added
 #### Javascript/Typescript
