@@ -1,12 +1,15 @@
 //! Module for utils that does not use any of the Devolutions custom data types.
 
+use base64;
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 
 use super::DataType;
+use super::Error;
 use super::Header;
+use super::Result;
 
 /// Returns a random key of the specified length. Can also be used
 ///  whenever you need a random byte array, like for a salt.
@@ -87,6 +90,30 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
                 || Header::<PublicKey>::try_from(&data[0..Header::len()]).is_ok()
         }
         DataType::Share => Header::<Share>::try_from(&data[0..Header::len()]).is_ok(),
+    }
+}
+
+pub fn base64_encode(data: &[u8]) -> String {
+    base64::encode(data)
+}
+
+pub fn base64_encode_url(data: &[u8]) -> String {
+    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
+    base64::encode_config(data, config)
+}
+
+pub fn base64_decode(data: &str) -> Result<Vec<u8>> {
+    match base64::decode(data) {
+        Ok(d) => Ok(d),
+        _ => Err(Error::InvalidData),
+    }
+}
+
+pub fn base64_decode_url(data: &str) -> Result<Vec<u8>> {
+    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
+    match base64::decode_config(data, config) {
+        Ok(d) => Ok(d),
+        _ => Err(Error::InvalidData),
     }
 }
 
