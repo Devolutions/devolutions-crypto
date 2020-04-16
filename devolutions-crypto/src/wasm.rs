@@ -1,6 +1,5 @@
 use std::convert::TryFrom as _;
 
-use base64;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -283,36 +282,20 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
 
 #[wasm_bindgen]
 pub fn base64encode(data: &[u8]) -> String {
-    base64::encode(data)
+    utils::base64_encode(data)
 }
 
 #[wasm_bindgen]
 pub fn base64decode(data: &str) -> Result<Vec<u8>, JsValue> {
-    match base64::decode(&data) {
-        Ok(res) => Ok(res),
-        Err(e) => {
-            let error = js_sys::Error::new(&format!("{}", e));
-            error.set_name("Base64Error");
-            Err(error.into())
-        }
-    }
+    Ok(utils::base64_decode(data)?)
 }
 
 #[wasm_bindgen(js_name = "base64urlEncode")]
 pub fn base64url_encode(data: &[u8]) -> String {
-    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
-    base64::encode_config(data, config)
+    utils::base64_encode_url(data)
 }
 
 #[wasm_bindgen(js_name = "base64urlDecode")]
 pub fn base64url_decode(data: &str) -> Result<Vec<u8>, JsValue> {
-    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
-    match base64::decode_config(&data, config) {
-        Ok(res) => Ok(res),
-        Err(e) => {
-            let error = js_sys::Error::new(&format!("{}", e));
-            error.set_name("Base64Error");
-            Err(error.into())
-        }
-    }
+    Ok(utils::base64_decode_url(data)?)
 }
