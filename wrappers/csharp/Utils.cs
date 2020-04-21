@@ -103,21 +103,17 @@ namespace Devolutions.Cryptography
                 return null;
             }
 
-            int length = GetDecodedLength(base64);
+            byte[] buffer = new byte[base64.Length];
 
-            if (length == 0)
+            long res = Native.DecodeNative(base64, (UIntPtr)base64.Length, buffer, (UIntPtr)buffer.Length);
+
+            if (res < 0)
             {
                 return null;
             }
 
-            byte[] buffer = new byte[length];
-
-            long decode_res = Native.DecodeNative(base64, (UIntPtr)base64.Length, buffer, (UIntPtr)buffer.Length);
-
-            if (decode_res == -1)
-            {
-                return null;
-            }
+            // If success it returns the real result size, so we resize.
+            Array.Resize(ref buffer, (int)res);
 
             return buffer;
         }
@@ -145,63 +141,19 @@ namespace Devolutions.Cryptography
                 return null;
             }
 
-            int length = GetEncodedLength(data);
+            byte[] buffer = new byte[data.Length * 2];
 
-            if (length == 0)
+            long res = Native.EncodeNative(data, (UIntPtr)data.Length, buffer, (UIntPtr)buffer.Length);
+
+            if (res < 0)
             {
                 return null;
             }
 
-            byte[] buffer = new byte[length];
-
-            long encode_res = Native.EncodeNative(data, (UIntPtr)data.Length, buffer, (UIntPtr)buffer.Length);
+            // If success it returns the real result size, so we resize.
+            Array.Resize(ref buffer, (int)res);
 
             return ByteArrayToUtf8String(buffer);
-        }
-
-        /// <summary>
-        /// Calculate the length of the original buffer if the base 64 string is converted back.
-        /// </summary>
-        /// <param name="base64">The base 64 string to calculate the resulting length.</param>
-        /// <returns>The original buffer length.</returns>
-        public static int GetDecodedLength(string base64)
-        {
-            if (string.IsNullOrEmpty(base64))
-            {
-                return 0;
-            }
-
-            int characterCount = base64.Length;
-
-            int result = Convert.ToInt32(3 * ((double)characterCount / 4));
-
-            int index = characterCount - 1;
-
-            int loopCount = 1;
-
-            while (base64[index] == '=' && loopCount <= 2)
-            {
-                result--;
-                index--;
-                loopCount++;
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Calculate the length of the resulting array if the buffer is encoded in base64.
-        /// </summary>
-        /// <param name="buffer">The buffer to calculate the resulting length.</param>
-        /// <returns>The resulting base 64 buffer lentgh.</returns>
-        public static int GetEncodedLength(byte[] buffer)
-        {
-            if (buffer == null)
-            {
-                return 0;
-            }
-
-            return ((4 * buffer.Length / 3) + 3) & ~3;
         }
 
         /// <summary>

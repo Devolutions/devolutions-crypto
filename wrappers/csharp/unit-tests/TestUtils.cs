@@ -67,20 +67,6 @@ namespace xamarin_android
         }
 
         [TestMethod]
-        public void GetDecodedLength()
-        {
-            int decodedLength = Utils.GetDecodedLength(TestData.StringTestData);
-            Assert.AreEqual(2, decodedLength);
-        }
-
-        [TestMethod]
-        public void GetEncodedLength()
-        {
-            int encodedLength = Utils.GetEncodedLength(TestData.BytesTestData);
-            Assert.AreEqual(4, encodedLength);
-        }
-
-        [TestMethod]
         public void StringToByteArray()
         {
             byte[] data = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
