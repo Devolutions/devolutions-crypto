@@ -161,32 +161,28 @@ namespace Devolutions.Cryptography
 
         /// <summary>
         /// Calculate the length of the original buffer if the base 64 string is converted back.
+        /// Warning this method doesn't validate if the string is valid base64.
         /// </summary>
         /// <param name="base64">The base 64 string to calculate the resulting length.</param>
         /// <returns>The original buffer length.</returns>
         public static int GetDecodedLength(string base64)
         {
-            if (string.IsNullOrEmpty(base64))
+            if (string.IsNullOrEmpty(base64) || base64.Length % 4 != 0)
             {
                 return 0;
             }
 
-            int characterCount = base64.Length;
+            int padCount = 0;
 
-            int result = Convert.ToInt32(3 * ((double)characterCount / 4));
-
-            int index = characterCount - 1;
-
-            int loopCount = 1;
-
-            while (base64[index] == '=' && loopCount <= 2)
+            for (int i = base64.Length - 1; i >= base64.Length - 2; i--)
             {
-                result--;
-                index--;
-                loopCount++;
+                if (base64[i] == '=')
+                {
+                    padCount++;
+                }
             }
 
-            return result;
+            return (3 * (base64.Length / 4)) - padCount;
         }
 
         /// <summary>
