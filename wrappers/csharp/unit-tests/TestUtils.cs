@@ -69,8 +69,25 @@ namespace xamarin_android
         [TestMethod]
         public void GetDecodedLength()
         {
-            int decodedLength = Utils.GetDecodedLength(TestData.StringTestData);
-            Assert.AreEqual(2, decodedLength);
+            Assert.IsTrue(this.GetDotNetBase64Length(TestData.StringTestData) <= Utils.GetDecodedLength(TestData.StringTestData)); // Invalid data
+            Assert.IsTrue(Utils.GetDecodedLength("====") >= this.GetDotNetBase64Length("===="));
+            Assert.IsTrue(Utils.GetDecodedLength("=") == this.GetDotNetBase64Length("="));
+            Assert.IsTrue(Utils.GetDecodedLength("YWxsbw==") == this.GetDotNetBase64Length("YWxsbw=="));
+            Assert.IsTrue(Utils.GetDecodedLength(null) == this.GetDotNetBase64Length(null));
+        }
+
+        public int GetDotNetBase64Length(string base64)
+        {
+            try
+            {
+                byte[] test = Convert.FromBase64String(base64);
+
+                return test.Length;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
         }
 
         [TestMethod]
