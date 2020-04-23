@@ -1,6 +1,5 @@
 //! Module for utils that does not use any of the Devolutions custom data types.
 
-use base64;
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
