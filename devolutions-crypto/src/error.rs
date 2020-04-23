@@ -1,6 +1,5 @@
 //! Possible errors in the library.
 
-use std;
 use std::fmt;
 
 #[cfg(target_arch = "wasm32")]
@@ -11,7 +10,6 @@ use strum_macros::IntoStaticStr;
 use block_modes::{BlockModeError, InvalidKeyIvLength};
 use hmac::crypto_mac::InvalidKeyLength;
 use hmac::crypto_mac::MacError;
-use rand;
 
 /// This crate's error type.
 #[derive(Debug, IntoStaticStr)]
