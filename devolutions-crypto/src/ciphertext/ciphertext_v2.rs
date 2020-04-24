@@ -19,8 +19,11 @@ use sha2::{Digest, Sha256};
 use x25519_dalek::StaticSecret;
 use zeroize::Zeroize;
 
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+
 #[derive(Zeroize, Clone, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[zeroize(drop)]
 pub struct CiphertextV2Symmetric {
     nonce: [u8; 24],
@@ -34,9 +37,9 @@ pub struct CiphertextV2Asymmetric {
 }
 
 #[cfg(feature = "fuzz")]
-impl arbitrary::Arbitrary for CiphertextV2Asymmetric {
+impl Arbitrary for CiphertextV2Asymmetric {
     fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
-        let public_key: [u8; 32] = arbitrary::Arbitrary::arbitrary(u)?;
+        let public_key: [u8; 32] = Arbitrary::arbitrary(u)?;
         let public_key = x25519_dalek::PublicKey::from(public_key);
         let ciphertext = CiphertextV2Symmetric::arbitrary(u)?;
         Ok(Self {

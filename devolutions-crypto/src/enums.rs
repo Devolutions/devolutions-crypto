@@ -1,12 +1,15 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use zeroize::Zeroize;
 
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
 /// The different data types.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 pub enum DataType {
@@ -30,7 +33,7 @@ impl Default for DataType {
 
 /// The versions of the encryption scheme to use.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 pub enum CiphertextVersion {
@@ -50,7 +53,7 @@ impl Default for CiphertextVersion {
 
 /// The versions of the password hashing scheme to use.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 pub enum PasswordHashVersion {
@@ -68,7 +71,7 @@ impl Default for PasswordHashVersion {
 
 /// The versions of the key scheme to use.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 pub enum KeyVersion {
@@ -86,7 +89,7 @@ impl Default for KeyVersion {
 
 /// The versions of the secret sharing scheme to use.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 pub enum SecretSharingVersion {
@@ -103,7 +106,7 @@ impl Default for SecretSharingVersion {
 }
 
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[repr(u16)]
 pub enum CiphertextSubtype {
     None = 0,
@@ -118,7 +121,7 @@ impl Default for CiphertextSubtype {
 }
 
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[repr(u16)]
 pub enum KeySubtype {
     None = 0,
@@ -133,7 +136,7 @@ impl Default for KeySubtype {
 }
 
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[repr(u16)]
 pub enum PasswordHashSubtype {
     None = 0,
@@ -146,7 +149,7 @@ impl Default for PasswordHashSubtype {
 }
 
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[repr(u16)]
 pub enum ShareSubtype {
     None = 0,

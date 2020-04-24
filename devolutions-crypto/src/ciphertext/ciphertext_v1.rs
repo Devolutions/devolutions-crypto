@@ -15,8 +15,11 @@ use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 use zeroize::Zeroize;
 
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+
 #[derive(Zeroize, Clone, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[zeroize(drop)]
 pub struct CiphertextV1 {
     iv: [u8; 16],

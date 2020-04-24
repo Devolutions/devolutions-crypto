@@ -6,9 +6,13 @@ use std::convert::TryFrom;
 use sharks::{Share, Sharks};
 use zeroize::Zeroize;
 
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+
 // This will need some work in the Sharks crate to get the zeroize working.
 //#[derive(Zeroize)]
 //#[zeroize(drop)]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone)]
 pub struct ShareV1 {
     threshold: u8,
@@ -18,23 +22,6 @@ pub struct ShareV1 {
 impl core::fmt::Debug for ShareV1 {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> std::result::Result<(), core::fmt::Error> {
         write!(f, "Share with threshold {}", self.threshold)
-    }
-}
-
-#[cfg(feature = "fuzz")]
-impl arbitrary::Arbitrary for ShareV1 {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
-        let threshold: u8 = arbitrary::Arbitrary::arbitrary(u)?;
-        let num: [u8; 2] = arbitrary::Arbitrary::arbitrary(u)?;
-        let mut share: Vec<u8> = arbitrary::Arbitrary::arbitrary(u)?;
-
-        let mut full_share = num.to_vec();
-        full_share.append(&mut share);
-
-        Ok(Self {
-            threshold,
-            share: Share::from(full_share.as_slice()),
-        })
     }
 }
 
@@ -58,7 +45,11 @@ impl TryFrom<&[u8]> for ShareV1 {
         };
 
         let threshold = data[0];
-        let share = Share::from(&data[1..]);
+
+        let share = match Share::try_from(&data[1..]) {
+            Ok(s) => s,
+            Err(_) => return Err(Error::InvalidData),
+        };
 
         Ok(ShareV1 { threshold, share })
     }

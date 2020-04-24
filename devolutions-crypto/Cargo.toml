@@ -28,26 +28,26 @@ zeroize_derive = "1.0.0"
 base64 = "0.12.0"
 chacha20poly1305 = "0.4.1"
 aead = "0.2.0"
-sharks = "0.3.2"
+sharks = "0.4.1"
 strum = "0.18.0"
 strum_macros = "0.18.0"
 num_enum = "0.4.3"
-arbitrary = {version = "0.4.1", features = ["derive"], optional = true}
+arbitrary = {version = "0.4.2", features = ["derive"], optional = true}
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
 rand = { version = "0.7.3", features = ["wasm-bindgen"] }
-wasm-bindgen = { version = "0.2.59", features = ["serde-serialize"] }
-js-sys = "0.3.36"
-rust-argon2 = { version = "0.8.1", default-features = false }
+wasm-bindgen = { version = "0.2.60", features = ["serde-serialize"] }
+js-sys = "0.3.37"
+rust-argon2 = { version = "0.8.2", default-features = false }
 
 [target.'cfg(not(target_arch="wasm32"))'.dependencies]
 rand = { version = "0.7.3" }
 rust-argon2 = "0.8.1"
 
 [target.'cfg(target_arch="wasm32")'.dev-dependencies]
-wasm-bindgen-test = "0.3.9"
+wasm-bindgen-test = "0.3.10"
 
 [features]
 default = []
 ffi = []
-fuzz = ["arbitrary"]
+fuzz = ["arbitrary", "sharks/fuzzing"]
