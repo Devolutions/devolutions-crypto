@@ -12,6 +12,9 @@ use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
 use zeroize::Zeroize;
 
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+
 #[derive(Zeroize, Clone, Debug)]
 #[zeroize(drop)]
 pub struct PasswordHashV1 {
@@ -21,10 +24,10 @@ pub struct PasswordHashV1 {
 }
 
 #[cfg(feature = "fuzz")]
-impl arbitrary::Arbitrary for PasswordHashV1 {
+impl Arbitrary for PasswordHashV1 {
     fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
-        let salt: [u8; 32] = arbitrary::Arbitrary::arbitrary(u)?;
-        let hash: [u8; 32] = arbitrary::Arbitrary::arbitrary(u)?;
+        let salt: [u8; 32] = Arbitrary::arbitrary(u)?;
+        let hash: [u8; 32] = Arbitrary::arbitrary(u)?;
         Ok(Self {
             iterations: 2,
             salt,

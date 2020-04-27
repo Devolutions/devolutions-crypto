@@ -64,6 +64,9 @@ use key_v1::{KeyV1Private, KeyV1Public};
 
 use std::convert::TryFrom;
 
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -78,7 +81,7 @@ pub struct KeyPair {
 
 /// A public key. This key can be sent in clear on unsecured channels and stored publicly.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Debug)]
 pub struct PublicKey {
     pub(crate) header: Header<PublicKey>,
@@ -87,7 +90,7 @@ pub struct PublicKey {
 
 /// A private key. This key should never be sent over an insecure channel or stored unsecurely.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Debug)]
 pub struct PrivateKey {
     pub(crate) header: Header<PrivateKey>,
@@ -121,13 +124,13 @@ impl HeaderType for PrivateKey {
 }
 
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum PrivateKeyPayload {
     V1(KeyV1Private),
 }
 
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum PublicKeyPayload {
     V1(KeyV1Public),
 }

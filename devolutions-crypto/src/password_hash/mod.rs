@@ -26,9 +26,12 @@ use password_hash_v1::PasswordHashV1;
 
 use std::convert::TryFrom;
 
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+
 /// A versionned password hash. Can be used to validate a password without storing the password.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 pub struct PasswordHash {
     pub(crate) header: Header<PasswordHash>,
     payload: PasswordHashPayload,
@@ -44,7 +47,7 @@ impl HeaderType for PasswordHash {
 }
 
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum PasswordHashPayload {
     V1(PasswordHashV1),
 }

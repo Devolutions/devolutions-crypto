@@ -9,6 +9,9 @@ use zeroize::Zeroize;
 
 use std::convert::TryFrom;
 
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+
 #[derive(Clone)]
 pub struct KeyV1Pair {
     pub private_key: KeyV1Private,
@@ -27,9 +30,9 @@ impl core::fmt::Debug for KeyV1Private {
 }
 
 #[cfg(feature = "fuzz")]
-impl arbitrary::Arbitrary for KeyV1Private {
+impl Arbitrary for KeyV1Private {
     fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
-        let private_key: [u8; 32] = arbitrary::Arbitrary::arbitrary(u)?;
+        let private_key: [u8; 32] = Arbitrary::arbitrary(u)?;
         Ok(Self {
             key: x25519_dalek::StaticSecret::from(private_key),
         })
@@ -42,9 +45,9 @@ pub struct KeyV1Public {
 }
 
 #[cfg(feature = "fuzz")]
-impl arbitrary::Arbitrary for KeyV1Public {
+impl Arbitrary for KeyV1Public {
     fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
-        let public_key: [u8; 32] = arbitrary::Arbitrary::arbitrary(u)?;
+        let public_key: [u8; 32] = Arbitrary::arbitrary(u)?;
         Ok(Self {
             key: x25519_dalek::PublicKey::from(public_key),
         })

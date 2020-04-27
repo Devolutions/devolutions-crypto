@@ -34,9 +34,12 @@ use secret_sharing_v1::ShareV1;
 
 use std::convert::TryFrom;
 
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+
 /// A part of the secret key. You need multiple of them to recompute the secret key.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 pub struct Share {
     pub(crate) header: Header<Share>,
     payload: SharePayload,
@@ -52,7 +55,7 @@ impl HeaderType for Share {
 }
 
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum SharePayload {
     V1(ShareV1),
 }

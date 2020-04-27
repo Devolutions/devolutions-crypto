@@ -10,13 +10,16 @@ use std::io::Cursor;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use zeroize::Zeroize;
 
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+
 const SIGNATURE: u16 = 0x0C0D;
 
 pub trait HeaderType {
     cfg_if! {
         if #[cfg(feature = "fuzz")] {
-            type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + arbitrary::Arbitrary;
-            type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + arbitrary::Arbitrary;
+            type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + Arbitrary;
+            type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + Arbitrary;
         }
         else {
             type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug;
@@ -46,7 +49,7 @@ impl HeaderType for () {
 }
 
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "fuzz", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 pub struct Header<M>
 where
     M: HeaderType,
