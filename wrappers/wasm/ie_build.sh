@@ -1,3 +1,8 @@
+#!/bin/bash
+set -ex
+
+./wasm_build.sh
+
 cd dist/bundler
 
 # Convert to javascript
@@ -20,11 +25,9 @@ sed -i '' '/devolutions_crypto_bg.wasm/ d' package.json
 sed -i '' 's/devolutions-crypto/devolutions-crypto-ie/g' package.json
 sed -i '' 's/devolutions_crypto/devolutions_crypto_ie/g' package.json
 
-# Prepare browserlist
 # Babel for browser compat
 npm install --save-dev @babel/core @babel/preset-env @babel/cli
-echo 'running babel-cli'
-npx babel devolutions_crypto_ie_init.js --out-file devolutions_crypto_ie.js --presets=@babel/preset-env
+npx babel devolutions_crypto_ie_init.js --out-file devolutions_crypto_ie.js --presets=@babel/preset-env --minified
 
 # Cleanup
 sed -i '' '/devolutions_crypto_ie_bg.js/ d' package.json
