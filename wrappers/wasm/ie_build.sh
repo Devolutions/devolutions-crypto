@@ -30,5 +30,5 @@ npm install --silent --save-dev @babel/core @babel/preset-env @babel/cli
 npx babel devolutions_crypto_ie_init.js --out-file devolutions_crypto_ie.js --presets=@babel/preset-env --minified
 
 # Cleanup
-sed -i '' '/devolutions_crypto_ie_bg.js/ d' package.json
+sed -i.bak '/devolutions_crypto_ie_bg.js/ d' package.json
 rm devolutions_crypto_bg.js devolutions_crypto_bg.d.ts devolutions_crypto_bg.wasm devolutions_crypto_ie_init.js devolutions_crypto_bg.js.bak devolutions_crypto.js.bak package.json.bak
