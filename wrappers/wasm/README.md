@@ -27,4 +27,4 @@ First of all you will need to download wasm2js binary according to your platform
  * Make sure your build directory if clean by running `rm -rf dist/`
  * run `./ie_build.sh`
 
-If you need devolutions-crypto to be compatible with a specific browser version, add it to the [browserlist](./browserlist) file.
+If you need devolutions-crypto to be compatible with a specific browser version, add it to the [browserslist](./browserslist) file.
