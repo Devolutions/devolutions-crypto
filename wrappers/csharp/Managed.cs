@@ -84,7 +84,7 @@ namespace Devolutions.Cryptography
         /// <returns>Returns a keypair.</returns>
         public static KeyPair DeriveKeyPair(byte[] password, Argon2Parameters parameters)
         {
-            if (password == null)
+            if (password == null || password.Length == 0)
             {
                 return null;
             }
@@ -180,7 +180,7 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the derived password.</returns>
         public static byte[] DeriveKey(byte[] key, byte[] salt = null, uint iterations = 10000, uint length = 32)
         {
-            if (key == null)
+            if (key == null || key.Length == 0)
             {
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
@@ -354,6 +354,11 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string EncryptWithPasswordAsBase64String(byte[] data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+
             uint keySize;
             if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
             {
@@ -394,6 +399,11 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string EncryptBase64WithPasswordAsBase64String(string b64data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
+            if (string.IsNullOrEmpty(b64data))
+            {
+                return null;
+            }
+
             uint keySize;
             if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
             {
@@ -616,6 +626,11 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string EncryptWithPasswordAsBase64String(string data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
+            if (string.IsNullOrEmpty(data))
+            {
+                return null;
+            }
+
             uint keySize;
             if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
             {
@@ -643,6 +658,11 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the encryption result as a byte array.</returns>
         public static byte[] EncryptWithPassword(byte[] data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+
             uint keySize;
             if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
             {
@@ -670,6 +690,11 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the encryption result as a byte array.</returns>
         public static byte[] EncryptBase64WithPassword(string b64data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
+            if (string.IsNullOrEmpty(b64data))
+            {
+                return null;
+            }
+
             uint keySize;
             if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
             {
@@ -697,6 +722,11 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the encryption result as a byte array.</returns>
         public static byte[] EncryptWithPassword(string data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
         {
+            if (string.IsNullOrEmpty(data))
+            {
+                return null;
+            }
+
             uint keySize;
             if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
             {
@@ -812,6 +842,11 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
         public static string DecryptWithPasswordAsUtf8String(byte[] data, string password, uint iterations = 10000)
         {
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+
             // There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#.
             // This is unfortunatly the best way we found to fix it while keeping backward compatibility.
             // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
@@ -921,6 +956,11 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
         public static string DecryptWithPasswordAsUtf8String(string b64data, string password, uint iterations = 10000)
         {
+            if (string.IsNullOrEmpty(b64data))
+            {
+                return null;
+            }
+
             // There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#.
             // This is unfortunatly the best way we found to fix it while keeping backward compatibility.
             // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
@@ -1003,6 +1043,11 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the decryption result as a byte array.</returns>
         public static byte[] DecryptWithPassword(byte[] data, string password, uint iterations = 10000)
         {
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+
             //// There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#.
             //// This is unfortunatly the best way we found to fix it while keeping backward compatibility.
             //// We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
@@ -1047,6 +1092,11 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the decryption result as a byte array.</returns>
         public static byte[] DecryptWithPassword(string b64data, string password, uint iterations = 10000)
         {
+            if (string.IsNullOrEmpty(b64data))
+            {
+                return null;
+            }
+
             // There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#.
             // This is unfortunatly the best way we found to fix it while keeping backward compatibility.
             // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
