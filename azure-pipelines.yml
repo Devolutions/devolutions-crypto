@@ -91,7 +91,7 @@ stages:
       displayName: "Code Analysis"
 
 - stage: Native_Build
-  dependsOn: [RustCodeFormattingCheck, CsharpCodeFormattingCheck]
+  dependsOn: []
   jobs:
   - job: Linux
     pool:
@@ -446,7 +446,7 @@ stages:
         artifactName: AppSpecificNugets
 
 - stage: WebAssembly
-  dependsOn: RustCodeFormattingCheck
+  dependsOn: []
   jobs:
   - job: safari_unit_tests
     pool:
@@ -605,10 +605,49 @@ stages:
       workingDirectory: "./wrappers/csharp/tests/unit-tests/nugets"
       displayName: "Unit tests XAMARIN-MAC-MODERN"
 
+
+  - job: ios
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - checkout: self
+      lfs: true
+      submodules: true
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: "Nugets"
+        targetPath: "./wrappers/csharp/tests/unit-tests/nugets/Nugets"
+    - script: |
+        sudo nuget update -self
+      displayName: "Update Nuget"
+
+    - script: | # Fix issue with azure pipeline without the right default Xcode View github actions/virtual-environment issue 775
+        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_11.4.app;
+        sudo xcode-select --switch /Applications/Xcode_11.4.app/Contents/Developer
+
     - script: |
         python3 unit-tests.py -p ios
       workingDirectory: "./wrappers/csharp/tests/unit-tests/nugets"
       displayName: "Unit tests XAMARIN-IOS"
+
+  - job: android
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - checkout: self
+      lfs: true
+      submodules: true
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: "Nugets"
+        targetPath: "./wrappers/csharp/tests/unit-tests/nugets/Nugets"
+    - script: |
+        sudo nuget update -self
+      displayName: "Update Nuget"
+
+    - script: | # Fix issue with azure pipeline without the right default Xcode View github actions/virtual-environment issue 775
+        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_11.4.app;
+        sudo xcode-select --switch /Applications/Xcode_11.4.app/Contents/Developer
 
     - script: |
         adb start-server
@@ -636,6 +675,7 @@ stages:
         python3 unit-tests.py -p android
       workingDirectory: "./wrappers/csharp/tests/unit-tests/nugets"
       displayName: "Unit tests XAMARIN-ANDROID"
+
 
 - stage: CSharpIntegrationTests
   dependsOn: Nugets
