@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [0.5.3] - 2020-05-06 - C#
+
+### Changed
+ - Prevent derivation if encryption/decryption data is null.
 
 ## [0.5.2-0.5.6] - 2020-05-05 - Javascript IE
 
