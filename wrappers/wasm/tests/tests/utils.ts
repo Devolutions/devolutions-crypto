@@ -1,8 +1,9 @@
-import { generateKey, deriveKey, validateHeader, base64encode, base64decode, DataType } from 'devolutions-crypto'
+import { generateKey, deriveKey, validateHeader, base64encode, base64decode, base64urlEncode, base64urlDecode, DataType } from 'devolutions-crypto'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
 const encoder: TextEncoder = new TextEncoder()
+const decoder: TextDecoder = new TextDecoder()
 
 describe('generateKey', () => {
   it('should return a 32 bytes random key by default', () => {
@@ -104,5 +105,35 @@ describe('base64', () => {
     const input: string = 'YWJjZGU='
     const result: Uint8Array = base64decode(input)
     expect(result).to.eql(Uint8Array.from([0x61, 0x62, 0x63, 0x64, 0x65]))
+  })
+})
+
+describe('base64url', () => {
+  it('should give the right encoded value', () => {
+    const input1: Uint8Array = encoder.encode('Ab6/')
+    const result1: string = base64urlEncode(input1)
+    expect(result1).to.eql('QWI2Lw')
+
+    const input2: Uint8Array = encoder.encode('Ab6/75')
+    const result2: string = base64urlEncode(input2)
+    expect(result2).to.eql('QWI2Lzc1')
+
+    const input3: Uint8Array = Uint8Array.from([0xff, 0xff, 0xfe, 0xff])
+    const result3: string = base64urlEncode(input3)
+    expect(result3).to.eql('___-_w')
+  })
+
+  it('should give the right decoded value', () => {
+    const input1: string = 'QWI2Lw'
+    const result1: string = decoder.decode(base64urlDecode(input1))
+    expect(result1).to.eql('Ab6/')
+
+    const input2: string = 'QWI2Lzc1'
+    const result2: string = decoder.decode(base64urlDecode(input2))
+    expect(result2).to.eql('Ab6/75')
+
+    const input3: string = '___-_w'
+    const result3: Uint8Array = base64urlDecode(input3)
+    expect(result3).to.eql(Uint8Array.from([0xff, 0xff, 0xfe, 0xff]))
   })
 })

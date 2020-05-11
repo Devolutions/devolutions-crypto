@@ -33,6 +33,18 @@ namespace xamarin_android
 
         public const string TestPassword = "Key123";
 
+        public const string Base64Url1 = "QWI2Lw";
+
+        public const string Base64Url2 = "QWI2Lzc1";
+
+        public const string Base64Url3 = "___-_w";
+
+        public static readonly byte[] Base64UrlBytes1 = new byte[] { 0x41, 0x62, 0x36, 0x2f };
+
+        public static readonly byte[] Base64UrlBytes2 = new byte[] { 0x41, 0x62, 0x36, 0x2f, 0x37, 0x35 };
+
+        public static readonly byte[] Base64UrlBytes3 = new byte[] { 0xff, 0xff, 0xfe, 0xff };
+
         public static readonly byte[] AlicePrivateKey = new byte[]
             {
                 0x0d,

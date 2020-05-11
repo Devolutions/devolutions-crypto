@@ -45,7 +45,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// This returns the length of the ciphertext. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn Encrypt(
     data: *const u8,
@@ -99,7 +99,7 @@ pub unsafe extern "C" fn Encrypt(
 /// This returns the length of the asymmetric ciphertext. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn EncryptAsymmetric(
     data: *const u8,
@@ -192,7 +192,7 @@ pub extern "C" fn EncryptAsymmetricSize(data_length: usize, version: u16) -> i64
 /// This returns the length of the plaintext. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn Decrypt(
     data: *const u8,
@@ -242,7 +242,7 @@ pub unsafe extern "C" fn Decrypt(
 /// This returns the length of the plaintext. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn DecryptAsymmetric(
     data: *const u8,
@@ -299,7 +299,7 @@ pub unsafe extern "C" fn DecryptAsymmetric(
 /// This returns the length of the hash. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn HashPassword(
     password: *const u8,
@@ -344,7 +344,7 @@ pub extern "C" fn HashPasswordLength() -> i64 {
 /// Returns 0 if the password is invalid or 1 if the password is valid. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn VerifyPassword(
     password: *const u8,
@@ -383,7 +383,7 @@ pub unsafe extern "C" fn VerifyPassword(
 /// Returns 0 if the generation worked. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn GenerateKeyPair(
     private: *mut u8,
@@ -444,7 +444,7 @@ pub extern "C" fn DeriveKeyPairSize() -> i64 {
 /// Returns 0 if the key exchange worked. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn MixKeyExchange(
     private: *const u8,
@@ -499,7 +499,7 @@ pub extern "C" fn MixKeyExchangeSize() -> i64 {
 /// Returns 0 if the operation is successful. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn GenerateSharedKey(
     n_shares: u8,
@@ -552,7 +552,7 @@ pub extern "C" fn GenerateSharedKeySize(secret_length: usize) -> i64 {
 /// Returns 0 if the operation is successful. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn JoinShares(
     n_shares: usize,
@@ -605,7 +605,7 @@ pub extern "C" fn JoinSharesSize(share_length: usize) -> i64 {
 /// Returns 0 if the operation is successful. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
     if key.is_null() {
@@ -632,7 +632,7 @@ pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
 /// Returns 0 if the operation is successful. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn DeriveKey(
     key: *const u8,
@@ -702,7 +702,7 @@ pub unsafe extern "C" fn ValidateHeader(
 /// # Returns
 /// Returns 0 if the operation is successful.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn GetDefaultArgon2Parameters(
     argon2_parameters: *mut u8,
@@ -740,7 +740,7 @@ pub extern "C" fn GetDefaultArgon2ParametersSize() -> i64 {
 /// Returns 0 if the operation is successful. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn DeriveKeyPair(
     password: *const u8,
@@ -803,7 +803,7 @@ pub extern "C" fn KeySize() -> u32 {
 /// # Returns
 /// Returns the size of the decoded string.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn Decode(
     input: *const u8,
@@ -833,7 +833,7 @@ pub unsafe extern "C" fn Decode(
 /// # Returns
 /// Returns the size, in bytes, of the output buffer.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn Encode(
     input: *const u8,
@@ -851,6 +851,68 @@ pub unsafe extern "C" fn Encode(
     encode_config_slice(&input, STANDARD, &mut output) as i64
 }
 
+
+/// Decode a base64 string to bytes using base64url.
+/// # Arguments
+///  * input - Pointer to the string to decode.
+///  * input_length - Length of the string to decode.
+///  * output - Pointer to the output buffer.
+///  * output_length - Length of the output buffer.
+/// # Returns
+/// Returns the size of the decoded string.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn DecodeUrl(
+    input: *const u8,
+    input_length: usize,
+    output: *mut u8,
+    output_length: usize,
+) -> i64 {
+    if input.is_null() || output.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
+    let mut output = slice::from_raw_parts_mut(output, output_length);
+
+    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
+
+    match decode_config_slice(&input, config, &mut output) {
+        Ok(res) => res as i64,
+        Err(_e) => -1,
+    }
+}
+
+/// Encode a byte array to a base64 string using base64url.
+/// # Arguments
+///  * input - Pointer to the buffer to encode.
+///  * input_length - Length of the buffer to encode.
+///  * output - Pointer to the output buffer.
+///  * output_length - Length of the output buffer.
+/// # Returns
+/// Returns the size, in bytes, of the output buffer.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn EncodeUrl(
+    input: *const u8,
+    input_length: usize,
+    output: *mut u8,
+    output_length: usize,
+) -> i64 {
+    if input.is_null() || output.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let input = slice::from_raw_parts(input, input_length);
+    let mut output = slice::from_raw_parts_mut(output, output_length);
+
+    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
+
+    encode_config_slice(&input, config, &mut output) as i64
+}
+
 ///  Size of the version string
 /// # Returns
 /// Returns the size of the version string
@@ -866,7 +928,7 @@ pub extern "C" fn VersionSize() -> i64 {
 /// # Returns
 /// Returns the size, in bytes, of the output buffer.
 /// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers ans sizes.
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
     if output.is_null() {

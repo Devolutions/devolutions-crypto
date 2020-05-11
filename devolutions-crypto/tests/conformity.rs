@@ -117,3 +117,19 @@ fn test_password_hashing_v1() {
     assert!(hash1.verify_password(b"password1"));
     assert!(hash2.verify_password(b"password1"));
 }
+
+#[test]
+fn test_base64_url() {
+    use devolutions_crypto::utils::{base64_decode_url, base64_encode_url};
+
+    assert_eq!(base64_encode_url(b"Ab6/"), "QWI2Lw");
+    assert_eq!(base64_encode_url(b"Ab6/75"), "QWI2Lzc1");
+    assert_eq!(base64_encode_url(&[0xff, 0xff, 0xfe, 0xff]), "___-_w");
+
+    assert_eq!(base64_decode_url("QWI2Lw").unwrap(), b"Ab6/");
+    assert_eq!(base64_decode_url("QWI2Lzc1").unwrap(), b"Ab6/75");
+    assert_eq!(
+        base64_decode_url("___-_w").unwrap(),
+        &[0xff, 0xff, 0xfe, 0xff]
+    );
+}
