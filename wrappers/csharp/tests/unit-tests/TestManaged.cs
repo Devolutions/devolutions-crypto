@@ -253,7 +253,7 @@ namespace xamarin_android
         [TestMethod]
         public void GetDecodedLength()
         {
-            int bufferDecodedLength = Utils.GetDecodedLength(TestData.Base64TestData);
+            int bufferDecodedLength = Utils.GetDecodedBase64StringLength(TestData.Base64TestData);
             Assert.AreEqual(bufferDecodedLength, 3);
         }
 
@@ -269,7 +269,7 @@ namespace xamarin_android
         [TestMethod]
         public void GetEncodedLength()
         {
-            int stringEncodedLength = Utils.GetEncodedLength(TestData.BytesTestData);
+            int stringEncodedLength = Utils.GetEncodedBase64StringLength(TestData.BytesTestData);
             Assert.AreEqual(stringEncodedLength, 4);
         }
 

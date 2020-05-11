@@ -103,7 +103,7 @@ namespace Devolutions.Cryptography
                 return null;
             }
 
-            int length = GetDecodedLength(base64);
+            int length = GetDecodedBase64StringLength(base64);
 
             if (length == 0)
             {
@@ -118,6 +118,32 @@ namespace Devolutions.Cryptography
             {
                 return null;
             }
+
+            return buffer;
+        }
+
+        /// <summary>
+        /// Converts a base 64 url string to a byte array.
+        /// </summary>
+        /// <param name="base64url">The data to convert.</param>
+        /// <returns>A byte array.</returns>
+        public static byte[] DecodeFromBase64Url(string base64url)
+        {
+            if (string.IsNullOrEmpty(base64url))
+            {
+                return null;
+            }
+
+            byte[] buffer = new byte[base64url.Length];
+
+            long decode_res = Native.DecodeUrlNative(base64url, (UIntPtr)base64url.Length, buffer, (UIntPtr)buffer.Length);
+
+            if (decode_res == -1)
+            {
+                return null;
+            }
+
+            Array.Resize(ref buffer, (int)decode_res);
 
             return buffer;
         }
@@ -145,7 +171,7 @@ namespace Devolutions.Cryptography
                 return null;
             }
 
-            int length = GetEncodedLength(data);
+            int length = GetEncodedBase64StringLength(data);
 
             if (length == 0)
             {
@@ -160,12 +186,47 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// Converts a byte array to a base 64 url encoded string.
+        /// </summary>
+        /// <param name="data">The data to convert.</param>
+        /// <returns>A base 64 url string.</returns>
+        public static string EncodeToBase64UrlString(byte[] data)
+        {
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+
+            int length = (data.Length * 4 / 3) + 4;
+
+            byte[] buffer = new byte[length];
+
+            long encode_res = Native.EncodeUrlNative(data, (UIntPtr)data.Length, buffer, (UIntPtr)buffer.Length);
+
+            Array.Resize(ref buffer, (int)encode_res);
+
+            return ByteArrayToUtf8String(buffer);
+        }
+
+        /// <summary>
         /// Calculate the length of the original buffer if the base 64 string is converted back.
         /// Warning this method doesn't validate if the string is valid base64.
         /// </summary>
         /// <param name="base64">The base 64 string to calculate the resulting length.</param>
         /// <returns>The original buffer length.</returns>
+        [Obsolete("This method has been deprecated. Use GetDecodedBase64StringLength instead.")]
         public static int GetDecodedLength(string base64)
+        {
+            return GetDecodedBase64StringLength(base64);
+        }
+
+        /// <summary>
+        /// Calculate the length of the original buffer if the base 64 string is converted back.
+        /// Warning this method doesn't validate if the string is valid base64.
+        /// </summary>
+        /// <param name="base64">The base 64 string to calculate the resulting length.</param>
+        /// <returns>The original buffer length.</returns>
+        public static int GetDecodedBase64StringLength(string base64)
         {
             if (string.IsNullOrEmpty(base64) || base64.Length % 4 != 0)
             {
@@ -190,7 +251,18 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="buffer">The buffer to calculate the resulting length.</param>
         /// <returns>The resulting base 64 buffer lentgh.</returns>
+        [Obsolete("This method has been deprecated. Use GetEncodedBase64StringLength instead.")]
         public static int GetEncodedLength(byte[] buffer)
+        {
+            return GetEncodedBase64StringLength(buffer);
+        }
+
+        /// <summary>
+        /// Calculate the length of the resulting array if the buffer is encoded in base64.
+        /// </summary>
+        /// <param name="buffer">The buffer to calculate the resulting length.</param>
+        /// <returns>The resulting base 64 buffer lentgh.</returns>
+        public static int GetEncodedBase64StringLength(byte[] buffer)
         {
             if (buffer == null)
             {

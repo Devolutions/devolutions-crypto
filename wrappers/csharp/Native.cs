@@ -351,6 +351,16 @@ namespace Devolutions.Cryptography
             return Decode86(input, input_length, output, output_length);
         }
 
+        internal static long DecodeUrlNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return DecodeUrl64(input, input_length, output, output_length);
+            }
+
+            return DecodeUrl86(input, input_length, output, output_length);
+        }
+
         internal static long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length)
         {
             if (Environment.Is64BitProcess)
@@ -359,6 +369,16 @@ namespace Devolutions.Cryptography
             }
 
             return Encode86(input, input_length, output, output_length);
+        }
+
+        internal static long EncodeUrlNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return EncodeUrl64(input, input_length, output, output_length);
+            }
+
+            return EncodeUrl86(input, input_length, output, output_length);
         }
 
         internal static long ValidateHeader(byte[] data, UIntPtr dataLength, ushort dataType)
@@ -427,6 +447,12 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName64, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private static extern long Decode64(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName86, EntryPoint = "DecodeUrl", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        private static extern long DecodeUrl86(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName64, EntryPoint = "DecodeUrl", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        private static extern long DecodeUrl64(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 #pragma warning restore CA2101 // Specify marshaling for P/Invoke string arguments
 
         [DllImport(LibName64, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
@@ -480,6 +506,12 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName64, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
         private static extern long Encode64(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName86, EntryPoint = "EncodeUrl", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long EncodeUrl86(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName64, EntryPoint = "EncodeUrl", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long EncodeUrl64(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
         [DllImport(LibName86, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
         private static extern long EncryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version);

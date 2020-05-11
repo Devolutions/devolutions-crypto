@@ -29,6 +29,9 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "Decode", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long DecodeNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
+        [DllImport(LibName, EntryPoint = "DecodeUrl", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DecodeUrlNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
         [DllImport(LibName, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
 
@@ -46,6 +49,10 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
+
+        [DllImport(LibName, EntryPoint = "EncodeUrl", CallingConvention = CallingConvention.Cdecl)]
+
+        internal static extern long EncodeUrlNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
         [DllImport(LibName, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, UInt16 version);

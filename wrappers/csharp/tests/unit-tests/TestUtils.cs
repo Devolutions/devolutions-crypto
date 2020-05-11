@@ -62,18 +62,40 @@ namespace xamarin_android
         [TestMethod]
         public void Encode()
         {
-            var y = Utils.EncodeToBase64String(TestData.BytesTestData);
+            string y = Utils.EncodeToBase64String(TestData.BytesTestData);
             Assert.AreEqual(y, TestData.Base64TestData);
+        }
+
+        [TestMethod]
+        public void DecodeUrl()
+        {
+            byte[] d1 = Utils.DecodeFromBase64Url(TestData.Base64Url1);
+            byte[] d2 = Utils.DecodeFromBase64Url(TestData.Base64Url2);
+            byte[] d3 = Utils.DecodeFromBase64Url(TestData.Base64Url3);
+            Assert.AreEqual(Convert.ToBase64String(d1), Convert.ToBase64String(TestData.Base64UrlBytes1));
+            Assert.AreEqual(Convert.ToBase64String(d2), Convert.ToBase64String(TestData.Base64UrlBytes2));
+            Assert.AreEqual(Convert.ToBase64String(d3), Convert.ToBase64String(TestData.Base64UrlBytes3));
+        }
+
+        [TestMethod]
+        public void EncodeUrl()
+        {
+            string e1 = Utils.EncodeToBase64UrlString(TestData.Base64UrlBytes1);
+            string e2 = Utils.EncodeToBase64UrlString(TestData.Base64UrlBytes2);
+            string e3 = Utils.EncodeToBase64UrlString(TestData.Base64UrlBytes3);
+            Assert.AreEqual(e1, TestData.Base64Url1);
+            Assert.AreEqual(e2, TestData.Base64Url2);
+            Assert.AreEqual(e3, TestData.Base64Url3);
         }
 
         [TestMethod]
         public void GetDecodedLength()
         {
-            Assert.IsTrue(this.GetDotNetBase64Length(TestData.StringTestData) <= Utils.GetDecodedLength(TestData.StringTestData)); // Invalid data
-            Assert.IsTrue(Utils.GetDecodedLength("====") >= this.GetDotNetBase64Length("===="));
-            Assert.IsTrue(Utils.GetDecodedLength("=") == this.GetDotNetBase64Length("="));
-            Assert.IsTrue(Utils.GetDecodedLength("YWxsbw==") == this.GetDotNetBase64Length("YWxsbw=="));
-            Assert.IsTrue(Utils.GetDecodedLength(null) == this.GetDotNetBase64Length(null));
+            Assert.IsTrue(this.GetDotNetBase64Length(TestData.StringTestData) <= Utils.GetDecodedBase64StringLength(TestData.StringTestData)); // Invalid data
+            Assert.IsTrue(Utils.GetDecodedBase64StringLength("====") >= this.GetDotNetBase64Length("===="));
+            Assert.IsTrue(Utils.GetDecodedBase64StringLength("=") == this.GetDotNetBase64Length("="));
+            Assert.IsTrue(Utils.GetDecodedBase64StringLength("YWxsbw==") == this.GetDotNetBase64Length("YWxsbw=="));
+            Assert.IsTrue(Utils.GetDecodedBase64StringLength(null) == this.GetDotNetBase64Length(null));
         }
 
         public int GetDotNetBase64Length(string base64)
@@ -93,7 +115,7 @@ namespace xamarin_android
         [TestMethod]
         public void GetEncodedLength()
         {
-            int encodedLength = Utils.GetEncodedLength(TestData.BytesTestData);
+            int encodedLength = Utils.GetEncodedBase64StringLength(TestData.BytesTestData);
             Assert.AreEqual(4, encodedLength);
         }
 
