@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [0.5.4] - 2020-05-11 - C#
+
+### Added
+ - Binding to base64 encoding/decoding in url-safe format.
+
 ## [0.5.3] - 2020-05-06 - C#
 
 ### Changed
