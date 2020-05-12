@@ -23,56 +23,84 @@ members = ["."]
 
 [[bin]]
 name = "ciphertext_deserialization"
-path = "fuzz_targets/ciphertext_deserialization.rs"
-
-[[bin]]
-name = "password_hash_deserialization"
-path = "fuzz_targets/password_hash_deserialization.rs"
-
-[[bin]]
-name = "public_key_deserialization"
-path = "fuzz_targets/public_key_deserialization.rs"
-
-[[bin]]
-name = "private_key_deserialization"
-path = "fuzz_targets/private_key_deserialization.rs"
-
-[[bin]]
-name = "share_deserialization"
-path = "fuzz_targets/share_deserialization.rs"
-
-[[bin]]
-name = "argon2parameters_deserialization"
-path = "fuzz_targets/argon2parameters_deserialization.rs"
+path = "fuzz_targets/ciphertext/ciphertext_deserialization.rs"
 
 [[bin]]
 name = "encrypt"
-path = "fuzz_targets/encrypt.rs"
+path = "fuzz_targets/ciphertext/encrypt.rs"
 
 [[bin]]
 name = "encrypt_asymmetric"
-path = "fuzz_targets/encrypt_asymmetric.rs"
+path = "fuzz_targets/ciphertext/encrypt_asymmetric.rs"
 
 [[bin]]
 name = "decrypt"
-path = "fuzz_targets/decrypt.rs"
+path = "fuzz_targets/ciphertext/decrypt.rs"
 
 [[bin]]
 name = "decrypt_asymmetric"
-path = "fuzz_targets/decrypt_asymmetric.rs"
+path = "fuzz_targets/ciphertext/decrypt_asymmetric.rs"
+
+[[bin]]
+name = "password_hash_deserialization"
+path = "fuzz_targets/password_hash/password_hash_deserialization.rs"
 
 [[bin]]
 name = "hash_password"
-path = "fuzz_targets/hash_password.rs"
+path = "fuzz_targets/password_hash/hash_password.rs"
 
 [[bin]]
 name = "verify_password"
-path = "fuzz_targets/verify_password.rs"
+path = "fuzz_targets/password_hash/verify_password.rs"
+
+[[bin]]
+name = "public_key_deserialization"
+path = "fuzz_targets/key/public_key_deserialization.rs"
+
+[[bin]]
+name = "private_key_deserialization"
+path = "fuzz_targets/key/private_key_deserialization.rs"
+
+[[bin]]
+name = "argon2parameters_deserialization"
+path = "fuzz_targets/key/argon2parameters_deserialization.rs"
+
+[[bin]]
+name = "share_deserialization"
+path = "fuzz_targets/secret_sharing/share_deserialization.rs"
 
 [[bin]]
 name = "generate_shared_key"
-path = "fuzz_targets/generate_shared_key.rs"
+path = "fuzz_targets/secret_sharing/generate_shared_key.rs"
 
 [[bin]]
 name = "join_shares"
-path = "fuzz_targets/join_shares.rs"
+path = "fuzz_targets/secret_sharing/join_shares.rs"
+
+[[bin]]
+name = "generate_key"
+path = "fuzz_targets/utils/generate_key.rs"
+
+[[bin]]
+name = "derive_key"
+path = "fuzz_targets/utils/derive_key.rs"
+
+[[bin]]
+name = "validate_header"
+path = "fuzz_targets/utils/validate_header.rs"
+
+[[bin]]
+name = "base64_encode"
+path = "fuzz_targets/utils/base64_encode.rs"
+
+[[bin]]
+name = "base64_encode_url"
+path = "fuzz_targets/utils/base64_encode_url.rs"
+
+[[bin]]
+name = "base64_decode"
+path = "fuzz_targets/utils/base64_decode.rs"
+
+[[bin]]
+name = "base64_decode_url"
+path = "fuzz_targets/utils/base64_decode_url.rs"
