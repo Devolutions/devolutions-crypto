@@ -38,27 +38,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\..\..\..\..\windows\bin\DevolutionsCrypto-x86.dll" Condition="Exists('..\..\..\..\..\..\..\windows\bin\DevolutionsCrypto-x86.dll')">
+    <Content Include="..\..\..\..\..\windows\bin\DevolutionsCrypto-x86.dll" Condition="Exists('..\..\..\..\..\windows\bin\DevolutionsCrypto-x86.dll')">
       <Link>DevolutionsCrypto-x86.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     
-    <Content Include="..\..\..\..\..\windows\bin\DevolutionsCrypto-x64.dll" Condition="Exists('..\..\..\..\..\..\..\windows\bin\DevolutionsCrypto-x64.dll')">
+    <Content Include="..\..\..\..\..\windows\bin\DevolutionsCrypto-x64.dll" Condition="Exists('..\..\..\..\..\windows\bin\DevolutionsCrypto-x64.dll')">
       <Link>DevolutionsCrypto-x64.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
 
-    <Content Include="..\..\..\..\..\linux\bin\libDevolutionsCrypto-x86.so" Condition="Exists('..\..\..\..\..\..\..\linux\bin\libDevolutionsCrypto-x86.so')">
+    <Content Include="..\..\..\..\..\linux\bin\libDevolutionsCrypto-x86.so" Condition="Exists('..\..\..\..\..\linux\bin\libDevolutionsCrypto-x86.so')">
       <Link>libDevolutionsCrypto-x86.so</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     
-    <Content Include="..\..\..\..\..\linux\bin\libDevolutionsCrypto-x64.so" Condition="Exists('..\..\..\..\..\..\..\linux\bin\libDevolutionsCrypto-x64.so')">
+    <Content Include="..\..\..\..\..\linux\bin\libDevolutionsCrypto-x64.so" Condition="Exists('..\..\..\..\..\linux\bin\libDevolutionsCrypto-x64.so')">
       <Link>libDevolutionsCrypto-x64.so</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
 
-    <Content Include="..\..\..\..\..\macos-modern\bin\x86_64\libDevolutionsCrypto.dylib" Condition="Exists('..\..\..\..\..\..\..\macos-modern\bin\x86_64\libDevolutionsCrypto.dylib')">
+    <Content Include="..\..\..\..\..\macos-modern\bin\x86_64\libDevolutionsCrypto.dylib" Condition="Exists('..\..\..\..\..\macos-modern\bin\x86_64\libDevolutionsCrypto.dylib')">
       <Link>libDevolutionsCrypto.dylib</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
