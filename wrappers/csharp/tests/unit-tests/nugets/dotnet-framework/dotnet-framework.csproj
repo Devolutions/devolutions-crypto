@@ -111,6 +111,9 @@
     <Compile Include="..\..\TestUtils.cs">
       <Link>TestUtils.cs</Link>
     </Compile>
+    <Compile Include="..\..\TestLegacy.cs">
+      <Link>TestLegacy.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

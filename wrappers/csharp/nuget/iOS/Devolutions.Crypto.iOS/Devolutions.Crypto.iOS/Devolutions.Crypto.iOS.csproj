@@ -43,36 +43,39 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\..\..\..\Managed.cs">
+    <Compile Include="..\..\..\..\src\Managed.cs">
       <Link>Managed.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\DevolutionsCryptoException.cs">
+    <Compile Include="..\..\..\..\src\DevolutionsCryptoException.cs">
       <Link>DevolutionsCryptoException.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Native.cs">
+    <Compile Include="..\..\..\..\src\Native.cs">
       <Link>Native.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\NativeError.cs">
+    <Compile Include="..\..\..\..\src\NativeError.cs">
       <Link>NativeError.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\KeyPair.cs">
+    <Compile Include="..\..\..\..\src\KeyPair.cs">
       <Link>KeyPair.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Native.Xamarin.cs">
+    <Compile Include="..\..\..\..\src\Native.Xamarin.cs">
       <Link>Native.Xamarin.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\Utils.cs">
+    <Compile Include="..\..\..\..\src\Utils.cs">
       <Link>Utils.cs</Link>
     </Compile>
-	<Compile Include="..\..\..\..\Enums.cs">
+	<Compile Include="..\..\..\..\src\Enums.cs">
       <Link>Enums.cs</Link>
     </Compile>
-  <Compile Include="..\..\..\..\Enums.Argon2.cs">
-      <Link>Enums.cs</Link>
+  <Compile Include="..\..\..\..\src\Enums.Argon2.cs">
+      <Link>Enums.Argon2.cs</Link>
     </Compile>
-  <Compile Include="..\..\..\..\Argon2Parameters.cs">
-      <Link>Enums.cs</Link>
+  <Compile Include="..\..\..\..\src\Argon2Parameters.cs">
+      <Link>Argon2Parameters.cs</Link>
     </Compile>
+  <Compile Include="..\..\..\..\src\ILegacyDecryptor.cs">
+    <Link>ILegacyDecryptor.cs</Link>
+  </Compile>
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="..\..\..\..\ios\bin\universal\libDevolutionsCrypto.a">

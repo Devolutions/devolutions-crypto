@@ -82,6 +82,9 @@
     <Compile Include="..\..\Conformity.cs">
       <Link>Conformity.cs</Link>
     </Compile>
+    <Compile Include="..\..\TestLegacy.cs">
+      <Link>TestLegacy.cs</Link>
+    </Compile>
     <Compile Include="AutomatedTestSuiteActivity.cs" />
     <Compile Include="TestInstrumentation.cs" />
   </ItemGroup>

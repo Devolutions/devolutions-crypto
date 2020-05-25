@@ -103,6 +103,9 @@
     <Compile Include="..\..\TestUtils.cs">
       <Link>TestUtils.cs</Link>
     </Compile>
+    <Compile Include="..\..\TestLegacy.cs">
+      <Link>TestLegacy.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Main.storyboard" />

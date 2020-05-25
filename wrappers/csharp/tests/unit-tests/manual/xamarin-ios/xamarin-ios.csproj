@@ -111,6 +111,9 @@
     <Compile Include="..\..\Conformity.cs">
       <Link>Conformity.cs</Link>
     </Compile>
+    <Compile Include="..\..\TestLegacy.cs">
+      <Link>TestLegacy.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="devolutions-crypto\devolutions-crypto.csproj">
