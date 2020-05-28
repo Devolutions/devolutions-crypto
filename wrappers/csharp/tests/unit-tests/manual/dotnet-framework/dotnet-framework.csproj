@@ -84,6 +84,7 @@
     </Compile>
     <Compile Include="..\..\TestManaged.cs" />
     <Compile Include="..\..\TestUtils.cs" />
+    <Compile Include="..\..\TestLegacy.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MSTest.TestAdapter" Version="1.3.2" />

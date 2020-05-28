@@ -118,6 +118,9 @@
     <Compile Include="..\..\Conformity.cs">
       <Link>Conformity.cs</Link>
     </Compile>
+    <Compile Include="..\..\TestLegacy.cs">
+      <Link>TestLegacy.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/msbuild/iOS/Xamarin.iOS.CSharp.targets" />
 </Project>

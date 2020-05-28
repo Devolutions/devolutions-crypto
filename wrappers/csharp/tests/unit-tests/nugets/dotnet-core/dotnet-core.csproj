@@ -19,6 +19,7 @@
     <Compile Include="..\..\TestManaged.cs" Link="TestManaged.cs" />
     <Compile Include="..\..\TestNative.cs" Link="TestNative.cs" />
     <Compile Include="..\..\TestUtils.cs" Link="TestUtils.cs" />
+    <Compile Include="..\..\TestLegacy.cs" Link="TestLegacy.cs" />
   </ItemGroup>
 
   <ItemGroup>

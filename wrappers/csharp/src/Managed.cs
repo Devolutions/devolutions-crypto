@@ -125,7 +125,7 @@ namespace Devolutions.Cryptography
             return new KeyPair()
                 {
                     PrivateKey = privateKey,
-                    PublicKey = publicKey
+                    PublicKey = publicKey,
                 };
         }
 
@@ -230,7 +230,7 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
         /// <returns>Returns the decryption result in a byte array.</returns>
-        public static byte[] Decrypt(byte[] data, byte[] key)
+        public static byte[] Decrypt(byte[] data, byte[] key, ILegacyDecryptor legacyDecryptor = null)
         {
             if (data == null || data.Length == 0)
             {
@@ -240,6 +240,14 @@ namespace Devolutions.Cryptography
             if (key == null)
             {
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            if (legacyDecryptor != null)
+            {
+                if (!Utils.ValidateHeader(data, DataType.Cipher))
+                {
+                    return legacyDecryptor.Decrypt(data, key);
+                }
             }
 
             byte[] result = new byte[data.Length];
@@ -524,7 +532,7 @@ namespace Devolutions.Cryptography
             return new KeyPair()
                 {
                     PublicKey = publicKey,
-                    PrivateKey = privateKey
+                    PrivateKey = privateKey,
                 };
         }
 
@@ -762,9 +770,9 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The base 64 string to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
         /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
-        public static string DecryptWithKeyAsUtf8String(string b64data, byte[] key)
+        public static string DecryptWithKeyAsUtf8String(string b64data, byte[] key, ILegacyDecryptor legacyDecryptor = null)
         {
-            byte[] result = Decrypt(Utils.Base64StringToByteArray(b64data), key);
+            byte[] result = Decrypt(Utils.Base64StringToByteArray(b64data), key, legacyDecryptor);
 
             return Utils.ByteArrayToUtf8String(result);
         }
@@ -775,9 +783,9 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The base 64 string to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
         /// <returns>Returns the decryption result as a byte array.</returns>
-        public static byte[] DecryptWithKey(string b64data, byte[] key)
+        public static byte[] DecryptWithKey(string b64data, byte[] key, ILegacyDecryptor legacyDecryptor = null)
         {
-            byte[] result = Decrypt(Utils.Base64StringToByteArray(b64data), key);
+            byte[] result = Decrypt(Utils.Base64StringToByteArray(b64data), key, legacyDecryptor);
 
             return result;
         }
@@ -800,9 +808,9 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
         /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
-        public static string DecryptWithKeyAsUtf8String(byte[] data, byte[] key)
+        public static string DecryptWithKeyAsUtf8String(byte[] data, byte[] key, ILegacyDecryptor legacyDecryptor = null)
         {
-            byte[] result = Decrypt(data, key);
+            byte[] result = Decrypt(data, key, legacyDecryptor);
 
             return Utils.ByteArrayToUtf8String(result);
         }
@@ -813,9 +821,9 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
         /// <returns>Returns the decryption result as a byte array.</returns>
-        public static byte[] DecryptWithKey(byte[] data, byte[] key)
+        public static byte[] DecryptWithKey(byte[] data, byte[] key, ILegacyDecryptor legacyDecryptor = null)
         {
-            byte[] result = Decrypt(data, key);
+            byte[] result = Decrypt(data, key, legacyDecryptor);
 
             return result;
         }

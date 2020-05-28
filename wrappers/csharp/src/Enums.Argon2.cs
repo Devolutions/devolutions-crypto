@@ -19,7 +19,7 @@ namespace Devolutions.Cryptography.Argon2
         /// <summary>
         /// Argon2 using hybrid construction.
         /// </summary>
-        Argon2id = 2
+        Argon2id = 2,
     }
 
     /// <summary>The Argon2 version.</summary>
