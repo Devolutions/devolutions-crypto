@@ -125,7 +125,7 @@ namespace Devolutions.Cryptography
             return new KeyPair()
                 {
                     PrivateKey = privateKey,
-                    PublicKey = publicKey
+                    PublicKey = publicKey,
                 };
         }
 
@@ -532,7 +532,7 @@ namespace Devolutions.Cryptography
             return new KeyPair()
                 {
                     PublicKey = publicKey,
-                    PrivateKey = privateKey
+                    PrivateKey = privateKey,
                 };
         }
 

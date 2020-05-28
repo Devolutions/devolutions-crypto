@@ -80,6 +80,6 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// The version of the multiple data is inconsistent: -42
         /// </summary>
-        InconsistentVersion = -42
+        InconsistentVersion = -42,
     }
 }

@@ -84,6 +84,6 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// Unknown error.
         /// </summary>
-        Error
+        Error,
     }
 }
