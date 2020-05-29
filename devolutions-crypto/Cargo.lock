@@ -291,6 +291,7 @@ dependencies = [
  "pbkdf2",
  "rand",
  "rust-argon2",
+ "scrypt",
  "sha2",
  "sharks",
  "strum",
@@ -554,6 +555,19 @@ name = "scoped-tls"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"
+
+[[package]]
+name = "scrypt"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "656c79d0e90d0ab28ac86bf3c3d10bfbbac91450d3f190113b4e76d9fec3cfdd"
+dependencies = [
+ "byte-tools",
+ "byteorder",
+ "hmac",
+ "pbkdf2",
+ "sha2",
+]
 
 [[package]]
 name = "serde"

@@ -92,6 +92,49 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
     }
 }
 
+/// Temporarly binded here for a specific use case, don't rely on this.
+// Copied and modified from:
+// https://github.com/RustCrypto/password-hashing/blob/master/scrypt/src/simple.rs
+// Because rand is outdated, I cannot use the crate directly
+#[cfg(target_arch = "wasm32")]
+pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) -> String {
+    use byteorder::{ByteOrder, LittleEndian};
+
+    let params = scrypt::ScryptParams::new(log_n, r, p).expect("params should be valid");
+
+    // 256-bit derived key
+    let mut dk = [0u8; 32];
+
+    scrypt::scrypt(password, salt, &params, &mut dk)
+        .expect("32 bytes always satisfy output length requirements");
+
+    // usually 128 bytes is enough
+    let mut result = String::with_capacity(128);
+    result.push_str("$rscrypt$");
+    if r < 256 && p < 256 {
+        result.push_str("0$");
+        let mut tmp = [0u8; 3];
+        tmp[0] = log_n;
+        tmp[1] = r as u8;
+        tmp[2] = p as u8;
+        result.push_str(&base64::encode(&tmp));
+    } else {
+        result.push_str("1$");
+        let mut tmp = [0u8; 9];
+        tmp[0] = log_n;
+        LittleEndian::write_u32(&mut tmp[1..5], r);
+        LittleEndian::write_u32(&mut tmp[5..9], p);
+        result.push_str(&base64::encode(&tmp));
+    }
+    result.push('$');
+    result.push_str(&base64::encode(&salt));
+    result.push('$');
+    result.push_str(&base64::encode(&dk));
+    result.push('$');
+
+    result
+}
+
 pub fn base64_encode(data: &[u8]) -> String {
     base64::encode(data)
 }
