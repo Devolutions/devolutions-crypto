@@ -33,6 +33,7 @@ strum = "0.18.0"
 strum_macros = "0.18.0"
 num_enum = "0.4.3"
 arbitrary = {version = "0.4.2", features = ["derive"], optional = true}
+scrypt = {version = "0.2.0", default-features = false}
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
 rand = { version = "0.7.3", features = ["wasm-bindgen"] }

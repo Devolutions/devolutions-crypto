@@ -280,6 +280,12 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
     utils::validate_header(data, data_type)
 }
 
+/// Temporarly binded here for a specific use case, don't rely on this.
+#[wasm_bindgen(js_name = "scryptSimple")]
+pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) -> String {
+    utils::scrypt_simple(password, salt, log_n, r, p)
+}
+
 #[wasm_bindgen]
 pub fn base64encode(data: &[u8]) -> String {
     utils::base64_encode(data)
