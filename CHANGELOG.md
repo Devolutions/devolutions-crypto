@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [0.5.5] - 2020-05-11 - C# and Javascript/Typescript
+
+### Added (C#)
+ - Added a legacy decryption handler, in case the header is invalid.
+
+### Added (WASM)
+ - Binded a Rust Scrypt method to WASM for a very specific use case, and this might be removed in the future, so don't rely on it.
+
 ## [0.5.4] - 2020-05-11 - C#
 
 ### Added
