@@ -49,6 +49,18 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
+        public void DeriveKeyArgon2_Default()
+        {
+            Argon2Parameters parameters = Argon2Parameters.FromByteArray(Utils.Base64StringToByteArray("AQAAACAAAAABAAAAIAAAAAEAAAACEwAAAAAQAAAAimFBkm3f8+f+YfLRnF5OoQ=="));
+            byte[] password = Utils.StringToUtf8ByteArray("password");
+
+            byte[] derivedPassword = Managed.DeriveKeyArgon2(password, parameters);
+
+            string derivedPasswordAsBase64String = Utils.EncodeToBase64String(derivedPassword);
+            Assert.AreEqual(derivedPasswordAsBase64String, "AcEN6Cb1Om6tomZScAM725qiXMzaxaHlj3iMiT/Ukq0=");
+        }
+
+        [TestMethod]
         public void DeriveKey_Default()
         {
             byte[] encodedPassword = Utils.StringToUtf8ByteArray("testpassword");

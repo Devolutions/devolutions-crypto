@@ -587,8 +587,8 @@ stages:
       displayName: "Update Nuget"
 
     - script: | # Fix issue with azure pipeline without the right default Xcode View github actions/virtual-environment issue 775
-        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_11.4.app;
-        sudo xcode-select --switch /Applications/Xcode_11.4.app/Contents/Developer
+        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_11.5.app;
+        sudo xcode-select --switch /Applications/Xcode_11.5.app/Contents/Developer
 
     - script: |
         python3 unit-tests.py -p core
@@ -622,8 +622,8 @@ stages:
       displayName: "Update Nuget"
 
     - script: | # Fix issue with azure pipeline without the right default Xcode View github actions/virtual-environment issue 775
-        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_11.4.app;
-        sudo xcode-select --switch /Applications/Xcode_11.4.app/Contents/Developer
+        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_11.5.app;
+        sudo xcode-select --switch /Applications/Xcode_11.5.app/Contents/Developer
 
     - script: |
         python3 unit-tests.py -p ios
@@ -646,8 +646,8 @@ stages:
       displayName: "Update Nuget"
 
     - script: | # Fix issue with azure pipeline without the right default Xcode View github actions/virtual-environment issue 775
-        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_11.4.app;
-        sudo xcode-select --switch /Applications/Xcode_11.4.app/Contents/Developer
+        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_11.5.app;
+        sudo xcode-select --switch /Applications/Xcode_11.5.app/Contents/Developer
 
     - script: |
         adb start-server
@@ -696,8 +696,8 @@ stages:
       displayName: "Update Nuget"
 
     - script: | # Fix issue with azure pipeline without the right default Xcode View github actions/virtual-environment issue 775
-        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_11.4.app;
-        sudo xcode-select --switch /Applications/Xcode_11.4.app/Contents/Developer
+        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_11.5.app;
+        sudo xcode-select --switch /Applications/Xcode_11.5.app/Contents/Developer
 
     - script: |
         set -e

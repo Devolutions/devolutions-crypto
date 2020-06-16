@@ -194,13 +194,13 @@
 //! This is a method used to generate a key from a password or another key. Useful for password-dependant cryptography. Salt should be a random 16 bytes array if possible and iterations should be 10000 or configurable by the user.
 //!
 //! ```rust
-//! use devolutions_crypto::utils::{generate_key, derive_key};
+//! use devolutions_crypto::utils::{generate_key, derive_key_pbkdf2};
 //! let key = b"this is a secret password";
 //! let salt = generate_key(16);
 //! let iterations = 10000;
 //! let length = 32;
 //!
-//! let new_key = derive_key(key, &salt, iterations, length);
+//! let new_key = derive_key_pbkdf2(key, &salt, iterations, length);
 //!
 //! assert_eq!(32, new_key.len());
 //! ```

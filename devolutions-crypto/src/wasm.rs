@@ -261,8 +261,8 @@ pub fn generate_key(length: Option<usize>) -> Vec<u8> {
     utils::generate_key(length.unwrap_or(32))
 }
 
-#[wasm_bindgen(js_name = "deriveKey")]
-pub fn derive_key(
+#[wasm_bindgen(js_name = "deriveKeyPbkdf2")]
+pub fn derive_key_pbkdf2(
     key: &[u8],
     salt: Option<Vec<u8>>,
     iterations: Option<usize>,
@@ -272,7 +272,12 @@ pub fn derive_key(
     let iterations = iterations.unwrap_or(10000);
     let length = length.unwrap_or(32);
 
-    utils::derive_key(key, &salt, iterations, length)
+    utils::derive_key_pbkdf2(key, &salt, iterations, length)
+}
+
+#[wasm_bindgen(js_name = "deriveKeyArgon2")]
+pub fn derive_key_argon2(key: &[u8], parameters: &Argon2Parameters) -> Result<Vec<u8>, JsValue> {
+    Ok(utils::derive_key_argon2(key, parameters)?)
 }
 
 #[wasm_bindgen(js_name = "validateHeader")]

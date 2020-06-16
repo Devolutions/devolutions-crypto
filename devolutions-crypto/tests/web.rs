@@ -60,10 +60,10 @@ cfg_if! {
         }
 
         #[wasm_bindgen_test]
-        fn test_derive_key() {
+        fn test_derive_key_pbkdf2() {
             let password = "ThisIsAGoodPassword123".as_bytes();
             let salt = base64::decode("u4tv/i1228VOqoZWITseoQ==").unwrap();
-            let key = wasm::derive_key(password, Some(salt), Some(123), Some(32));
+            let key = wasm::derive_key_pbkdf2(password, Some(salt), Some(123), Some(32));
 
             assert_eq!(key, base64::decode("RfIYPWWXRSm/SWjVXvQq1Z3n/mzxGeu/y396bAuYWTI=").unwrap());
         }

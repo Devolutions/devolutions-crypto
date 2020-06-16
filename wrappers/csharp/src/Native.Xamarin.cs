@@ -38,8 +38,11 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "DecryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long DecryptAsymmetricNative(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] result, UIntPtr resultLength);
 
-        [DllImport(LibName, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long DeriveKeyNative(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
+        [DllImport(LibName, EntryPoint = "DeriveKeyArgon2", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DeriveKeyArgon2Native(byte[] key, UIntPtr keyLength, byte[] argon2Parameters, UIntPtr argon2ParametersLength, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName, EntryPoint = "DeriveKeyPbkdf2", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DeriveKeyPbkdf2Native(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
 
         [DllImport(LibName, EntryPoint = "DeriveKeyPair", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long DeriveKeyPairNative(byte[] password, UIntPtr passwordLength, byte[] parameters, UIntPtr parametersLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] publicKey, UIntPtr publicKeyLength);

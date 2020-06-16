@@ -3,18 +3,35 @@ use devolutions_crypto::{
     ciphertext::Ciphertext,
     key::{derive_keypair, KeyVersion, PrivateKey},
     password_hash::PasswordHash,
-    utils::derive_key,
+    utils::{derive_key_argon2, derive_key_pbkdf2},
     Argon2Parameters,
 };
 
 use std::convert::TryFrom as _;
 
 #[test]
+fn test_derive_key_argon2() {
+    let params = Argon2Parameters::try_from(
+        base64::decode("AQAAACAAAAABAAAAIAAAAAEAAAACEwAAAAAQAAAAimFBkm3f8+f+YfLRnF5OoQ==")
+            .unwrap()
+            .as_slice(),
+    )
+    .unwrap();
+
+    let key = derive_key_argon2(b"password", &params).unwrap();
+
+    assert_eq!(
+        key,
+        base64::decode("AcEN6Cb1Om6tomZScAM725qiXMzaxaHlj3iMiT/Ukq0=").unwrap()
+    );
+}
+
+#[test]
 fn test_derive_key_default() {
     let password = b"testpassword";
     let salt = b"";
 
-    let derived_password = derive_key(password, salt, 10000, 32);
+    let derived_password = derive_key_pbkdf2(password, salt, 10000, 32);
     assert_eq!(
         derived_password,
         base64::decode("ImfGCyv6PwMYaJShGxR4MfVrjuUrsI0CSarJgOApwf8=").unwrap()
@@ -26,7 +43,7 @@ fn test_derive_key_iterations() {
     let password = b"testPa$$";
     let salt = b"";
 
-    let derived_password = derive_key(password, salt, 100, 32);
+    let derived_password = derive_key_pbkdf2(password, salt, 100, 32);
     assert_eq!(
         derived_password,
         base64::decode("ev/GiJLvOgIkkWrnIrHSi2fdZE5qJBIrW+DLeMLIXK4=").unwrap()
@@ -38,7 +55,7 @@ fn test_derive_key_salt() {
     let password = b"testPa$$";
     let salt = base64::decode("tdTt5wgeqQYLvkiXKkFirqy2hMbzadBtL+jekVeNCRA=").unwrap();
 
-    let derived_password = derive_key(password, &salt, 100, 32);
+    let derived_password = derive_key_pbkdf2(password, &salt, 100, 32);
     assert_eq!(
         derived_password,
         base64::decode("ZaYRZeQiIPJ+Jl511AgHZjv4/HbCFq4eUP9yNa3gowI=").unwrap()
