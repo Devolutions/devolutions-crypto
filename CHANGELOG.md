@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [0.6.0] - 2020-06-16
+
+### Added
+ - Added `derive_key_argon2()` method to derive a symmetric key from a set of `Argon2Parameters`.
+
+### Changed
+ - Renamed `derive_key()` to `derive_key_pbkdf2()`.
+
 ## [0.5.5] - 2020-05-11 - C# and Javascript/Typescript
 
 ### Added (C#)

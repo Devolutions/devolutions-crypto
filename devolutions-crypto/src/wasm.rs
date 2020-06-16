@@ -265,7 +265,7 @@ pub fn generate_key(length: Option<usize>) -> Vec<u8> {
 pub fn derive_key_pbkdf2(
     key: &[u8],
     salt: Option<Vec<u8>>,
-    iterations: Option<usize>,
+    iterations: Option<u32>,
     length: Option<usize>,
 ) -> Vec<u8> {
     let salt = salt.unwrap_or_else(|| vec![0u8; 0]);

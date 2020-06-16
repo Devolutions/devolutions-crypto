@@ -9,11 +9,9 @@ use super::Ciphertext;
 
 use std::convert::TryFrom;
 
-use aead::{
-    generic_array::{typenum, GenericArray},
-    Aead, NewAead, Payload,
-};
-use chacha20poly1305::XChaCha20Poly1305;
+use chacha20poly1305::aead::{Aead, NewAead, Payload};
+use chacha20poly1305::{Key, XChaCha20Poly1305, XNonce};
+
 use rand::{rngs::OsRng, RngCore};
 use sha2::{Digest, Sha256};
 use x25519_dalek::StaticSecret;
@@ -76,10 +74,10 @@ impl TryFrom<&[u8]> for CiphertextV2Symmetric {
 }
 
 impl CiphertextV2Symmetric {
-    fn derive_key(secret: &[u8]) -> GenericArray<u8, typenum::U32> {
+    fn derive_key(secret: &[u8]) -> [u8; 32] {
         let mut hasher = Sha256::new();
-        hasher.input(secret);
-        hasher.result()
+        hasher.update(secret);
+        hasher.finalize().into()
     }
 
     pub fn encrypt(data: &[u8], key: &[u8], header: &Header<Ciphertext>) -> Result<Self> {
@@ -87,8 +85,10 @@ impl CiphertextV2Symmetric {
         let mut key = CiphertextV2Symmetric::derive_key(&key);
 
         // Generate nonce
-        let mut nonce = [0u8; 24];
-        OsRng.fill_bytes(&mut nonce);
+        let mut nonce_bytes = [0u8; 24];
+        OsRng.fill_bytes(&mut nonce_bytes);
+
+        let nonce = XNonce::from_slice(&nonce_bytes);
 
         // Authenticate the header
         let aad: Vec<u8> = (*header).clone().into();
@@ -98,13 +98,19 @@ impl CiphertextV2Symmetric {
         };
 
         // Encrypt
-        let cipher = XChaCha20Poly1305::new(key);
-        let ciphertext = cipher.encrypt(&GenericArray::from_slice(&nonce), payload)?;
+        let ciphertext = {
+            let key = Key::from_slice(&key);
+            let cipher = XChaCha20Poly1305::new(key);
+            cipher.encrypt(&nonce, payload)?
+        };
 
         // Zero out the key
         key.zeroize();
 
-        Ok(CiphertextV2Symmetric { nonce, ciphertext })
+        Ok(CiphertextV2Symmetric {
+            nonce: nonce_bytes,
+            ciphertext,
+        })
     }
 
     pub fn decrypt(&self, key: &[u8], header: &Header<Ciphertext>) -> Result<Vec<u8>> {
@@ -118,9 +124,14 @@ impl CiphertextV2Symmetric {
             aad: &aad,
         };
 
-        // Decrypt
-        let cipher = XChaCha20Poly1305::new(key);
-        let result = cipher.decrypt(&GenericArray::from_slice(&self.nonce), payload)?;
+        let result = {
+            // Decrypt
+            let key = Key::from_slice(&key);
+            let nonce = XNonce::from_slice(&self.nonce);
+
+            let cipher = XChaCha20Poly1305::new(key);
+            cipher.decrypt(nonce, payload)?
+        };
 
         // Zeroize the key
         key.zeroize();

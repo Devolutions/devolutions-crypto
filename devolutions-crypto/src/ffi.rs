@@ -686,7 +686,7 @@ pub unsafe extern "C" fn DeriveKeyPbkdf2(
     key_length: usize,
     salt: *const u8,
     salt_length: usize,
-    niterations: usize,
+    niterations: u32,
     result: *mut u8,
     result_length: usize,
 ) -> i64 {
