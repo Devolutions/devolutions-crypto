@@ -146,14 +146,24 @@ namespace Devolutions.Cryptography
             return DecryptAsymmetricNative86(data, dataLength, privateKey, privateKeyLength, result, resultLength);
         }
 
-        internal static long DeriveKeyNative(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength)
+        internal static long DeriveKeyArgon2Native(byte[] key, UIntPtr keyLength, byte[] argon2Parameters, UIntPtr argon2ParametersLength, byte[] result, UIntPtr resultLength)
         {
             if (Environment.Is64BitProcess)
             {
-                return DeriveKeyNative64(key, keyLength, salt, saltLength, iterations, result, resultLength);
+                return DeriveKeyArgon2Native64(key, keyLength, argon2Parameters, argon2ParametersLength, result, resultLength);
             }
 
-            return DeriveKeyNative86(key, keyLength, salt, saltLength, iterations, result, resultLength);
+            return DeriveKeyArgon2Native86(key, keyLength, argon2Parameters, argon2ParametersLength, result, resultLength);
+        }
+
+        internal static long DeriveKeyPbkdf2Native(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return DeriveKeyPbkdf2Native64(key, keyLength, salt, saltLength, iterations, result, resultLength);
+            }
+
+            return DeriveKeyPbkdf2Native86(key, keyLength, salt, saltLength, iterations, result, resultLength);
         }
 
         internal static long DeriveKeyPairNative(
@@ -467,11 +477,17 @@ namespace Devolutions.Cryptography
         [DllImport(LibName86, EntryPoint = "DecryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DecryptAsymmetricNative86(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] result, UIntPtr resultLength);
 
-        [DllImport(LibName86, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DeriveKeyNative86(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
+        [DllImport(LibName86, EntryPoint = "DeriveKeyArgon2", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DeriveKeyArgon2Native86(byte[] key, UIntPtr keyLength, byte[] argon2Parameters, UIntPtr argon2ParametersLength, byte[] result, UIntPtr resultLength);
 
-        [DllImport(LibName64, EntryPoint = "DeriveKey", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DeriveKeyNative64(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
+        [DllImport(LibName64, EntryPoint = "DeriveKeyArgon2", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DeriveKeyArgon2Native64(byte[] key, UIntPtr keyLength, byte[] argon2Parameters, UIntPtr argon2ParametersLength, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName86, EntryPoint = "DeriveKeyPbkdf2", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DeriveKeyPbkdf2Native86(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName64, EntryPoint = "DeriveKeyPbkdf2", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long DeriveKeyPbkdf2Native64(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, UIntPtr iterations, byte[] result, UIntPtr resultLength);
 
         [DllImport(LibName86, EntryPoint = "DeriveKeyPair", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DeriveKeyPairNative86(

@@ -5,6 +5,7 @@ use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 
+use super::Argon2Parameters;
 use super::DataType;
 use super::Error;
 use super::Header;
@@ -27,7 +28,7 @@ pub fn generate_key(length: usize) -> Vec<u8> {
     key
 }
 
-/// Derives a password or key into a new one.
+/// Derives a password or key into a new one using PBKDF2.
 /// # Arguments
 ///  * `key` - The key or password to derive.
 ///  * `salt` - The cryptographic salt to be used to add randomness. Can be empty. Recommended size is 16 bytes.
@@ -36,20 +37,39 @@ pub fn generate_key(length: usize) -> Vec<u8> {
 ///  * `length` - Length of the desired key.
 /// # Example
 /// ```
-/// use devolutions_crypto::utils::{derive_key, generate_key};
+/// use devolutions_crypto::utils::{derive_key_pbkdf2, generate_key};
 /// let key = b"this is a secret password";
 /// let salt = generate_key(16);
 /// let iterations = 10000;
 /// let length = 32;
 ///
-/// let new_key = derive_key(key, &salt, iterations, length);
+/// let new_key = derive_key_pbkdf2(key, &salt, iterations, length);
 ///
 /// assert_eq!(32, new_key.len());
 /// ```
-pub fn derive_key(key: &[u8], salt: &[u8], iterations: usize, length: usize) -> Vec<u8> {
+pub fn derive_key_pbkdf2(key: &[u8], salt: &[u8], iterations: usize, length: usize) -> Vec<u8> {
     let mut new_key = vec![0u8; length];
     pbkdf2::<Hmac<Sha256>>(&key, &salt, iterations, &mut new_key);
     new_key
+}
+
+/// Derives a password or key into a new one using Argon2.
+/// # Arguments
+///  * `key` - The key or password to derive.
+///  * `parameters` - The `Argon2Parameters` to use.
+/// # Example
+/// ```
+/// use devolutions_crypto::utils::{derive_key_argon2, generate_key};
+/// use devolutions_crypto::Argon2Parameters;
+/// let key = b"this is a secret password";
+/// let parameters = Argon2Parameters::default();
+///
+/// let new_key = derive_key_argon2(key, &parameters).expect("default parameters should not fail");
+///
+/// assert_eq!(32, new_key.len());
+/// ```
+pub fn derive_key_argon2(key: &[u8], parameters: &Argon2Parameters) -> Result<Vec<u8>> {
+    parameters.compute(key)
 }
 
 /// Only validate the header to make sure it is valid. Used to quickly determine if the data comes from the library.
@@ -169,13 +189,13 @@ fn test_generate_key() {
 }
 
 #[test]
-fn test_derive_key() {
+fn test_derive_key_pbkdf2() {
     let salt = b"salt";
     let key = b"key";
     let iterations = 100;
     let size = 32;
 
-    let derived = derive_key(key, salt, iterations, size);
+    let derived = derive_key_pbkdf2(key, salt, iterations, size);
 
     assert_eq!(size, derived.len());
     assert_ne!(vec![0u8; size], derived);

@@ -620,7 +620,54 @@ pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
     0
 }
 
-/// Derive a key to create a new one. Can be used with a password.
+/// Derive a key with Argon2 to create a new one. Can be used with a password.
+/// # Arguments
+///  * key - Pointer to the key to derive.
+///  * key_length - Length of the key to derive.
+///  * argon2_parameters - Pointer to the buffer containing the argon2 parameters.
+///  * argon2_parameters_length - Length of the argon2 parameters to use.
+///  * result - Pointer to the buffer to write the new key to.
+///  * result_length - Length of buffer to write the key to.
+/// # Returns
+/// Returns 0 if the operation is successful. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn DeriveKeyArgon2(
+    key: *const u8,
+    key_length: usize,
+    argon2_parameters: *const u8,
+    argon2_parameters_length: usize,
+    result: *mut u8,
+    result_length: usize,
+) -> i64 {
+    if key.is_null() || result.is_null() || argon2_parameters.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let key = slice::from_raw_parts(key, key_length);
+
+    let argon2_parameters_raw = slice::from_raw_parts(argon2_parameters, argon2_parameters_length);
+
+    let argon2_parameters = match Argon2Parameters::try_from(argon2_parameters_raw) {
+        Ok(x) => x,
+        Err(e) => return e.error_code(),
+    };
+
+    let mut native_result = match utils::derive_key_argon2(&key, &argon2_parameters) {
+        Ok(x) => x,
+        Err(e) => return e.error_code(),
+    };
+
+    let result = slice::from_raw_parts_mut(result, result_length);
+
+    result.copy_from_slice(&native_result);
+    native_result.zeroize();
+    0
+}
+
+/// Derive a key with PBKDF2 to create a new one. Can be used with a password.
 /// # Arguments
 ///  * key - Pointer to the key to derive.
 ///  * key_length - Length of the key to derive.
@@ -634,7 +681,7 @@ pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
-pub unsafe extern "C" fn DeriveKey(
+pub unsafe extern "C" fn DeriveKeyPbkdf2(
     key: *const u8,
     key_length: usize,
     salt: *const u8,
@@ -656,7 +703,7 @@ pub unsafe extern "C" fn DeriveKey(
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    let mut native_result = utils::derive_key(&key, &salt, niterations, result_length);
+    let mut native_result = utils::derive_key_pbkdf2(&key, &salt, niterations, result_length);
     result.copy_from_slice(&native_result);
     native_result.zeroize();
     0
@@ -850,7 +897,6 @@ pub unsafe extern "C" fn Encode(
 
     encode_config_slice(&input, STANDARD, &mut output) as i64
 }
-
 
 /// Decode a base64 string to bytes using base64url.
 /// # Arguments

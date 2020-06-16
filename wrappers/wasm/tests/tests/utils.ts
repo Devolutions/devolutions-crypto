@@ -1,4 +1,4 @@
-import { generateKey, deriveKey, validateHeader, base64encode, base64decode, base64urlEncode, base64urlDecode, DataType } from 'devolutions-crypto'
+import { generateKey, deriveKeyPbkdf2, validateHeader, base64encode, base64decode, base64urlEncode, base64urlDecode, DataType, Argon2Parameters, deriveKeyArgon2 } from 'devolutions-crypto'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
@@ -25,32 +25,32 @@ describe('generateKey', () => {
   })
 })
 
-describe('deriveKey', () => {
+describe('deriveKeyPbkdf2', () => {
   it('should derive a key of 32 bytes', () => {
-    const result: Uint8Array = deriveKey(encoder.encode('password'), null, 10)
+    const result: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), null, 10)
     expect(result).to.have.lengthOf(32)
     expect(result).to.not.eql(new Array(32).fill(0))
   })
 
   it('should derive a key of 41 bytes', () => {
-    const result: Uint8Array = deriveKey(encoder.encode('password'), null, 10, 41)
+    const result: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), null, 10, 41)
     expect(result).to.have.lengthOf(41)
     expect(result).to.not.eql(new Array(41).fill(0))
   })
 
   it('should produce the same key', () => {
-    const result1: Uint8Array = deriveKey(encoder.encode('password'), null, 10)
-    const result2: Uint8Array = deriveKey(encoder.encode('password'), null, 10)
+    const result1: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), null, 10)
+    const result2: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), null, 10)
     expect(result1).to.have.lengthOf(32)
     expect(result1).to.not.eql(new Array(41).fill(0))
     expect(result2).to.eql(result2)
   })
 
   it('should produce different keys', () => {
-    const result: Uint8Array = deriveKey(encoder.encode('password'), encoder.encode('thisisasalt'), 10)
-    const differentPass: Uint8Array = deriveKey(encoder.encode('pa$$word'), encoder.encode('thisisasalt'), 10)
-    const differentSalt: Uint8Array = deriveKey(encoder.encode('password'), encoder.encode('this1sasalt'), 10)
-    const differentIterations: Uint8Array = deriveKey(encoder.encode('password'), encoder.encode('thisisasalt'), 11)
+    const result: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), encoder.encode('thisisasalt'), 10)
+    const differentPass: Uint8Array = deriveKeyPbkdf2(encoder.encode('pa$$word'), encoder.encode('thisisasalt'), 10)
+    const differentSalt: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), encoder.encode('this1sasalt'), 10)
+    const differentIterations: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), encoder.encode('thisisasalt'), 11)
 
     expect(result).to.not.eql(differentPass)
     expect(result).to.not.eql(differentSalt)
@@ -58,7 +58,16 @@ describe('deriveKey', () => {
   })
 })
 
-describe('validateSignature', () => {
+describe('deriveKeyArgon2', () => {
+  it('should derive a key of 32 bytes', () => {
+    const parameters: Argon2Parameters = new Argon2Parameters()
+    const result: Uint8Array = deriveKeyArgon2(encoder.encode('password'), parameters)
+    expect(result).to.have.lengthOf(32)
+    expect(result).to.not.eql(new Array(32).fill(0))
+  })
+})
+
+describe('validateHeader', () => {
   it('should return true', () => {
     const validCiphertext: Uint8Array = base64decode('DQwCAAAAAQA=')
     const validPasswordHash: Uint8Array = base64decode('DQwDAAAAAQA=')

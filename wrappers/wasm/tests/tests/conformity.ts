@@ -1,6 +1,6 @@
 // These tests are there to make sure that the implementations are compatible between one language and another
 import {
-  KeyPair, deriveKey, base64encode, base64decode, decrypt, Argon2Parameters, deriveKeyPair, PrivateKey, decryptAsymmetric, verifyPassword
+  KeyPair, deriveKeyPbkdf2, base64encode, base64decode, decrypt, Argon2Parameters, deriveKeyPair, PrivateKey, decryptAsymmetric, verifyPassword, deriveKeyArgon2
 } from 'devolutions-crypto'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
@@ -9,14 +9,21 @@ const encoder: TextEncoder = new TextEncoder()
 const decoder: TextDecoder = new TextDecoder()
 
 describe('Conformity Tests', () => {
-  it('Key Derivation', () => {
-    const derivedKey: Uint8Array = deriveKey(encoder.encode('testpassword'))
-    const derivedKeyWithIterations: Uint8Array = deriveKey(encoder.encode('testPa$$'), null, 100)
-    const derivedKeyWithSalt: Uint8Array = deriveKey(encoder.encode('testPa$$'), base64decode('tdTt5wgeqQYLvkiXKkFirqy2hMbzadBtL+jekVeNCRA='), 100)
+  it('Key Derivation PBKDF2', () => {
+    const derivedKey: Uint8Array = deriveKeyPbkdf2(encoder.encode('testpassword'))
+    const derivedKeyWithIterations: Uint8Array = deriveKeyPbkdf2(encoder.encode('testPa$$'), null, 100)
+    const derivedKeyWithSalt: Uint8Array = deriveKeyPbkdf2(encoder.encode('testPa$$'), base64decode('tdTt5wgeqQYLvkiXKkFirqy2hMbzadBtL+jekVeNCRA='), 100)
 
     expect(base64encode(derivedKey)).to.eql('ImfGCyv6PwMYaJShGxR4MfVrjuUrsI0CSarJgOApwf8=')
     expect(base64encode(derivedKeyWithIterations)).to.eql('ev/GiJLvOgIkkWrnIrHSi2fdZE5qJBIrW+DLeMLIXK4=')
     expect(base64encode(derivedKeyWithSalt)).to.eql('ZaYRZeQiIPJ+Jl511AgHZjv4/HbCFq4eUP9yNa3gowI=')
+  })
+
+  it('Key Derivation Argon2', () => {
+    const parameters: Argon2Parameters = Argon2Parameters.fromBytes(base64decode('AQAAACAAAAABAAAAIAAAAAEAAAACEwAAAAAQAAAAimFBkm3f8+f+YfLRnF5OoQ=='))
+    const result: Uint8Array = deriveKeyArgon2(encoder.encode('password'), parameters)
+
+    expect(base64encode(result)).to.eql('AcEN6Cb1Om6tomZScAM725qiXMzaxaHlj3iMiT/Ukq0=')
   })
 
   it('Symmetric Decrypt V1', () => {

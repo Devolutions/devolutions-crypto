@@ -171,6 +171,46 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// Derives the password using Argon2.
+        /// </summary>
+        /// <param name="key">The password to derive.</param>
+        /// <param name="parameters">The argon2 parameters used for the derivation.</param>
+        /// <param name="length">The resulting key length.</param>
+        /// <returns>Returns the derived password.</returns>
+        public static byte[] DeriveKey(byte[] key, Argon2Parameters parameters)
+        {
+            return DeriveKeyArgon2(key, parameters);
+        }
+
+        /// <summary>
+        /// Derives the password using Argon2.
+        /// </summary>
+        /// <param name="key">The password to derive.</param>
+        /// <param name="parameters">The argon2 parameters used for the derivation.</param>
+        /// <param name="length">The resulting key length.</param>
+        /// <returns>Returns the derived password.</returns>
+        public static byte[] DeriveKeyArgon2(byte[] key, Argon2Parameters parameters)
+        {
+            if (key == null || key.Length == 0 || parameters == null || parameters.Length == 0)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            byte[] result = new byte[parameters.Length];
+
+            byte[] parameters_raw = parameters.ToByteArray();
+
+            long res = Native.DeriveKeyArgon2Native(key, (UIntPtr)key.Length, parameters_raw, (UIntPtr)parameters_raw.Length, result, (UIntPtr)result.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Derives the password using PBKDF2.
         /// </summary>
         /// <param name="key">The password to derive.</param>
@@ -179,6 +219,19 @@ namespace Devolutions.Cryptography
         /// <param name="length">The resulting key length.</param>
         /// <returns>Returns the derived password.</returns>
         public static byte[] DeriveKey(byte[] key, byte[] salt = null, uint iterations = 10000, uint length = 32)
+        {
+            return DeriveKeyPbkdf2(key, salt, iterations, length);
+        }
+
+        /// <summary>
+        /// Derives the password using PBKDF2.
+        /// </summary>
+        /// <param name="key">The password to derive.</param>
+        /// <param name="salt">The salt. (Optional).</param>
+        /// <param name="iterations">The amount of iterations. 10 000 Recommended by NIST.</param>
+        /// <param name="length">The resulting key length.</param>
+        /// <returns>Returns the derived password.</returns>
+        public static byte[] DeriveKeyPbkdf2(byte[] key, byte[] salt = null, uint iterations = 10000, uint length = 32)
         {
             if (key == null || key.Length == 0)
             {
@@ -189,7 +242,7 @@ namespace Devolutions.Cryptography
 
             int saltLength = salt?.Length ?? 0;
 
-            long res = Native.DeriveKeyNative(key, (UIntPtr)key.Length, salt, (UIntPtr)saltLength, (UIntPtr)iterations, result, (UIntPtr)result.Length);
+            long res = Native.DeriveKeyPbkdf2Native(key, (UIntPtr)key.Length, salt, (UIntPtr)saltLength, (UIntPtr)iterations, result, (UIntPtr)result.Length);
 
             if (res < 0)
             {
