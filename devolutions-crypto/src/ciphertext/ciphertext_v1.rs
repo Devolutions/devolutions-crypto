@@ -9,7 +9,7 @@ use std::convert::TryFrom;
 
 use aes::Aes256;
 use block_modes::{block_padding::Pkcs7, BlockMode, Cbc};
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, Mac, NewMac};
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
@@ -93,9 +93,9 @@ impl CiphertextV1 {
 
         // HMAC
         let mut mac = Hmac::<Sha256>::new_varkey(&signature_key)?;
-        mac.input(&mac_data);
+        mac.update(&mac_data);
 
-        let hmac: [u8; 32] = mac.result().code().into();
+        let hmac: [u8; 32] = mac.finalize().into_bytes().into();
 
         // Zero out the key
         signature_key.zeroize();
@@ -119,7 +119,7 @@ impl CiphertextV1 {
         mac_data.append(&mut self.ciphertext.clone());
 
         let mut mac = Hmac::<Sha256>::new_varkey(&signature_key)?;
-        mac.input(&mac_data);
+        mac.update(&mac_data);
         mac.verify(&self.hmac)?;
 
         // Zeroize the key

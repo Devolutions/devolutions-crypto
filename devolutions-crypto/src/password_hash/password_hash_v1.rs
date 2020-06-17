@@ -81,7 +81,7 @@ impl PasswordHashV1 {
 
         // Generate hash
         let mut hash = [0u8; 32];
-        pbkdf2::<Hmac<Sha256>>(pass, &salt, iterations as usize, &mut hash);
+        pbkdf2::<Hmac<Sha256>>(pass, &salt, iterations, &mut hash);
 
         PasswordHashV1 {
             iterations,
@@ -92,7 +92,7 @@ impl PasswordHashV1 {
 
     pub fn verify_password(&self, pass: &[u8]) -> bool {
         let mut res = vec![0u8; 32];
-        pbkdf2::<Hmac<Sha256>>(pass, &self.salt, self.iterations as usize, &mut res);
+        pbkdf2::<Hmac<Sha256>>(pass, &self.salt, self.iterations, &mut res);
 
         let is_equal = res.ct_eq(&self.hash).into();
 

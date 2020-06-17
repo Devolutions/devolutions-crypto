@@ -242,7 +242,7 @@ namespace Devolutions.Cryptography
 
             int saltLength = salt?.Length ?? 0;
 
-            long res = Native.DeriveKeyPbkdf2Native(key, (UIntPtr)key.Length, salt, (UIntPtr)saltLength, (UIntPtr)iterations, result, (UIntPtr)result.Length);
+            long res = Native.DeriveKeyPbkdf2Native(key, (UIntPtr)key.Length, salt, (UIntPtr)saltLength, iterations, result, (UIntPtr)result.Length);
 
             if (res < 0)
             {

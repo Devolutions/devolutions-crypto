@@ -47,7 +47,7 @@ pub fn generate_key(length: usize) -> Vec<u8> {
 ///
 /// assert_eq!(32, new_key.len());
 /// ```
-pub fn derive_key_pbkdf2(key: &[u8], salt: &[u8], iterations: usize, length: usize) -> Vec<u8> {
+pub fn derive_key_pbkdf2(key: &[u8], salt: &[u8], iterations: u32, length: usize) -> Vec<u8> {
     let mut new_key = vec![0u8; length];
     pbkdf2::<Hmac<Sha256>>(&key, &salt, iterations, &mut new_key);
     new_key
