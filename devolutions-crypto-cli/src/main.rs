@@ -279,7 +279,7 @@ fn derive_key(matches: &ArgMatches) {
     let iterations = matches
         .value_of("iterations")
         .unwrap_or("")
-        .parse::<usize>()
+        .parse::<u32>()
         .unwrap_or(10000);
 
     let length = matches
@@ -288,7 +288,7 @@ fn derive_key(matches: &ArgMatches) {
         .parse::<usize>()
         .unwrap_or(32);
 
-    let key = devolutions_crypto::utils::derive_key(data, &salt, iterations, length);
+    let key = devolutions_crypto::utils::derive_key_pbkdf2(data, &salt, iterations, length);
     println!("{}", base64::encode(&key));
 }
 
