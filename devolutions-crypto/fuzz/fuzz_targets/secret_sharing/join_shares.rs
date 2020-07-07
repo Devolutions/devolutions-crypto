@@ -1,8 +1,8 @@
 #![no_main]
-use libfuzzer_sys::fuzz_target;
 use arbitrary::Arbitrary;
+use libfuzzer_sys::fuzz_target;
 
-use devolutions_crypto::secret_sharing::{ Share, join_shares};
+use devolutions_crypto::secret_sharing::{join_shares, Share};
 
 #[derive(Arbitrary, Clone, Debug)]
 struct Input {

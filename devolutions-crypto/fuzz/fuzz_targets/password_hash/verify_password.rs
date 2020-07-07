@@ -1,13 +1,13 @@
 #![no_main]
-use libfuzzer_sys::fuzz_target;
 use arbitrary::Arbitrary;
+use libfuzzer_sys::fuzz_target;
 
 use devolutions_crypto::password_hash::PasswordHash;
 
 #[derive(Arbitrary, Clone, Debug)]
 struct Input {
     data: Vec<u8>,
-    hash: PasswordHash
+    hash: PasswordHash,
 }
 
 fuzz_target!(|data: Input| {
