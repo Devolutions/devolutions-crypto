@@ -75,7 +75,7 @@ stages:
       displayName: "Setting up PATH environment variable"
 
     - script: |
-        rustup update
+        #rustup update
         rustup target add x86_64-pc-windows-msvc
         rustup target add i686-pc-windows-msvc
       displayName: "Installing rust targets"
@@ -250,7 +250,7 @@ stages:
       displayName: "Setting up PATH environment variable"
 
     - script: |
-        rustup update
+        #rustup update
         rustup target add x86_64-pc-windows-msvc
         rustup target add i686-pc-windows-msvc
       displayName: "Installing rust targets"
@@ -504,6 +504,341 @@ stages:
       inputs:
         pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: WebAssembly
+
+- stage: PythonBuild
+  dependsOn: []
+  jobs:
+  - job: Linux
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        architecture: 'x64'
+  
+    - script: |
+        sudo apt update
+        sudo apt install nuget gcc-multilib software-properties-common
+      displayName: "Installing dependencies"
+
+    - script: |
+        rustup update
+        rustup target add x86_64-unknown-linux-gnu
+        mkdir .cargo
+      displayName: "Install rust"
+            
+    - script: |
+        pip install maturin
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Install Maturin"
+
+    - script: |
+        maturin sdist
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Building sdist"
+    
+    - script: |
+        maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Building x86_64 3.8 Wheel"
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7'
+        architecture: 'x64'
+      
+    - script: |
+        maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Building x86_64 3.7 Wheel"
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.6'
+        architecture: 'x64'
+      
+    - script: |
+        maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Building x86_64 3.6 Wheel"
+
+    - task: CopyFiles@2
+      inputs:
+        contents: 'devolutions-crypto/target/wheels/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+  
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        flattenFolders: true
+        artifactName: PythonWheels
+
+  - job: macOS
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        architecture: 'x64'
+    - script: |
+        set -e
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
+        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+        source $HOME/.cargo/env
+
+        rustup target add x86_64-apple-darwin
+      displayName: "Install rust"
+
+    - script: |
+        pip install maturin
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Install maturin"
+
+    - script: |
+        source $HOME/.cargo/env
+        
+        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Building x86_64 3.8 Wheel"
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7'
+        architecture: 'x64'
+    
+    - script: |
+        source $HOME/.cargo/env
+        
+        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Building x86_64 3.7 Wheel"
+    
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.6'
+        architecture: 'x64'
+    
+    - script: |
+        source $HOME/.cargo/env
+        
+        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Building x86_64 3.6 Wheel"
+    
+    - task: CopyFiles@2
+      inputs:
+        contents: 'devolutions-crypto/target/wheels/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        flattenFolders: true
+        artifactName: PythonWheels
+
+  - job: Windows
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - checkout: self
+      lfs: true
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+
+    - bash: |
+        echo "##vso[task.prependpath]c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\Roslyn"
+      displayName: "Setting up PATH environment variable"
+
+    - script: |
+        rustup target add x86_64-pc-windows-msvc
+      displayName: "Installing rust targets"
+
+    - script: |
+        pip install maturin
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Install maturin"
+
+    - script: |
+        maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Building x86_64 3.8"
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7'
+        addToPath: true
+        architecture: 'x64'
+
+    - script: |
+        maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Building x86_64 3.7"
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.6'
+        addToPath: true
+        architecture: 'x64'
+
+    - script: |
+        maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      workingDirectory: "./devolutions-crypto"
+      displayName: "Building x86_64 3.6"
+    
+    - task: CopyFiles@2
+      inputs:
+        contents: 'devolutions-crypto/target/wheels/**'
+        flattenFolders: true
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: PythonWheels
+
+- stage: PythonTests
+  dependsOn: PythonBuild
+  jobs:
+  - job: Linux
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        architecture: 'x64'
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: "PythonWheels"
+        targetPath: "./wheels"
+            
+    - script: |
+        python -m venv venv python
+        source venv/bin/activate
+      workingDirectory: "./wrappers/python"
+      displayName: "Create virtual environment"
+
+    - script: |
+        pip install --find-links="./" devolutions_crypto
+      workingDirectory: "./wheels"
+      displayName: "Install wheel"
+
+    - script: |
+        python -m unittest tests/*.py
+      workingDirectory: "./wrappers/python"
+      displayName: "Run 3.8 tests"
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7'
+        architecture: 'x64'
+
+    - script: |
+        rm -rf venv/
+        python -m venv venv python
+        source venv/bin/activate
+      workingDirectory: "./wrappers/python"
+      displayName: "Create virtual environment"
+
+    - script: |
+        pip install --find-links="./" devolutions_crypto
+      workingDirectory: "./wheels"
+      displayName: "Install wheel"
+
+    - script: |
+        python -m unittest tests/*.py
+      workingDirectory: "./wrappers/python"
+      displayName: "Run 3.7 tests"
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.6'
+        architecture: 'x64'
+
+    - script: |
+        rm -rf venv/
+        python -m venv venv python
+        source venv/bin/activate
+      workingDirectory: "./wrappers/python"
+      displayName: "Create virtual environment"
+
+    - script: |
+        pip install --find-links="./" devolutions_crypto
+      workingDirectory: "./wheels"
+      displayName: "Install wheel"
+
+    - script: |
+        python -m unittest tests/*.py
+      workingDirectory: "./wrappers/python"
+      displayName: "Run 3.6 tests"
+
+  - job: MacOS
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        architecture: 'x64'
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: "PythonWheels"
+        targetPath: "./wheels"
+            
+    - script: |
+        python -m venv venv python
+        source venv/bin/activate
+      workingDirectory: "./wrappers/python"
+      displayName: "Create virtual environment"
+
+    - script: |
+        pip install --find-links="./" devolutions_crypto
+      workingDirectory: "./wheels"
+      displayName: "Install wheel"
+
+    - script: |
+        python -m unittest tests/*.py
+      workingDirectory: "./wrappers/python"
+      displayName: "Run tests"
+
+  - job: Windows
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        architecture: 'x64'
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: "PythonWheels"
+        targetPath: "./wheels"
+            
+    - script: |
+        python -m venv venv python
+        venv\Scripts\activate.bat
+      workingDirectory: "./wrappers/python"
+      displayName: "Create virtual environment"
+
+    - script: |
+        pip install --find-links="./" devolutions_crypto
+      workingDirectory: "./wheels"
+      displayName: "Install wheel"
+
+    - script: |
+        python -m unittest discover -p "*"
+      workingDirectory: "./wrappers/python/tests/"
+      displayName: "Run tests"
 
 - stage: CSharpUnitTests
   dependsOn: Nugets

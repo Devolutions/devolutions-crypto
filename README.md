@@ -5,6 +5,8 @@ This repo contains the library used for cryptography of products used by Devolut
 It also includes wrappers for it in different languages.  
 Currently, the supported languages are: [Rust](devolutions-crypto/), [C#](wrappers/csharp/) and [Javascript/Typescript](wrappers/wasm/).
 
+Python bindings are also available as a beta, but it is not production ready yet. You can install it with `pip3 install devolutions-crypto`, but this might not work depending on the platform. If it doesn't, you can try building it manually.
+
 Note that the Javascript version of the library is compiled using WebAssembly, so it can run in a browser.
 
 # Underlying algorithms

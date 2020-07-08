@@ -18,12 +18,7 @@ use super::{
 fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m, "encrypt")]
     fn encrypt(py: Python, data: &[u8], key: &[u8], version: Option<u16>) -> PyResult<Py<PyBytes>> {
-        let version = match version {
-            None => 0,
-            Some(v) => v,
-        };
-
-        let version = match CiphertextVersion::try_from(version) {
+        let version = match CiphertextVersion::try_from(version.unwrap_or(0)) {
             Ok(v) => v,
             Err(_) => {
                 let error: PyErr = Error::UnknownVersion.into();
@@ -42,12 +37,7 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
         key: &[u8],
         version: Option<u16>,
     ) -> PyResult<Py<PyBytes>> {
-        let version = match version {
-            None => 0,
-            Some(v) => v,
-        };
-
-        let version = match CiphertextVersion::try_from(version) {
+        let version = match CiphertextVersion::try_from(version.unwrap_or(0)) {
             Ok(v) => v,
             Err(_) => {
                 let error: PyErr = Error::UnknownVersion.into();
@@ -94,12 +84,7 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m, "generate_keypair")]
     fn generate_keypair(py: Python, version: Option<u16>) -> PyResult<Py<PyDict>> {
-        let version = match version {
-            None => 0,
-            Some(v) => v,
-        };
-
-        let version = match KeyVersion::try_from(version) {
+        let version = match KeyVersion::try_from(version.unwrap_or(0)) {
             Ok(v) => v,
             Err(_) => {
                 let error: PyErr = Error::UnknownVersion.into();

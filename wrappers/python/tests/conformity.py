@@ -21,7 +21,7 @@ class TestComformity(unittest.TestCase):
         self.assertEqual(devolutions_crypto.decrypt(ciphertext, key), b'test Ciph3rtext~2')
 
     def test_asymmetric(self):
-        self.assertEquals(devolutions_crypto.decrypt_asymmetric(b64decode(b'DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg=='), b64decode(b'DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ==')), b"testdata")
+        self.assertEqual(devolutions_crypto.decrypt_asymmetric(b64decode(b'DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg=='), b64decode(b'DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ==')), b"testdata")
 
 if __name__ == "__main__":
     unittest.main()
