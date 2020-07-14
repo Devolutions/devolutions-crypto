@@ -1,6 +1,6 @@
 #![no_main]
-use libfuzzer_sys::fuzz_target;
 use arbitrary::Arbitrary;
+use libfuzzer_sys::fuzz_target;
 
 use devolutions_crypto::utils::validate_header;
 use devolutions_crypto::DataType;
@@ -12,5 +12,5 @@ struct Input {
 }
 
 fuzz_target!(|input: Input| {
-    let _  = validate_header(&input.header, input.data_type);
+    let _ = validate_header(&input.header, input.data_type);
 });

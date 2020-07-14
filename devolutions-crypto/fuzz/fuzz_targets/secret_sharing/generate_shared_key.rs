@@ -1,8 +1,8 @@
 #![no_main]
-use libfuzzer_sys::fuzz_target;
 use arbitrary::Arbitrary;
+use libfuzzer_sys::fuzz_target;
 
-use devolutions_crypto::secret_sharing::{ generate_shared_key, SecretSharingVersion };
+use devolutions_crypto::secret_sharing::{generate_shared_key, SecretSharingVersion};
 
 #[derive(Arbitrary, Clone, Debug)]
 struct Input {
@@ -13,5 +13,10 @@ struct Input {
 }
 
 fuzz_target!(|data: Input| {
-    let _ = generate_shared_key(data.n_shares, data.threshold, data.length as usize, data.version);
+    let _ = generate_shared_key(
+        data.n_shares,
+        data.threshold,
+        data.length as usize,
+        data.version,
+    );
 });

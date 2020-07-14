@@ -1,6 +1,6 @@
 #![no_main]
-use libfuzzer_sys::fuzz_target;
 use arbitrary::Arbitrary;
+use libfuzzer_sys::fuzz_target;
 
 use devolutions_crypto::ciphertext::Ciphertext;
 use devolutions_crypto::key::PrivateKey;

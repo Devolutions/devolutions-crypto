@@ -225,7 +225,6 @@ pub mod password_hash;
 pub mod secret_sharing;
 pub mod utils;
 
-use cfg_if::cfg_if;
 use enums::{CiphertextSubtype, KeySubtype, PasswordHashSubtype, ShareSubtype};
 pub use header::{Header, HeaderType};
 
@@ -238,11 +237,11 @@ pub use error::Error;
 
 type Result<T> = std::result::Result<T, error::Error>;
 
-cfg_if! {
-    if #[cfg(target_arch = "wasm32")] {
-        pub mod wasm;
-    }
-    else if #[cfg(feature = "ffi")] {
-        pub mod ffi;
-    }
-}
+#[cfg(target_arch = "wasm32")]
+pub mod wasm;
+
+#[cfg(feature = "ffi")]
+pub mod ffi;
+
+#[cfg(feature = "python")]
+pub mod python;
