@@ -220,6 +220,17 @@ namespace Devolutions.Crypto.Tests
 
             Assert.AreEqual(validationResult, true);
         }
+
+        [TestMethod]
+        public void ScryptSimple()
+        {
+            byte[] password = Utils.StringToUtf8ByteArray(TestData.TestPassword);
+            byte[] salt = TestData.Salt;
+
+            string hash = Utils.ScryptSimple(password, salt, 10, 8, 1);
+
+            Assert.AreEqual(TestData.ScryptHash, hash);
+        }
     }
 }
 

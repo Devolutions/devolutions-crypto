@@ -130,8 +130,8 @@ impl TryFrom<&[u8]> for PasswordHash {
 
         let header = Header::try_from(&data[0..Header::len()])?;
 
-        let payload = match PasswordHashVersion::try_from(header.version) {
-            Ok(PasswordHashVersion::V1) => {
+        let payload = match header.version {
+            PasswordHashVersion::V1 => {
                 PasswordHashPayload::V1(PasswordHashV1::try_from(&data[Header::len()..])?)
             }
             _ => return Err(Error::UnknownVersion),
