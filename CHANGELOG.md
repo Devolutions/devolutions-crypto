@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [0.6.1] - 2020-06-28
+
+### Added
+ - Added `scrypt_simple` to Rust and C#
+
+### Changed
+ - Fixed missing file in NPM package
+
 ## [0.6.0] - 2020-06-16
 
 ### Added

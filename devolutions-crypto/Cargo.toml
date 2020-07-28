@@ -42,7 +42,7 @@ features = ["extension-module"]
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
 rand = { version = "0.7.3", features = ["wasm-bindgen"] }
-wasm-bindgen = { version = "0.2.60", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.60", features = ["serde-serialize"] }
 js-sys = "0.3.37"
 rust-argon2 = { version = "0.8.2", default-features = false }
 
