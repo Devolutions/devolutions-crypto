@@ -308,10 +308,8 @@ impl TryFrom<&[u8]> for PublicKey {
             return Err(Error::InvalidDataType);
         }
 
-        let payload = match KeyVersion::try_from(header.version) {
-            Ok(KeyVersion::V1) => {
-                PublicKeyPayload::V1(KeyV1Public::try_from(&data[Header::len()..])?)
-            }
+        let payload = match header.version {
+            KeyVersion::V1 => PublicKeyPayload::V1(KeyV1Public::try_from(&data[Header::len()..])?),
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -344,8 +342,8 @@ impl TryFrom<&[u8]> for PrivateKey {
             return Err(Error::InvalidDataType);
         }
 
-        let payload = match KeyVersion::try_from(header.version) {
-            Ok(KeyVersion::V1) => {
+        let payload = match header.version {
+            KeyVersion::V1 => {
                 PrivateKeyPayload::V1(KeyV1Private::try_from(&data[Header::len()..])?)
             }
             _ => return Err(Error::UnknownVersion),

@@ -401,6 +401,26 @@ namespace Devolutions.Cryptography
             return ValidateHeader86(data, dataLength, dataType);
         }
 
+        internal static long ScryptSimple(byte[] password, UIntPtr passwordLength, byte[] salt, UIntPtr saltLength, byte logN, uint r, uint p, byte[] output, UIntPtr outputLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return ScryptSimple64(password, passwordLength, salt, saltLength, logN, r, p, output, outputLength);
+            }
+
+            return ScryptSimple86(password, passwordLength, salt, saltLength, logN, r, p, output, outputLength);
+        }
+
+        internal static long ScryptSimpleSize()
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return ScryptSimpleSize64();
+            }
+
+            return ScryptSimpleSize86();
+        }
+
         internal static long VersionNative(byte[] output, UIntPtr output_length)
         {
             if (Environment.Is64BitProcess)
@@ -632,6 +652,18 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName64, EntryPoint = "ValidateHeader", CallingConvention = CallingConvention.Cdecl)]
         private static extern long ValidateHeader64(byte[] data, UIntPtr dataLength, ushort dataType);
+
+        [DllImport(LibName86, EntryPoint = "ScryptSimple", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long ScryptSimple86(byte[] password, UIntPtr passwordLength, byte[] salt, UIntPtr saltLength, byte logN,  uint r, uint p, byte[] output, UIntPtr outputLength);
+
+        [DllImport(LibName64, EntryPoint = "ScryptSimple", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long ScryptSimple64(byte[] password, UIntPtr passwordLength, byte[] salt, UIntPtr saltLength, byte logN,  uint r, uint p, byte[] output, UIntPtr outputLength);
+
+        [DllImport(LibName86, EntryPoint = "ScryptSimpleSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long ScryptSimpleSize86();
+
+        [DllImport(LibName64, EntryPoint = "ScryptSimpleSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long ScryptSimpleSize64();
 
         [DllImport(LibName86, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
         private static extern long Version86(byte[] output, UIntPtr output_length);

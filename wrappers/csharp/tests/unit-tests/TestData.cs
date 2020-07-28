@@ -20,11 +20,49 @@ namespace Devolutions.Crypto.Tests
 
         public const string Base64Url3 = "___-_w";
 
+        public const string ScryptHash = "$rscrypt$0$CggB$kqMiZ1/rLr/0GAh97TYMO/x3Ppx1lbQPO/OCHC2Qesw=$4J5xGu24Q3YM2Yvvyic3d1/+gLXnBkfeoL33sKEYZwE=$";
+
         public static readonly byte[] Base64UrlBytes1 = new byte[] { 0x41, 0x62, 0x36, 0x2f };
 
         public static readonly byte[] Base64UrlBytes2 = new byte[] { 0x41, 0x62, 0x36, 0x2f, 0x37, 0x35 };
 
         public static readonly byte[] Base64UrlBytes3 = new byte[] { 0xff, 0xff, 0xfe, 0xff };
+
+        public static readonly byte[] Salt = new byte[]
+            {
+                0x92,
+                0xa3,
+                0x22,
+                0x67,
+                0x5f,
+                0xeb,
+                0x2e,
+                0xbf,
+                0xf4,
+                0x18,
+                0x08,
+                0x7d,
+                0xed,
+                0x36,
+                0x0c,
+                0x3b,
+                0xfc,
+                0x77,
+                0x3e,
+                0x9c,
+                0x75,
+                0x95,
+                0xb4,
+                0x0f,
+                0x3b,
+                0xf3,
+                0x82,
+                0x1c,
+                0x2d,
+                0x90,
+                0x7a,
+                0xcc,
+            };
 
         public static readonly byte[] AlicePrivateKey = new byte[]
             {

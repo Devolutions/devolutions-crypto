@@ -168,8 +168,8 @@ impl TryFrom<&[u8]> for Share {
 
         let header = Header::try_from(&data[0..Header::len()])?;
 
-        let payload = match SecretSharingVersion::try_from(header.version) {
-            Ok(SecretSharingVersion::V1) => {
+        let payload = match header.version {
+            SecretSharingVersion::V1 => {
                 SharePayload::V1(ShareV1::try_from(&data[Header::len()..])?)
             }
             _ => return Err(Error::UnknownVersion),

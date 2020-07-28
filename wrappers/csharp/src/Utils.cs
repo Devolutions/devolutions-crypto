@@ -273,6 +273,33 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// This method is exposed for a very specific use case. Do not rely on it.
+        /// </summary>
+        /// <returns>The resulting hash.</returns>
+        public static string ScryptSimple(byte[] password, byte[] salt, byte logN, uint r, uint p)
+        {
+            if (password == null || salt == null)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            long length = (int)Native.ScryptSimpleSize();
+
+            byte[] hash = new byte[length];
+
+            long res = Native.ScryptSimple(password, (UIntPtr)password.Length, salt, (UIntPtr)salt.Length, logN, r, p, hash, (UIntPtr)hash.Length);
+
+            if (res < 0)
+            {
+                HandleError(res);
+            }
+
+            Array.Resize(ref hash, (int)res);
+
+            return ByteArrayToUtf8String(hash);
+        }
+
+        /// <summary>
         /// Converts a string to a UTF8 encoded byte array.
         /// </summary>
         /// <param name="data">The string to convert.</param>

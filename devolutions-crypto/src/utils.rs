@@ -113,10 +113,9 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
 }
 
 /// Temporarly binded here for a specific use case, don't rely on this.
-// Copied and modified from:
-// https://github.com/RustCrypto/password-hashing/blob/master/scrypt/src/simple.rs
-// Because rand is outdated, I cannot use the crate directly
-#[cfg(target_arch = "wasm32")]
+/// Copied and modified from:
+/// https://github.com/RustCrypto/password-hashing/blob/master/scrypt/src/simple.rs
+/// Because rand is outdated, I cannot use the crate directly
 pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) -> String {
     use byteorder::{ByteOrder, LittleEndian};
 

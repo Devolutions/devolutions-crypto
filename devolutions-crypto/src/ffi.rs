@@ -742,6 +742,43 @@ pub unsafe extern "C" fn ValidateHeader(
     }
 }
 
+/// This is binded here for one specific use case, do not use it if you don't know what you're doing.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn ScryptSimple(
+    password: *const u8,
+    password_length: usize,
+    salt: *const u8,
+    salt_length: usize,
+    log_n: u8,
+    r: u32,
+    p: u32,
+    output: *mut u8,
+    output_length: usize,
+) -> i64 {
+    if password.is_null() && salt.is_null() && output.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let password = slice::from_raw_parts(password, password_length);
+    let salt = slice::from_raw_parts(salt, salt_length);
+
+    let hash = utils::scrypt_simple(password, salt, log_n, r, p);
+
+    let output = slice::from_raw_parts_mut(output, output_length);
+    output[..hash.len()].copy_from_slice(hash.as_bytes());
+    hash.len() as i64
+}
+
+/// This is binded here for one specific use case, do not use it if you don't know what you're doing.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn ScryptSimpleSize() -> i64 {
+    256
+}
+
 /// Get the default Argon2Parameters struct values.
 /// # Arguments
 ///  * argon2_parameters - Pointer to the output buffer.
