@@ -33,7 +33,7 @@ namespace Devolutions.Cryptography
     /// Devolutions Crypto Cipher Version.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "V2_5 is not version 25")]
-    public enum CipherVersion
+    public enum CipherTextVersion
     {
         /// <summary>
         /// This is the latest version. (Currently XChaCha20Poly1305)
