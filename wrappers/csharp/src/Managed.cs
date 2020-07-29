@@ -10,13 +10,13 @@ namespace Devolutions.Cryptography
 #if RDM
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:Field names should not contain underscore", Justification =
  "Preprocessor directive")]
-        private const CipherVersion CIPHER_VERSION = CipherVersion.V1;
+        private const CipherTextVersion CIPHERTEXT_VERSION = CipherTextVersion.V1;
 #else
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "StyleCop.CSharp.NamingRules",
             "SA1310:Field names should not contain underscore",
             Justification = "Preprocessor directive")]
-        private const CipherVersion CIPHER_VERSION = CipherVersion.Latest;
+        private const CipherTextVersion CIPHERTEXT_VERSION = CipherTextVersion.Latest;
 #endif
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Devolutions.Cryptography
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         [Obsolete("This method has been deprecated. Use EncryptWithKeyAsBase64String instead.")]
-        public static string EncryptWithKeyAsString(string data, byte[] key, CipherVersion version = CIPHER_VERSION)
+        public static string EncryptWithKeyAsString(string data, byte[] key, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             return EncryptWithKeyAsBase64String(data, key, version);
         }
@@ -149,7 +149,7 @@ namespace Devolutions.Cryptography
         /// <param name="key">The key to use for encryption.</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptWithKeyAsBase64String(string data, byte[] key, CipherVersion version = CIPHER_VERSION)
+        public static string EncryptWithKeyAsBase64String(string data, byte[] key, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, version);
 
@@ -163,7 +163,7 @@ namespace Devolutions.Cryptography
         /// <param name="key">The key to use for encryption.</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[] EncryptWithKey(string data, byte[] key, CipherVersion version = CIPHER_VERSION)
+        public static byte[] EncryptWithKey(string data, byte[] key, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, version);
 
@@ -358,7 +358,7 @@ namespace Devolutions.Cryptography
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         [Obsolete("This method has been deprecated. Use EncryptWithKeyAsBase64String instead.")]
-        public static string EncryptWithKeyAsString(byte[] data, byte[] key, CipherVersion version = CIPHER_VERSION)
+        public static string EncryptWithKeyAsString(byte[] data, byte[] key, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             return EncryptWithKeyAsBase64String(data, key, version);
         }
@@ -370,7 +370,7 @@ namespace Devolutions.Cryptography
         /// <param name="key">The key to use for encryption.</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptWithKeyAsBase64String(byte[] data, byte[] key, CipherVersion version = CIPHER_VERSION)
+        public static string EncryptWithKeyAsBase64String(byte[] data, byte[] key, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             byte[] cipher = Encrypt(data, key, version);
 
@@ -384,7 +384,7 @@ namespace Devolutions.Cryptography
         /// <param name="key">The key to use for encryption.</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[] EncryptWithKey(byte[] data, byte[] key, CipherVersion version = CIPHER_VERSION)
+        public static byte[] EncryptWithKey(byte[] data, byte[] key, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             byte[] cipher = Encrypt(data, key, version);
 
@@ -397,12 +397,12 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         [Obsolete("This method has been deprecated. Use EncryptWithPasswordAsBase64String instead.")]
-        public static string EncryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
-            return EncryptWithPasswordAsBase64String(data, password, iterations, cipher_version);
+            return EncryptWithPasswordAsBase64String(data, password, iterations, cipherTextVersion);
         }
 
         /// <summary>
@@ -411,9 +411,9 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptWithPasswordAsBase64String(byte[] data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptWithPasswordAsBase64String(byte[] data, string password, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (data == null || data.Length == 0)
             {
@@ -421,7 +421,7 @@ namespace Devolutions.Cryptography
             }
 
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherTextVersion == CipherTextVersion.V1 || cipherTextVersion == CipherTextVersion.V2)
             {
                 keySize = 256;
             }
@@ -432,7 +432,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(data, key, cipher_version);
+            byte[] cipher = Encrypt(data, key, cipherTextVersion);
 
             return Utils.EncodeToBase64String(cipher);
         }
@@ -443,11 +443,11 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
-            return EncryptBase64WithPasswordAsBase64String(b64data, password, iterations, cipher_version);
+            return EncryptBase64WithPasswordAsBase64String(b64data, password, iterations, cipherTextVersion);
         }
 
         /// <summary>
@@ -456,9 +456,9 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptBase64WithPasswordAsBase64String(string b64data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptBase64WithPasswordAsBase64String(string b64data, string password, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (string.IsNullOrEmpty(b64data))
             {
@@ -466,7 +466,7 @@ namespace Devolutions.Cryptography
             }
 
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherTextVersion == CipherTextVersion.V1 || cipherTextVersion == CipherTextVersion.V2)
             {
                 keySize = 256;
             }
@@ -477,7 +477,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(Utils.Base64StringToByteArray(b64data), key, cipher_version);
+            byte[] cipher = Encrypt(Utils.Base64StringToByteArray(b64data), key, cipherTextVersion);
 
             return Utils.EncodeToBase64String(cipher);
         }
@@ -596,7 +596,7 @@ namespace Devolutions.Cryptography
         /// <param name="key">The key to use for encryption.</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as byte array.</returns>
-        public static byte[] Encrypt(byte[] data, byte[] key, CipherVersion version = CIPHER_VERSION)
+        public static byte[] Encrypt(byte[] data, byte[] key, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             if (data == null || data.Length == 0)
             {
@@ -633,7 +633,7 @@ namespace Devolutions.Cryptography
         /// <param name="publicKey">The public key to use for encryption.</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as byte array.</returns>
-        public static byte[] EncryptAsymmetric(byte[] data, byte[] publicKey, CipherVersion version = CIPHER_VERSION)
+        public static byte[] EncryptAsymmetric(byte[] data, byte[] publicKey, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             if (data == null || data.Length == 0)
             {
@@ -669,12 +669,12 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         [Obsolete("This method has been deprecated. Use EncryptWithPasswordAsBase64String instead.")]
-        public static string EncryptWithPasswordAsString(string data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptWithPasswordAsString(string data, string password, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
-            return EncryptWithPasswordAsBase64String(data, password, iterations, cipher_version);
+            return EncryptWithPasswordAsBase64String(data, password, iterations, cipherTextVersion);
         }
 
         /// <summary>
@@ -683,9 +683,9 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptWithPasswordAsBase64String(string data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
+        public static string EncryptWithPasswordAsBase64String(string data, string password, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (string.IsNullOrEmpty(data))
             {
@@ -693,7 +693,7 @@ namespace Devolutions.Cryptography
             }
 
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherTextVersion == CipherTextVersion.V1 || cipherTextVersion == CipherTextVersion.V2)
             {
                 keySize = 256;
             }
@@ -704,7 +704,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, cipher_version);
+            byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, cipherTextVersion);
 
             return Utils.EncodeToBase64String(cipher);
         }
@@ -715,9 +715,9 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[] EncryptWithPassword(byte[] data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
+        public static byte[] EncryptWithPassword(byte[] data, string password, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (data == null || data.Length == 0)
             {
@@ -725,7 +725,7 @@ namespace Devolutions.Cryptography
             }
 
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherTextVersion == CipherTextVersion.V1 || cipherTextVersion == CipherTextVersion.V2)
             {
                 keySize = 256;
             }
@@ -736,7 +736,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(data, key, cipher_version);
+            byte[] cipher = Encrypt(data, key, cipherTextVersion);
 
             return cipher;
         }
@@ -747,9 +747,9 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[] EncryptBase64WithPassword(string b64data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
+        public static byte[] EncryptBase64WithPassword(string b64data, string password, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (string.IsNullOrEmpty(b64data))
             {
@@ -757,7 +757,7 @@ namespace Devolutions.Cryptography
             }
 
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherTextVersion == CipherTextVersion.V1 || cipherTextVersion == CipherTextVersion.V2)
             {
                 keySize = 256;
             }
@@ -768,7 +768,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(Utils.Base64StringToByteArray(b64data), key, cipher_version);
+            byte[] cipher = Encrypt(Utils.Base64StringToByteArray(b64data), key, cipherTextVersion);
 
             return cipher;
         }
@@ -779,9 +779,9 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipher_version">The cipher version to use. (Latest is recommended).</param>
+        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[] EncryptWithPassword(string data, string password, uint iterations = 10000, CipherVersion cipher_version = CIPHER_VERSION)
+        public static byte[] EncryptWithPassword(string data, string password, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (string.IsNullOrEmpty(data))
             {
@@ -789,7 +789,7 @@ namespace Devolutions.Cryptography
             }
 
             uint keySize;
-            if (cipher_version == CipherVersion.V1 || cipher_version == CipherVersion.V2)
+            if (cipherTextVersion == CipherTextVersion.V1 || cipherTextVersion == CipherTextVersion.V2)
             {
                 keySize = 256;
             }
@@ -800,7 +800,7 @@ namespace Devolutions.Cryptography
 
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, keySize);
 
-            byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, cipher_version);
+            byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, cipherTextVersion);
 
             return cipher;
         }

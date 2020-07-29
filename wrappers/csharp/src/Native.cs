@@ -58,7 +58,7 @@ namespace Devolutions.Cryptography
         [Obsolete("This method has been deprecated. Use Managed.Encrypt instead.")]
         public static byte[] Encrypt(byte[] data, byte[] key, uint version = 0)
         {
-            return Managed.Encrypt(data, key, (CipherVersion)version);
+            return Managed.Encrypt(data, key, (CipherTextVersion)version);
         }
 
         [Obsolete("This method has been deprecated. Use Managed.GenerateKey instead.")]
