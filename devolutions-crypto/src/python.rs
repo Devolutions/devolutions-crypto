@@ -4,6 +4,7 @@ use pyo3::types::{PyBytes, PyDict};
 
 use std::convert::TryFrom;
 
+use super::argon2parameters::Argon2Parameters;
 use super::utils;
 use super::CiphertextVersion;
 use super::Error;
@@ -79,6 +80,14 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
         let length = length.unwrap_or(32);
 
         let key = utils::derive_key_pbkdf2(key, &salt, iterations, length);
+        Ok(PyBytes::new(py, &key).into())
+    }
+
+    #[pyfn(m, "derive_key_argon2")]
+    fn derive_key_argon2(py: Python, key: &[u8], parameters: &[u8]) -> PyResult<Py<PyBytes>> {
+        let parameters = Argon2Parameters::try_from(parameters)?;
+
+        let key = utils::derive_key_argon2(key, &parameters)?;
         Ok(PyBytes::new(py, &key).into())
     }
 
