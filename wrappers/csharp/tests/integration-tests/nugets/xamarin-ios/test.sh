@@ -3,7 +3,7 @@ runtime=$(xcrun simctl list runtimes | grep iOS | tail -1 | cut -d ")" -f 2 | cu
 deviceType=$(xcrun simctl list devicetypes | grep iPhone | cut -d "(" -f 2 | cut -d ")" -f 1 | grep com | tail -1)
 echo $runtime
 echo $deviceType
-export MONOTOUCH_ROOT=/Library/Frameworks/Xamarin.iOS.framework/Versions/Current
+export MONOTOUCH_ROOT=/Library/Frameworks/Xamarin.iOS.framework/Versions/13.18
 
 # touch server source https://github.com/prashantvc/Touch.Server/
 
