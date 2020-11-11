@@ -2,7 +2,7 @@
 
 use std::fmt;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "wbindgen")]
 use wasm_bindgen::JsValue;
 
 use strum_macros::IntoStaticStr;
@@ -162,7 +162,7 @@ impl From<argon2::Error> for Error {
     }
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "wbindgen")]
 impl From<Error> for JsValue {
     fn from(error: Error) -> JsValue {
         let js_error = js_sys::Error::new(&error.description());

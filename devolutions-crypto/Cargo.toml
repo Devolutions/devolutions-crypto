@@ -34,6 +34,7 @@ subtle = "2.2.3"
 x25519-dalek = "0.6.0"
 zeroize = "1.1.0"
 zeroize_derive = "1.0.0"
+rand = "0.7.3"
 
 [dependencies.pyo3]
 optional = true
@@ -41,13 +42,11 @@ version = "0.11.1"
 features = ["extension-module"]
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
-rand = { version = "0.7.3", features = ["wasm-bindgen"] }
-wasm-bindgen = { version = "=0.2.60", features = ["serde-serialize"] }
-js-sys = "0.3.37"
 rust-argon2 = { version = "0.8.2", default-features = false }
+wasm-bindgen = { version = "=0.2.60", features = ["serde-serialize"], optional = true }
+js-sys = {version = "0.3.37", optional = true }
 
 [target.'cfg(not(target_arch="wasm32"))'.dependencies]
-rand = { version = "0.7.3" }
 rust-argon2 = "0.8.1"
 
 [target.'cfg(target_arch="wasm32")'.dev-dependencies]
@@ -58,3 +57,4 @@ default = []
 ffi = []
 python = ["pyo3"]
 fuzz = ["arbitrary", "sharks/fuzzing"]
+wbindgen = ["wasm-bindgen", "js-sys", "rand/wasm-bindgen"]

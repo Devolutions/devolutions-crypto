@@ -67,7 +67,7 @@ use std::convert::TryFrom;
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "wbindgen")]
 use wasm_bindgen::prelude::*;
 
 /// An asymmetric keypair.
@@ -80,7 +80,7 @@ pub struct KeyPair {
 }
 
 /// A public key. This key can be sent in clear on unsecured channels and stored publicly.
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Debug)]
 pub struct PublicKey {
@@ -89,7 +89,7 @@ pub struct PublicKey {
 }
 
 /// A private key. This key should never be sent over an insecure channel or stored unsecurely.
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Debug)]
 pub struct PrivateKey {
