@@ -1,7 +1,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! {
-    if #[cfg(target_arch = "wasm32")] {
+    if #[cfg(all(target_arch = "wasm32", feature = "wbindgen"))] {
         wasm_bindgen_test_configure!(run_in_browser);
         use wasm_bindgen_test::*;
 
