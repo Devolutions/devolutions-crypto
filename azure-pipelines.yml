@@ -921,10 +921,6 @@ stages:
         sudo nuget update -self
       displayName: "Update Nuget"
 
-    - script: | # Fix issue with azure pipeline without the right default Xcode View github actions/virtual-environment issue 775
-        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/xcode_11.6.app;
-        sudo xcode-select --switch /Applications/xcode_11.6.app/Contents/Developer
-
     - script: |
         python3 unit-tests.py -p core
       workingDirectory: "./wrappers/csharp/tests/unit-tests/nugets"
@@ -956,10 +952,6 @@ stages:
         sudo nuget update -self
       displayName: "Update Nuget"
 
-    - script: | # Fix issue with azure pipeline without the right default Xcode View github actions/virtual-environment issue 775
-        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/xcode_11.6.app;
-        sudo xcode-select --switch /Applications/xcode_11.6.app/Contents/Developer
-
     - script: |
         python3 unit-tests.py -p ios
       workingDirectory: "./wrappers/csharp/tests/unit-tests/nugets"
@@ -979,10 +971,6 @@ stages:
     - script: |
         sudo nuget update -self
       displayName: "Update Nuget"
-
-    - script: | # Fix issue with azure pipeline without the right default Xcode View github actions/virtual-environment issue 775
-        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/xcode_11.6.app;
-        sudo xcode-select --switch /Applications/xcode_11.6.app/Contents/Developer
 
     - script: |
         adb start-server
@@ -1029,10 +1017,6 @@ stages:
     - script: |
         sudo nuget update -self
       displayName: "Update Nuget"
-
-    - script: | # Fix issue with azure pipeline without the right default Xcode View github actions/virtual-environment issue 775
-        echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/xcode_11.6.app;
-        sudo xcode-select --switch /Applications/xcode_11.6.app/Contents/Developer
 
     - script: |
         set -e
