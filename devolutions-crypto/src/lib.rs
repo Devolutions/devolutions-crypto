@@ -237,7 +237,7 @@ pub use error::Error;
 
 type Result<T> = std::result::Result<T, error::Error>;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "wbindgen")]
 pub mod wasm;
 
 #[cfg(feature = "ffi")]

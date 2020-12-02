@@ -8,7 +8,7 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use rand::rngs::OsRng;
 use rand::Rng;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "wbindgen")]
 use wasm_bindgen::prelude::*;
 
 use super::Error;
@@ -23,7 +23,7 @@ use super::Result;
 ///
 /// Note that calling `default()` will also generate a new random salt,
 ///  so two calls to `default()` will not generate the same structure.
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[derive(Clone)]
 pub struct Argon2Parameters {
     /// Length of the desired hash. Should be 32 in most case.

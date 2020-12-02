@@ -4,11 +4,11 @@ use zeroize::Zeroize;
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "wbindgen")]
 use wasm_bindgen::prelude::*;
 
 /// The different data types.
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
@@ -32,7 +32,7 @@ impl Default for DataType {
 }
 
 /// The versions of the encryption scheme to use.
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
@@ -52,7 +52,7 @@ impl Default for CiphertextVersion {
 }
 
 /// The versions of the password hashing scheme to use.
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
@@ -70,7 +70,7 @@ impl Default for PasswordHashVersion {
 }
 
 /// The versions of the key scheme to use.
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
@@ -88,7 +88,7 @@ impl Default for KeyVersion {
 }
 
 /// The versions of the secret sharing scheme to use.
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]

@@ -479,8 +479,8 @@ stages:
       displayName: "Update rust and install wasm-pack"
 
     - script: |
-        wasm-pack test --firefox --headless
-        wasm-pack test --chrome --headless
+        wasm-pack test --firefox --headless -- --features=wbindgen
+        wasm-pack test --chrome --headless -- --features=wbindgen
       workingDirectory: "./devolutions-crypto"
       displayName: "Platform tests"
 
