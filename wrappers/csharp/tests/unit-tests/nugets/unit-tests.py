@@ -15,7 +15,7 @@ def get_output(args, cwd=None):
         return result
     except subprocess.CalledProcessError as exc:
         result = exc.output.decode(sys.stdout.encoding).strip()
-        return result
+        return "EXEC FAILED!\n" + result
 
 def main():
     platforms = {
@@ -169,7 +169,7 @@ def test_dotnet_core(script_dir, version, args):
     output = get_output(["dotnet", "test", "./dotnet-core"])
     print(output)
 
-    if "Test Run Successful" not in output:
+    if "EXEC FAILED!" in output:
         exit(1)
 
 def test_mac_full(script_dir, version, args):
