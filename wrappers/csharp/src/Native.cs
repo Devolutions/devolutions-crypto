@@ -24,16 +24,21 @@ namespace Devolutions.Cryptography
 #endif
 
 #if !DEBUG
+        private const string NativeVersion = "||NATIVE_VERSION||";
+        private const string ManagedVersion = "||MANAGED_VERSION||";
+#endif
+
+#if !DEBUG
         static Native()
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
 
             string managedVersion = assembly.GetName().Version.ToString();
-            string nativeVersion = Utils.Version() + ".0";
+            string nativeVersion = Utils.Version();
 
-            if (managedVersion != nativeVersion)
+            if (managedVersion != (ManagedVersion + ".0") || NativeVersion != nativeVersion)
             {
-                throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion);
+                throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion + " Supported : managed(" + ManagedVersion + ") native (" + NativeVersion + ")");
             }
     }
 #endif

@@ -39,13 +39,33 @@ def exec_command(command, cwd="."):
 def generate_manifest():
     print("Generating assembly manifest...")
     # Generate assembly manifest with the right version
-    with open('../../devolutions-crypto/Cargo.toml', 'r') as file:
+    with open('./version-managed.txt', 'r') as file:
         data=file.read()
-        version = data.split("version = \"")[1].split("\"", 1)[0]
+        version_managed = data.split("version = \"")[1].split("\"", 1)[0]
         
         assembly_manifest = assembly_manifest_template.replace("||YEAR||", str(datetime.datetime.now().year))
-        assembly_manifest = assembly_manifest.replace("||VERSION||", version)
-    return (assembly_manifest, version)
+        assembly_manifest = assembly_manifest.replace("||VERSION||", version_managed)
+    return (assembly_manifest, version_managed)
+
+def version_live_change():
+    print("Changing version manifest...")
+    # Generate assembly manifest with the right version
+    with open('./version-managed.txt', 'r') as file:
+        data=file.read()
+        version_managed = data.split("version = \"")[1].split("\"", 1)[0]
+
+    with open('../../devolutions-crypto/Cargo.toml', 'r') as file:
+        data=file.read()
+        version_native = data.split("version = \"")[1].split("\"", 1)[0]
+
+
+    with open('./src/Native.cs', 'r+') as file:
+        data=file.read()
+        file.seek(0)
+        data = data.replace("||MANAGED_VERSION||", version_managed)
+        data = data.replace("||NATIVE_VERSION||", version_native)
+        file.write(data)
+        file.truncate()
 
 def build_native(architectures, target_folder, manifest=None):
     try:
@@ -113,6 +133,7 @@ def main():
     os.chdir(script_dir)
 
     (assembly_manifest, version) = generate_manifest()
+    version_live_change()
 
     platforms.get(args.platform)(assembly_manifest, version, args)
     print("Done")
@@ -196,7 +217,7 @@ def build_windows(assembly_manifest, version, args):
     if args.rdm:
         define += ";RDM"
 
-    output = exec_command("csc -out:./" + folder + "/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./" + folder + "/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu " + define + " src/*.cs ./" + folder + "/bin/AssemblyInfo.cs")
+    output = exec_command("csc -out:./" + folder + "/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./" + folder + "/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu " + define + " src/*.cs ./" + folder + "/bin/AssemblyInfo.cs -optimize")
     print(output)
 
     if("error" in output):
@@ -227,7 +248,7 @@ def build_linux(assembly_manifest, version, args):
 
     print("Building Managed Library...")
 
-    output = exec_command("csc -out:./linux/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./linux/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:LINUX src/*.cs ./linux/bin/AssemblyInfo.cs")
+    output = exec_command("csc -out:./linux/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./linux/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:LINUX src/*.cs ./linux/bin/AssemblyInfo.cs -optimize")
     print(output)
 
     if("error" in output):
@@ -252,7 +273,7 @@ def build_mac_full(assembly_manifest, version, args):
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
-    output = exec_command("csc -out:./macos-full/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./macos-full/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:MAC_FULL src/*.cs ./macos-full/bin/AssemblyInfo.cs")
+    output = exec_command("csc -out:./macos-full/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./macos-full/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:MAC_FULL src/*.cs ./macos-full/bin/AssemblyInfo.cs -optimize")
     print(output)
 
     if("error" in output):

@@ -213,6 +213,7 @@
 //!  * Key exchange uses x25519, or ECDH over Curve25519
 //!  * Password Hashing uses PBKDF2-HMAC-SHA2-256
 //!  * Secret Sharing uses Shamir Secret sharing over GF256
+#![allow(clippy::field_reassign_with_default)]
 
 mod argon2parameters;
 mod enums;
