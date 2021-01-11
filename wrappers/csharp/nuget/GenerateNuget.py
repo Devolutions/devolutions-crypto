@@ -39,11 +39,33 @@ def main():
 
     version = ""
 
-    with open('../../../devolutions-crypto/Cargo.toml', 'r') as file:
+    with open('../version-managed.txt', 'r') as file:
         data=file.read()
         version = data.split("version = \"")[1].split("\"", 1)[0]
 
+    version_live_change()
+
     platforms.get(args.platform)(version, args)
+
+def version_live_change():
+    print("Changing version manifest...")
+    # Generate assembly manifest with the right version
+    with open('../version-managed.txt', 'r') as file:
+        data=file.read()
+        version_managed = data.split("version = \"")[1].split("\"", 1)[0]
+
+    with open('../../../devolutions-crypto/Cargo.toml', 'r') as file:
+        data=file.read()
+        version_native = data.split("version = \"")[1].split("\"", 1)[0]
+
+
+    with open('../src/Native.cs', 'r+') as file:
+        data=file.read()
+        file.seek(0)
+        data = data.replace("||MANAGED_VERSION||", version_managed)
+        data = data.replace("||NATIVE_VERSION||", version_native)
+        file.write(data)
+        file.truncate()
 
 def build_all(version, args):
     for name, handler in platforms.items():
