@@ -79,6 +79,9 @@
     <Compile Include="..\..\..\..\..\src\ILegacyDecryptor.cs">
       <Link>ILegacyDecryptor.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\..\..\src\ILegacyHasher.cs">
+      <Link>ILegacyHasher.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">
@@ -86,7 +89,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="SecurityCodeScan" Version="3.5.0" />
+    <PackageReference Include="SecurityCodeScan" Version="3.5.3">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="StyleCop.Analyzers">
       <Version>1.1.118</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

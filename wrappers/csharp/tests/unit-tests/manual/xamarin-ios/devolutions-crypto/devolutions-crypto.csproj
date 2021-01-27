@@ -72,6 +72,9 @@
     <Compile Include="..\..\..\..\..\src\ILegacyDecryptor.cs">
       <Link>ILegacyDecryptor.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\..\..\src\ILegacyHasher.cs">
+      <Link>ILegacyHasher.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
