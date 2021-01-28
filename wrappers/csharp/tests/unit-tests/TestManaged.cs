@@ -272,10 +272,10 @@ namespace Devolutions.Crypto.Tests
             Assert.IsTrue(result != null && result.Length == 10);
 
             var shares2 = GetSharesKeys2();
-            var result2 = Managed.JoinShares(shares);
-            var val2 = Utils.ByteArrayToUtf8String(result);
+            var result2 = Managed.JoinShares(shares2);
+            var val2 = Utils.ByteArrayToUtf8String(result2);
 
-            Assert.IsTrue(result != null && result.Length == 10);
+            Assert.IsTrue(result2 != null && result2.Length == 10);
             Assert.AreEqual(val, val2);
         }
 

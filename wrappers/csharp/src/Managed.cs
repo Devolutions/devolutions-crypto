@@ -175,7 +175,6 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="key">The password to derive.</param>
         /// <param name="parameters">The argon2 parameters used for the derivation.</param>
-        /// <param name="length">The resulting key length.</param>
         /// <returns>Returns the derived password.</returns>
         public static byte[] DeriveKey(byte[] key, Argon2Parameters parameters)
         {
@@ -187,7 +186,6 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="key">The password to derive.</param>
         /// <param name="parameters">The argon2 parameters used for the derivation.</param>
-        /// <param name="length">The resulting key length.</param>
         /// <returns>Returns the derived password.</returns>
         public static byte[] DeriveKeyArgon2(byte[] key, Argon2Parameters parameters)
         {
@@ -282,6 +280,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
+        /// <param name="legacyDecryptor">The fallback decryptor to use if the data is not from Devolutions Crypto.</param>
         /// <returns>Returns the decryption result in a byte array.</returns>
         public static byte[] Decrypt(byte[] data, byte[] key, ILegacyDecryptor legacyDecryptor = null)
         {
@@ -295,19 +294,19 @@ namespace Devolutions.Cryptography
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
 
-            if (legacyDecryptor != null)
-            {
-                if (!Utils.ValidateHeader(data, DataType.Cipher))
-                {
-                    return legacyDecryptor.Decrypt(data, key);
-                }
-            }
-
             byte[] result = new byte[data.Length];
             long res = Native.DecryptNative(data, (UIntPtr)data.Length, key, (UIntPtr)key.Length, result, (UIntPtr)result.Length);
 
             if (res < 0)
             {
+                if (legacyDecryptor != null && Enum.IsDefined(typeof(NativeError), (int)res))
+                {
+                    if ((NativeError)res == NativeError.InvalidSignature)
+                    {
+                        return legacyDecryptor.Decrypt(data, key);
+                    }
+                }
+
                 Utils.HandleError(res);
             }
 
@@ -510,8 +509,9 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="password">The password in bytes.</param>
         /// <param name="hash">The hash in bytes. Must be a hash from the method HashPassword().</param>
+        /// <param name="legacyHasher">The fallback hasher to use if the hash is not from Devolutions Crypto.</param>
         /// <returns>Returns true if the password matches with the hash.</returns>
-        public static bool VerifyPassword(byte[] password, byte[] hash)
+        public static bool VerifyPassword(byte[] password, byte[] hash, ILegacyHasher legacyHasher = null)
         {
             if (password == null || hash == null)
             {
@@ -527,6 +527,14 @@ namespace Devolutions.Cryptography
 
             if (res < 0)
             {
+                if (legacyHasher != null && Enum.IsDefined(typeof(NativeError), (int)res))
+                {
+                    if ((NativeError)res == NativeError.InvalidSignature)
+                    {
+                        return legacyHasher.VerifyPassword(password, hash);
+                    }
+                }
+
                 Utils.HandleError(res);
             }
 
@@ -822,6 +830,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="b64data">The base 64 string to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
+        /// <param name="legacyDecryptor">The fallback decryptor to use if the data is not from Devolutions Crypto.</param>
         /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
         public static string DecryptWithKeyAsUtf8String(string b64data, byte[] key, ILegacyDecryptor legacyDecryptor = null)
         {
@@ -835,6 +844,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="b64data">The base 64 string to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
+        /// <param name="legacyDecryptor">The fallback decryptor to use if the data is not from Devolutions Crypto.</param>
         /// <returns>Returns the decryption result as a byte array.</returns>
         public static byte[] DecryptWithKey(string b64data, byte[] key, ILegacyDecryptor legacyDecryptor = null)
         {
@@ -860,6 +870,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
+        /// <param name="legacyDecryptor">The fallback decryptor to use if the data is not from Devolutions Crypto.</param>
         /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
         public static string DecryptWithKeyAsUtf8String(byte[] data, byte[] key, ILegacyDecryptor legacyDecryptor = null)
         {
@@ -873,6 +884,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
+        /// <param name="legacyDecryptor">The fallback decryptor to use if the data is not from Devolutions Crypto.</param>
         /// <returns>Returns the decryption result as a byte array.</returns>
         public static byte[] DecryptWithKey(byte[] data, byte[] key, ILegacyDecryptor legacyDecryptor = null)
         {
