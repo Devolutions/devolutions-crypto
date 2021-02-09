@@ -119,7 +119,7 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
 pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) -> String {
     use byteorder::{ByteOrder, LittleEndian};
 
-    let params = scrypt::ScryptParams::new(log_n, r, p).expect("params should be valid");
+    let params = scrypt::Params::new(log_n, r, p).expect("params should be valid");
 
     // 256-bit derived key
     let mut dk = [0u8; 32];

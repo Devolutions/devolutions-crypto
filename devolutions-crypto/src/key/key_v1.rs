@@ -3,7 +3,6 @@ use super::Argon2Parameters;
 use super::Error;
 use super::Result;
 
-use rand::rngs::OsRng;
 use x25519_dalek::{PublicKey, StaticSecret};
 use zeroize::Zeroize;
 
@@ -99,7 +98,7 @@ impl TryFrom<&[u8]> for KeyV1Public {
 }
 
 pub fn generate_keypair() -> KeyV1Pair {
-    let private = StaticSecret::new(&mut OsRng);
+    let private = StaticSecret::new(&mut rand07::rngs::OsRng);
     let public = PublicKey::from(&private);
 
     KeyV1Pair {
