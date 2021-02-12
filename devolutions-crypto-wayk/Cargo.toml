@@ -3,6 +3,10 @@ name = "devolutions-crypto-wayk"
 version = "0.1.0"
 authors = ["Benoît CORTIER <benoit.cortier@fried-world.eu>"]
 edition = "2018"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/devolutions/devolutions-crypto"
+repository = "https://github.com/devolutions/devolutions-crypto"
+description = "Cryptographic primitives for Wayk Bastion Data Source"
 
 [dependencies]
 hkdf = "0.10"
