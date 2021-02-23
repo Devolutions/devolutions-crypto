@@ -6,6 +6,8 @@ use zeroize::{Zeroize, Zeroizing};
 pub use x25519_dalek::PublicKey;
 
 /// Wraps shared secret produced by key exchange
+#[derive(Zeroize)]
+#[zeroize(drop)]
 pub struct SharedSecret([u8; 32]);
 
 impl SharedSecret {
@@ -28,21 +30,9 @@ impl SharedSecret {
     }
 }
 
-impl Zeroize for SharedSecret {
-    fn zeroize(&mut self) {
-        self.0.zeroize();
-    }
-}
-
-impl Drop for SharedSecret {
-    fn drop(&mut self) {
-        self.zeroize();
-    }
-}
-
 impl From<[u8; 32]> for SharedSecret {
-    fn from(array: [u8; 32]) -> Self {
-        Self(array)
+    fn from(bytes: [u8; 32]) -> Self {
+        Self::from_bytes(bytes)
     }
 }
 
