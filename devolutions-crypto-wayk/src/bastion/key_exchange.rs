@@ -1,9 +1,50 @@
 use crate::bastion::Error;
 use uuid::Uuid;
 use x25519_dalek::EphemeralSecret;
-use zeroize::Zeroizing;
+use zeroize::{Zeroize, Zeroizing};
 
-pub use x25519_dalek::{PublicKey, SharedSecret};
+pub use x25519_dalek::PublicKey;
+
+/// Wraps shared secret produced by key exchange
+pub struct SharedSecret([u8; 32]);
+
+impl SharedSecret {
+    /// Constructs `SharedSecret` from a slice of bytes whose len is exactly 32.
+    /// Input slice is zeroized.
+    pub fn from_slice_mut(bytes: &mut [u8]) -> Result<Self, Error> {
+        use core::convert::TryFrom;
+        let array =
+            <[u8; 32]>::try_from(&*bytes).map_err(|_| Error::InvalidSize { got: bytes.len() })?;
+        bytes.zeroize();
+        Ok(Self(array))
+    }
+
+    pub fn from_bytes(bytes: [u8; 32]) -> Self {
+        Self(bytes)
+    }
+
+    pub fn as_bytes(&self) -> &[u8; 32] {
+        &self.0
+    }
+}
+
+impl Zeroize for SharedSecret {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
+    }
+}
+
+impl Drop for SharedSecret {
+    fn drop(&mut self) {
+        self.zeroize();
+    }
+}
+
+impl From<[u8; 32]> for SharedSecret {
+    fn from(array: [u8; 32]) -> Self {
+        Self(array)
+    }
+}
 
 /// Basically wraps `x25519_dalek`
 pub struct KeyExchange {
@@ -27,7 +68,8 @@ impl KeyExchange {
     }
 
     pub fn into_shared_secret(self, peer_public_key: &PublicKey) -> SharedSecret {
-        self.secret.diffie_hellman(peer_public_key)
+        let shared = self.secret.diffie_hellman(peer_public_key);
+        SharedSecret(shared.to_bytes())
     }
 }
 
@@ -74,7 +116,7 @@ pub fn encrypt_key(
     data.copy_from_slice(symmetric_key_to_share);
 
     // In-place encryption
-    let key = Key::from_slice(shared_key.as_bytes());
+    let key = Key::from_slice(&shared_key.0);
     let aead = XChaCha20Poly1305::new(key);
     let tag = aead
         .encrypt_in_place_detached(&nonce, aad, data)
@@ -120,7 +162,7 @@ pub fn decrypt_key(
     let nonce = XNonce::from_slice(nonce);
     let tag = Tag::<<XChaCha20Poly1305 as AeadInPlace>::TagSize>::from_slice(tag);
 
-    let key = Key::from_slice(shared_key.as_bytes());
+    let key = Key::from_slice(&shared_key.0);
     let aead = XChaCha20Poly1305::new(key);
     aead.decrypt_in_place_detached(nonce, aad, data, tag)
         .map_err(|_| Error::XChaCha20)?;
