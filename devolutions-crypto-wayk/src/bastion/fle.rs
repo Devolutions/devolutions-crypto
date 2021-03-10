@@ -99,35 +99,17 @@ pub fn decrypt_field(
 ) -> Result<Vec<u8>, Error> {
     use chacha20poly1305::aead::Tag;
 
-    const MIN_SIZE: usize = AAD_SIZE + NONCE_SIZE + 1 + TAG_SIZE;
+    let mut buffer = h_check_size_and_decode_base64(encrypted_content)?;
 
-    let mut buffer = Zeroizing::new(base64::decode_config(
-        &encrypted_content[SAFE_PAYLOAD_PREFIX.len()..],
-        base64::STANDARD,
-    )?);
+    let (aad, rest) = buffer.split_at_mut(AAD_SIZE);
 
-    if buffer.len() < MIN_SIZE {
-        return Err(Error::InvalidSize { got: buffer.len() });
-    }
-
-    let (aad, rest) = buffer.as_mut_slice().split_at_mut(AAD_SIZE);
-    {
-        // Associated data sanity checks
-
-        let (aad_magic, aad_rest) = aad.split_at(AAD_MAGIC_NUMBER_SIZE);
-        if aad_magic != AAD_MAGIC_NUMBER {
-            return Err(Error::InvalidMagicNumber);
-        }
-
-        let (_aad_reserved, uuid) = aad_rest.split_at(AAD_RESERVED_SIZE);
-        let found_master_key_id =
-            Uuid::from_slice(&uuid[..16]).expect("buffer contains enough bytes");
-        if master_key_id != found_master_key_id {
-            return Err(Error::MasterKeyIdMismatch {
-                expected: master_key_id,
-                found: found_master_key_id,
-            });
-        }
+    // Associated data sanity checks
+    let found_master_key_id = h_check_aad_and_extract_master_key_id(aad)?;
+    if master_key_id != found_master_key_id {
+        return Err(Error::MasterKeyIdMismatch {
+            expected: master_key_id,
+            found: found_master_key_id,
+        });
     }
 
     let (nonce, rest) = rest.split_at_mut(NONCE_SIZE);
@@ -148,6 +130,42 @@ pub fn decrypt_field(
     let decoded_payload = Pkcs7::unpad(data).map_err(|_| Error::XChaCha20)?;
 
     Ok(decoded_payload.to_vec())
+}
+
+/// Extracts Master Key ID encoded in AAD
+pub fn extract_master_key_id(encrypted_content: &str) -> Result<Uuid, Error> {
+    let buffer = h_check_size_and_decode_base64(encrypted_content)?;
+    let (aad, _rest) = buffer.split_at(AAD_SIZE);
+    h_check_aad_and_extract_master_key_id(aad)
+}
+
+// == helpers == //
+
+fn h_check_size_and_decode_base64(encrypted_content: &str) -> Result<Zeroizing<Vec<u8>>, Error> {
+    const MIN_SIZE: usize = AAD_SIZE + NONCE_SIZE + 1 + TAG_SIZE;
+
+    let buffer = Zeroizing::new(base64::decode_config(
+        &encrypted_content[SAFE_PAYLOAD_PREFIX.len()..],
+        base64::STANDARD,
+    )?);
+
+    if buffer.len() < MIN_SIZE {
+        return Err(Error::InvalidSize { got: buffer.len() });
+    }
+
+    Ok(buffer)
+}
+
+fn h_check_aad_and_extract_master_key_id(aad: &[u8]) -> Result<Uuid, Error> {
+    let (aad_magic, aad_rest) = aad.split_at(AAD_MAGIC_NUMBER_SIZE);
+    if aad_magic != AAD_MAGIC_NUMBER {
+        return Err(Error::InvalidMagicNumber);
+    }
+
+    let (_aad_reserved, uuid) = aad_rest.split_at(AAD_RESERVED_SIZE);
+    let found_master_key_id = Uuid::from_slice(&uuid[..16]).expect("buffer contains enough bytes");
+
+    Ok(found_master_key_id)
 }
 
 const AAD_SIZE: usize = 24;
@@ -187,6 +205,13 @@ mod tests {
         let encrypted_field = encrypt_field(MASTER_KEY_ID, RESOURCE_KEY, FIELD).unwrap();
         let decrypted_field = decrypt_field(MASTER_KEY_ID, RESOURCE_KEY, &encrypted_field).unwrap();
         assert_eq!(decrypted_field, FIELD);
+    }
+
+    #[test]
+    fn encrypt_extract() {
+        let encrypted_field = encrypt_field(MASTER_KEY_ID, RESOURCE_KEY, FIELD).unwrap();
+        let found_id = extract_master_key_id(&encrypted_field).unwrap();
+        assert_eq!(found_id, MASTER_KEY_ID);
     }
 
     #[test]
