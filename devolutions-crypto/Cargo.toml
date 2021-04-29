@@ -47,6 +47,9 @@ getrandom = { version = "0.2", features = ["js"] }
 # used for fuzzing
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
 
+[build-dependencies]
+cbindgen = "0.19"
+
 [dependencies.pyo3]
 optional = true
 version = "0.11.1"
