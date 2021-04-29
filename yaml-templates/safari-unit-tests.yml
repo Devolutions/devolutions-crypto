@@ -1,0 +1,20 @@
+jobs:
+- job: safari_unit_tests
+  pool:
+    vmImage: 'macOS-latest'
+  steps:
+  - script: |
+      set -e
+      curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
+      echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+      source $HOME/.cargo/env
+      cargo install wasm-pack
+    displayName: "install rust"
+  - script: |
+      sudo npm i -g n
+      sudo n stable
+      sudo npm update -g npm
+
+      wasm-pack test --safari --headless
+    workingDirectory: "./devolutions-crypto"
+    displayName: "Unit tests"

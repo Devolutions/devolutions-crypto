@@ -1,0 +1,52 @@
+jobs:
+- job: native_build_windows
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - checkout: self
+    lfs: true
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'
+      addToPath: true
+      architecture: 'x64'
+
+  - bash: |
+      echo "##vso[task.prependpath]c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\Roslyn"
+    displayName: "Setting up PATH environment variable"
+
+  - script: |
+      #rustup update
+      rustup target add x86_64-pc-windows-msvc
+      rustup target add i686-pc-windows-msvc
+    displayName: "Installing rust targets"
+
+  - script: |
+      cargo test
+    workingDirectory: "./devolutions-crypto"
+    displayName: "Unit tests"
+
+  - script: |
+      python GeneratePackage.py -p windows
+    workingDirectory: "./wrappers/csharp"
+    displayName: "Building WIN"
+
+  - script: |
+      python GeneratePackage.py -p windows --rdm
+    workingDirectory: "./wrappers/csharp"
+    displayName: "Building WIN"
+
+  - task: CopyFiles@2
+    inputs:
+      contents: 'wrappers/csharp/windows/**'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: CopyFiles@2
+    inputs:
+      contents: 'wrappers/csharp/rdm/**'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: MyBuildOutputs

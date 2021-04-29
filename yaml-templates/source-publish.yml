@@ -1,0 +1,17 @@
+jobs:
+- job: source_publish
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: |
+        **/*
+        !.git/**/*
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: Source

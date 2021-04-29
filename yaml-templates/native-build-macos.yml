@@ -1,0 +1,64 @@
+jobs:
+- job: native_build_macos
+  pool:
+    vmImage: 'macOS-latest'
+  steps:
+
+  - script: |
+      set -e
+      curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
+      echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+      source $HOME/.cargo/env
+
+      rustup target add x86_64-apple-darwin
+
+      rustup target add aarch64-apple-ios
+      rustup target add x86_64-apple-ios
+    displayName: "Install rust"
+
+  - script: |
+      source $HOME/.cargo/env
+      cargo test
+    workingDirectory: "./devolutions-crypto"
+    displayName: "Unit tests"
+
+  - script: |
+      source $HOME/.cargo/env
+      
+      python3 GeneratePackage.py -p mac
+    workingDirectory: "./wrappers/csharp"
+    displayName: "Building Mac Full"
+
+  - script: |
+      source $HOME/.cargo/env
+      
+      python3 GeneratePackage.py -p mac-modern
+    workingDirectory: "./wrappers/csharp"
+    displayName: "Building Mac Modern"
+
+  - script: |
+      source $HOME/.cargo/env
+
+      python3 GeneratePackage.py -p ios
+    workingDirectory: "./wrappers/csharp"
+    displayName: "Building IOS"
+
+  - task: CopyFiles@2
+    inputs:
+      contents: 'wrappers/csharp/macos-full/**'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: CopyFiles@2
+    inputs:
+      contents: 'wrappers/csharp/macos-modern/**'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: CopyFiles@2
+    inputs:
+      contents: 'wrappers/csharp/ios/**'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: MyBuildOutputs

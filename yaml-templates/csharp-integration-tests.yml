@@ -1,0 +1,30 @@
+jobs:
+- job: csharp_integration_tests
+  pool:
+    vmImage: 'macOS-latest'
+  steps:
+  - checkout: self
+    lfs: true
+    submodules: true
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      artifact: "Nugets"
+      targetPath: "./wrappers/csharp/tests/integration-tests/nugets/Nugets"
+  - script: |
+      sudo nuget update -self
+    displayName: "Update Nuget"
+
+  - script: |
+      set -e
+      curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
+      echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+      source $HOME/.cargo/env
+
+      rustup target add x86_64-apple-ios
+    displayName: "Install rust"
+
+  - script: |
+      python3 integration-tests.py -p ios
+    workingDirectory: "./wrappers/csharp/tests/integration-tests/nugets"
+    displayName: "Integration tests XAMARIN IOS"
+    

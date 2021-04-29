@@ -27,9 +27,7 @@ impl core::fmt::Debug for ShareV1 {
 
 impl From<ShareV1> for Vec<u8> {
     fn from(share: ShareV1) -> Vec<u8> {
-        let mut data: Vec<u8> = Vec::new();
-
-        data.push(share.threshold);
+        let mut data: Vec<u8> = vec![share.threshold];
         data.append(&mut (&share.share).into());
 
         data
