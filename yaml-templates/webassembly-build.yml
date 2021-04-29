@@ -1,0 +1,37 @@
+jobs:
+- job: webassembly_build
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:    
+  - script: |
+      rustup update
+
+      cargo install wasm-pack
+    displayName: "Update rust and install wasm-pack"
+
+  - script: |
+      wasm-pack test --firefox --headless -- --features=wbindgen
+      wasm-pack test --chrome --headless -- --features=wbindgen
+    workingDirectory: "./devolutions-crypto"
+    displayName: "Platform tests"
+
+  - script: |
+      sh ./wasm_build.sh
+    workingDirectory: "./wrappers/wasm"
+    displayName: "Generating npm package"
+
+  - script: |
+      npm install
+      npm test
+    workingDirectory: "./wrappers/wasm/tests"
+    displayName: "Integration tests"
+
+  - task: CopyFiles@2
+    inputs:
+      contents: 'wrappers/wasm/dist/**'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: WebAssembly
