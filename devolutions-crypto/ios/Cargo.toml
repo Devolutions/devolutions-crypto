@@ -16,9 +16,9 @@ path = "../src/lib.rs"
 
 [dependencies]
 aead = "0.3.2"
-aes = "0.6.0"
+aes = "0.7.0"
 base64 = "0.13.0"
-block-modes = "0.7.0"
+block-modes = "0.8.1"
 byteorder = "1.4.2"
 chacha20poly1305 = "0.7.1"
 cfg-if = "1"
