@@ -80,7 +80,7 @@ impl CiphertextV1 {
         OsRng.fill_bytes(&mut iv);
 
         // Create cipher object
-        let cipher = Cbc::<Aes256, Pkcs7>::new_var(&encryption_key, &iv)?;
+        let cipher = Cbc::<Aes256, Pkcs7>::new_from_slices(&encryption_key, &iv)?;
         let ciphertext = cipher.encrypt_vec(data);
 
         // Zero out the key
@@ -126,7 +126,7 @@ impl CiphertextV1 {
         signature_key.zeroize();
         mac_data.zeroize();
 
-        let cipher = Cbc::<Aes256, Pkcs7>::new_var(&encryption_key, &self.iv)?;
+        let cipher = Cbc::<Aes256, Pkcs7>::new_from_slices(&encryption_key, &self.iv)?;
         let result = cipher.decrypt_vec(&self.ciphertext)?;
 
         // Zeroize the key
