@@ -6,6 +6,12 @@
         <Link>libDevolutionsCrypto-x64.dylib</Link>
         </Content>
     </ItemGroup>
+    <ItemGroup>
+        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\osx-arm64\native\libDevolutionsCrypto-arm64.dylib">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Link>libDevolutionsCrypto-arm64.dylib</Link>
+        </Content>
+    </ItemGroup>
 </Project>
 
 <!-- reference -->
