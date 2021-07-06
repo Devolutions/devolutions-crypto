@@ -33,10 +33,12 @@ namespace Devolutions.Cryptography
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
 
-            string managedVersion = assembly.GetName().Version.ToString();
+            Version assemblyVersion = assembly.GetName().Version;
+            Version managedVersion = Version.Parse(ManagedVersion);
+            
             string nativeVersion = Utils.Version();
 
-            if (managedVersion != (ManagedVersion + ".0") || NativeVersion != nativeVersion)
+            if (managedVersion != assemblyVersion || NativeVersion != nativeVersion)
             {
                 throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion + " Supported : managed(" + ManagedVersion + ") native (" + NativeVersion + ")");
             }
