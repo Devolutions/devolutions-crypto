@@ -36,6 +36,11 @@ namespace Devolutions.Cryptography
             Version assemblyVersion = assembly.GetName().Version;
             Version managedVersion = Version.Parse(ManagedVersion);
             
+            if(managedVersion.Revision == -1)
+            {
+                managedVersion = Version.Parse(ManagedVersion + ".0");
+            }
+
             string nativeVersion = Utils.Version();
 
             if (managedVersion != assemblyVersion || NativeVersion != nativeVersion)
