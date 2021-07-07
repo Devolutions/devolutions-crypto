@@ -67,14 +67,24 @@ def version_live_change():
         file.write(data)
         file.truncate()
 
-def build_native(architectures, target_folder, manifest=None):
+def build_native(architectures, target_folder, manifest=None, clean=True):
+
+    if clean:
+        try:
+            shutil.rmtree(target_folder)
+        except:
+            pass
+
     try:
-        shutil.rmtree(target_folder)
+        os.mkdir(target_folder)
     except:
         pass
 
-    os.mkdir(target_folder)
-    os.mkdir(target_folder + "/bin")
+    try:
+        os.mkdir(target_folder + "/bin")
+    except:
+        pass
+    
 
     if manifest:
         with open(target_folder + "/bin/AssemblyInfo.cs","w+") as file:
@@ -269,7 +279,10 @@ def build_mac_full(assembly_manifest, version, args):
     if args.output:
         target_folder = args.output
 
-    build_native(architectures, target_folder, manifest=assembly_manifest)
+    build_native(architectures, target_folder, manifest=assembly_manifest, clean=False)
+
+    # prebuilt because pipeline doesn't support big sur
+    architectures.append({"name" : "aarch64" })
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
@@ -313,7 +326,10 @@ def build_mac_modern(assembly_manifest, version, args):
     if args.output:
         target_folder = args.output
 
-    build_native(architectures, target_folder)
+    build_native(architectures, target_folder, clean=False)
+
+    # prebuilt because pipeline doesn't support big sur
+    architectures.append({"name" : "aarch64" })
 
     print("Making universal binary...")
 

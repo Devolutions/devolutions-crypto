@@ -3,6 +3,8 @@ jobs:
   pool:
     vmImage: 'macOS-latest'
   steps:
+  - checkout: self
+    lfs: true
 
   - script: |
       set -e
