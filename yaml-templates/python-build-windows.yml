@@ -7,7 +7,7 @@ jobs:
     lfs: true
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: '3.8'
+      versionSpec: '3.9'
       addToPath: true
       architecture: 'x64'
 
@@ -27,6 +27,17 @@ jobs:
   - script: |
       maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
     workingDirectory: "./devolutions-crypto"
+    displayName: "Building x86_64 3.9"
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.8'
+      addToPath: true
+      architecture: 'x64'
+
+  - script: |
+      maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+    workingDirectory: "./devolutions-crypto"
     displayName: "Building x86_64 3.8"
 
   - task: UsePythonVersion@0
@@ -39,17 +50,6 @@ jobs:
       maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
     workingDirectory: "./devolutions-crypto"
     displayName: "Building x86_64 3.7"
-
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.6'
-      addToPath: true
-      architecture: 'x64'
-
-  - script: |
-      maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
-    workingDirectory: "./devolutions-crypto"
-    displayName: "Building x86_64 3.6"
   
   - task: CopyFiles@2
     inputs:

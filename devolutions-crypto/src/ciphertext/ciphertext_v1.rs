@@ -92,7 +92,7 @@ impl CiphertextV1 {
         mac_data.append(&mut ciphertext.clone());
 
         // HMAC
-        let mut mac = Hmac::<Sha256>::new_varkey(&signature_key)?;
+        let mut mac = Hmac::<Sha256>::new_from_slice(&signature_key)?;
         mac.update(&mac_data);
 
         let hmac: [u8; 32] = mac.finalize().into_bytes().into();
@@ -118,7 +118,7 @@ impl CiphertextV1 {
         mac_data.extend_from_slice(&self.iv);
         mac_data.append(&mut self.ciphertext.clone());
 
-        let mut mac = Hmac::<Sha256>::new_varkey(&signature_key)?;
+        let mut mac = Hmac::<Sha256>::new_from_slice(&signature_key)?;
         mac.update(&mac_data);
         mac.verify(&self.hmac)?;
 

@@ -178,7 +178,7 @@ impl CiphertextV2Asymmetric {
     ) -> Result<Self> {
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
-        let ephemeral_private_key = StaticSecret::new(&mut rand07::rngs::OsRng);
+        let ephemeral_private_key = StaticSecret::new(rand_core::OsRng);
         let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
 
         let key = ephemeral_private_key.diffie_hellman(&public_key);
