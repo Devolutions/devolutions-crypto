@@ -1,6 +1,6 @@
 [package]
 name = "devolutions-crypto"
-version = "0.7.0"
+version = "0.7.1"
 authors = ["Philippe Dugre <pdugre@devolutions.net>", "Mathieu Morrissette <mmorrissette@devolutions.net>"]
 edition = "2018"
 readme = "README.md"
@@ -14,37 +14,41 @@ name = "devolutions_crypto"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-aead = "0.3.2"
-aes = "0.7.0"
+aead = "0.4.2"
+aes = "0.7.4"
 base64 = "0.13.0"
 block-modes = "0.8.1"
 byteorder = "1.4.2"
-chacha20poly1305 = "0.7.1"
+chacha20poly1305 = "0.8.0"
 cfg-if = "1"
-hmac = "0.10.1"
+hmac = "0.11.0"
 num_enum = "0.5.1"
-pbkdf2 = { version = "0.7.2", default-features = false }
-scrypt = { version = "0.6.1", default-features = false }
-sharks = "0.4.3"
+pbkdf2 = { version = "0.8.0", default-features = false }
+scrypt = { version = "0.7.0", default-features = false }
+sharks = "0.5.0"
 sha2 = "0.9.3"
-strum = "0.20.0"
-strum_macros = "0.20.1"
+strum = "0.21.0"
+strum_macros = "0.21.1"
 subtle = "2.4.0"
-x25519-dalek = "1.1.0"
+x25519-dalek = "1.1.1"
 zeroize = "1.2.0"
 zeroize_derive = "1.0.1"
-rand = "0.8.3"
+rand = "0.8.4"
 
-# FIXME: remove once x25519-dalek is updated
-rand07 = { package = "rand", version = "0.7" }
+# Old version, imported for x25519_dalek
+rand_core = "0.5.1"
+
 # FIXME: https://docs.rs/getrandom/0.2.2/getrandom/#webassembly-support
 # let `getrandom` know that JavaScript is available for our targets
 # `getrandom` is not used directly, but by adding the right feature here
 # it will be compiled with it in our dependencies as well (since union of
 # all the features selected is used when building a Cargo project)
 getrandom = { version = "0.2", features = ["js"] }
+getrandom1 = { package = "getrandom", version = "0.1", features = ["wasm-bindgen"] }
 
 # used for fuzzing
+# Version is pinned because newer version requires lifetime annotations
+#   that isn't compatible with the header trait
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
 
 [build-dependencies]
@@ -52,7 +56,7 @@ cbindgen = "0.19"
 
 [dependencies.pyo3]
 optional = true
-version = "0.11.1"
+version = "0.14.1"
 features = ["extension-module"]
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
@@ -71,5 +75,5 @@ default = []
 ffi = []
 python = ["pyo3"]
 fuzz = ["arbitrary", "sharks/fuzzing"]
-wbindgen = ["wasm-bindgen", "js-sys", "rand07/wasm-bindgen"]
+wbindgen = ["wasm-bindgen", "js-sys"]
 

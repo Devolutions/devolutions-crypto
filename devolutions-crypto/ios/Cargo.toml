@@ -1,6 +1,6 @@
 [package]
 name = "devolutions-crypto"
-version = "0.7.0"
+version = "0.7.1"
 authors = ["Philippe Dugre <pdugre@devolutions.net>", "Mathieu Morrissette <mmorrissette@devolutions.net>"]
 edition = "2018"
 readme = "README.md"
@@ -15,30 +15,30 @@ crate-type = ["staticlib"]
 path = "../src/lib.rs"
 
 [dependencies]
-aead = "0.3.2"
-aes = "0.7.0"
+aead = "0.4.2"
+aes = "0.7.4"
 base64 = "0.13.0"
 block-modes = "0.8.1"
 byteorder = "1.4.2"
-chacha20poly1305 = "0.7.1"
+chacha20poly1305 = "0.8.0"
 cfg-if = "1"
-hmac = "0.10.1"
+hmac = "0.11.0"
 num_enum = "0.5.1"
-pbkdf2 = { version = "0.7.2", default-features = false }
-scrypt = { version = "0.6.1", default-features = false }
-sharks = "0.4.3"
+pbkdf2 = { version = "0.8.0", default-features = false }
+scrypt = { version = "0.7.0", default-features = false }
+sharks = "0.5.0"
 sha2 = "0.9.3"
+strum = "0.21.0"
+strum_macros = "0.21.1"
 subtle = "2.4.0"
-rand = "0.8.3"
-strum = "0.20.0"
-strum_macros = "0.20.1"
-x25519-dalek = "1.1.0"
+x25519-dalek = "1.1.1"
 zeroize = "1.2.0"
 zeroize_derive = "1.0.1"
 rust-argon2 = "0.8.2"
+rand = "0.8.4"
 
-# FIXME: remove once x25519-dalek is updated
-rand07 = { package = "rand", version = "0.7" }
+# Old version, imported for x25519_dalek
+rand_core = "0.5.1"
 
 [profile.release]
 lto = true

@@ -5,6 +5,33 @@ jobs:
   steps:
   - task: UsePythonVersion@0
     inputs:
+      versionSpec: '3.9'
+      architecture: 'x64'
+      
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      artifact: "PythonWheels"
+      targetPath: "./wheels"
+
+  - script: |
+      rm -rf venv/
+      python -m venv venv python
+      source venv/bin/activate
+    workingDirectory: "./wrappers/python"
+    displayName: "Create virtual environment"
+
+  - script: |
+      pip install --find-links="./" devolutions_crypto
+    workingDirectory: "./wheels"
+    displayName: "Install wheel"
+
+  - script: |
+      python -m unittest tests/*.py
+    workingDirectory: "./wrappers/python"
+    displayName: "Run 3.9 tests"
+  
+  - task: UsePythonVersion@0
+    inputs:
       versionSpec: '3.8'
       architecture: 'x64'
 
@@ -50,25 +77,3 @@ jobs:
       python -m unittest tests/*.py
     workingDirectory: "./wrappers/python"
     displayName: "Run 3.7 tests"
-
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.6'
-      architecture: 'x64'
-
-  - script: |
-      rm -rf venv/
-      python -m venv venv python
-      source venv/bin/activate
-    workingDirectory: "./wrappers/python"
-    displayName: "Create virtual environment"
-
-  - script: |
-      pip install --find-links="./" devolutions_crypto
-    workingDirectory: "./wheels"
-    displayName: "Install wheel"
-
-  - script: |
-      python -m unittest tests/*.py
-    workingDirectory: "./wrappers/python"
-    displayName: "Run 3.6 tests"

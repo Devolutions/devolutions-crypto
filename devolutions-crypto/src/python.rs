@@ -119,6 +119,6 @@ impl From<Error> for PyErr {
     fn from(error: Error) -> PyErr {
         let description: String = error.to_string();
         let name: &str = error.into();
-        exceptions::BaseException::py_err((name, description))
+        exceptions::PyBaseException::new_err((name, description))
     }
 }

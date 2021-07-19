@@ -5,7 +5,7 @@ jobs:
   steps:
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: '3.8'
+      versionSpec: '3.9'
       architecture: 'x64'
 
   - script: |
@@ -32,6 +32,16 @@ jobs:
   - script: |
       maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
     workingDirectory: "./devolutions-crypto"
+    displayName: "Building x86_64 3.9 Wheel"
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.8'
+      architecture: 'x64'
+    
+  - script: |
+      maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
+    workingDirectory: "./devolutions-crypto"
     displayName: "Building x86_64 3.8 Wheel"
 
   - task: UsePythonVersion@0
@@ -43,16 +53,6 @@ jobs:
       maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
     workingDirectory: "./devolutions-crypto"
     displayName: "Building x86_64 3.7 Wheel"
-
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.6'
-      architecture: 'x64'
-    
-  - script: |
-      maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
-    workingDirectory: "./devolutions-crypto"
-    displayName: "Building x86_64 3.6 Wheel"
 
   - task: CopyFiles@2
     inputs:
