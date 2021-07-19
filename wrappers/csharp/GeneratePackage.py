@@ -249,6 +249,11 @@ def build_linux(assembly_manifest, version, args):
             "value" : "x86_64-unknown-linux-gnu",
             "cargo_output": "../../devolutions-crypto/target/x86_64-unknown-linux-gnu/release/libdevolutions_crypto.so",
             "filename" : "libDevolutionsCrypto-x64.so"})
+        
+        architectures.append({"name" : "aarch64",
+            "value" : "aarch64-unknown-linux-gnu",
+            "cargo_output": "../../devolutions-crypto/target/aarch64-unknown-linux-gnu/release/libdevolutions_crypto.so",
+            "filename" : "libDevolutionsCrypto-arm64.so"})
 
     target_folder = "./linux"
     if args.output:

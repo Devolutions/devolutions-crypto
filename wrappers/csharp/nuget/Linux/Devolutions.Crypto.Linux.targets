@@ -10,6 +10,11 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <Link>libDevolutionsCrypto-x64.so</Link>
         </Content>
+
+        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\linux-arm64\native\libDevolutionsCrypto-arm64.so">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Link>libDevolutionsCrypto-arm64.so</Link>
+        </Content>
     </ItemGroup>
 </Project>
 
