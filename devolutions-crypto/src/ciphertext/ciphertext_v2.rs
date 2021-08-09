@@ -82,7 +82,7 @@ impl CiphertextV2Symmetric {
 
     pub fn encrypt(data: &[u8], key: &[u8], header: &Header<Ciphertext>) -> Result<Self> {
         // Derive key
-        let mut key = CiphertextV2Symmetric::derive_key(&key);
+        let mut key = CiphertextV2Symmetric::derive_key(key);
 
         // Generate nonce
         let mut nonce_bytes = [0u8; 24];
@@ -101,7 +101,7 @@ impl CiphertextV2Symmetric {
         let ciphertext = {
             let key = Key::from_slice(&key);
             let cipher = XChaCha20Poly1305::new(key);
-            cipher.encrypt(&nonce, payload)?
+            cipher.encrypt(nonce, payload)?
         };
 
         // Zero out the key
@@ -115,7 +115,7 @@ impl CiphertextV2Symmetric {
 
     pub fn decrypt(&self, key: &[u8], header: &Header<Ciphertext>) -> Result<Vec<u8>> {
         // Derive key
-        let mut key = CiphertextV2Symmetric::derive_key(&key);
+        let mut key = CiphertextV2Symmetric::derive_key(key);
 
         // Authenticate the header
         let aad: Vec<u8> = (*header).clone().into();

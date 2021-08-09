@@ -264,7 +264,7 @@ pub fn derive_keypair(
 pub fn mix_key_exchange(private_key: &PrivateKey, public_key: &PublicKey) -> Result<Vec<u8>> {
     Ok(match (&private_key.payload, &public_key.payload) {
         (PrivateKeyPayload::V1(private_key), PublicKeyPayload::V1(public_key)) => {
-            key_v1::mix_key_exchange(&private_key, &public_key)
+            key_v1::mix_key_exchange(private_key, public_key)
         } //_ => Err(DevoCryptoError::InvalidDataType),
     })
 }
