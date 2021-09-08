@@ -274,10 +274,18 @@ def build_linux(assembly_manifest, version, args):
 def build_mac_full(assembly_manifest, version, args):
     architectures = [
         #{"name" : "i686", "value" : "i686-apple-darwin"}, # 32 bit no longer supported by mac
-        {"name" : "x86_64",
+        {
+            "name" : "x86_64",
             "value" : "x86_64-apple-darwin",
             "cargo_output": "../../devolutions-crypto/target/x86_64-apple-darwin/release/libdevolutions_crypto.dylib",
-            "filename" : "x86_64/libDevolutionsCrypto.dylib"}
+            "filename" : "x86_64/libDevolutionsCrypto.dylib"
+        },
+        {
+            "name" : "aarch64",
+            "value" : "aarch64-apple-darwin",
+            "cargo_output": "../../devolutions-crypto/target/aarch64-apple-darwin/release/libdevolutions_crypto.dylib",
+            "filename" : "aarch64/libDevolutionsCrypto.dylib"
+        }
     ]
 
     target_folder = "./macos-full"
@@ -285,9 +293,6 @@ def build_mac_full(assembly_manifest, version, args):
         target_folder = args.output
 
     build_native(architectures, target_folder, manifest=assembly_manifest, clean=False)
-
-    # prebuilt because pipeline doesn't support big sur
-    architectures.append({"name" : "aarch64" })
 
     print("Building Managed Library...")
     # TODO create universal library with lipo
@@ -321,10 +326,18 @@ def build_mac_full(assembly_manifest, version, args):
 def build_mac_modern(assembly_manifest, version, args):
     architectures = [
         #{"name" : "i686", "value" : "i686-apple-darwin"}, # no longer supported in stable (Tier 3)
-        {"name" : "x86_64",
+        {   
+            "name" : "x86_64",
             "value" : "x86_64-apple-darwin",
             "cargo_output": "../../devolutions-crypto/target/x86_64-apple-darwin/release/libdevolutions_crypto.dylib",
-            "filename" : "x86_64/libDevolutionsCrypto.dylib"}
+            "filename" : "x86_64/libDevolutionsCrypto.dylib"
+        },
+        {
+            "name" : "aarch64",
+            "value" : "aarch64-apple-darwin",
+            "cargo_output": "../../devolutions-crypto/target/aarch64-apple-darwin/release/libdevolutions_crypto.dylib",
+            "filename" : "aarch64/libDevolutionsCrypto.dylib"
+        }
     ]
 
     target_folder = "./macos-modern"
@@ -332,9 +345,6 @@ def build_mac_modern(assembly_manifest, version, args):
         target_folder = args.output
 
     build_native(architectures, target_folder, clean=False)
-
-    # prebuilt because pipeline doesn't support big sur
-    architectures.append({"name" : "aarch64" })
 
     print("Making universal binary...")
 
