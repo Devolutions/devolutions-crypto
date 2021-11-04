@@ -94,6 +94,8 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
     use super::key::{PrivateKey, PublicKey};
     use super::password_hash::PasswordHash;
     use super::secret_sharing::Share;
+    use super::signature::Signature;
+    use super::signing_key::{SigningKeyPair, SigningPublicKey};
     use std::convert::TryFrom;
 
     if data.len() < Header::len() {
@@ -108,7 +110,12 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
             Header::<PrivateKey>::try_from(&data[0..Header::len()]).is_ok()
                 || Header::<PublicKey>::try_from(&data[0..Header::len()]).is_ok()
         }
+        DataType::SigningKey => {
+            Header::<SigningKeyPair>::try_from(&data[0..Header::len()]).is_ok()
+                || Header::<SigningPublicKey>::try_from(&data[0..Header::len()]).is_ok()
+        }
         DataType::Share => Header::<Share>::try_from(&data[0..Header::len()]).is_ok(),
+        DataType::Signature => Header::<Signature>::try_from(&data[0..Header::len()]).is_ok(),
     }
 }
 
