@@ -1,6 +1,6 @@
 // These tests are there to make sure that the implementations are compatible between one language and another
 import {
-  KeyPair, deriveKeyPbkdf2, base64encode, base64decode, decrypt, Argon2Parameters, deriveKeyPair, PrivateKey, decryptAsymmetric, verifyPassword, deriveKeyArgon2
+  KeyPair, deriveKeyPbkdf2, base64encode, base64decode, decrypt, Argon2Parameters, deriveKeyPair, PrivateKey, SigningPublicKey, decryptAsymmetric, verifyPassword, verifySignature, deriveKeyArgon2
 } from 'devolutions-crypto'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
@@ -64,5 +64,15 @@ describe('Conformity Tests', () => {
     const hash2: Uint8Array = base64decode('DQwDAAAAAQAKAAAAmH1BBckBJYDD0xfiwkAk1xwKgw8a57YQT0Igm+Faa9LFamTeEJgqn/qHc2R/8XEyK2iLPkVy+IErdGLLtLKJ2g==')
     expect(verifyPassword(encoder.encode('password1'), hash1)).to.eql(true)
     expect(verifyPassword(encoder.encode('password1'), hash2)).to.eql(true)
+  })
+
+  it('Signature V1', () => {
+    const public_key_bytes: Uint8Array = base64decode('DQwFAAIAAQDeEvwlEigK5AXoTorhmlKP6+mbiUU2rYrVQ25JQ5xang==')
+    const signature: Uint8Array = base64decode('DQwGAAAAAQD82uRk4sFC8vEni6pDNw/vOdN1IEDg9cAVfprWJZ/JBls9Gi61cUt5u6uBJtseNGZFT7qKLvp4NUZrAOL8FH0K')
+
+    const public_key = SigningPublicKey.fromBytes(public_key_bytes);
+
+    expect(verifySignature(encoder.encode('this is a test'), public_key, signature)).to.eql(true)
+    expect(verifySignature(encoder.encode('this is wrong'), public_key, signature)).to.eql(false)
   })
 })
