@@ -136,6 +136,27 @@ fn test_password_hashing_v1() {
 }
 
 #[test]
+fn test_signature_v1() {
+    use devolutions_crypto::signature::Signature;
+    use devolutions_crypto::signing_key::SigningPublicKey;
+    use std::convert::TryInto;
+
+    let data = b"this is a test";
+    let wrong_data = b"this is wrong";
+
+    let public_key: SigningPublicKey =
+        (base64::decode("DQwFAAIAAQDeEvwlEigK5AXoTorhmlKP6+mbiUU2rYrVQ25JQ5xang==")
+            .unwrap()
+            .as_slice())
+        .try_into()
+        .unwrap();
+    let signature: Signature = (base64::decode("DQwGAAAAAQD82uRk4sFC8vEni6pDNw/vOdN1IEDg9cAVfprWJZ/JBls9Gi61cUt5u6uBJtseNGZFT7qKLvp4NUZrAOL8FH0K").unwrap().as_slice()).try_into().unwrap();
+
+    assert!(signature.verify(data, &public_key));
+    assert!(!signature.verify(wrong_data, &public_key));
+}
+
+#[test]
 fn test_base64_url() {
     use devolutions_crypto::utils::{base64_decode_url, base64_encode_url};
 

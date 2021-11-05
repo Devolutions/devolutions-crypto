@@ -1,52 +1,24 @@
-//! Module for dealing with wrapped keys and key exchange.
+//! Module for dealing with signature keys.
 //!
-//! For now, this module only deal with keypairs, as the symmetric keys are not wrapped yet.
-//!
-//! ### Generation/Derivation
-//!
-//! You have two ways to generate a `KeyPair`: Using `generate_keypair` will generate a random one, using `derive_keypair` will derive one from another password or key along with derivation parameters(including salt). Except in specific circumstances, you should use `generate_keypair`.
-//!
-//! Asymmetric keys have two uses. They can be used to [encrypt and decrypt data](##asymmetric) and to perform a [key exchange](#key-exchange).
+//! See the `signature` module for more usage.
 //!
 //! #### `generate_keypair`
+//! Note: A private key is useless on their own as the public key is also required to sign the data.
+//! Therefore, you ned to handle use the full keypair as a private key when you want to sign data.
 //! ```rust
-//! use devolutions_crypto::key::{generate_keypair, KeyVersion, KeyPair};
+//! use std::convert::TryInto;
 //!
-//! let keypair: KeyPair = generate_keypair(KeyVersion::Latest);
-//! ```
+//! use devolutions_crypto::signing_key::{generate_signing_keypair, SigningKeyVersion, SigningKeyPair, SigningPublicKey};
 //!
-//! #### `derive_keypair`
-//! ```rust
-//! use devolutions_crypto::Argon2Parameters;
-//! use devolutions_crypto::key::{KeyVersion, KeyPair, derive_keypair};
+//! let keypair: SigningKeyPair = generate_signing_keypair(SigningKeyVersion::Latest);
+//! let public_key: SigningPublicKey = keypair.get_public_key();
 //!
-//! let parameters: Argon2Parameters = Default::default();
-//! let keypair: KeyPair = derive_keypair(b"thisisapassword", &parameters, KeyVersion::Latest).expect("derivation should not fail");
-//! ```
+//! // You can serialize to and from a byte array to store and transfer the keys
+//! let keypair_bytes: Vec<u8> = keypair.into();
+//! let public_bytes: Vec<u8> = public_key.into();
 //!
-//! ### Key Exchange
-//!
-//! The goal of using a key exchange is to get a shared secret key between
-//! two parties without making it possible for users listening on the conversation
-//! to guess that shared key.
-//! 1. Alice and Bob generates a `KeyPair` each.
-//! 2. Alice and Bob exchanges their `PublicKey`.
-//! 3. Alice mix her `PrivateKey` with Bob's `PublicKey`. This gives her the shared key.
-//! 4. Bob mixes his `PrivateKey` with Alice's `PublicKey`. This gives him the shared key.
-//! 5. Both Bob and Alice has the same shared key, which they can use for symmetric encryption for further communications.
-//!
-//! ```rust
-//! use devolutions_crypto::key::{generate_keypair, mix_key_exchange, KeyVersion, KeyPair};
-//!
-//! let bob_keypair: KeyPair = generate_keypair(KeyVersion::Latest);
-//! let alice_keypair: KeyPair = generate_keypair(KeyVersion::Latest);
-//!
-//! let bob_shared = mix_key_exchange(&bob_keypair.private_key, &alice_keypair.public_key).expect("key exchange should not fail");
-//!
-//! let alice_shared = mix_key_exchange(&alice_keypair.private_key, &bob_keypair.public_key).expect("key exchange should not fail");
-//!
-//! // They now have a shared secret!
-//! assert_eq!(bob_shared, alice_shared);
+//! let keypair: SigningKeyPair = (keypair_bytes.as_slice()).try_into().unwrap();
+//! let public_key: SigningPublicKey = (public_bytes.as_slice()).try_into().unwrap();
 //! ```
 
 mod signing_key_v1;
@@ -69,15 +41,6 @@ use arbitrary::Arbitrary;
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::prelude::*;
 
-// /// An asymmetric keypair.
-// #[derive(Clone)]
-// pub struct SigningKeyPair {
-//     /// The private key of this pair.
-//     pub private_key: SigningPrivateKey,
-//     /// The public key of this pair.
-//     pub public_key: SigningPublicKey,
-// }
-
 /// A public key. This key can be sent in clear on unsecured channels and stored publicly.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
@@ -87,7 +50,8 @@ pub struct SigningPublicKey {
     payload: SigningPublicKeyPayload,
 }
 
-/// A private key. This key should never be sent over an insecure channel or stored unsecurely.
+/// A keypair. This should never be sent over an insecure channel or stored unsecurely.
+/// To extract the public part of the keypair, use `get_public_key()`
 #[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Debug)]
@@ -134,6 +98,17 @@ enum SigningPublicKeyPayload {
     V1(SigningKeyV1Public),
 }
 
+/// Generates a `SigningKeyPair` to use in a key exchange or to encrypt data.
+/// # Arguments
+///  * `version` - Version of the key scheme to use. Use `SigningKeyVersion::Latest` if you're not dealing with shared data.
+/// # Returns
+/// Returns a `SigningKeyPair` containing the private key and the public key.
+/// # Example
+/// ```rust
+/// use devolutions_crypto::signing_key::{generate_signing_keypair, SigningKeyVersion, SigningKeyPair};
+///
+/// let keypair: SigningKeyPair = generate_signing_keypair(SigningKeyVersion::Latest);
+/// ```
 pub fn generate_signing_keypair(version: SigningKeyVersion) -> SigningKeyPair {
     let mut header = Header::default();
 
@@ -150,6 +125,16 @@ pub fn generate_signing_keypair(version: SigningKeyVersion) -> SigningKeyPair {
 }
 
 impl SigningKeyPair {
+    /// Gets the public part `SingingPublicKey` of a `SigningKeyPair`
+    /// # Returns
+    /// Returns a `SingingPublicKey` containingthe public key.
+    /// # Example
+    /// ```rust
+    /// use devolutions_crypto::signing_key::{generate_signing_keypair, SigningKeyVersion, SigningKeyPair, SigningPublicKey};
+    ///
+    /// let keypair: SigningKeyPair = generate_signing_keypair(SigningKeyVersion::Latest);
+    /// let public: SigningPublicKey = keypair.get_public_key();
+    /// ```
     pub fn get_public_key(&self) -> SigningPublicKey {
         let mut header = Header::default();
 

@@ -1,3 +1,4 @@
+///! Signature V1: ed25519
 use super::Error;
 use super::Result;
 
@@ -33,11 +34,11 @@ impl TryFrom<&[u8]> for SignatureV1 {
     type Error = Error;
 
     fn try_from(data: &[u8]) -> Result<SignatureV1> {
-        if data.len() != 32 {
+        if data.len() != 64 {
             return Err(Error::InvalidLength);
         };
 
-        match Signature::try_from(&data[0..32]) {
+        match Signature::try_from(&data[0..64]) {
             Ok(signature) => Ok(SignatureV1 { signature }),
             Err(_) => Err(Error::InvalidData),
         }

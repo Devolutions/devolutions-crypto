@@ -1,3 +1,29 @@
+//! Module for signing and verifying data.
+//!
+//! ```rust
+//! use std::convert::TryInto;
+//!
+//! use devolutions_crypto::signing_key::{generate_signing_keypair, SigningKeyVersion, SigningKeyPair, SigningPublicKey};
+//! use devolutions_crypto::signature::{sign, Signature, SignatureVersion};
+//!
+//! let keypair: SigningKeyPair = generate_signing_keypair(SigningKeyVersion::Latest);
+//! let public_key: SigningPublicKey = keypair.get_public_key();
+//!
+//! // You can sign data using the keypair.
+//! let signature: Signature = sign(b"this is some test data", &keypair, SignatureVersion::Latest);
+//!
+//! // You can then verify if the signature is valid
+//! assert!(signature.verify(b"this is some test data", &public_key));
+//! assert!(!signature.verify(b"this is some wrong test data", &public_key));
+//!
+//! // You can serialize the signature to and from a byte array.
+//! let signature_bytes: Vec<u8> = signature.into();
+//!
+//! let signature: Signature = signature_bytes.as_slice().try_into().expect("This signature should be valid");
+//!
+//! assert!(signature.verify(b"this is some test data", &public_key));
+//! assert!(!signature.verify(b"this is some wrong test data", &public_key));
+//! ```
 mod signature_v1;
 
 use super::DataType;
@@ -40,13 +66,28 @@ enum SignaturePayload {
     V1(SignatureV1),
 }
 
-pub fn sign(data: &[u8], private_key: &SigningKeyPair, version: SignatureVersion) -> Signature {
+/// Sign some data with a keypair so that anyone knowing the public part of it can verify the signature.
+/// # Arguments
+///  * `data` - The data you want to sign
+///  * `keypair` - The keypair to use to sign the data. Note that the public part of the keypair is also required to sign the data.
+///  * `version` - Version of the signature scheme to use. Use `SignatureVersion::Latest` if you're not dealing with shared data.
+/// # Returns
+/// Returns a `Signature` that can be used to verify if the data has been tempered with or if.
+/// # Example
+/// ```rust
+/// use devolutions_crypto::signing_key::{generate_signing_keypair, SigningKeyVersion, SigningKeyPair};
+/// use devolutions_crypto::signature::{sign, Signature, SignatureVersion};
+///
+/// let keypair: SigningKeyPair = generate_signing_keypair(SigningKeyVersion::Latest);
+/// let signature: Signature = sign(b"this is some test data", &keypair, SignatureVersion::Latest);
+/// ```
+pub fn sign(data: &[u8], keypair: &SigningKeyPair, version: SignatureVersion) -> Signature {
     let mut header = Header::default();
 
     let payload = match version {
         SignatureVersion::V1 | SignatureVersion::Latest => {
             header.version = SignatureVersion::V1;
-            SignaturePayload::V1(SignatureV1::sign(data, private_key))
+            SignaturePayload::V1(SignatureV1::sign(data, keypair))
         }
     };
 
@@ -54,6 +95,22 @@ pub fn sign(data: &[u8], private_key: &SigningKeyPair, version: SignatureVersion
 }
 
 impl Signature {
+    /// Verify if the signature matches with the specified data and key.
+    /// # Arguments
+    ///  * `data` - The data that's signed.
+    ///  * `public_key` - The public part of the keypair used to sign the data.
+    /// # Returns
+    /// Returns true if the signature is valid and false if it doesn't.
+    /// # Example
+    /// ```rust
+    /// use devolutions_crypto::signing_key::{generate_signing_keypair, SigningKeyVersion, SigningKeyPair};
+    /// use devolutions_crypto::signature::{sign, Signature, SignatureVersion};
+    ///
+    /// let keypair: SigningKeyPair = generate_signing_keypair(SigningKeyVersion::Latest);
+    /// let signature: Signature = sign(b"this is some test data", &keypair, SignatureVersion::Latest);
+    ///
+    /// assert!(signature.verify(b"this is some test data", &keypair.get_public_key()));
+    /// ```
     pub fn verify(&self, data: &[u8], public_key: &SigningPublicKey) -> bool {
         match &self.payload {
             SignaturePayload::V1(x) => x.verify(data, public_key),

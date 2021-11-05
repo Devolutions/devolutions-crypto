@@ -1,3 +1,4 @@
+///! Secret Sharing V1: Shamir's Secret Sharing
 use super::Error;
 use super::Result;
 
