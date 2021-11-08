@@ -57,7 +57,7 @@ cbindgen = "0.20"
 
 [dependencies.pyo3]
 optional = true
-version = "0.14"
+version = "0.15"
 features = ["extension-module"]
 
 [target.'cfg(target_arch="wasm32")'.dependencies]

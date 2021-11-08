@@ -23,5 +23,11 @@ class TestComformity(unittest.TestCase):
     def test_asymmetric(self):
         self.assertEqual(devolutions_crypto.decrypt_asymmetric(b64decode(b'DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg=='), b64decode(b'DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ==')), b"testdata")
 
+    def test_signature(self):
+        signature = b64decode(b'DQwGAAAAAQD82uRk4sFC8vEni6pDNw/vOdN1IEDg9cAVfprWJZ/JBls9Gi61cUt5u6uBJtseNGZFT7qKLvp4NUZrAOL8FH0K')
+        public_key = b64decode(b'DQwFAAIAAQDeEvwlEigK5AXoTorhmlKP6+mbiUU2rYrVQ25JQ5xang==')
+        self.assertTrue(devolutions_crypto.verify_signature(b"this is a test", public_key, signature))
+        self.assertFalse(devolutions_crypto.verify_signature(b"this is wrong", public_key, signature))
+
 if __name__ == "__main__":
     unittest.main()
