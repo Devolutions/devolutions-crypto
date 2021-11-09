@@ -19,6 +19,14 @@ use super::key::{
 };
 use super::password_hash::{hash_password, PasswordHash, PasswordHashVersion};
 use super::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion, Share};
+use super::{
+    signature,
+    signature::{Signature, SignatureVersion},
+};
+use super::{
+    signing_key,
+    signing_key::{SigningKeyPair, SigningKeyVersion, SigningPublicKey},
+};
 
 use super::Result;
 
@@ -285,6 +293,112 @@ pub unsafe extern "C" fn DecryptAsymmetric(
     }
 }
 
+/// Sign data using a keypair to certify its authenticity.
+/// # Arguments
+///  * `data` - Pointer to the data to sign.
+///  * `data_length` - Length of the data to sign.
+///  * `keypair` - pointer to the keypair to use to sign the data.
+///  * `keypair_length` - Length of the keypair to use to sign the data.
+///  * `result` - Pointer to the buffer to write the signature to.
+///  * `result_length` - Length of the buffer to write the signature to. You can get the value by
+///                         calling SignSize() beforehand.
+/// # Returns
+/// This returns 0 if the operation worked. If there is an error, it will return the
+///     appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn Sign(
+    data: *const u8,
+    data_length: usize,
+    keypair: *const u8,
+    keypair_length: usize,
+    result: *mut u8,
+    result_length: usize,
+    version: u16,
+) -> i64 {
+    if data.is_null() || keypair.is_null() || result.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    if result_length != SignSize(version) as usize {
+        return Error::InvalidOutputLength.error_code();
+    };
+
+    let data = slice::from_raw_parts(data, data_length);
+    let keypair = slice::from_raw_parts(keypair, keypair_length);
+    let result = slice::from_raw_parts_mut(result, result_length);
+
+    match SigningKeyPair::try_from(keypair) {
+        Ok(keypair) => {
+            let version = match SignatureVersion::try_from(version) {
+                Ok(v) => v,
+                Err(_) => return Error::UnknownVersion.error_code(),
+            };
+
+            let signature: Vec<u8> = signature::sign(data, &keypair, version).into();
+
+            result[0..signature.len()].copy_from_slice(&signature);
+
+            0
+        }
+        Err(e) => e.error_code(),
+    }
+}
+
+/// Verify some data using a signature and the corresponding public key.
+/// # Arguments
+///  * `data` - Pointer to the data to verify.
+///  * `data_length` - Length of the data to verify.
+///  * `public_key` - Pointer to the public part of the keypair that was used to sign the data.
+///  * `public_key` - Length of the public part of the keypair that was used to sign the data.
+///  * `signature` - Pointer to the signature to verify.
+///  * `signature_length` - Length of the signature to verify.
+/// # Returns
+/// Returns 0 if the data, the signature or the public key is invalid or 1 if everything is valid. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn VerifySignature(
+    data: *const u8,
+    data_length: usize,
+    public_key: *const u8,
+    public_key_length: usize,
+    signature: *const u8,
+    signature_length: usize,
+) -> i64 {
+    if data.is_null() || public_key.is_null() || signature.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let data = slice::from_raw_parts(data, data_length);
+    let public_key = slice::from_raw_parts(public_key, public_key_length);
+    let signature = slice::from_raw_parts(signature, signature_length);
+
+    match SigningPublicKey::try_from(public_key) {
+        Ok(public_key) => match Signature::try_from(signature) {
+            Ok(signature) => {
+                if signature.verify(data, &public_key) {
+                    1
+                } else {
+                    0
+                }
+            }
+            Err(e) => e.error_code(),
+        },
+        Err(e) => e.error_code(),
+    }
+}
+
+/// Get the size of the resulting signature.
+/// # Returns
+/// Returns the length of the signature to input as `result_length` in `Sign()`.
+#[no_mangle]
+pub extern "C" fn SignSize(_version: u16) -> i64 {
+    8 + 64 // header + signature
+}
+
 /// Hash a password using a high-cost algorithm.
 /// # Arguments
 ///  * `password` - Pointer to the password to hash.
@@ -414,6 +528,85 @@ pub unsafe extern "C" fn GenerateKeyPair(
     0
 }
 
+/// Generate a key pair to sign and verify data with.
+/// # Arguments
+///  * `keypair` - Pointer to the buffer to write the keypair to.
+///  * `keypair_length` - Length of the buffer to write the keypair to.
+///                         You can get the value by calling `GenerateSigningKeyPairSize()` beforehand.
+///  * `version` - Version to use. Use 0 for the latest one.
+/// # Returns
+/// Returns 0 if the generation worked. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn GenerateSigningKeyPair(
+    keypair: *mut u8,
+    keypair_length: usize,
+    version: u16,
+) -> i64 {
+    if keypair.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    if keypair_length != GenerateSigningKeyPairSize() as usize {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    let keypair = slice::from_raw_parts_mut(keypair, keypair_length);
+
+    let version = match SigningKeyVersion::try_from(version) {
+        Ok(v) => v,
+        Err(_) => return Error::UnknownVersion.error_code(),
+    };
+
+    let generated_keypair = signing_key::generate_signing_keypair(version);
+
+    let mut keypair_bytes: Vec<u8> = generated_keypair.into();
+
+    keypair[0..keypair_bytes.len()].copy_from_slice(&keypair_bytes);
+
+    keypair_bytes.zeroize();
+    0
+}
+
+/// Get the public part of a keypair used to sign data.
+/// # Arguments
+///  * `keypair` - Pointer to the buffer containing the keypair.
+///  * `keypair_length` - Length of the buffer containing the keypair.
+///  * `public` - Pointer to the buffer to write the public key to.
+///  * `public_length` - Length of the buffer to write the public key to.
+///                         You can get the value by calling `GetSigningPublicKeySize()` beforehand.
+#[no_mangle]
+pub unsafe extern "C" fn GetSigningPublicKey(
+    keypair: *const u8,
+    keypair_length: usize,
+    public: *mut u8,
+    public_length: usize,
+) -> i64 {
+    if keypair.is_null() || public.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    if public_length != GetSigningPublicKeySize() as usize {
+        return Error::InvalidOutputLength.error_code();
+    };
+
+    let keypair = slice::from_raw_parts(keypair, keypair_length);
+    let public = slice::from_raw_parts_mut(public, public_length);
+
+    let keypair = SigningKeyPair::try_from(keypair);
+    match keypair {
+        Ok(keypair) => {
+            let public_key: Vec<u8> = keypair.get_public_key().into();
+            public[..public_key.len()].copy_from_slice(&public_key);
+
+            0
+        }
+        Err(e) => e.error_code(),
+    }
+}
+
 /// Get the size of the keys in the key exchange key pair.
 /// # Returns
 /// Returns the length of the keys to input as `private_length`
@@ -421,6 +614,24 @@ pub unsafe extern "C" fn GenerateKeyPair(
 #[no_mangle]
 pub extern "C" fn GenerateKeyPairSize() -> i64 {
     8 + 32 // header + key length
+}
+
+/// Get the size of the keypair used for signing.
+/// # Returns
+/// Returns the length of the keypair to input as `keypair_length`
+///   in `GenerateSigningKeyPair()`.
+#[no_mangle]
+pub extern "C" fn GenerateSigningKeyPairSize() -> i64 {
+    8 + 64 // header + keypair length
+}
+
+/// Get the size of the public key used for signing.
+/// # Returns
+/// Returns the length of the public key to input as `public_length`
+///   in `GetSigningPublicKey()`.
+#[no_mangle]
+pub extern "C" fn GetSigningPublicKeySize() -> i64 {
+    8 + 32 // header + public key length
 }
 
 /// Get the size of the keys in the derived key pair.
