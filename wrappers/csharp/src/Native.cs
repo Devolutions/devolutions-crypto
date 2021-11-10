@@ -2,7 +2,6 @@ namespace Devolutions.Cryptography
 {
     using System;
     using System.Runtime.InteropServices;
-
 #if !DEBUG
     using System.Reflection;
 #endif
@@ -433,14 +432,84 @@ namespace Devolutions.Cryptography
             return ScryptSimpleSize86();
         }
 
-        internal static long VersionNative(byte[] output, UIntPtr output_length)
+        internal static long Sign(byte[] data, UIntPtr dataLength, byte[] keypair, UIntPtr keypairLength, byte[] result, UIntPtr resultLength, ushort version)
         {
             if (Environment.Is64BitProcess)
             {
-                return Version64(output, output_length);
+                return Sign64(data, dataLength, keypair, keypairLength, result, resultLength, version);
             }
 
-            return Version86(output, output_length);
+            return Sign86(data, dataLength, keypair, keypairLength, result, resultLength, version);
+        }
+
+        internal static long SignSize(ushort version)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return SignSize64(version);
+            }
+
+            return SignSize86(version);
+        }
+
+        internal static long VerifySignature(byte[] data, UIntPtr dataLength, byte[] publicKey, UIntPtr publicKeyLength, byte[] signature, UIntPtr signatureLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return VerifySignature64(data, dataLength, publicKey, publicKeyLength, signature, signatureLength);
+            }
+
+            return VerifySignature86(data, dataLength, publicKey, publicKeyLength, signature, signatureLength);
+        }
+
+        internal static long VersionNative(byte[] output, UIntPtr outputLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return Version64(output, outputLength);
+            }
+
+            return Version86(output, outputLength);
+        }
+
+        internal static long GenerateSigningKeyPair(byte[] keypair, UIntPtr keypairLength, ushort version)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return GenerateSigningKeyPair64(keypair, keypairLength, version);
+            }
+
+            return GenerateSigningKeyPair86(keypair, keypairLength, version);
+        }
+
+        internal static long GenerateSigningKeyPairSize(ushort version)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return GenerateSigningKeyPairSize64(version);
+            }
+
+            return GenerateSigningKeyPairSize86(version);
+        }
+
+        internal static long GetSigningPublicKey(byte[] keypair, UIntPtr keypairLength, byte[] publicKey, UIntPtr publicKeyLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return GetSigningPublicKey64(keypair, keypairLength, publicKey, publicKeyLength);
+            }
+
+            return GetSigningPublicKey86(keypair, keypairLength, publicKey, publicKeyLength);
+        }
+
+        internal static long GetSigningPublicKeySize(byte[] keypair, UIntPtr keypairLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return GetSigningPublicKeySize64(keypair, keypairLength);
+            }
+
+            return GetSigningPublicKeySize86(keypair, keypairLength);
         }
 
         internal static long VersionSizeNative()
@@ -510,16 +579,42 @@ namespace Devolutions.Cryptography
         private static extern long DecryptAsymmetricNative86(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] result, UIntPtr resultLength);
 
         [DllImport(LibName86, EntryPoint = "DeriveKeyArgon2", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DeriveKeyArgon2Native86(byte[] key, UIntPtr keyLength, byte[] argon2Parameters, UIntPtr argon2ParametersLength, byte[] result, UIntPtr resultLength);
+        private static extern long DeriveKeyArgon2Native86(
+            byte[] key,
+            UIntPtr keyLength,
+            byte[] argon2Parameters,
+            UIntPtr argon2ParametersLength,
+            byte[] result,
+            UIntPtr resultLength);
 
         [DllImport(LibName64, EntryPoint = "DeriveKeyArgon2", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DeriveKeyArgon2Native64(byte[] key, UIntPtr keyLength, byte[] argon2Parameters, UIntPtr argon2ParametersLength, byte[] result, UIntPtr resultLength);
+        private static extern long DeriveKeyArgon2Native64(
+            byte[] key,
+            UIntPtr keyLength,
+            byte[] argon2Parameters,
+            UIntPtr argon2ParametersLength,
+            byte[] result,
+            UIntPtr resultLength);
 
         [DllImport(LibName86, EntryPoint = "DeriveKeyPbkdf2", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DeriveKeyPbkdf2Native86(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, System.UInt32 iterations, byte[] result, UIntPtr resultLength);
+        private static extern long DeriveKeyPbkdf2Native86(
+            byte[] key,
+            UIntPtr keyLength,
+            byte[] salt,
+            UIntPtr saltLength,
+            System.UInt32 iterations,
+            byte[] result,
+            UIntPtr resultLength);
 
         [DllImport(LibName64, EntryPoint = "DeriveKeyPbkdf2", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DeriveKeyPbkdf2Native64(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, System.UInt32 iterations, byte[] result, UIntPtr resultLength);
+        private static extern long DeriveKeyPbkdf2Native64(
+            byte[] key,
+            UIntPtr keyLength,
+            byte[] salt,
+            UIntPtr saltLength,
+            System.UInt32 iterations,
+            byte[] result,
+            UIntPtr resultLength);
 
         [DllImport(LibName86, EntryPoint = "DeriveKeyPair", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DeriveKeyPairNative86(
@@ -666,10 +761,28 @@ namespace Devolutions.Cryptography
         private static extern long ValidateHeader64(byte[] data, UIntPtr dataLength, ushort dataType);
 
         [DllImport(LibName86, EntryPoint = "ScryptSimple", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long ScryptSimple86(byte[] password, UIntPtr passwordLength, byte[] salt, UIntPtr saltLength, byte logN,  uint r, uint p, byte[] output, UIntPtr outputLength);
+        private static extern long ScryptSimple86(
+            byte[] password,
+            UIntPtr passwordLength,
+            byte[] salt,
+            UIntPtr saltLength,
+            byte logN,
+            uint r,
+            uint p,
+            byte[] output,
+            UIntPtr outputLength);
 
         [DllImport(LibName64, EntryPoint = "ScryptSimple", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long ScryptSimple64(byte[] password, UIntPtr passwordLength, byte[] salt, UIntPtr saltLength, byte logN,  uint r, uint p, byte[] output, UIntPtr outputLength);
+        private static extern long ScryptSimple64(
+            byte[] password,
+            UIntPtr passwordLength,
+            byte[] salt,
+            UIntPtr saltLength,
+            byte logN,
+            uint r,
+            uint p,
+            byte[] output,
+            UIntPtr outputLength);
 
         [DllImport(LibName86, EntryPoint = "ScryptSimpleSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long ScryptSimpleSize86();
@@ -677,11 +790,53 @@ namespace Devolutions.Cryptography
         [DllImport(LibName64, EntryPoint = "ScryptSimpleSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long ScryptSimpleSize64();
 
+        [DllImport(LibName64, EntryPoint = "Sign", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long Sign64(byte[] data, UIntPtr dataLength, byte[] keypair, UIntPtr keypairLength, byte[] result, UIntPtr resultLength, ushort version);
+
+        [DllImport(LibName86, EntryPoint = "Sign", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long Sign86(byte[] data, UIntPtr dataLength, byte[] keypair, UIntPtr keypairLength, byte[] result, UIntPtr resultLength, ushort version);
+
+        [DllImport(LibName64, EntryPoint = "SignSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long SignSize64(ushort version);
+
+        [DllImport(LibName86, EntryPoint = "SignSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long SignSize86(ushort version);
+
+        [DllImport(LibName64, EntryPoint = "VerifySignature", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long VerifySignature64(byte[] data, UIntPtr dataLength, byte[] publicKey, UIntPtr publicKeyLength, byte[] signature, UIntPtr signatureLength);
+
+        [DllImport(LibName86, EntryPoint = "VerifySignature", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long VerifySignature86(byte[] data, UIntPtr dataLength, byte[] publicKey, UIntPtr publicKeyLength, byte[] signature, UIntPtr signatureLength);
+
+        [DllImport(LibName64, EntryPoint = "GenerateSigningKeyPair", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateSigningKeyPair64(byte[] keypair, UIntPtr keypairLength, ushort version);
+
+        [DllImport(LibName86, EntryPoint = "GenerateSigningKeyPair", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateSigningKeyPair86(byte[] keypair, UIntPtr keypairLength, ushort version);
+
+        [DllImport(LibName64, EntryPoint = "GenerateSigningKeyPairSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateSigningKeyPairSize64(ushort version);
+
+        [DllImport(LibName86, EntryPoint = "GenerateSigningKeyPairSize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GenerateSigningKeyPairSize86(ushort version);
+
+        [DllImport(LibName64, EntryPoint = "GetSigningPublicKey", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GetSigningPublicKey64(byte[] keypair, UIntPtr keypairLength, byte[] publicKey, UIntPtr publicKeyLength);
+
+        [DllImport(LibName86, EntryPoint = "GetSigningPublicKey", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GetSigningPublicKey86(byte[] keypair, UIntPtr keypairLength, byte[] publicKey, UIntPtr publicKeyLength);
+
+        [DllImport(LibName64, EntryPoint = "GetSigningPublicKeySize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GetSigningPublicKeySize64(byte[] keypair, UIntPtr keypairLength);
+
+        [DllImport(LibName86, EntryPoint = "GetSigningPublicKeySize", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long GetSigningPublicKeySize86(byte[] keypair, UIntPtr keypairLength);
+
         [DllImport(LibName86, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long Version86(byte[] output, UIntPtr output_length);
+        private static extern long Version86(byte[] output, UIntPtr outputLength);
 
         [DllImport(LibName64, EntryPoint = "Version", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long Version64(byte[] output, UIntPtr output_length);
+        private static extern long Version64(byte[] output, UIntPtr outputLength);
 
         [DllImport(LibName86, EntryPoint = "VersionSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long VersionSize86();

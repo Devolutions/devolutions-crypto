@@ -116,6 +116,27 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName, EntryPoint = "ScryptSimpleSize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long ScryptSimpleSize();
+
+        [DllImport(LibName, EntryPoint = "Sign", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long Sign(byte[] data, UIntPtr dataLength, byte[] keypair, UIntPtr keypairLength, byte[] result, UIntPtr resultLength, ushort version);
+
+        [DllImport(LibName, EntryPoint = "SignSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long SignSize(ushort version);
+
+        [DllImport(LibName, EntryPoint = "VerifySignature", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long VerifySignature(byte[] data, UIntPtr dataLength, byte[] publicKey, UIntPtr publicKeyLength, byte[] signature, UIntPtr signatureLength);
+
+        [DllImport(LibName, EntryPoint = "GenerateSigningKeyPair", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GenerateSigningKeyPair(byte[] keypair, UIntPtr keypairLength, ushort version);
+
+        [DllImport(LibName, EntryPoint = "GenerateSigningKeyPairSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GenerateSigningKeyPairSize(ushort version);
+
+        [DllImport(LibName, EntryPoint = "GetSigningPublicKey", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GetSigningPublicKey(byte[] keypair, UIntPtr keypairLength, byte[] publicKey, UIntPtr publicKeyLength);
+
+        [DllImport(LibName, EntryPoint = "GetSigningPublicKeySize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GetSigningPublicKeySize(byte[] keypair, UIntPtr keypairLength);
     }
 }
 #endif

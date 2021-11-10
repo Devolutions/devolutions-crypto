@@ -4,6 +4,7 @@ namespace Devolutions.Cryptography
     using System.Runtime.InteropServices;
 
     using Devolutions.Cryptography.Argon2;
+    using Devolutions.Cryptography.Signature;
 
     public static class Managed
     {
@@ -18,6 +19,12 @@ namespace Devolutions.Cryptography
             Justification = "Preprocessor directive")]
         private const CipherTextVersion CIPHERTEXT_VERSION = CipherTextVersion.Latest;
 #endif
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "StyleCop.CSharp.NamingRules",
+            "SA1310:Field names should not contain underscore",
+            Justification = "Preprocessor directive")]
+        private const SignatureVersion SIGNATURE_VERSION = SignatureVersion.Latest;
 
         /// <summary>
         /// Performs a key exchange.
@@ -457,7 +464,11 @@ namespace Devolutions.Cryptography
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string EncryptBase64WithPasswordAsBase64String(string b64data, string password, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
+        public static string EncryptBase64WithPasswordAsBase64String(
+            string b64data,
+            string password,
+            uint iterations = 10000,
+            CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (string.IsNullOrEmpty(b64data))
             {
@@ -632,6 +643,94 @@ namespace Devolutions.Cryptography
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Sign data using a keypair to certify its authenticity.
+        /// </summary>
+        /// <param name="data">The data to sign.</param>
+        /// <param name="keypair">The keypair to use to sign the data.</param>
+        /// <param name="version">The signature version to use. (Latest is recommended).</param>
+        /// <returns>Returns the signature result as byte array.</returns>
+        public static byte[] Sign(byte[] data, SigningKeyPair keypair, SignatureVersion version = SIGNATURE_VERSION)
+        {
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+
+            if (keypair == null)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            byte[] keypairNative = keypair.ToByteArray();
+
+            byte[] result = new byte[Native.SignSize((ushort)version)];
+
+            long resultLength = Native.Sign(data, (UIntPtr)data.Length, keypairNative, (UIntPtr)keypairNative.Length, result, (UIntPtr)result.Length, (ushort)version);
+
+            if (resultLength < 0)
+            {
+                Utils.HandleError(resultLength);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Verify some data using a signature and the corresponding public key.
+        /// </summary>
+        /// <param name="data">The data to verify.</param>
+        /// <param name="publicKey">The public key that was used to sign the data.</param>
+        /// <param name="signature">The signature to verify.</param>
+        /// <returns>Returns false if the data, the signature or the public key is invalid or true if everything is valid.</returns>
+        public static bool VerifySignature(byte[] data, SigningPublicKey publicKey, byte[] signature)
+        {
+            if (data == null || data.Length == 0)
+            {
+                return false;
+            }
+
+            if (publicKey == null || signature == null || signature.Length == 0)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            byte[] publicKeyNative = publicKey.ToByteArray();
+
+            long res = Native.VerifySignature(data, (UIntPtr)data.Length, publicKeyNative, (UIntPtr)publicKeyNative.Length, signature, (UIntPtr)signature.Length);
+
+            if (res == 0)
+            {
+                return false;
+            }
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Generate a key pair to sign and verify data with.
+        /// </summary>
+        /// <param name="version">The signature version to use. (Latest is recommended).</param>
+        /// <returns>Returns a signing keypair.</returns>
+        public static SigningKeyPair GenerateSigningKeyPair(SignatureVersion version = SIGNATURE_VERSION)
+        {
+            byte[] keypairNative = new byte[Native.GenerateSigningKeyPairSize((ushort)version)];
+
+            long res = Native.GenerateSigningKeyPair(keypairNative, (UIntPtr)keypairNative.Length, (ushort)version);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return SigningKeyPair.FromByteArray(keypairNative);
         }
 
         /// <summary>

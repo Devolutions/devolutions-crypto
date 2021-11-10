@@ -72,7 +72,7 @@ impl TryFrom<&[u8]> for SigningKeyV1Pair {
             return Err(Error::InvalidLength);
         }
 
-        match Keypair::from_bytes(&key) {
+        match Keypair::from_bytes(key) {
             Ok(k) => Ok(Self { keypair: k }),
             Err(_) => Err(Error::InvalidData),
         }
@@ -87,7 +87,7 @@ impl TryFrom<&[u8]> for SigningKeyV1Public {
             return Err(Error::InvalidLength);
         }
 
-        match PublicKey::from_bytes(&key) {
+        match PublicKey::from_bytes(key) {
             Ok(k) => Ok(Self { key: k }),
             Err(_) => Err(Error::InvalidData),
         }

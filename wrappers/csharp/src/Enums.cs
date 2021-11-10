@@ -27,6 +27,21 @@ namespace Devolutions.Cryptography
         /// </summary>
         [Obsolete("This value has been deprecated. Use DataType.PasswordHash instead.")]
         Hash = 3,
+
+        /// <summary>
+        /// A wrapped share. Used for secret sharing scheme.
+        /// </summary>
+        Share = 4,
+
+        /// <summary>
+        /// A wrapped key used to sign data.
+        /// </summary>
+        SigningKey = 5,
+
+        /// <summary>
+        /// A wrapped signature
+        /// </summary>
+        Signature = 6
     }
 
     /// <summary>
@@ -54,6 +69,23 @@ namespace Devolutions.Cryptography
         /// XChaCha20Poly1305 with DeriveKey length fix
         /// </summary>
         V2_5 = 2,
+    }
+
+    /// <summary>
+    /// Devolutions Crypto Signature Version.
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "V2_5 is not version 25")]
+    public enum SignatureVersion
+    {
+        /// <summary>
+        /// This is the latest version. (Currently ed25519)
+        /// </summary>
+        Latest = 0,
+
+        /// <summary>
+        /// ed25519
+        /// </summary>
+        V1 = 1,
     }
 
     /// <summary>

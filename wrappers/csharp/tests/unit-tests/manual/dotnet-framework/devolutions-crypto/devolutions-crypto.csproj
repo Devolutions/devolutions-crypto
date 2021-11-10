@@ -46,42 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\..\..\src\Argon2Parameters.cs">
-      <Link>Argon2Parameters.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\DevolutionsCryptoException.cs">
-      <Link>DevolutionsCryptoException.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\Enums.Argon2.cs">
-      <Link>Enums.Argon2.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\Enums.cs">
-      <Link>Enums.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\KeyPair.cs">
-      <Link>KeyPair.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\Managed.cs">
-      <Link>Managed.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\Native.cs">
-      <Link>Native.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\Native.Xamarin.cs">
-      <Link>Native.Xamarin.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\NativeError.cs">
-      <Link>NativeError.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\Utils.cs">
-      <Link>Utils.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\ILegacyDecryptor.cs">
-      <Link>ILegacyDecryptor.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\src\ILegacyHasher.cs">
-      <Link>ILegacyHasher.cs</Link>
-    </Compile>
+    <Compile Include="..\..\..\..\..\src\*.cs"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">

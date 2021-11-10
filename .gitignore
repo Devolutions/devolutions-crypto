@@ -3,7 +3,11 @@ obj
 packages
 .vs
 *.nupkg
+*.user
 wrappers/csharp/nuget/dotnet/package/*
 wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/package/*
 wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/package/*
 wrappers/csharp/nuget/macOS/Devolutions.Crypto.Mac/package/*
+wrappers/csharp/windows/bin
+devolutions-crypto-cli/target
+devolutions-crypto-wayk/target

@@ -9,8 +9,12 @@ namespace Devolutions.Crypto.Tests
 #else
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
+    using System;
+    using System.Text;
+
     using Devolutions.Cryptography;
     using Devolutions.Cryptography.Argon2;
+    using Devolutions.Cryptography.Signature;
 
     [TestClass]
     public class Conformity
@@ -117,6 +121,20 @@ namespace Devolutions.Crypto.Tests
                 Utils.DecodeFromBase64("DQwDAAAAAQAKAAAAmH1BBckBJYDD0xfiwkAk1xwKgw8a57YQT0Igm+Faa9LFamTeEJgqn/qHc2R/8XEyK2iLPkVy+IErdGLLtLKJ2g=="));
 
             Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void SignatureV1()
+        {
+            byte[] data = Encoding.UTF8.GetBytes("this is a test");
+            byte[] wrong_data = Encoding.UTF8.GetBytes("this is wrong");
+
+            SigningPublicKey publicKey = SigningPublicKey.FromByteArray(Convert.FromBase64String("DQwFAAIAAQDeEvwlEigK5AXoTorhmlKP6+mbiUU2rYrVQ25JQ5xang=="));
+
+            byte[] signature = Convert.FromBase64String("DQwGAAAAAQD82uRk4sFC8vEni6pDNw/vOdN1IEDg9cAVfprWJZ/JBls9Gi61cUt5u6uBJtseNGZFT7qKLvp4NUZrAOL8FH0K");
+
+            Assert.IsTrue(Managed.VerifySignature(data, publicKey, signature));
+            Assert.IsFalse(Managed.VerifySignature(wrong_data, publicKey, signature));
         }
     }
 }

@@ -111,6 +111,20 @@ int64_t DecryptAsymmetric(const uint8_t *data,
                           uint8_t *result,
                           uintptr_t result_length);
 
+/// Sign data using a keypair to certify its authenticity.
+/// # Arguments
+///  * `data` - Pointer to the data to sign.
+///  * `data_length` - Length of the data to sign.
+///  * `keypair` - pointer to the keypair to use to sign the data.
+///  * `keypair_length` - Length of the keypair to use to sign the data.
+///  * `result` - Pointer to the buffer to write the signature to.
+///  * `result_length` - Length of the buffer to write the signature to. You can get the value by
+///                         calling SignSize() beforehand.
+/// # Returns
+/// This returns 0 if the operation worked. If there is an error, it will return the
+///     appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 int64_t Sign(const uint8_t *data,
              uintptr_t data_length,
              const uint8_t *keypair,
@@ -119,6 +133,29 @@ int64_t Sign(const uint8_t *data,
              uintptr_t result_length,
              uint16_t version);
 
+/// Verify some data using a signature and the corresponding public key.
+/// # Arguments
+///  * `data` - Pointer to the data to verify.
+///  * `data_length` - Length of the data to verify.
+///  * `public_key` - Pointer to the public part of the keypair that was used to sign the data.
+///  * `public_key` - Length of the public part of the keypair that was used to sign the data.
+///  * `signature` - Pointer to the signature to verify.
+///  * `signature_length` - Length of the signature to verify.
+/// # Returns
+/// Returns 0 if the data, the signature or the public key is invalid or 1 if everything is valid. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+int64_t VerifySignature(const uint8_t *data,
+                        uintptr_t data_length,
+                        const uint8_t *public_key,
+                        uintptr_t public_key_length,
+                        const uint8_t *signature,
+                        uintptr_t signature_length);
+
+/// Get the size of the resulting signature.
+/// # Returns
+/// Returns the length of the signature to input as `result_length` in `Sign()`.
 int64_t SignSize(uint16_t _version);
 
 /// Hash a password using a high-cost algorithm.
@@ -218,13 +255,13 @@ int64_t GenerateKeyPairSize();
 /// # Returns
 /// Returns the length of the keypair to input as `keypair_length`
 ///   in `GenerateSigningKeyPair()`.
-int64_t GenerateSigningKeyPairSize();
+int64_t GenerateSigningKeyPairSize(uint16_t _version);
 
 /// Get the size of the public key used for signing.
 /// # Returns
 /// Returns the length of the public key to input as `public_length`
 ///   in `GetSigningPublicKey()`.
-int64_t GetSigningPublicKeySize();
+int64_t GetSigningPublicKeySize(const uint8_t *_keypair, uintptr_t _keypair_length);
 
 /// Get the size of the keys in the derived key pair.
 /// # Returns

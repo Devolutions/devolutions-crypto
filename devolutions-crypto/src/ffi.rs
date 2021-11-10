@@ -549,7 +549,7 @@ pub unsafe extern "C" fn GenerateSigningKeyPair(
         return Error::NullPointer.error_code();
     };
 
-    if keypair_length != GenerateSigningKeyPairSize() as usize {
+    if keypair_length != GenerateSigningKeyPairSize(version) as usize {
         return Error::InvalidOutputLength.error_code();
     }
 
@@ -588,7 +588,7 @@ pub unsafe extern "C" fn GetSigningPublicKey(
         return Error::NullPointer.error_code();
     };
 
-    if public_length != GetSigningPublicKeySize() as usize {
+    if public_length != GetSigningPublicKeySize(keypair, keypair_length) as usize {
         return Error::InvalidOutputLength.error_code();
     };
 
@@ -621,7 +621,7 @@ pub extern "C" fn GenerateKeyPairSize() -> i64 {
 /// Returns the length of the keypair to input as `keypair_length`
 ///   in `GenerateSigningKeyPair()`.
 #[no_mangle]
-pub extern "C" fn GenerateSigningKeyPairSize() -> i64 {
+pub extern "C" fn GenerateSigningKeyPairSize(_version: u16) -> i64 {
     8 + 64 // header + keypair length
 }
 
@@ -630,7 +630,7 @@ pub extern "C" fn GenerateSigningKeyPairSize() -> i64 {
 /// Returns the length of the public key to input as `public_length`
 ///   in `GetSigningPublicKey()`.
 #[no_mangle]
-pub extern "C" fn GetSigningPublicKeySize() -> i64 {
+pub extern "C" fn GetSigningPublicKeySize(_keypair: *const u8, _keypair_length: usize) -> i64 {
     8 + 32 // header + public key length
 }
 
