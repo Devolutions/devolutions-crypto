@@ -14,6 +14,10 @@ Cryptographic library used in Devolutions products. It is made to be fast, easy 
     * [Key Exchange](#key-exchange)
 * [PasswordHash Module](#passwordhash)
 * [SecretSharing Module](#secretsharing)
+* [Signature Module](#signature)
+    * [Generating Key Pairs](#generating-key-pairs)
+    * [Signing data](#signing-data)
+    * [Signature Verification](#verifying-the-signature)
 * [Utils Module](#utils)
     * [Key Generation](#key-generation)
     * [Key Derivation](#key-derivation)
@@ -174,6 +178,29 @@ let shares: Vec<Share> = generate_shared_key(5, 3, 32, SecretSharingVersion::Lat
 
 assert_eq!(shares.len(), 5);
 let key = join_shares(&shares[2..5]).expect("joining shouldn't fail with the right shares");
+```
+
+## Signature
+This module is used to sign data using a keypair to certify its authenticity. 
+
+###  Generating Key Pairs
+```rust
+use devolutions_crypto::signing_key::{generate_signing_keypair, SigningKeyVersion, SigningKeyPair, SigningPublicKey};
+
+let keypair: SigningKeyPair = generate_signing_keypair(SigningKeyVersion::Latest);
+```
+### Signing Data
+```rust
+use devolutions_crypto::signature::{sign, Signature, SignatureVersion};
+
+let signature: Signature = sign(b"this is some test data", &keypair, SignatureVersion::Latest);
+```
+
+### Verifying the signature
+```rust
+use devolutions_crypto::signature::{sign, Signature, SignatureVersion};
+
+assert!(signature.verify(b"this is some test data", &public_key));
 ```
 
 ## Utils
