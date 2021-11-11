@@ -2,7 +2,7 @@ import unittest
 import devolutions_crypto
 from base64 import b64encode, b64decode
 
-class TestSymmetric(unittest.TestCase):
+class TestSignature(unittest.TestCase):
     def test_signature(self):
         data = b"this is some test data"
         keypair = devolutions_crypto.generate_signing_keypair()

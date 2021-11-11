@@ -23,9 +23,9 @@ pub enum DataType {
     PasswordHash = 3,
     /// A wrapped share. Used for secret sharing scheme.
     Share = 4,
-    /// A wrapped signature.
+    /// A wrapped key used to sign data.
     SigningKey = 5,
-    /// A wrapped key used to sign data
+    /// A wrapped signature.
     Signature = 6,
 }
 

@@ -701,9 +701,9 @@ namespace Devolutions.Cryptography
 
             long res = Native.VerifySignature(data, (UIntPtr)data.Length, publicKeyNative, (UIntPtr)publicKeyNative.Length, signature, (UIntPtr)signature.Length);
 
-            if (res == 0)
+            if (res == 1)
             {
-                return false;
+                return true;
             }
 
             if (res < 0)
@@ -711,7 +711,7 @@ namespace Devolutions.Cryptography
                 Utils.HandleError(res);
             }
 
-            return true;
+            return false;
         }
 
         /// <summary>
