@@ -224,13 +224,16 @@ pub mod ciphertext;
 pub mod key;
 pub mod password_hash;
 pub mod secret_sharing;
+pub mod signature;
+pub mod signing_key;
 pub mod utils;
 
-use enums::{CiphertextSubtype, KeySubtype, PasswordHashSubtype, ShareSubtype};
+use enums::{CiphertextSubtype, KeySubtype, PasswordHashSubtype, ShareSubtype, SignatureSubtype};
 pub use header::{Header, HeaderType};
 
 pub use enums::{
     CiphertextVersion, DataType, KeyVersion, PasswordHashVersion, SecretSharingVersion,
+    SignatureVersion, SigningKeyVersion,
 };
 
 pub use argon2parameters::Argon2Parameters;

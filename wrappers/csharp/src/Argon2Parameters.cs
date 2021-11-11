@@ -3,13 +3,23 @@ namespace Devolutions.Cryptography.Argon2
     using System;
     using System.IO;
 
+    /// <summary>
+    /// Used to define the Argon2 parameters when deriving data.
+    /// </summary>
     public class Argon2Parameters
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Argon2Parameters"/> class.
+        /// </summary>
         public Argon2Parameters()
         {
             this.InitializeParameters();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Argon2Parameters"/> class.
+        /// </summary>
+        /// <param name="defaultParameters">Use the standard Argon2 parameters</param>
         internal Argon2Parameters(bool defaultParameters = true)
         {
             if (defaultParameters)
@@ -18,6 +28,9 @@ namespace Devolutions.Cryptography.Argon2
             }
         }
 
+        /// <summary>
+        /// Gets the size of the raw Argon2 data.
+        /// </summary>
         public static long NativeSize
         {
             get
@@ -26,22 +39,49 @@ namespace Devolutions.Cryptography.Argon2
             }
         }
 
+        /// <summary>
+        /// Gets or sets the number of iterations over the memory.
+        /// </summary>
         public uint Iterations { get; set; }
 
+        /// <summary>
+        /// Gets or sets the number of threads to use.
+        /// </summary>
         public uint Lanes { get; set; }
 
+        /// <summary>
+        /// Gets or sets the hash length.
+        /// </summary>
         public uint Length { get; set; }
 
+        /// <summary>
+        /// Gets or sets the memory used by the algorithm.
+        /// </summary>
         public uint Memory { get; set; }
 
+        /// <summary>
+        /// Gets or sets the associated data.
+        /// </summary>
         internal byte[] AssociatedData { get; set; }
 
+        /// <summary>
+        /// Gets or sets the devolutions crypto version.
+        /// </summary>
         internal uint DevolutionsCryptoVersion { get; set; }
 
+        /// <summary>
+        /// Gets or sets the salt used by the algorithm.
+        /// </summary>
         internal byte[] Salt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Argon2 variant used by the algorithm.
+        /// </summary>
         internal Variant Variant { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Argon2 version.
+        /// </summary>
         internal Version Version { get; set; }
 
         /// <summary>
@@ -271,6 +311,9 @@ namespace Devolutions.Cryptography.Argon2
             }
         }
 
+        /// <summary>
+        /// Initialise the default recommended parameters.
+        /// </summary>
         private void InitializeParameters()
         {
             Argon2Parameters parameters = Managed.GetDefaultArgon2Parameters();

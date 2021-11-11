@@ -13,6 +13,7 @@ namespace Devolutions.Crypto.Tests
 
     using Devolutions.Cryptography;
     using Devolutions.Cryptography.Argon2;
+    using Devolutions.Cryptography.Signature;
 
     [TestClass]
     public class TestManaged
@@ -218,6 +219,78 @@ namespace Devolutions.Crypto.Tests
             byte[] bobMix = Managed.MixKeyExchange(bob.PrivateKey, alice.PublicKey);
             byte[] aliceMix = Managed.MixKeyExchange(alice.PrivateKey, bob.PublicKey);
             Assert.AreEqual(Convert.ToBase64String(bobMix), Convert.ToBase64String(aliceMix));
+        }
+
+        [TestMethod]
+        public void GenerateSigningKeyPair()
+        {
+            SigningKeyPair keypair = Managed.GenerateSigningKeyPair();
+            byte[] keypairRaw = keypair.ToByteArray();
+
+            Assert.AreEqual(keypairRaw.Length, 72);
+        }
+
+        [TestMethod]
+        public void Sign()
+        {
+            SigningKeyPair keypair = SigningKeyPair.FromByteArray(Convert.FromBase64String(TestData.SigningKeyPairb64));
+            byte[] data = System.Text.Encoding.UTF8.GetBytes(TestData.SignTesting);
+
+            byte[] signature = Managed.Sign(data, keypair);
+
+            Assert.AreEqual(Convert.ToBase64String(signature), TestData.SignedTestingb64);
+        }
+
+        [TestMethod]
+        public void VerifySignature()
+        {
+            byte[] signature = Convert.FromBase64String(TestData.SignedTestingb64);
+
+            SigningKeyPair keypair = SigningKeyPair.FromByteArray(Convert.FromBase64String(TestData.SigningKeyPairb64));
+            SigningPublicKey pubkey = SigningPublicKey.FromByteArray(Convert.FromBase64String(TestData.SigningPublicKeyb64));
+
+            bool res = Managed.VerifySignature(System.Text.Encoding.UTF8.GetBytes(TestData.SignTesting), pubkey, signature);
+
+            Assert.AreEqual(res, true);
+        }
+
+        [TestMethod]
+        public void VerifySignature_FailBadData()
+        {
+            byte[] signature = Convert.FromBase64String(TestData.SignedTestingb64);
+
+            SigningKeyPair keypair = SigningKeyPair.FromByteArray(Convert.FromBase64String(TestData.SigningKeyPairb64));
+            SigningPublicKey pubkey = SigningPublicKey.FromByteArray(Convert.FromBase64String(TestData.SigningPublicKeyb64));
+
+            bool res = Managed.VerifySignature(System.Text.Encoding.UTF8.GetBytes("bad data"), pubkey, signature);
+
+            Assert.AreEqual(res, false);
+        }
+
+        [TestMethod]
+        public void VerifySignature_FailBadKey()
+        {
+            byte[] signature = Convert.FromBase64String(TestData.SignedTestingb64);
+
+            SigningKeyPair keypair = Managed.GenerateSigningKeyPair();
+            SigningPublicKey pubkey = keypair.GetPublicKey();
+
+            bool res = Managed.VerifySignature(System.Text.Encoding.UTF8.GetBytes(TestData.SignTesting), pubkey, signature);
+
+            Assert.AreEqual(res, false);
+        }
+
+        [TestMethod]
+        public void VerifySignature_FailBadSignature()
+        {
+            SigningKeyPair keypair = Managed.GenerateSigningKeyPair();
+            byte[] signature = Managed.Sign(System.Text.Encoding.UTF8.GetBytes(TestData.SignTesting), keypair);
+
+            SigningPublicKey pubkey = SigningPublicKey.FromByteArray(Convert.FromBase64String(TestData.SigningPublicKeyb64));
+
+            bool res = Managed.VerifySignature(System.Text.Encoding.UTF8.GetBytes(TestData.SignTesting), pubkey, signature);
+
+            Assert.AreEqual(res, false);
         }
 
         [TestMethod]

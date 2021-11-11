@@ -12,9 +12,14 @@ Cryptographic library used in Devolutions products. It is made to be fast, easy 
     * [Key Exchange](#key-exchange)
 * [PasswordHash Module](#passwordhash)
 * [SecretSharing Module](#secretsharing)
+* [Signature Module](#signature)
+    * [Generating Key Pairs](#generating-key-pairs)
+    * [Signing data](#signing-data)
+    * [Signature Verification](#verifying-the-signature)
 * [Utils Module](#utils)
     * [Key Generation](#key-generation)
     * [Key Derivation](#key-derivation)
+    
 
 ## Overview
 
@@ -61,7 +66,7 @@ You have two ways to generate a `KeyPair`: Using `GenerateKeyPair` will generate
 
 Asymmetric keys have two uses. They can be used to [encrypt and decrypt data](##asymmetric) and to perform a [key exchange](#key-exchange).
 
-#### `GenerateKeyPair`
+#### `Generate Key Pair`
 ```C#
 using Devolutions.Cryptography;
 
@@ -128,6 +133,31 @@ byte[][] shares = Managed.GenerateSharedKey(5, 3, 32);
 
 byte[] key = Managed.JoinShares(shares.Skip(2).ToArray());
 ```
+
+## Signature
+This module is used to sign data using a keypair to certify its authenticity. 
+
+###  Generating Key Pairs
+```c#
+using Devolutions.Cryptography;
+using System.Linq;
+
+SigningKeyPair keypair = Managed.GenerateSigningKeyPair();
+```
+### Signing Data
+```c#
+byte[] dataToSign = System.Text.Encoding.UTF8.GetBytes("some data");
+
+byte[] signature = Managed.Sign(dataToSign, keypair);
+```
+
+### Verifying the signature
+```c#
+byte[] dataToVerify = System.Text.Encoding.UTF8.GetBytes("some data");
+
+bool valid = Managed.VerifySignature(dataToVerify, keypair.GetPublicKey(), signature);
+```
+
 
 ## Utils
 

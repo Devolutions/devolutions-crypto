@@ -21,6 +21,7 @@ block-modes = "0.8"
 byteorder = "1"
 chacha20poly1305 = "0.9"
 cfg-if = "1"
+ed25519-dalek = "1"
 hmac = "0.11"
 num_enum = "0.5"
 pbkdf2 = { version = "0.9", default-features = false }
@@ -56,7 +57,7 @@ cbindgen = "0.20"
 
 [dependencies.pyo3]
 optional = true
-version = "0.14"
+version = "0.15"
 features = ["extension-module"]
 
 [target.'cfg(target_arch="wasm32")'.dependencies]

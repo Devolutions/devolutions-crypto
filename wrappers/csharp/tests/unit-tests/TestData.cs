@@ -6,6 +6,14 @@ namespace Devolutions.Crypto.Tests
     {
         public const string Argon2DefaultParametersb64 = "AQAAACAAAAABAAAAABAAAAIAAAACEwAAAAAQAAAAtGY57+B0VqXmHFlvBiIBLg==";
 
+        public const string SigningKeyPairb64 = "DQwFAAEAAQAkrJYWvIXBN4bXndumZVuKQDn2tDkNYC4dLJx3w+1mYEUFIjQa5yMDfXH0K0kiIAOUGSfTsOF6CLb+i0EN5Z7q";
+
+        public const string SigningPublicKeyb64 = "DQwFAAIAAQBFBSI0GucjA31x9CtJIiADlBkn07Dhegi2/otBDeWe6g==";
+
+        public const string SignTesting = "Testing";
+
+        public const string SignedTestingb64 = "DQwGAAAAAQDAwPiQInFO3XNdZjeYUVSzpFrZu/Tfwsf7WZIKNwP6O8v/msm4E4bp7jW/miCWj+P7U5FIqucCh8/QuRURWvkB";
+
         public const string Base64TestData = "QUJD";
 
         public const string Base64TestData2 = "QUJDDE";

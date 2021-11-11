@@ -23,6 +23,10 @@ pub enum DataType {
     PasswordHash = 3,
     /// A wrapped share. Used for secret sharing scheme.
     Share = 4,
+    /// A wrapped key used to sign data.
+    SigningKey = 5,
+    /// A wrapped signature.
+    Signature = 6,
 }
 
 impl Default for DataType {
@@ -87,6 +91,23 @@ impl Default for KeyVersion {
     }
 }
 
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+#[repr(u16)]
+pub enum SigningKeyVersion {
+    /// Uses the latest version.
+    Latest = 0,
+    /// Uses version 1: Ed25519.
+    V1 = 1,
+}
+
+impl Default for SigningKeyVersion {
+    fn default() -> Self {
+        Self::Latest
+    }
+}
+
 /// The versions of the secret sharing scheme to use.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
@@ -100,6 +121,24 @@ pub enum SecretSharingVersion {
 }
 
 impl Default for SecretSharingVersion {
+    fn default() -> Self {
+        Self::Latest
+    }
+}
+
+/// The versions of the secret sharing scheme to use.
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+#[repr(u16)]
+pub enum SignatureVersion {
+    /// Uses the latest version.
+    Latest = 0,
+    /// Uses version 1: ed25519
+    V1 = 1,
+}
+
+impl Default for SignatureVersion {
     fn default() -> Self {
         Self::Latest
     }
@@ -127,6 +166,7 @@ pub enum KeySubtype {
     None = 0,
     Private = 1,
     Public = 2,
+    Pair = 3,
 }
 
 impl Default for KeySubtype {
@@ -156,6 +196,19 @@ pub enum ShareSubtype {
 }
 
 impl Default for ShareSubtype {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[repr(u16)]
+pub enum SignatureSubtype {
+    None = 0,
+}
+
+impl Default for SignatureSubtype {
     fn default() -> Self {
         Self::None
     }

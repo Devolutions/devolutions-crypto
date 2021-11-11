@@ -1,4 +1,4 @@
-use std::convert::TryFrom as _;
+use std::convert::{TryFrom as _, TryInto as _};
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -22,6 +22,14 @@ use super::{
 use super::{
     secret_sharing,
     secret_sharing::{SecretSharingVersion, Share},
+};
+use super::{
+    signature,
+    signature::{Signature, SignatureVersion},
+};
+use super::{
+    signing_key,
+    signing_key::{SigningKeyPair, SigningKeyVersion, SigningPublicKey},
 };
 
 use super::Argon2Parameters;
@@ -111,6 +119,37 @@ impl PrivateKey {
 }
 
 #[wasm_bindgen]
+impl SigningPublicKey {
+    #[wasm_bindgen(getter)]
+    pub fn bytes(&self) -> Vec<u8> {
+        self.clone().into()
+    }
+
+    #[wasm_bindgen(js_name = "fromBytes")]
+    pub fn from_bytes(buffer: &[u8]) -> Result<SigningPublicKey, JsValue> {
+        Ok(SigningPublicKey::try_from(buffer)?)
+    }
+}
+
+#[wasm_bindgen]
+impl SigningKeyPair {
+    #[wasm_bindgen(getter)]
+    pub fn bytes(&self) -> Vec<u8> {
+        self.clone().into()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn public(&self) -> SigningPublicKey {
+        self.get_public_key()
+    }
+
+    #[wasm_bindgen(js_name = "fromBytes")]
+    pub fn from_bytes(buffer: &[u8]) -> Result<SigningKeyPair, JsValue> {
+        Ok(SigningKeyPair::try_from(buffer)?)
+    }
+}
+
+#[wasm_bindgen]
 pub fn encrypt(
     data: &[u8],
     key: &[u8],
@@ -170,6 +209,20 @@ pub fn generate_keypair(version: Option<KeyVersion>) -> KeyPair {
     key::generate_keypair(version.unwrap_or(KeyVersion::Latest)).into()
 }
 
+#[wasm_bindgen(js_name = "deriveKeyPair")]
+pub fn derive_keypair(
+    password: &[u8],
+    parameters: &Argon2Parameters,
+    version: Option<KeyVersion>,
+) -> Result<KeyPair, JsValue> {
+    Ok(key::derive_keypair(password, parameters, version.unwrap_or(KeyVersion::Latest))?.into())
+}
+
+#[wasm_bindgen(js_name = "generateSigningKeyPair")]
+pub fn generate_signing_keypair(version: Option<SigningKeyVersion>) -> SigningKeyPair {
+    signing_key::generate_signing_keypair(version.unwrap_or(SigningKeyVersion::Latest))
+}
+
 #[wasm_bindgen(js_name = "mixKeyExchange")]
 pub fn mix_key_exchange(
     private_key: &PrivateKey,
@@ -178,13 +231,20 @@ pub fn mix_key_exchange(
     Ok(key::mix_key_exchange(private_key, public_key)?)
 }
 
-#[wasm_bindgen(js_name = "deriveKeyPair")]
-pub fn derive_keypair(
-    password: &[u8],
-    parameters: &Argon2Parameters,
-    version: Option<KeyVersion>,
-) -> Result<KeyPair, JsValue> {
-    Ok(key::derive_keypair(password, parameters, version.unwrap_or(KeyVersion::Latest))?.into())
+#[wasm_bindgen]
+pub fn sign(data: &[u8], keypair: &SigningKeyPair, version: Option<SignatureVersion>) -> Vec<u8> {
+    signature::sign(data, keypair, version.unwrap_or(SignatureVersion::Latest)).into()
+}
+
+#[wasm_bindgen(js_name = "verifySignature")]
+pub fn verify_signature(
+    data: &[u8],
+    public_key: &SigningPublicKey,
+    signature: &[u8],
+) -> Result<bool, JsValue> {
+    let signature: Signature = signature.try_into()?;
+
+    Ok(signature.verify(data, public_key))
 }
 
 #[wasm_bindgen(typescript_custom_section)]
