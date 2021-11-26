@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [0.8.0] - 2021-11-25
+
+### Added
+ - Added the `signing_key` and `signature` modules to support public key signing using ed25519.
+
 ## [0.6.1] - 2020-06-28
 
 ### Added
