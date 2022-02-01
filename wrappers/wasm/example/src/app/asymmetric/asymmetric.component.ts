@@ -4,7 +4,7 @@ import { EncryptionService } from '../service/encryption.service';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons';
 import * as functions from '../shared/shared.component';
 
-import { Argon2Parameters, KeyVersion, CiphertextVersion, KeyPair, PrivateKey, PublicKey } from 'devolutions-crypto';
+import { Argon2Parameters, KeyVersion, CiphertextVersion, KeyPair, PrivateKey, PublicKey } from '@devolutions/devolutions-crypto';
 
 type EncryptionServiceInner = typeof import('../service/encryption.inner.service');
 

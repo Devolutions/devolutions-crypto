@@ -130,7 +130,7 @@ export class UtilitiesComponent implements OnInit {
     const deriveIterations: number = (deriveIterationsString === null || deriveIterationsString === '')
                                       ? null : Number(deriveIterationsString);
 
-    const derivedKey: Uint8Array = service.deriveKey(derivePasswordArray, deriveSaltArray, deriveIterations, deriveLength);
+    const derivedKey: Uint8Array = service.deriveKeyPbkdf2(derivePasswordArray, deriveSaltArray, deriveIterations, deriveLength);
     if (derivedKey === null) { return; }
     const derivedKeyText: string = service.base64encode(derivedKey);
 

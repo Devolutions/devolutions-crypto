@@ -1,6 +1,6 @@
-import { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, Argon2Parameters } from 'devolutions-crypto';
-export { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, Argon2Parameters } from 'devolutions-crypto';
-import * as devolutionsCrypto from 'devolutions-crypto';
+import { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, Argon2Parameters } from '@devolutions/devolutions-crypto';
+export { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, Argon2Parameters } from '@devolutions/devolutions-crypto';
+import * as devolutionsCrypto from '@devolutions/devolutions-crypto';
 
 export function encrypt(data: Uint8Array, key: Uint8Array, version?: CiphertextVersion): Uint8Array {
     return devolutionsCrypto.encrypt(data, key, version);
@@ -18,8 +18,8 @@ export function decryptAsymmetric(data: Uint8Array, privateKey: PrivateKey): Uin
     return devolutionsCrypto.decryptAsymmetric(data, privateKey);
 }
 
-export function deriveKey(key: Uint8Array, salt?: Uint8Array, iterations?: number, length?: number): Uint8Array {
-    return devolutionsCrypto.deriveKey(key, salt, iterations, length);
+export function deriveKeyPbkdf2(key: Uint8Array, salt?: Uint8Array, iterations?: number, length?: number): Uint8Array {
+    return devolutionsCrypto.deriveKeyPbkdf2(key, salt, iterations, length);
 }
 
 export function deriveKeyPair(password: Uint8Array, parameters: Argon2Parameters, version?: KeyVersion): KeyPair {
