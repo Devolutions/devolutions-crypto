@@ -15,11 +15,7 @@
       "es2018",
       "dom"
     ],
-    "paths": {
-      "util": [
-        "src/empty.ts"
-      ]
-    }
+    "paths": { "@angular/*": ["./node_modules/@angular/*"] }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
