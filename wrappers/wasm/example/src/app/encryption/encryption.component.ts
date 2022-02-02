@@ -4,7 +4,7 @@ import { EncryptionService } from '../service/encryption.service';
 import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import * as functions from '../shared/shared.component';
 
-import { CiphertextVersion } from 'devolutions-crypto';
+import { CiphertextVersion } from '@devolutions/devolutions-crypto';
 
 type EncryptionServiceInner = typeof import('../service/encryption.inner.service');
 
@@ -79,7 +79,7 @@ export class EncryptionComponent implements OnInit {
     // You can use the types directly, but you must use the service to use their functions
     const version: CiphertextVersion = service.CiphertextVersion.Latest;
 
-    const key: Uint8Array = service.deriveKey(pwdArray, saltArray);
+    const key: Uint8Array = service.deriveKeyPbkdf2(pwdArray, saltArray);
     const ciphertext: Uint8Array = service.encrypt(data, key, version);
 
     const encrypt = {
@@ -105,7 +105,7 @@ export class EncryptionComponent implements OnInit {
     const pwdArray: Uint8Array = this.encoder.encode(pwd);
     const saltArray: Uint8Array = (salt === null || salt === '') ? null : this.encoder.encode(salt);
 
-    const key: Uint8Array = service.deriveKey(pwdArray, saltArray);
+    const key: Uint8Array = service.deriveKeyPbkdf2(pwdArray, saltArray);
     const ciphertext: Uint8Array = service.base64decode(encryptedText.trim());
     const plaintext: Uint8Array = service.decrypt(ciphertext, key);
     const text: string = this.decoder.decode(plaintext);
