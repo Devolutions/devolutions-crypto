@@ -4,6 +4,9 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    assignees:
+      - "pdugre"
+      - "MathieuMorrissette"
 
   - package-ecosystem: "npm"
     directory: "/wrappers/wasm/example"
@@ -11,6 +14,9 @@ updates:
       interval: "weekly"
     allow:
       - dependency-type: "production"
+    assignees:
+      - "pdugre"
+      - "MathieuMorrissette"
 
 
 
