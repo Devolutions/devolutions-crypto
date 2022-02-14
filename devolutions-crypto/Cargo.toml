@@ -28,7 +28,7 @@ pbkdf2 = { version = "0.9", default-features = false }
 scrypt = { version = "0.8", default-features = false }
 sharks = "0.5"
 sha2 = "0.9"
-strum = "0.22"
+strum = "0.23"
 strum_macros = "0.22"
 subtle = "2"
 x25519-dalek = "1"
