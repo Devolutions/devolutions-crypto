@@ -15,7 +15,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 aead = "0.4"
-aes = "0.7"
+aes = "0.8"
 base64 = "0.13"
 block-modes = "0.8"
 byteorder = "1"
