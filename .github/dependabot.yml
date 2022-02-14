@@ -1,22 +1,11 @@
 version: 2
 updates:
   - package-ecosystem: "cargo"
-    directory: "/"
+    directory: "/devolutions-crypto"
     schedule:
       interval: "daily"
     assignees:
       - "pdugre"
       - "MathieuMorrissette"
-
-  - package-ecosystem: "npm"
-    directory: "/wrappers/wasm/example"
-    schedule:
-      interval: "weekly"
-    allow:
-      - dependency-type: "production"
-    assignees:
-      - "pdugre"
-      - "MathieuMorrissette"
-
 
 
