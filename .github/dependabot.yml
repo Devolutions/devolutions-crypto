@@ -7,5 +7,5 @@ updates:
     assignees:
       - "pdugre"
       - "MathieuMorrissette"
-
-
+    # Disable version updates, we only want security updates.
+    open-pull-requests-limit: 0
