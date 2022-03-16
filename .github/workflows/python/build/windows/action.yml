@@ -1,0 +1,62 @@
+name: Build Windows Python
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+
+    - name: Setting up PATH environment variable
+      shell: bash
+      run: echo "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn" >> $GITHUB_PATH
+
+    - name: Installing rust targets
+      shell: bash
+      run: rustup target add x86_64-pc-windows-msvc
+
+    - name: Install maturin
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: pip install maturin
+
+    - name: Building x86_64 3.10
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.9"
+
+    - name: Building x86_64 3.9
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+
+    - name: Building x86_64 3.8
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+
+    - name: Building x86_64 3.7
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      
+    - name: Place Artifacts
+      shell: bash
+      run: |
+        mv devolutions-crypto/target/wheels/*.whl .
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: python-wheels
+        path: ./*.whl

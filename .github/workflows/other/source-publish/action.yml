@@ -1,0 +1,11 @@
+name: Publish Source
+description: This package the source code used for this build.
+runs:
+  using: composite
+  steps:
+  - uses: actions/upload-artifact@v3
+    with:
+      name: source
+      path: |
+        **/*
+        !.git/**/*

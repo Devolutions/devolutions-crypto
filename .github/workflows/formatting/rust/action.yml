@@ -1,0 +1,24 @@
+name: Check Rust Code Format
+description: Ensure that the Rust code format is compliant
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+
+    - name: Install rust
+      shell: bash
+      run: |
+        rustup update
+        mkdir .cargo
+
+    - name: Check Format
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: cargo fmt --all -- --check
+
+    - name: Check Clippy
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: cargo clippy -- --D warnings

@@ -1,0 +1,23 @@
+name: Unit Tests macOS Nuget
+description: This tests the macOS nugets package.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+
+    - name: Download Native Libs
+      uses: actions/download-artifact@v3
+      with:
+        name: nugets
+        path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
+
+    - name: Install nuget
+      shell: bash
+      run: sudo apt-get install nuget
+
+    - name: Unit tests DOTNET CORE
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: python unit-tests.py -p core

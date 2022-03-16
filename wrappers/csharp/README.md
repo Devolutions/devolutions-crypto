@@ -1,5 +1,5 @@
 # devolutions-crypto
-[![Build Status](https://dev.azure.com/devolutions-net/Open%20Source/_apis/build/status/devolutions-crypto?branchName=master)](https://dev.azure.com/devolutions-net/Open%20Source/_build/latest?definitionId=170&branchName=master)  
+[![Build Status](https://github.com/Devolutions/devolutions-crypto/actions/workflows/ci.yml/badge.svg)]
 Cryptographic library used in Devolutions products. It is made to be fast, easy to use and misuse-resistant.
 
 # Usage

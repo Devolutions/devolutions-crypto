@@ -1,0 +1,45 @@
+name: Native Build Windows
+description: This builds the windows native libraries
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+
+    - name:  Setting up PATH environment variable
+      shell: bash
+      run: |
+        ls "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn"
+        echo "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn" >> $GITHUB_PATH
+
+    - name: Installing rust targets
+      shell: bash
+      run: |
+        rustup target add x86_64-pc-windows-msvc
+        rustup target add i686-pc-windows-msvc
+
+    - name: Unit tests
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: |
+        cargo test
+      
+    - name: Building WIN
+      working-directory: ./wrappers/csharp
+      shell: bash
+      run: |
+        python GeneratePackage.py -p windows
+
+    - name:  Building WIN
+      working-directory: ./wrappers/csharp
+      shell: bash
+      run: |
+        python GeneratePackage.py -p windows --rdm
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: artifact-staging
+        path: |
+          wrappers/csharp/windows/**
+          wrappers/csharp/rdm/**

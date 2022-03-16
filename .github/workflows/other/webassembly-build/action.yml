@@ -1,0 +1,34 @@
+name: Build WebAssembly 
+description: This builds the webassembly version of Devolutions Crypto
+runs:
+  using: composite
+  steps:  
+    - name: Update rust and install wasm-pack
+      shell: bash
+      run: |
+        rustup update
+        cargo install wasm-pack
+
+    - name: Platform tests
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: |
+        wasm-pack test --firefox --headless -- --features=wbindgen
+        wasm-pack test --chrome --headless -- --features=wbindgen
+
+    - name: Generating npm package
+      working-directory: ./wrappers/wasm
+      shell: bash
+      run: sh ./wasm_build.sh
+
+    - name: Integration tests
+      working-directory: ./wrappers/wasm/tests
+      shell: bash
+      run: |
+        npm install
+        npm test
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: source
+        path: wrappers/wasm/dist/**

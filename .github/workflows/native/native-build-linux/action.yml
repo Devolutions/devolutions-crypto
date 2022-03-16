@@ -1,0 +1,78 @@
+name: Native Build Linux
+description: This builds the linux native libraries
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+
+    - name:  Installing dependencies
+      shell: bash
+      run: | 
+        sudo apt-get update
+        sudo apt-get install nuget gcc-multilib software-properties-common 
+        sudo apt-get install -y gcc-aarch64-linux-gnu
+
+    - name: Install rust 
+      shell: bash
+      run: |
+        rustup update
+
+        rustup target add x86_64-unknown-linux-gnu
+        rustup target add i686-unknown-linux-gnu
+        rustup target add aarch64-unknown-linux-gnu
+
+        rustup target add aarch64-linux-android
+        rustup target add armv7-linux-androideabi
+        rustup target add i686-linux-android
+        rustup target add x86_64-linux-android
+
+        mkdir .cargo
+      
+    - name: Unit tests
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: |
+        ls
+        cargo test
+
+    - name: Building Linux
+      working-directory: ./wrappers/csharp
+      shell: bash
+      run: python GeneratePackage.py -p linux
+
+    - name: Configure Android NDK
+      shell: bash
+      run: |
+        export ANDROID_HOME=/usr/local/lib/android/sdk        
+        export NDK_HOME=$ANDROID_HOME/ndk-bundle
+
+        echo "[target.aarch64-linux-android]
+        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar\"
+        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang\"
+        [target.armv7-linux-androideabi]
+        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar\"
+        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi16-clang\"
+        [target.i686-linux-android]
+        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-ar\"
+        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android16-clang\"
+        [target.x86_64-linux-android]
+        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ar\"
+        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> ./.cargo/config
+
+    - name: Build Android package
+      working-directory: ./wrappers/csharp
+      shell: bash
+      run: |
+        export ANDROID_HOME=/usr/local/lib/android/sdk        
+        export NDK_HOME=$ANDROID_HOME/ndk-bundle
+
+        python GeneratePackage.py -p android
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: artifact-staging
+        path: |
+          wrappers/csharp/android/**
+          wrappers/csharp/linux/**

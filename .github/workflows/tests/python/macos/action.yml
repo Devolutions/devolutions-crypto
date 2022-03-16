@@ -1,0 +1,30 @@
+name: Test Python Wheels for macOS
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+
+    - name: Download Python Wheels
+      uses: actions/download-artifact@v3
+      with:
+        name: python-wheels
+        path: ./wheels
+            
+    - name: Create virtual environment
+      working-directory: ./wrappers/python
+      shell: bash
+      run: |
+        python -m venv venv python
+        source venv/bin/activate
+
+    - name: Install wheel
+      working-directory: ./wheels
+      shell: bash
+      run: pip install --find-links="./" devolutions_crypto
+
+    - name: Run tests
+      working-directory: ./wrappers/python
+      shell: bash
+      run:  python -m unittest tests/*.py
