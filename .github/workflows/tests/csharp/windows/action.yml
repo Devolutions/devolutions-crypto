@@ -1,0 +1,38 @@
+name: Unit Tests Windows Nuget
+description: This tests the windows nuget package.
+runs:
+  using: composite
+  steps:  
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+
+    - name: Download Native Libs
+      uses: actions/download-artifact@v3
+      with:
+        name: nugets
+        path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
+
+    - name: setting up PATH environment variable
+      shell: bash
+      run: |
+        echo "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn" >> $GITHUB_PATH
+        echo "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow" >> $GITHUB_PATH
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Downloading nuget
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: curl https://dist.nuget.org/win-x86-commandline/latest/nuget.exe --output nuget.exe
+
+    - name: Unit tests DOTNET FRAMEWORK PACKAGE CONFIG
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: python unit-tests.py -p framework
+    
+    - name: Unit tests DOTNET CORE
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: python unit-tests.py -p core

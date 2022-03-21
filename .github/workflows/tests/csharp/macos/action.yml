@@ -1,0 +1,31 @@
+name: Unit Tests macOS Nuget
+description: This tests the macOS nugets package.
+runs:
+  using: composite
+  steps:
+    - name: Download Nugets Libs
+      uses: actions/download-artifact@v3
+      with:
+        name: nugets
+        path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
+
+    - name: Update Nuget
+      shell: bash
+      run: |
+        ls /Users/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/Nugets
+        sudo nuget update -self
+
+    - name: Unit tests DOTNET CORE
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: python3 unit-tests.py -p core
+
+    - name: Unit tests XAMARIN-MAC-FULL
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: python3 unit-tests.py -p mac
+
+    - name: Unit tests XAMARIN-MAC-MODERN
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: python3 unit-tests.py -p mac-modern

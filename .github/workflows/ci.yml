@@ -1,0 +1,230 @@
+name: Main
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+
+jobs:
+  #### NATIVE BUILD ####
+  native_build_linux:
+    needs: rust_code_format
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/workflows/native/native-build-linux
+
+  native_build_macos:
+    needs: rust_code_format
+    runs-on: "macos-11"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/native/native-build-macos
+
+  native_build_windows:
+    needs: rust_code_format
+    runs-on: "windows-latest"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/native/native-build-windows
+
+  #### NUGET BUILD ####
+  nugets_linux:
+    needs: [native_build_linux , csharp_code_format]
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/nugets/nugets-linux
+
+  nugets_windows:
+    needs: [native_build_linux, native_build_macos, native_build_windows , csharp_code_format] # All Natives for dotnet-core
+    runs-on: "windows-latest"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/nugets/nugets-windows
+
+  nugets_macos:
+    needs: [native_build_macos, native_build_linux, csharp_code_format]
+    runs-on: "macos-11"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/nugets/nugets-macos
+
+
+  #### WEB ASSEMBLY BUILD ####
+  webassembly_build:
+    needs: rust_code_format
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/other/webassembly-build
+
+  #### WEB ASSEMBLY TEST ####
+  webassembly_test:
+    needs: webassembly_build
+    runs-on: "macos-11"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/webassembly/safari
+
+  #### TESTS NUGETS ####
+  tests_nuget_windows:
+    needs: nugets_windows
+    runs-on: "windows-latest"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/csharp/windows
+
+  tests_nuget_macos:
+    needs: [nugets_macos, nugets_windows]
+    runs-on: "macos-11"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+          submodules: "recursive"
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/csharp/macos
+
+  tests_nuget_ios:
+    needs: nugets_macos
+    runs-on: "macos-11"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/csharp/ios
+
+  tests_nuget_linux:
+    needs: [nugets_linux, nugets_windows]
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/csharp/linux
+
+  tests_nuget_android:
+    needs: nugets_macos
+    runs-on: "macos-11"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/csharp/android
+
+  tests_ios_integration:
+    needs: tests_nuget_ios
+    runs-on: "macos-11"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/csharp/integration-ios
+
+  #### CODE FORMATTING ####
+  rust_code_format:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/workflows/formatting/rust
+
+  csharp_code_format:
+    runs-on: "windows-latest"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/formatting/csharp
+  
+
+  #### PYTHON BUILD ####
+  build_python_linux:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/python/build/linux
+
+  build_python_macos:
+    runs-on: "macos-11"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/python/build/macos
+
+  build_python_windows:
+    runs-on: "windows-latest"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/python/build/windows
+
+  #### PYTHON TEST ####
+  test_python_linux:
+    needs: build_python_linux
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/workflows/tests/python/linux
+
+  test_python_macos:
+    needs: build_python_macos
+    runs-on: "macos-11"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/workflows/tests/python/macos
+
+  test_python_windows:
+    needs: build_python_windows
+    runs-on: "windows-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/workflows/tests/python/windows
+
+
+  #### PUBLISH SOURCE ####
+  source_publish:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/other/source-publish

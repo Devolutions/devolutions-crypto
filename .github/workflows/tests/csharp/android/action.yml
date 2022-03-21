@@ -1,0 +1,40 @@
+name: Unit Tests Android Nuget
+description: This tests the Android nuget package.
+runs:
+  using: composite
+  steps:
+    - name: Download Native Libs
+      uses: actions/download-artifact@v3
+      with:
+        name: nugets
+        path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
+
+    - name: Update Nuget
+      shell: bash
+      run: sudo nuget update -self
+
+    - name: Starting ADB Server
+      shell: bash
+      run: adb start-server
+      
+    - name: Installing SDK Android-29 x86_64
+      shell: bash
+      run: /Users/runner/Library/Android/sdk/tools/bin/sdkmanager "system-images;android-29;google_apis;x86_64"
+      
+    - name: Creating Android device
+      shell: bash
+      run: echo "no" | /Users/runner/Library/Android/sdk/tools/bin/avdmanager create avd --force -n test_64 -k "system-images;android-29;google_apis;x86_64" 
+
+    - name: Starting emulator
+      working-directory: /Users/runner/Library/Android/sdk/tools/
+      shell: bash
+      run: emulator @test_64 &  
+      
+    - name: Waiting for emulator to boot
+      shell: bash
+      run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'  
+      
+    - name: Unit tests XAMARIN-ANDROID
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: python3 unit-tests.py -p android

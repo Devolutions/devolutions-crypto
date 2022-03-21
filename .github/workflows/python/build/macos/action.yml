@@ -1,0 +1,76 @@
+name: Build macOS Python
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+
+    - name: Install rust
+      shell: bash
+      run: |
+        set -e
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
+        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+        source $HOME/.cargo/env
+
+        rustup target add x86_64-apple-darwin
+
+    - name: Install maturin
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: pip install maturin
+
+    - name: Building x86_64 3.10 Wheel
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run:
+        source $HOME/.cargo/env
+        
+        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.9"
+
+    - name: Building x86_64 3.9 Wheel
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run:
+        source $HOME/.cargo/env
+        
+        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+    
+    - name: Building x86_64 3.8 Wheel
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: |
+        source $HOME/.cargo/env
+        
+        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+    
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+    
+    - name: Building x86_64 3.7 Wheel
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: |
+        source $HOME/.cargo/env
+        
+        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+    
+    - name: Place Artifacts
+      shell: bash
+      run: |
+        mv devolutions-crypto/target/wheels/*.whl .
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: python-wheels
+        path: ./*.whl

@@ -1,0 +1,101 @@
+name: Test Python Wheels for Linux
+runs:
+  using: composite
+  steps:
+# 3.10
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+
+    - name: Download Python Wheels
+      uses: actions/download-artifact@v3
+      with:
+        name: python-wheels
+        path: ./wheels
+
+    - name: Create virtual environment
+      working-directory: ./wrappers/python
+      shell: bash
+      run: |
+        rm -rf venv/
+        python -m venv venv python
+        source venv/bin/activate
+
+    - name: Install wheel
+      working-directory: ./wheels
+      shell: bash
+      run: pip install --find-links="./" devolutions_crypto
+
+    - name: Run 3.10 tests
+      working-directory: ./wrappers/python 
+      shell: bash
+      run: python -m unittest tests/*.py
+
+# 3.9
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.9"
+
+    - name: Create virtual environment
+      working-directory: ./wrappers/python
+      shell: bash
+      run: |
+        rm -rf venv/
+        python -m venv venv python
+        source venv/bin/activate
+
+    - name: Install wheel
+      working-directory: ./wheels
+      shell: bash
+      run: pip install --find-links="./" devolutions_crypto
+
+    - name: Run 3.9 tests
+      working-directory: ./wrappers/python 
+      shell: bash
+      run: python -m unittest tests/*.py
+    
+# 3.8
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+
+    - name: Create virtual environment
+      working-directory: ./wrappers/python
+      shell: bash
+      run: |
+        rm -rf venv/
+        python -m venv venv python
+        source venv/bin/activate
+
+    - name: Install wheel
+      working-directory: ./wheels
+      shell: bash
+      run: pip install --find-links="./" devolutions_crypto
+
+    - name: Run 3.8 tests
+      working-directory: ./wrappers/python 
+      shell: bash
+      run: python -m unittest tests/*.py
+
+# 3.7
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+
+    - name: Create virtual environment
+      working-directory: ./wrappers/python
+      shell: bash
+      run: |
+        rm -rf venv/
+        python -m venv venv python
+        source venv/bin/activate
+
+    - name: Install wheel
+      working-directory: ./wheels
+      shell: bash
+      run: pip install --find-links="./" devolutions_crypto
+
+    - name: Run 3.7 tests
+      working-directory: ./wrappers/python 
+      shell: bash
+      run: python -m unittest tests/*.py

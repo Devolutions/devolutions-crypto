@@ -1,0 +1,19 @@
+name: Unit Tests iOS Nuget
+description: This tests the iOS nuget package.
+runs:
+  using: composite
+  steps:
+    - name: Download Native Libs
+      uses: actions/download-artifact@v3
+      with:
+        name: nugets
+        path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
+
+    - name: Update Nuget
+      shell: bash
+      run: sudo nuget update -self
+
+    - name: Unit tests XAMARIN-IOS
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: python3 unit-tests.py -p ios

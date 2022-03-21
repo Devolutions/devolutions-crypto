@@ -1,4 +1,6 @@
-[![Build Status](https://dev.azure.com/devolutions-net/Open%20Source/_apis/build/status/devolutions-crypto?branchName=master)](https://dev.azure.com/devolutions-net/Open%20Source/_build/latest?definitionId=170&branchName=master) [![](https://meritbadge.herokuapp.com/devolutions-crypto)](https://crates.io/crates/devolutions-crypto) [![npm version](https://img.shields.io/npm/v/devolutions-crypto.svg?style=flat)](https://npmjs.org/package/devolutions-crypto "View this project on npm")
+[![Build Status](https://github.com/Devolutions/devolutions-crypto/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Devolutions/devolutions-crypto/actions/workflows/ci.yml)
+[![crates.io](https://img.shields.io/crates/v/devolutions-crypto.svg)](https://crates.io/crates/devolutions-crypto) 
+[![npm version](https://img.shields.io/npm/v/devolutions-crypto.svg?style=flat)](https://npmjs.org/package/devolutions-crypto "View this project on npm")
 
 # DevolutionsCrypto
 This repo contains the library used for cryptography of products used by Devolutions. 
