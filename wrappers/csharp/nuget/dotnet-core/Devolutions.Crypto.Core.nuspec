@@ -12,19 +12,19 @@
     </metadata>
     <files>
 
-    <file src="../../windows/bin/Devolutions.Crypto.dll" target="lib/netstandard1.5/Devolutions.Crypto.dll" />
-    <file src="../../windows/bin/Devolutions.Crypto.pdb" target="lib/netstandard1.5/Devolutions.Crypto.pdb" />
+    <file src="../../dotnet-core/bin/Devolutions.Crypto.dll" target="lib/netstandard1.5/Devolutions.Crypto.dll" />
+    <file src="../../dotnet-core/bin/Devolutions.Crypto.pdb" target="lib/netstandard1.5/Devolutions.Crypto.pdb" />
 
-    <file src="../../windows/bin/Devolutions.Crypto.dll" target="lib/netstandard2.0/Devolutions.Crypto.dll" />
-    <file src="../../windows/bin/Devolutions.Crypto.pdb" target="lib/netstandard2.0/Devolutions.Crypto.pdb" />
+    <file src="../../dotnet-core/bin/Devolutions.Crypto.dll" target="lib/netstandard2.0/Devolutions.Crypto.dll" />
+    <file src="../../dotnet-core/bin/Devolutions.Crypto.pdb" target="lib/netstandard2.0/Devolutions.Crypto.pdb" />
 
-    <file src="../../windows/bin/DevolutionsCrypto-x64.dll" target="runtimes/win-x64/native/DevolutionsCrypto-x64.dll"/>
-    <file src="../../windows/bin/DevolutionsCrypto-x86.dll" target="runtimes/win-x86/native/DevolutionsCrypto-x86.dll"/>
+    <file src="../../windows/bin/DevolutionsCrypto-x64.dll" target="runtimes/win-x64/native/DevolutionsCrypto.dll"/>
+    <file src="../../windows/bin/DevolutionsCrypto-x86.dll" target="runtimes/win-x86/native/DevolutionsCrypto.dll"/>
 
-    <file src="../../linux/bin/libDevolutionsCrypto-x64.so" target="runtimes/linux-x64/native/libDevolutionsCrypto-x64.so"/>
-    <file src="../../linux/bin/libDevolutionsCrypto-x86.so" target="runtimes/linux-x86/native/libDevolutionsCrypto-x86.so"/>
+    <file src="../../linux/bin/libDevolutionsCrypto-x64.so" target="runtimes/linux-x64/native/libDevolutionsCrypto.so"/>
+    <file src="../../linux/bin/libDevolutionsCrypto-x86.so" target="runtimes/linux-x86/native/libDevolutionsCrypto.so"/>
 
-    <file src="../../macos-full/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto-x64.dylib"/>
-    <file src="../../macos-full/bin/aarch64/libDevolutionsCrypto.dylib" target="runtimes/osx-arm64/native/libDevolutionsCrypto-arm64.dylib"/>
+    <file src="../../macos-full/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto.dylib"/>
+    <file src="../../macos-full/bin/aarch64/libDevolutionsCrypto.dylib" target="runtimes/osx-arm64/native/libDevolutionsCrypto.dylib"/>
 </files>
 </package>

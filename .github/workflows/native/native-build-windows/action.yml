@@ -38,9 +38,16 @@ runs:
       run: |
         python GeneratePackage.py -p windows --rdm
 
+    - name:  Building DOTNET CORE
+      working-directory: ./wrappers/csharp
+      shell: bash
+      run: |
+        python GeneratePackage.py -p dotnet-core
+
     - uses: actions/upload-artifact@v3
       with:
         name: artifact-staging
         path: |
           wrappers/csharp/windows/**
           wrappers/csharp/rdm/**
+          wrappers/csharp/dotnet-core/**

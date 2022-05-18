@@ -16,7 +16,7 @@ namespace Devolutions.Cryptography
         private const string LibName86 = "x86/DevolutionsCrypto";
 #endif
 
-#if !ANDROID && !IOS && !MAC_MODERN && !RDM
+#if !ANDROID && !IOS && !MAC_MODERN && !RDM && !DOTNET_CORE
         private const string LibName64 = "DevolutionsCrypto-x64";
 
         private const string LibName86 = "DevolutionsCrypto-x86";
@@ -96,7 +96,7 @@ namespace Devolutions.Cryptography
             return Managed.VerifyPassword(password, hash);
         }
 
-#if !ANDROID && !IOS && !MAC_MODERN
+#if !ANDROID && !IOS && !MAC_MODERN && !DOTNET_CORE
         internal static long GenerateSharedKeyNative(UIntPtr nbShares, UIntPtr threshold, UIntPtr size, IntPtr[] shares)
         {
             if (Environment.Is64BitProcess)

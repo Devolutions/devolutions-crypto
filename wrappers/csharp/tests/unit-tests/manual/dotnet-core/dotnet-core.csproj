@@ -5,6 +5,9 @@
     <RootNamespace>dotnet_core</RootNamespace>
     <CodeAnalysisRuleSet>../../../../stylecop.ruleset</CodeAnalysisRuleSet>
     <IsPackable>false</IsPackable>
+	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	  <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -40,6 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\src\devolutions-crypto.csproj" />
+    <ProjectReference Include="devolutions-crypto\devolutions-crypto.csproj" />
   </ItemGroup>
 </Project>
