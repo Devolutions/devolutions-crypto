@@ -115,6 +115,7 @@ def build_native(architectures, target_folder, manifest=None, clean=True):
 def main():
     platforms = {
         "windows": build_windows,
+        "dotnet-core": build_dotnet_core,
         "linux": build_linux,
         "mac": build_mac_full,
         "mac-modern": build_mac_modern,
@@ -234,6 +235,57 @@ def build_windows(assembly_manifest, version, args):
         exit(1)
 
     os.remove("./" + folder + "/bin/AssemblyInfo.cs")
+
+
+def build_dotnet_core(assembly_manifest, version, args):
+    output = exec_command("csc")
+    print("output")
+
+    if("is not recognized as an internal or external command" in output):
+        print("error : make sure you have csc (c# compiler) configured in your path")
+        exit(1)
+    
+    folder = "dotnet-core"
+
+    # Loop because permission issues on windows
+    print("Detecting if " +folder +" directory is present...")
+    while(os.path.isdir("./" + folder)):
+        print("Deleting " + folder + " directory...")
+        try:
+            shutil.rmtree("./" + folder)
+        except:
+            print("Access denied...Retrying")
+            time.sleep(1)
+
+
+    while(not os.path.isdir("./" + folder)):
+        try:
+            print("Creating " + folder + " directory...")
+            os.mkdir("./" + folder)
+            os.mkdir("./" + folder + "/bin")
+        except:
+            print("Access denied...Retrying")
+            time.sleep(1)
+
+    with open("./" + folder + "/bin/AssemblyInfo.cs","wb+") as filee:
+        filee.write(assembly_manifest.encode("utf-8"))
+
+    print("Building Native Libraries...")
+
+    print("Skipping for .NET Core")      
+
+    print("Building Managed Library...")
+
+    define = "-define:DOTNET_CORE"
+
+    output = exec_command("csc -out:./" + folder + "/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./" + folder + "/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu " + define + " src/*.cs ./" + folder + "/bin/AssemblyInfo.cs -optimize")
+    print(output)
+
+    if("error" in output):
+        exit(1)
+
+    os.remove("./" + folder + "/bin/AssemblyInfo.cs")
+
 
 def build_linux(assembly_manifest, version, args):
     architectures = []
