@@ -16,7 +16,7 @@ runs:
     - name: Installing rust targets
       shell: bash
       run: |
-        rustup default 1.59.0
+        rustup update
         rustup target add x86_64-pc-windows-msvc
         rustup target add i686-pc-windows-msvc
 
