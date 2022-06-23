@@ -45,28 +45,37 @@ runs:
     - name: Configure Android NDK
       shell: bash
       run: |
-        export ANDROID_HOME=/usr/local/lib/android/sdk        
-        export NDK_HOME=$ANDROID_HOME/ndk-bundle
+        # Install NDK 21 after GitHub update
+        # https://github.com/actions/virtual-environments/issues/5595
+
+        ANDROID_ROOT="/usr/local/lib/android"
+        ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
+        SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+        echo "y" | $SDKMANAGER "ndk;21.4.7075529"
+      
+        export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
 
         echo "[target.aarch64-linux-android]
-        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar\"
-        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang\"
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang\"
         [target.armv7-linux-androideabi]
-        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar\"
-        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi16-clang\"
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi16-clang\"
         [target.i686-linux-android]
-        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-ar\"
-        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android16-clang\"
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-ar\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android16-clang\"
         [target.x86_64-linux-android]
-        ar = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ar\"
-        linker = \"$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> ./.cargo/config
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ar\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> ./.cargo/config
 
     - name: Build Android package
       working-directory: ./wrappers/csharp
       shell: bash
       run: |
-        export ANDROID_HOME=/usr/local/lib/android/sdk        
-        export NDK_HOME=$ANDROID_HOME/ndk-bundle
+        export ANDROID_ROOT="/usr/local/lib/android"
+        export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"     
+        export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
+        ln -sfn $ANDROID_SDK_ROOT/ndk/21.4.7075529 $ANDROID_NDK
 
         python GeneratePackage.py -p android
 
