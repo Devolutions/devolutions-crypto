@@ -266,7 +266,7 @@ jobs:
         with:
           serverhostname: 'dtrack-api.devolutions.com'
           apikey: ${{ secrets.DTRACK_AUTOMATION_API_KEY }}
-          projectname: 'Devolutions Crypto Rust'
+          projectname: 'devolutions-crypto'
           projectversion: ${{ github.event.inputs.version }}
           autocreate: 'true'
           bomfilename: devolutions-crypto/bom.xml
