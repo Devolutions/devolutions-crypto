@@ -13,6 +13,14 @@ runs:
       shell: bash
       run: sudo nuget update -self
 
+    # dotnet restore fails on macos-11
+    # https://github.com/actions/virtual-environments/issues/5768
+    - name: Nuget workaround
+      shell: bash
+      run: |
+        rm -rf ~/.config/NuGet/NuGet.Config
+        dotnet nuget list source
+
     - name: Generating IOS Nuget
       working-directory: ./wrappers/csharp/nuget
       shell: bash
