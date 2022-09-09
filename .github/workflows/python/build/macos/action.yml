@@ -27,7 +27,7 @@ runs:
       run:
         source $HOME/.cargo/env
         
-        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+        maturin build --release -i python --features python --target=x86_64-apple-darwin
 
     - uses: actions/setup-python@v2
       with:
@@ -39,7 +39,7 @@ runs:
       run:
         source $HOME/.cargo/env
         
-        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+        maturin build --release -i python --features python --target=x86_64-apple-darwin
 
     - uses: actions/setup-python@v2
       with:
@@ -51,7 +51,7 @@ runs:
       run: |
         source $HOME/.cargo/env
         
-        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+        maturin build --release -i python --features python --target=x86_64-apple-darwin
     
     - uses: actions/setup-python@v2
       with:
@@ -63,7 +63,7 @@ runs:
       run: |
         source $HOME/.cargo/env
         
-        maturin build --no-sdist --release -i python --cargo-extra-args="--features python --target=x86_64-apple-darwin"
+        maturin build --release -i python --features python --target=x86_64-apple-darwin
     
     - name: Place Artifacts
       shell: bash

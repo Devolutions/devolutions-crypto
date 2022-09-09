@@ -33,7 +33,6 @@ namespace Devolutions.Cryptography
         private const string ManagedVersion = "||MANAGED_VERSION||";
 #endif
 
-
         static Native()
         {
 #if RDM
