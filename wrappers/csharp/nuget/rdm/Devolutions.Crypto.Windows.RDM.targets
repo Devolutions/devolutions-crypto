@@ -3,12 +3,17 @@
     <ItemGroup>
         <Content Include="$(MSBuildThisFileDirectory)..\..\runtime\win-x86\native\DevolutionsCrypto.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <Link>x86\DevolutionsCrypto.dll</Link>
+            <Link>runtimes\win-x86\native\DevolutionsCrypto.dll</Link>
         </Content>
 
         <Content Include="$(MSBuildThisFileDirectory)..\..\runtime\win-x64\native\DevolutionsCrypto.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <Link>x64\DevolutionsCrypto.dll</Link>
+            <Link>runtimes\win-x64\native\DevolutionsCrypto.dll</Link>
+        </Content>
+
+        <Content Include="$(MSBuildThisFileDirectory)..\..\runtime\win-arm64\native\DevolutionsCrypto.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>runtimes\win-arm64\native\DevolutionsCrypto.dll</Link>
         </Content>
     </ItemGroup>
 </Project>

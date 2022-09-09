@@ -104,6 +104,11 @@ namespace Devolutions.Cryptography
         IncompatibleVersion,
 
         /// <summary>
+        /// Error when the native library cannot be loaded
+        /// </summery>
+        NativeLibraryLoad,
+
+        /// <summary>
         /// Error when the stream cannot be seek.
         /// </summary>
         CanNotSeekStream,

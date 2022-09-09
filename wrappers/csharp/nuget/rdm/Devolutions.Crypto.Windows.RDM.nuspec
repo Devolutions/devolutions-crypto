@@ -27,6 +27,7 @@
 
     <file src="../../rdm/bin/x64/DevolutionsCrypto.dll" target="runtime/win-x64/native/DevolutionsCrypto.dll"/>
     <file src="../../rdm/bin/x86/DevolutionsCrypto.dll" target="runtime/win-x86/native/DevolutionsCrypto.dll"/>
+    <file src="../../rdm/bin/arm64/DevolutionsCrypto.dll" target="runtime/win-arm64/native/DevolutionsCrypto.dll"/>
 
     <file src="Devolutions.Crypto.Windows.RDM.targets" target="build/net45/Devolutions.Crypto.Windows.RDM.targets"/>
 </files>

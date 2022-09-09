@@ -19,6 +19,7 @@ runs:
         rustup update
         rustup target add x86_64-pc-windows-msvc
         rustup target add i686-pc-windows-msvc
+        rustup target add aarch64-pc-windows-msvc
 
     - name: Unit tests
       working-directory: ./devolutions-crypto

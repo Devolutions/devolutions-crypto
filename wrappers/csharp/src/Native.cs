@@ -1,6 +1,9 @@
 namespace Devolutions.Cryptography
 {
     using System;
+#if RDM
+    using System.IO;
+#endif
     using System.Runtime.InteropServices;
 #if !DEBUG
     using System.Reflection;
@@ -12,8 +15,11 @@ namespace Devolutions.Cryptography
     public static partial class Native
     {
 #if RDM
-        private const string LibName64 = "x64/DevolutionsCrypto";
-        private const string LibName86 = "x86/DevolutionsCrypto";
+        [DllImport("Kernel32", SetLastError = true)]
+        public static extern IntPtr LoadLibrary(string path);
+
+        private const string LibName64 = "DevolutionsCrypto";
+        private const string LibName86 = "DevolutionsCrypto";
 #endif
 
 #if !ANDROID && !IOS && !MAC_MODERN && !RDM && !DOTNET_CORE
@@ -27,9 +33,25 @@ namespace Devolutions.Cryptography
         private const string ManagedVersion = "||MANAGED_VERSION||";
 #endif
 
-#if !DEBUG
+
         static Native()
         {
+#if RDM
+            string rid = "win-" + RuntimeInformation.ProcessArchitecture.ToString().ToLower();
+            string path = Path.Combine(
+                Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), 
+                "runtimes", 
+                rid, 
+                "native",
+                $"{ LibName64 }.dll");
+
+            if (LoadLibrary(path) == IntPtr.Zero)
+            {
+                throw new DevolutionsCryptoException(ManagedError.NativeLibraryLoad, $"LoadLibrary failed for { path }");
+            }
+#endif
+
+#if !DEBUG
             Assembly assembly = Assembly.GetExecutingAssembly();
 
             Version assemblyVersion = assembly.GetName().Version;
@@ -46,8 +68,9 @@ namespace Devolutions.Cryptography
             {
                 throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion + " Supported : managed(" + ManagedVersion + ") native (" + NativeVersion + ")");
             }
-    }
 #endif
+        }
+
         [Obsolete("This method has been deprecated. Use Managed.Decrypt instead.")]
         public static byte[] Decrypt(byte[] data, byte[] key)
         {

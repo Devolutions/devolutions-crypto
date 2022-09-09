@@ -165,6 +165,7 @@ def build_windows(assembly_manifest, version, args):
         
     if not args.no_64:
         architectures.append({"name" : "x64", "value" : "x86_64-pc-windows-msvc"})
+        architectures.append({"name" : "arm64", "value" : "aarch64-pc-windows-msvc"})
 
     folder = "windows"
 
