@@ -38,9 +38,11 @@ namespace Devolutions.Cryptography
 #if WIN
             if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DEVOLUTIONS_CRYPTO_SKIP_NATIVE_PRELOAD")))
             {
+                string baseDir = Assembly.GetEntryAssembly()?.Location ?? 
+                    (Assembly.GetExecutingAssembly()?.Location ?? AppDomain.CurrentDomain.BaseDirectory);
                 string rid = "win-" + RuntimeInformation.ProcessArchitecture.ToString().ToLower();
                 string path = Path.Combine(
-                Assembly.GetEntryAssembly().Location,
+                baseDir,
                 "runtimes", 
                 rid, 
                 "native",
