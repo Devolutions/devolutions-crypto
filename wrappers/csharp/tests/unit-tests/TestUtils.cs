@@ -211,7 +211,6 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
-
         public void ValidateSignatureFromStream_ValidSignature()
         {
             Stream stream = new MemoryStream(TestData.EncryptedData);

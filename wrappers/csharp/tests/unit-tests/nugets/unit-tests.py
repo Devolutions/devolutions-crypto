@@ -114,13 +114,13 @@ def test_dotnet_framework(script_dir, version, args):
     print("=========================================================================")
 
 
-    output = get_output(["vstest.console.exe", "./dotnet-framework/bin/x64/Debug/dotnet-framework.dll"])
+    output = get_output(["vstest.console.exe", "--settings:./dotnet-framework/dotnet-framework.runsettings", "./dotnet-framework/bin/x64/Debug/dotnet-framework.dll"])
     print(output)
 
     if "Test Run Successful" not in output:
         exit(1)
 
-    output = get_output(["vstest.console.exe", "./dotnet-framework/bin/x86/Debug/dotnet-framework.dll"])
+    output = get_output(["vstest.console.exe", "--settings:./dotnet-framework/dotnet-framework.runsettings", "./dotnet-framework/bin/x86/Debug/dotnet-framework.dll"])
     print(output)
 
     if "Test Run Successful" not in output:

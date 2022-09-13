@@ -29,24 +29,27 @@ namespace Devolutions.Cryptography
 #endif
 
 #if !DEBUG
-        private const string NativeVersion = "0.8.0";
-        private const string ManagedVersion = "2022.5.9";
+        private const string NativeVersion = "||NATIVE_VERSION||";
+        private const string ManagedVersion = "||MANAGED_VERSION||";
 #endif
 
         static Native()
         {
 #if WIN
-            string rid = "win-" + RuntimeInformation.ProcessArchitecture.ToString().ToLower();
-            string path = Path.Combine(
-                Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), 
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DEVOLUTIONS_CRYPTO_SKIP_NATIVE_PRELOAD")))
+            {
+                string rid = "win-" + RuntimeInformation.ProcessArchitecture.ToString().ToLower();
+                string path = Path.Combine(
+                Assembly.GetEntryAssembly().Location,
                 "runtimes", 
                 rid, 
                 "native",
                 $"{ LibName64 }.dll");
 
-            if (LoadLibrary(path) == IntPtr.Zero)
-            {
-                throw new DevolutionsCryptoException(ManagedError.NativeLibraryLoad, $"LoadLibrary failed for { path }");
+                if (LoadLibrary(path) == IntPtr.Zero)
+                {
+                    throw new DevolutionsCryptoException(ManagedError.NativeLibraryLoad, $"LoadLibrary failed for { path }");
+                }
             }
 #endif
 
