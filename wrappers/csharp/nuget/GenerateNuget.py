@@ -14,7 +14,6 @@ def main():
     platforms = {
         "all": build_all,
         "windows": build_windows,
-        "rdm": build_rdm,
         "linux": build_linux,
         "mac": build_mac_full,
         "mac-modern": build_mac_modern,
@@ -76,17 +75,6 @@ def build_windows(version, args):
     print("Generating WINDOWS nuget...")
 
     command= subprocess.Popen(["nuget", "pack", "./Windows/Devolutions.Crypto.Windows.nuspec", "-Version", version, "-OutputDirectory", "./Windows/package", "-Properties", "platform=windows"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-
-    print(output)
-
-    if("error" in output):
-        exit(1)
-
-def build_rdm(version, args):
-    print("Generating WINDOWS RDM nuget...")
-
-    command= subprocess.Popen(["nuget", "pack", "./rdm/Devolutions.Crypto.Windows.RDM.nuspec", "-Version", version, "-OutputDirectory", "./rdm/package"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)

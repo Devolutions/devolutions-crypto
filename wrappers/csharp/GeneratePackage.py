@@ -129,7 +129,6 @@ def main():
         choices=platforms.keys(), 
         help="The platform to build for.")
 
-    parser.add_argument("--rdm", action="store_true", default=False, help="Build package for RDM")
     parser.add_argument("-o", "--output", default=None, help="Output folder")
 
     parser.add_argument("--no-64", action="store_true", default=False, help="Don't build the 64 bit version of the library")
@@ -169,9 +168,6 @@ def build_windows(assembly_manifest, version, args):
 
     folder = "windows"
 
-    if args.rdm:
-        folder = "rdm"
-
     # Loop because permission issues on windows
     print("Detecting if " +folder +" directory is present...")
     while(os.path.isdir("./" + folder)):
@@ -209,13 +205,7 @@ def build_windows(assembly_manifest, version, args):
         output = exec_command("cargo build --features ffi --release --target " + arch["value"], "../../devolutions-crypto")
         print(output)
         
-        if args.rdm:
-            os.mkdir("./" + folder + "/bin/" + arch["name"])
-
         dllpath = "./" + folder + "/bin/DevolutionsCrypto-" + arch["name"] + ".dll"
-
-        if args.rdm:
-            dllpath = "./rdm/bin/" + arch["name"] + "/DevolutionsCrypto.dll"
 
         shutil.copy("../../devolutions-crypto/target/" + arch["value"] + "/release/devolutions_crypto.dll", dllpath)
 
@@ -225,9 +215,6 @@ def build_windows(assembly_manifest, version, args):
     print("Building Managed Library...")
 
     define = "-define:WIN"
-
-    if args.rdm:
-        define += ";RDM"
 
     output = exec_command("csc -out:./" + folder + "/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./" + folder + "/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu " + define + " src/*.cs ./" + folder + "/bin/AssemblyInfo.cs -optimize")
     print(output)

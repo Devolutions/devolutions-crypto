@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <ItemGroup>
-        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x86\native\DevolutionsCrypto-x86.dll">
+        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x86\native\DevolutionsCrypto.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Link>DevolutionsCrypto-x86.dll</Link>
+        <Link>runtimes\win-x86\natibe\DevolutionsCrypto.dll</Link>
         </Content>
-
-        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x64\native\DevolutionsCrypto-x64.dll">
+        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x64\native\DevolutionsCrypto.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Link>DevolutionsCrypto-x64.dll</Link>
+        <Link>runtimes\win-x64\native\DevolutionsCrypto.dll</Link>
+        </Content>
+        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-arm64\native\DevolutionsCrypto.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Link>runtimes\win-arm64\native\DevolutionsCrypto.dll</Link>
         </Content>
     </ItemGroup>
 </Project>

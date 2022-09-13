@@ -1,7 +1,7 @@
 namespace Devolutions.Cryptography
 {
     using System;
-#if RDM
+#if WIN
     using System.IO;
 #endif
     using System.Runtime.InteropServices;
@@ -14,7 +14,7 @@ namespace Devolutions.Cryptography
     /// </summary>
     public static partial class Native
     {
-#if RDM
+#if WIN
         [DllImport("Kernel32", SetLastError = true)]
         public static extern IntPtr LoadLibrary(string path);
 
@@ -22,20 +22,20 @@ namespace Devolutions.Cryptography
         private const string LibName86 = "DevolutionsCrypto";
 #endif
 
-#if !ANDROID && !IOS && !MAC_MODERN && !RDM && !DOTNET_CORE
+#if !ANDROID && !IOS && !MAC_MODERN && !WIN && !DOTNET_CORE
         private const string LibName64 = "DevolutionsCrypto-x64";
 
         private const string LibName86 = "DevolutionsCrypto-x86";
 #endif
 
 #if !DEBUG
-        private const string NativeVersion = "||NATIVE_VERSION||";
-        private const string ManagedVersion = "||MANAGED_VERSION||";
+        private const string NativeVersion = "0.8.0";
+        private const string ManagedVersion = "2022.5.9";
 #endif
 
         static Native()
         {
-#if RDM
+#if WIN
             string rid = "win-" + RuntimeInformation.ProcessArchitecture.ToString().ToLower();
             string path = Path.Combine(
                 Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), 
