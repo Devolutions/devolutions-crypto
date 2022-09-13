@@ -32,7 +32,7 @@ runs:
     - name: Building x86_64 3.10 Wheel
       working-directory: ./devolutions-crypto
       shell: bash
-      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
+      run: maturin build -i python --release --features python --target=x86_64-unknown-linux-gnu
 
     - uses: actions/setup-python@v2
       with:
@@ -41,7 +41,7 @@ runs:
     - name: Building x86_64 3.9 Wheel
       working-directory: ./devolutions-crypto
       shell: bash
-      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
+      run: maturin build -i python --release --features python --target=x86_64-unknown-linux-gnu
 
     - uses: actions/setup-python@v2
       with:
@@ -50,7 +50,7 @@ runs:
     - name: Building x86_64 3.8 Wheel
       working-directory: ./devolutions-crypto
       shell: bash
-      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
+      run: maturin build -i python --release --features python --target=x86_64-unknown-linux-gnu
 
     - uses: actions/setup-python@v2
       with:
@@ -59,7 +59,7 @@ runs:
     - name: Building x86_64 3.7 Wheel
       working-directory: ./devolutions-crypto
       shell: bash
-      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-unknown-linux-gnu"
+      run: maturin build -i python --release --features python --target=x86_64-unknown-linux-gnu
 
     - name: Place Artifacts
       shell: bash

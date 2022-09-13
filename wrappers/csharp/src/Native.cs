@@ -1,6 +1,9 @@
 namespace Devolutions.Cryptography
 {
     using System;
+#if WIN
+    using System.IO;
+#endif
     using System.Runtime.InteropServices;
 #if !DEBUG
     using System.Reflection;
@@ -11,12 +14,15 @@ namespace Devolutions.Cryptography
     /// </summary>
     public static partial class Native
     {
-#if RDM
-        private const string LibName64 = "x64/DevolutionsCrypto";
-        private const string LibName86 = "x86/DevolutionsCrypto";
+#if WIN
+        [DllImport("Kernel32", SetLastError = true)]
+        public static extern IntPtr LoadLibrary(string path);
+
+        private const string LibName64 = "DevolutionsCrypto";
+        private const string LibName86 = "DevolutionsCrypto";
 #endif
 
-#if !ANDROID && !IOS && !MAC_MODERN && !RDM && !DOTNET_CORE
+#if !ANDROID && !IOS && !MAC_MODERN && !WIN && !DOTNET_CORE
         private const string LibName64 = "DevolutionsCrypto-x64";
 
         private const string LibName86 = "DevolutionsCrypto-x86";
@@ -27,9 +33,29 @@ namespace Devolutions.Cryptography
         private const string ManagedVersion = "||MANAGED_VERSION||";
 #endif
 
-#if !DEBUG
         static Native()
         {
+#if WIN
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DEVOLUTIONS_CRYPTO_SKIP_NATIVE_PRELOAD")))
+            {
+                string baseDir = Assembly.GetEntryAssembly()?.Location ?? 
+                    (Assembly.GetExecutingAssembly()?.Location ?? AppDomain.CurrentDomain.BaseDirectory);
+                string rid = "win-" + RuntimeInformation.ProcessArchitecture.ToString().ToLower();
+                string path = Path.Combine(
+                baseDir,
+                "runtimes", 
+                rid, 
+                "native",
+                $"{ LibName64 }.dll");
+
+                if (LoadLibrary(path) == IntPtr.Zero)
+                {
+                    throw new DevolutionsCryptoException(ManagedError.NativeLibraryLoad, $"LoadLibrary failed for { path }");
+                }
+            }
+#endif
+
+#if !DEBUG
             Assembly assembly = Assembly.GetExecutingAssembly();
 
             Version assemblyVersion = assembly.GetName().Version;
@@ -46,8 +72,9 @@ namespace Devolutions.Cryptography
             {
                 throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion + " Supported : managed(" + ManagedVersion + ") native (" + NativeVersion + ")");
             }
-    }
 #endif
+        }
+
         [Obsolete("This method has been deprecated. Use Managed.Decrypt instead.")]
         public static byte[] Decrypt(byte[] data, byte[] key)
         {

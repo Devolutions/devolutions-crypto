@@ -22,7 +22,7 @@ runs:
     - name: Building x86_64 3.10
       working-directory: ./devolutions-crypto
       shell: bash
-      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      run: maturin build -i python --release --features python --target=x86_64-pc-windows-msvc
       
     - uses: actions/setup-python@v2
       with:
@@ -31,7 +31,7 @@ runs:
     - name: Building x86_64 3.9
       working-directory: ./devolutions-crypto
       shell: bash
-      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      run: maturin build -i python --release --features python --target=x86_64-pc-windows-msvc
       
     - uses: actions/setup-python@v2
       with:
@@ -40,7 +40,7 @@ runs:
     - name: Building x86_64 3.8
       working-directory: ./devolutions-crypto
       shell: bash
-      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      run: maturin build -i python --release --features python --target=x86_64-pc-windows-msvc
       
     - uses: actions/setup-python@v2
       with:
@@ -49,7 +49,7 @@ runs:
     - name: Building x86_64 3.7
       working-directory: ./devolutions-crypto
       shell: bash
-      run: maturin build --no-sdist -i python --release --cargo-extra-args="--features python --target=x86_64-pc-windows-msvc"
+      run: maturin build -i python --release --features python --target=x86_64-pc-windows-msvc
       
     - name: Place Artifacts
       shell: bash

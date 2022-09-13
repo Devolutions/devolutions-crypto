@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+	<RunConfiguration>
+		<EnvironmentVariables>
+			<DEVOLUTIONS_CRYPTO_SKIP_NATIVE_PRELOAD>1</DEVOLUTIONS_CRYPTO_SKIP_NATIVE_PRELOAD>
+		</EnvironmentVariables>
+	</RunConfiguration>
+</RunSettings>
