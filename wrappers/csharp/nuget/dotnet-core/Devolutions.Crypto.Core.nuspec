@@ -6,7 +6,7 @@
         <authors>Devolutions Inc</authors>
         <description>Devolutions Cryptographic Library For the .NET Core Platform (supported Windows, Linux, Mac) </description>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <copyright>Copyright 2020 @ Devolutions Inc</copyright>
+        <copyright>Copyright 2022 @ Devolutions Inc</copyright>
         <license type="expression">Apache-2.0 OR MIT</license>
         <projectUrl>https://github.com/Devolutions/devolutions-crypto</projectUrl>
     </metadata>
@@ -20,6 +20,7 @@
 
     <file src="../../windows/bin/DevolutionsCrypto-x64.dll" target="runtimes/win-x64/native/DevolutionsCrypto.dll"/>
     <file src="../../windows/bin/DevolutionsCrypto-x86.dll" target="runtimes/win-x86/native/DevolutionsCrypto.dll"/>
+    <file src="../../windows/bin/DevolutionsCrypto-arm64.dll" target="runtimes/win-arm64/native/DevolutionsCrypto.dll"/>
 
     <file src="../../linux/bin/libDevolutionsCrypto-x64.so" target="runtimes/linux-x64/native/libDevolutionsCrypto.so"/>
     <file src="../../linux/bin/libDevolutionsCrypto-x86.so" target="runtimes/linux-x86/native/libDevolutionsCrypto.so"/>

@@ -6,7 +6,7 @@
         <authors>Devolutions Inc</authors>
         <description>Devolutions Cryptographic Library For the .NET Framework, .NET Standard platforms for the Linux platform</description>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <copyright>Copyright 2020 @ Devolutions Inc</copyright>
+        <copyright>Copyright 2022 @ Devolutions Inc</copyright>
         <frameworkAssemblies>
             <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5" />
             <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.5" />
