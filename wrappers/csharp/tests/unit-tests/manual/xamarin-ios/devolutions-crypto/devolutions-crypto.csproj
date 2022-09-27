@@ -83,8 +83,8 @@
     <ObjcBindingCoreSource Include="Structs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\..\..\ios\bin\universal\libDevolutionsCrypto.a">
-      <Kind>Static</Kind>
+    <NativeReference Include="..\..\..\..\..\ios\bin\universal\libDevolutionsCrypto.dylib">
+      <Kind>Dynamic</Kind>
       <SmartLink>False</SmartLink>
     </NativeReference>
   </ItemGroup>

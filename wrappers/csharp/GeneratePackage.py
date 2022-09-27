@@ -412,14 +412,14 @@ def build_ios(assembly_manifest, version, args):
         # {"name" : "i386", "value" : "i386-apple-ios"}, no longer supported in stable (Tier 3)
         {"name" : "x86_64",
             "value" : "x86_64-apple-ios",
-            "manifest_path" : "./ios/Cargo.toml",
-            "cargo_output": "../../devolutions-crypto/ios/target/x86_64-apple-ios/release/libdevolutions_crypto.a",
-            "filename" : "x86_64/libDevolutionsCrypto.a"},
+            "manifest_path" : "./Cargo.toml",
+            "cargo_output": "../../devolutions-crypto/ios/target/x86_64-apple-ios/release/libdevolutions_crypto.dylib",
+            "filename" : "x86_64/libDevolutionsCrypto.dylib"},
         {"name" : "aarch64",
             "value" : "aarch64-apple-ios",
-            "manifest_path" : "./ios/Cargo.toml",
-            "cargo_output": "../../devolutions-crypto/ios/target/aarch64-apple-ios/release/libdevolutions_crypto.a",
-            "filename" : "aarch64/libDevolutionsCrypto.a"},
+            "manifest_path" : "./Cargo.toml",
+            "cargo_output": "../../devolutions-crypto/ios/target/aarch64-apple-ios/release/libdevolutions_crypto.dylib",
+            "filename" : "aarch64/libDevolutionsCrypto.dylib"},
         ]
 
     target_folder = "./ios"
@@ -435,32 +435,11 @@ def build_ios(assembly_manifest, version, args):
     libs = " "
 
     for arch in architectures:
-        libs = libs + " ./ios/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.a"
-
-        # Hack : This is wrong on so many levels
-        # Rename __rust_eh_personality symbols (which conflicts with other rust libraries on iOS)
-        # https://github.com/rust-lang/rust/issues/44322
-        os.environ["LANG"]=""
-
-        # Extract static library.
-        output = exec_command("ar x " + "libDevolutionsCrypto.a", cwd="./ios/bin/" + arch["name"] + "/")
-        print(output)
-
-        # Rename symbol in the corresponding object file.
-        output = exec_command("bash -c \"LC_ALL=C sed -i '' 's/rust_eh_personality/rust_eh_personaliti/g' $(ls devolutions_crypto-*.rcgu.o)\"", cwd="./ios/bin/" + arch["name"] + "/")
-        print(output)
-
-        # Repackage the statuc library with the renamed symbol.
-        output = exec_command("bash -c \"ar cr libDevolutionsCrypto.a *.o\"", cwd="./ios/bin/" + arch["name"] + "/")
-        print(output)
-
-        # Clean up object files left when extracting the static library.
-        output = exec_command("bash -c \"find . ! -name '*.a' -type f -exec rm -rf {} +\"", cwd="./ios/bin/" + arch["name"] + "/")
-        print(output)
+        libs = libs + " ./ios/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib"
     
     args = "lipo -create "
     args = args + libs
-    args = args + " -output ./ios/bin/universal/libDevolutionsCrypto.a"
+    args = args + " -output ./ios/bin/universal/libDevolutionsCrypto.dylib"
     
     output = exec_command(args)
     print(output)
