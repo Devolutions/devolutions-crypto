@@ -413,12 +413,12 @@ def build_ios(assembly_manifest, version, args):
         {"name" : "x86_64",
             "value" : "x86_64-apple-ios",
             "manifest_path" : "./Cargo.toml",
-            "cargo_output": "../../devolutions-crypto/ios/target/x86_64-apple-ios/release/libdevolutions_crypto.dylib",
+            "cargo_output": "../../devolutions-crypto/target/x86_64-apple-ios/release/libdevolutions_crypto.dylib",
             "filename" : "x86_64/libDevolutionsCrypto.dylib"},
         {"name" : "aarch64",
             "value" : "aarch64-apple-ios",
             "manifest_path" : "./Cargo.toml",
-            "cargo_output": "../../devolutions-crypto/ios/target/aarch64-apple-ios/release/libdevolutions_crypto.dylib",
+            "cargo_output": "../../devolutions-crypto/target/aarch64-apple-ios/release/libdevolutions_crypto.dylib",
             "filename" : "aarch64/libDevolutionsCrypto.dylib"},
         ]
 
