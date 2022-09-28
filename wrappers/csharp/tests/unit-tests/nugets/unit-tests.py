@@ -428,12 +428,16 @@ def test_ios(script_dir, version, args):
     print(output)
     if("FAILED" in output):
         exit(1)
+    
+    print("exists 1" + str(os.path.exists("/Users/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/xamarin-ios/bin/iPhoneSimulator/Debug/xamarin-ios.app")))
 
     print("XAMARIN IOS UNIT TEST")
     print("=========================================================================")
 
 
     print("Running tests")
+    print("exists 2" + str(os.path.exists("/Users/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/xamarin-ios/bin/iPhoneSimulator/Debug/xamarin-ios.app")))
+
     output = get_output(["sh", "./xamarin-ios/test.sh"])
     print(output)
 
