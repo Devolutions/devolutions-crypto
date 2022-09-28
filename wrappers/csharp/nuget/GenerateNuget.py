@@ -119,6 +119,25 @@ def build_ios(version, args):
     with open("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties/AssemblyInfo.cs","wb+") as filee:
         filee.write(assembly_manifest_ios.encode("utf-8"))
 
+    print("Packaging into .framework ...")
+    # Unlike .a (static lib) the .dylib needs to be packaged into a .framework package. iOS is now using a dynamic library. 
+    universal_folder = "../ios/bin/universal/"
+    os.mkdir(universal_folder + "libDevolutionsCrypto.framework")
+    shutil.move(universal_folder + "libDevolutionsCrypto.dylib", universal_folder + "libDevolutionsCrypto.framework/libDevolutionsCrypto.dylib")
+
+    plist_framework_data = None
+
+    with open("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Info.plist", "r") as file:
+        plist_framework_data = file.read()
+
+    now = datetime.datetime.now()
+
+    plist_framework_data = plist_framework_data.replace("||VERSION||", version + "." + str(now.hour) + str(now.minute))
+    plist_framework_data = plist_framework_data.replace("||SHORT_VERSION||", version)
+
+    with open(universal_folder + "libDevolutionsCrypto.framework/Info.plist", "w+") as file:
+        file.write(plist_framework_data)
+
     print("Building...")
 
     command= subprocess.Popen(["msbuild", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS.sln", "/t:clean,restore,build", "/p:configuration=release"], stdout=subprocess.PIPE)

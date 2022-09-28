@@ -12,7 +12,7 @@ namespace Devolutions.Cryptography
     public static partial class Native
     {
 #if IOS
-        private const string LibName = "__Internal";
+        private const string LibName = "libDevolutionsCrypto.framework/libDevolutionsCrypto";
 #else
         private const string LibName = "DevolutionsCrypto";
 #endif
