@@ -412,14 +412,14 @@ def build_ios(assembly_manifest, version, args):
         # {"name" : "i386", "value" : "i386-apple-ios"}, no longer supported in stable (Tier 3)
         {"name" : "x86_64",
             "value" : "x86_64-apple-ios",
-            "manifest_path" : "./ios/Cargo.toml",
-            "cargo_output": "../../devolutions-crypto/ios/target/x86_64-apple-ios/release/libdevolutions_crypto.a",
-            "filename" : "x86_64/libDevolutionsCrypto.a"},
+            "manifest_path" : "./Cargo.toml",
+            "cargo_output": "../../devolutions-crypto/target/x86_64-apple-ios/release/libdevolutions_crypto.dylib",
+            "filename" : "x86_64/libDevolutionsCrypto.dylib"},
         {"name" : "aarch64",
             "value" : "aarch64-apple-ios",
-            "manifest_path" : "./ios/Cargo.toml",
-            "cargo_output": "../../devolutions-crypto/ios/target/aarch64-apple-ios/release/libdevolutions_crypto.a",
-            "filename" : "aarch64/libDevolutionsCrypto.a"},
+            "manifest_path" : "./Cargo.toml",
+            "cargo_output": "../../devolutions-crypto/target/aarch64-apple-ios/release/libdevolutions_crypto.dylib",
+            "filename" : "aarch64/libDevolutionsCrypto.dylib"},
         ]
 
     target_folder = "./ios"
@@ -435,38 +435,43 @@ def build_ios(assembly_manifest, version, args):
     libs = " "
 
     for arch in architectures:
-        libs = libs + " ./ios/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.a"
-
-        # Hack : This is wrong on so many levels
-        # Rename __rust_eh_personality symbols (which conflicts with other rust libraries on iOS)
-        # https://github.com/rust-lang/rust/issues/44322
-        os.environ["LANG"]=""
-
-        # Extract static library.
-        output = exec_command("ar x " + "libDevolutionsCrypto.a", cwd="./ios/bin/" + arch["name"] + "/")
-        print(output)
-
-        # Rename symbol in the corresponding object file.
-        output = exec_command("bash -c \"LC_ALL=C sed -i '' 's/rust_eh_personality/rust_eh_personaliti/g' $(ls devolutions_crypto-*.rcgu.o)\"", cwd="./ios/bin/" + arch["name"] + "/")
-        print(output)
-
-        # Repackage the statuc library with the renamed symbol.
-        output = exec_command("bash -c \"ar cr libDevolutionsCrypto.a *.o\"", cwd="./ios/bin/" + arch["name"] + "/")
-        print(output)
-
-        # Clean up object files left when extracting the static library.
-        output = exec_command("bash -c \"find . ! -name '*.a' -type f -exec rm -rf {} +\"", cwd="./ios/bin/" + arch["name"] + "/")
-        print(output)
+        libs = libs + " ./ios/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib"
     
     args = "lipo -create "
     args = args + libs
-    args = args + " -output ./ios/bin/universal/libDevolutionsCrypto.a"
+    args = args + " -output ./ios/bin/universal/libDevolutionsCrypto.dylib"
     
     output = exec_command(args)
     print(output)
 
     if("error" in output):
         exit(1)
+
+    print("Packaging into .framework ...") #########################
+    # Unlike .a (static lib) the .dylib needs to be packaged into a .framework package. iOS is now using a dynamic library.
+
+    universal_folder = "./ios/bin/universal/"
+    os.mkdir(universal_folder + "libDevolutionsCrypto.framework")
+    shutil.move(universal_folder + "libDevolutionsCrypto.dylib", universal_folder + "libDevolutionsCrypto.framework/libDevolutionsCrypto")
+
+    print("Fixing rpath")
+    command = subprocess.Popen(["install_name_tool", "-id", "@rpath/libDevolutionsCrypto.framework/libDevolutionsCrypto", universal_folder + "libDevolutionsCrypto.framework/libDevolutionsCrypto"], stdout=subprocess.PIPE)
+    output = command.stdout.read().decode('utf-8')
+    print(output)
+
+    plist_framework_data = None
+
+    with open("./nuget/iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Info.plist", "r") as file:
+        plist_framework_data = file.read()
+
+    now = datetime.datetime.now()
+
+    plist_framework_data = plist_framework_data.replace("||VERSION||", version + "." + str(now.hour) + str(now.minute))
+    plist_framework_data = plist_framework_data.replace("||SHORT_VERSION||", version)
+
+    with open(universal_folder + "libDevolutionsCrypto.framework/Info.plist", "w+") as file:
+        file.write(plist_framework_data)
+    ###################################
 
 def build_android(assembly_manifest, version, args):
     architectures = [

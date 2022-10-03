@@ -428,10 +428,9 @@ def test_ios(script_dir, version, args):
     print(output)
     if("FAILED" in output):
         exit(1)
-
+    
     print("XAMARIN IOS UNIT TEST")
     print("=========================================================================")
-
 
     print("Running tests")
     output = get_output(["sh", "./xamarin-ios/test.sh"])

@@ -46,8 +46,8 @@
     <Compile Include="..\..\..\..\src\*.cs"/>
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\..\ios\bin\universal\libDevolutionsCrypto.a">
-      <Kind>Static</Kind>
+    <NativeReference Include="..\..\..\..\ios\bin\universal\libDevolutionsCrypto.framework">
+      <Kind>Framework</Kind>
       <ForceLoad>True</ForceLoad>
       <IsCxx>True</IsCxx>
     </NativeReference>

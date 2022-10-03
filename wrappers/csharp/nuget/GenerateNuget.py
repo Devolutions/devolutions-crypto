@@ -119,6 +119,7 @@ def build_ios(version, args):
     with open("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties/AssemblyInfo.cs","wb+") as filee:
         filee.write(assembly_manifest_ios.encode("utf-8"))
 
+
     print("Building...")
 
     command= subprocess.Popen(["msbuild", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS.sln", "/t:clean,restore,build", "/p:configuration=release"], stdout=subprocess.PIPE)
