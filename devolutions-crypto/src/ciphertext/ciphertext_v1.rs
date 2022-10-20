@@ -7,9 +7,11 @@ use super::Ciphertext;
 
 use std::convert::TryFrom;
 
-use aes::Aes256;
-use block_modes::{block_padding::Pkcs7, BlockMode, Cbc};
-use hmac::{Hmac, Mac, NewMac};
+use cbc::cipher::{block_padding::Pkcs7, KeyIvInit, BlockEncryptMut, BlockDecryptMut};
+use aes::{Aes256};
+// cipher::{block_padding::Pkcs7, KeyIvInit, BlockEncryptMut, BlockDecryptMut}
+// use block_modes::{block_padding::Pkcs7, BlockMode, Cbc};
+use hmac::{Hmac, Mac};
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
@@ -80,8 +82,8 @@ impl CiphertextV1 {
         OsRng.fill_bytes(&mut iv);
 
         // Create cipher object
-        let cipher = Cbc::<Aes256, Pkcs7>::new_from_slices(&encryption_key, &iv)?;
-        let ciphertext = cipher.encrypt_vec(data);
+        let cipher = cbc::Encryptor::<Aes256>::new_from_slices(&encryption_key, &iv)?;
+        let ciphertext = cipher.encrypt_padded_vec_mut::<Pkcs7>(&data);
 
         // Zero out the key
         encryption_key.zeroize();
@@ -120,14 +122,14 @@ impl CiphertextV1 {
 
         let mut mac = Hmac::<Sha256>::new_from_slice(&signature_key)?;
         mac.update(&mac_data);
-        mac.verify(&self.hmac)?;
+        mac.verify_slice(&self.hmac)?;
 
         // Zeroize the key
         signature_key.zeroize();
         mac_data.zeroize();
 
-        let cipher = Cbc::<Aes256, Pkcs7>::new_from_slices(&encryption_key, &self.iv)?;
-        let result = cipher.decrypt_vec(&self.ciphertext)?;
+        let cipher = cbc::Decryptor::<Aes256>::new_from_slices(&encryption_key, &self.iv)?;
+        let result = cipher.decrypt_padded_vec_mut::<Pkcs7>(&self.ciphertext)?;
 
         // Zeroize the key
         encryption_key.zeroize();

@@ -96,7 +96,6 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
     use super::secret_sharing::Share;
     use super::signature::Signature;
     use super::signing_key::{SigningKeyPair, SigningPublicKey};
-    use std::convert::TryFrom;
 
     if data.len() < Header::len() {
         return false;
