@@ -298,7 +298,7 @@ pub fn join_shares(shares: Array) -> Result<Vec<u8>, JsValue> {
     //         s
     //     }
     // }));
-    // TODO: Remove this comment once read in the PR.
+    // TODO: Remove this comment once read in the PR. And tested.
     //       using serde_wasm_bindgen as discussed in the thread since `.into_serde()` is now
     //       deprecated.
     //       - sbergerondrouin

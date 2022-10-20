@@ -61,7 +61,6 @@ js-sys = { version = "0.3.50", optional = true }
 # it will be compiled with it in our dependencies as well (since union of
 # all the features selected is used when building a Cargo project)
 getrandom = { version = "0.2", features = ["js", "wasm-bindgen"] }
-#getrandom1 = { package = "getrandom", version = "0.1", features = ["wasm-bindgen"] }
 
 [target.'cfg(not(target_arch="wasm32"))'.dependencies]
 rust-argon2 = "1.0"
