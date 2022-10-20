@@ -10,7 +10,7 @@ use super::Ciphertext;
 use std::convert::TryFrom;
 
 use chacha20poly1305::aead::{Aead, Payload};
-use chacha20poly1305::{Key, XChaCha20Poly1305, XNonce, KeyInit};
+use chacha20poly1305::{Key, KeyInit, XChaCha20Poly1305, XNonce};
 
 use rand::{rngs::OsRng, RngCore};
 use sha2::{Digest, Sha256};

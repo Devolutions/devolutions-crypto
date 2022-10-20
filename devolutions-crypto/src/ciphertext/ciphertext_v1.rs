@@ -7,8 +7,8 @@ use super::Ciphertext;
 
 use std::convert::TryFrom;
 
-use cbc::cipher::{block_padding::Pkcs7, KeyIvInit, BlockEncryptMut, BlockDecryptMut};
-use aes::{Aes256};
+use aes::Aes256;
+use cbc::cipher::{block_padding::Pkcs7, BlockDecryptMut, BlockEncryptMut, KeyIvInit};
 use hmac::{Hmac, Mac};
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
@@ -81,7 +81,7 @@ impl CiphertextV1 {
 
         // Create cipher object
         let cipher = cbc::Encryptor::<Aes256>::new_from_slices(&encryption_key, &iv)?;
-        let ciphertext = cipher.encrypt_padded_vec_mut::<Pkcs7>(&data);
+        let ciphertext = cipher.encrypt_padded_vec_mut::<Pkcs7>(data);
 
         // Zero out the key
         encryption_key.zeroize();

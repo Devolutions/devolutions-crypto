@@ -269,14 +269,16 @@ pub fn generate_shared_key(
         version.unwrap_or(SecretSharingVersion::Latest),
     )?
     .into_iter()
-    .map(|x| match serde_wasm_bindgen::to_value(&Into::<Vec<u8>>::into(x)) {
-        Ok(s) => Ok(s),
-        Err(e) => {
-            let error = js_sys::Error::new(&format!("{}", e));
-            error.set_name("SerializationError");
-            Err(error.into())
-        }
-    })
+    .map(
+        |x| match serde_wasm_bindgen::to_value(&Into::<Vec<u8>>::into(x)) {
+            Ok(s) => Ok(s),
+            Err(e) => {
+                let error = js_sys::Error::new(&format!("{}", e));
+                error.set_name("SerializationError");
+                Err(error.into())
+            }
+        },
+    )
     .collect()
 }
 

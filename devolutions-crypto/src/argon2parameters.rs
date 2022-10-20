@@ -5,7 +5,7 @@ use std::{
 
 use argon2::{Config, ThreadMode, Variant, Version};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use rand_core::{RngCore, OsRng};
+use rand_core::{OsRng, RngCore};
 
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::prelude::*;

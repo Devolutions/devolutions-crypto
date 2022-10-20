@@ -1,7 +1,7 @@
 //! Possible errors in the library.
 
-use std::fmt;
 use cbc::cipher::block_padding::UnpadError;
+use std::fmt;
 
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::JsValue;
