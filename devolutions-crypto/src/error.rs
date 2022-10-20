@@ -8,7 +8,6 @@ use wasm_bindgen::JsValue;
 
 use strum::IntoStaticStr;
 
-// use block_modes::{BlockModeError, InvalidKeyIvLength};
 use hmac::digest::MacError;
 
 /// This crate's error type.
