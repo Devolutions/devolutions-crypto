@@ -271,7 +271,7 @@ fn encrypt_decrypt_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
     let data = "This is a very complex string of character that we need to encrypt".as_bytes();
 
-    let encrypted = encrypt(data, &key, CiphertextVersion::Latest).unwrap();
+    let encrypted = encrypt(data, key, CiphertextVersion::Latest).unwrap();
 
     let encrypted: Vec<u8> = encrypted.into();
 
@@ -286,7 +286,7 @@ fn encrypt_decrypt_v1_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
     let data = "This is a very complex string of character that we need to encrypt".as_bytes();
 
-    let encrypted = encrypt(data, &key, CiphertextVersion::V1).unwrap();
+    let encrypted = encrypt(data, key, CiphertextVersion::V1).unwrap();
 
     assert_eq!(encrypted.header.version, CiphertextVersion::V1);
     let encrypted: Vec<u8> = encrypted.into();
@@ -302,7 +302,7 @@ fn encrypt_decrypt_v2_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
     let data = "This is a very complex string of character that we need to encrypt".as_bytes();
 
-    let encrypted = encrypt(data, &key, CiphertextVersion::V2).unwrap();
+    let encrypted = encrypt(data, key, CiphertextVersion::V2).unwrap();
 
     assert_eq!(encrypted.header.version, CiphertextVersion::V2);
     let encrypted: Vec<u8> = encrypted.into();
