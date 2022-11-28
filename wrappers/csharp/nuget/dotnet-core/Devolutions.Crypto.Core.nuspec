@@ -24,6 +24,7 @@
 
     <file src="../../linux/bin/libDevolutionsCrypto-x64.so" target="runtimes/linux-x64/native/libDevolutionsCrypto.so"/>
     <file src="../../linux/bin/libDevolutionsCrypto-x86.so" target="runtimes/linux-x86/native/libDevolutionsCrypto.so"/>
+    <file src="../../linux/bin/libDevolutionsCrypto-arm64.so" target="runtimes/linux-arm64/native/libDevolutionsCrypto.so"/>
 
     <file src="../../macos-full/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto.dylib"/>
     <file src="../../macos-full/bin/aarch64/libDevolutionsCrypto.dylib" target="runtimes/osx-arm64/native/libDevolutionsCrypto.dylib"/>
