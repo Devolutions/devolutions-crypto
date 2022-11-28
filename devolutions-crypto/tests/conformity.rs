@@ -1,4 +1,3 @@
-use base64;
 use devolutions_crypto::{
     ciphertext::Ciphertext,
     key::{derive_keypair, KeyVersion, PrivateKey},

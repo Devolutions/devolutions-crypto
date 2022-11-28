@@ -143,19 +143,19 @@ pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) ->
         tmp[0] = log_n;
         tmp[1] = r as u8;
         tmp[2] = p as u8;
-        result.push_str(&base64::encode(&tmp));
+        result.push_str(&base64::encode(tmp));
     } else {
         result.push_str("1$");
         let mut tmp = [0u8; 9];
         tmp[0] = log_n;
         LittleEndian::write_u32(&mut tmp[1..5], r);
         LittleEndian::write_u32(&mut tmp[5..9], p);
-        result.push_str(&base64::encode(&tmp));
+        result.push_str(&base64::encode(tmp));
     }
     result.push('$');
-    result.push_str(&base64::encode(&salt));
+    result.push_str(&base64::encode(salt));
     result.push('$');
-    result.push_str(&base64::encode(&dk));
+    result.push_str(&base64::encode(dk));
     result.push('$');
 
     result
