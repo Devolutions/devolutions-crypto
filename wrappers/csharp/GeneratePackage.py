@@ -335,7 +335,6 @@ def build_mac_full(assembly_manifest, version, args):
     build_native(architectures, target_folder, manifest=assembly_manifest, clean=False)
 
     print("Building Managed Library...")
-    # TODO create universal library with lipo
     output = exec_command("csc -out:./macos-full/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./macos-full/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:MAC_FULL src/*.cs ./macos-full/bin/AssemblyInfo.cs -optimize")
     print(output)
 
@@ -426,7 +425,7 @@ def build_ios(assembly_manifest, version, args):
     if args.output:
         target_folder = args.output
 
-    build_native(architectures, target_folder)
+    build_native(architectures, target_folder, assembly_manifest)
 
     print("Making universal binary...")
 
@@ -472,6 +471,16 @@ def build_ios(assembly_manifest, version, args):
     with open(universal_folder + "libDevolutionsCrypto.framework/Info.plist", "w+") as file:
         file.write(plist_framework_data)
     ###################################
+
+    print("Building Managed Library...")
+    output = exec_command("csc -out:./ios/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./ios/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:IOS src/*.cs ./ios/bin/AssemblyInfo.cs -optimize")
+    print(output)
+
+    if("error" in output):
+        exit(1)    
+
+    os.remove("./ios/bin/AssemblyInfo.cs")
+
 
 def build_android(assembly_manifest, version, args):
     architectures = [
