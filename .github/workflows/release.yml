@@ -1,0 +1,173 @@
+name: Deploy to production
+on:
+  workflow_dispatch:
+    inputs:
+      publish_ios_nuget:
+        description: "Publish Devolutions.Crypto.iOS.*.nupkg"
+        required: true
+        type: boolean
+      publish_android_nuget:
+        description: "Publish Devolutions.Crypto.Android.*.nupkg"
+        required: true
+        type: boolean
+      publish_macos_full_nuget:
+        description: "Publish Devolutions.Crypto.Mac.Full.*.nupkg"
+        required: true
+        type: boolean
+      publish_macos_modern_nuget:
+        description: "Publish Devolutions.Crypto.Mac.Modern.*.nupkg"
+        required: true
+        type: boolean
+      publish_windows_nuget:
+        description: "Publish Devolutions.Crypto.Windows.*.nupkg"
+        required: true
+        type: boolean
+      publish_linux_nuget:
+        description: "Publish Devolutions.Crypto.Linux.*.nupkg"
+        required: true
+        type: boolean
+      publish_nuget_dry_run:
+        description: "NuGet Dry Run Publish Mode"
+        required: true
+        type: boolean
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: publish
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check out devolutions/actions
+      uses: actions/checkout@v3
+      with:
+        repository: Devolutions/actions
+        token: ${{ secrets.DEVOLUTIONSBOT_TOKEN }}
+        path: ./.github/workflows
+    
+    - name: Install toolbox
+      uses: ./.github/workflows/toolbox-install
+      with:
+        token: ${{ secrets.DEVOLUTIONSBOT_TOKEN }}
+
+    - name: Download Nugets Artifact
+      run: dv github download-artifact nugets . devolutions-crypto
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CI: true
+
+    - name: Extract Artifact
+      run: 7z x nugets.zip -o./devolutions-crypto-nugets
+
+    - name: Publish iOS NuGet
+      if: inputs.publish_ios_nuget == 'true'
+      run: |
+        ls
+        ls ./devolutions-crypto-nugets
+        COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.iOS.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
+        
+        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+          echo "Dry Run : True"
+        else
+          echo "Dry Run : False"
+        fi
+
+        echo "Running : $COMMAND"
+
+        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+          eval "$COMMAND"
+        fi
+    
+    - name: Publish Android NuGet
+      if: inputs.publish_android_nuget == 'true'
+      run: |
+        ls
+        ls ./devolutions-crypto-nugets
+        COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Android.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
+        
+        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+          echo "Dry Run : True"
+        else
+          echo "Dry Run : False"
+        fi
+
+        echo "Running : $COMMAND"
+
+        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+          eval "$COMMAND"
+        fi
+
+    - name: Publish Mac Full NuGet
+      if: inputs.publish_macos_full_nuget == 'true'
+      run: |
+        ls
+        ls ./devolutions-crypto-nugets
+        COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Mac.Full.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
+        
+        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+          echo "Dry Run : True"
+        else
+          echo "Dry Run : False"
+        fi
+
+        echo "Running : $COMMAND"
+
+        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+          eval "$COMMAND"
+        fi
+
+    - name: Publish Mac Modern NuGet
+      if: inputs.publish_macos_modern_nuget == 'true'
+      run: |
+        ls
+        ls ./devolutions-crypto-nugets
+        COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Mac.Modern.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
+        
+        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+          echo "Dry Run : True"
+        else
+          echo "Dry Run : False"
+        fi
+
+        echo "Running : $COMMAND"
+
+        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+          eval "$COMMAND"
+        fi
+
+    - name: Publish Windows NuGet
+      if: inputs.publish_windows_nuget == 'true'
+      run: |
+        ls
+        ls ./devolutions-crypto-nugets
+        COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Windows.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
+        
+        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+          echo "Dry Run : True"
+        else
+          echo "Dry Run : False"
+        fi
+
+        echo "Running : $COMMAND"
+
+        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+          eval "$COMMAND"
+        fi
+
+    - name: Publish Linux NuGet
+      if: inputs.publish_linux_nuget == 'true'
+      run: |
+        ls
+        ls ./devolutions-crypto-nugets
+        COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Linux.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
+        
+        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+          echo "Dry Run : True"
+        else
+          echo "Dry Run : False"
+        fi
+
+        echo "Running : $COMMAND"
+
+        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+          eval "$COMMAND"
+        fi   
+
