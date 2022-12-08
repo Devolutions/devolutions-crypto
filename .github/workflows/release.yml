@@ -58,7 +58,7 @@ jobs:
       run: 7z x nugets.zip -o./devolutions-crypto-nugets
 
     - name: Publish iOS NuGet
-      if: inputs.publish_ios_nuget == 'true'
+      if: inputs.publish_ios_nuget
       run: |
         ls
         ls ./devolutions-crypto-nugets
@@ -77,7 +77,7 @@ jobs:
         fi
     
     - name: Publish Android NuGet
-      if: inputs.publish_android_nuget == 'true'
+      if: inputs.publish_android_nuget
       run: |
         ls
         ls ./devolutions-crypto-nugets
@@ -96,7 +96,7 @@ jobs:
         fi
 
     - name: Publish Mac Full NuGet
-      if: inputs.publish_macos_full_nuget == 'true'
+      if: inputs.publish_macos_full_nuget
       run: |
         ls
         ls ./devolutions-crypto-nugets
@@ -115,7 +115,7 @@ jobs:
         fi
 
     - name: Publish Mac Modern NuGet
-      if: inputs.publish_macos_modern_nuget == 'true'
+      if: inputs.publish_macos_modern_nuget
       run: |
         ls
         ls ./devolutions-crypto-nugets
@@ -134,7 +134,7 @@ jobs:
         fi
 
     - name: Publish Windows NuGet
-      if: inputs.publish_windows_nuget == 'true'
+      if: inputs.publish_windows_nuget
       run: |
         ls
         ls ./devolutions-crypto-nugets
@@ -153,7 +153,7 @@ jobs:
         fi
 
     - name: Publish Linux NuGet
-      if: inputs.publish_linux_nuget == 'true'
+      if: inputs.publish_linux_nuget
       run: |
         ls
         ls ./devolutions-crypto-nugets
