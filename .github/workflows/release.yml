@@ -26,6 +26,10 @@ on:
         description: "Publish Devolutions.Crypto.Linux.*.nupkg"
         required: true
         type: boolean
+      publish_core_nuget:
+        description: "Publish Devolutions.Crypto.Core.*.nupkg"
+        required: true
+        type: boolean
       publish_nuget_dry_run:
         description: "NuGet Dry Run Publish Mode"
         required: true
@@ -60,8 +64,6 @@ jobs:
     - name: Publish iOS NuGet
       if: inputs.publish_ios_nuget
       run: |
-        ls
-        ls ./devolutions-crypto-nugets
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.iOS.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
         
         if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
@@ -79,8 +81,6 @@ jobs:
     - name: Publish Android NuGet
       if: inputs.publish_android_nuget
       run: |
-        ls
-        ls ./devolutions-crypto-nugets
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Android.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
         
         if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
@@ -98,8 +98,6 @@ jobs:
     - name: Publish Mac Full NuGet
       if: inputs.publish_macos_full_nuget
       run: |
-        ls
-        ls ./devolutions-crypto-nugets
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Mac.Full.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
         
         if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
@@ -117,8 +115,6 @@ jobs:
     - name: Publish Mac Modern NuGet
       if: inputs.publish_macos_modern_nuget
       run: |
-        ls
-        ls ./devolutions-crypto-nugets
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Mac.Modern.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
         
         if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
@@ -136,8 +132,6 @@ jobs:
     - name: Publish Windows NuGet
       if: inputs.publish_windows_nuget
       run: |
-        ls
-        ls ./devolutions-crypto-nugets
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Windows.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
         
         if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
@@ -155,8 +149,6 @@ jobs:
     - name: Publish Linux NuGet
       if: inputs.publish_linux_nuget
       run: |
-        ls
-        ls ./devolutions-crypto-nugets
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Linux.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
         
         if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
@@ -170,4 +162,22 @@ jobs:
         if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
           eval "$COMMAND"
         fi   
+
+    - name: Publish Core NuGet
+      if: inputs.publish_core_nuget
+      run: |
+        COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Core.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
+        
+        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+          echo "Dry Run : True"
+        else
+          echo "Dry Run : False"
+        fi
+
+        echo "Running : $COMMAND"
+
+        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+          eval "$COMMAND"
+        fi   
+
 
