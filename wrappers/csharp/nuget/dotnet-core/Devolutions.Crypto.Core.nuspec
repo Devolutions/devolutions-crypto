@@ -13,14 +13,14 @@
     <files>
 
     <!-- General Purpose Managed Library-->
-    <file src="../../dotnet-core/bin/Devolutions.Crypto.dll" target="lib/netstandard1.5/Devolutions.Crypto.dll" />
-    <file src="../../dotnet-core/bin/Devolutions.Crypto.pdb" target="lib/netstandard1.5/Devolutions.Crypto.pdb" />
     <file src="../../dotnet-core/bin/Devolutions.Crypto.dll" target="lib/netstandard2.0/Devolutions.Crypto.dll" />
     <file src="../../dotnet-core/bin/Devolutions.Crypto.pdb" target="lib/netstandard2.0/Devolutions.Crypto.pdb" />
 
+    <!-- Windows Specific Managed Library -->
+    <file src="../../windows/bin/Devolutions.Crypto.dll" target="lib/net45/Devolutions.Crypto.dll" />
+    <file src="../../windows/bin/Devolutions.Crypto.pdb" target="lib/net45/Devolutions.Crypto.pdb" />
+
     <!-- iOS Specific Managed Library -->
-    <file src="../../ios/bin/Devolutions.Crypto.dll" target="runtimes/ios/lib/netstandard1.5/Devolutions.Crypto.dll" />
-    <file src="../../ios/bin/Devolutions.Crypto.pdb" target="runtimes/ios/lib/netstandard1.5/Devolutions.Crypto.pdb" />
     <file src="../../ios/bin/Devolutions.Crypto.dll" target="runtimes/ios/lib/netstandard2.0/Devolutions.Crypto.dll" />
     <file src="../../ios/bin/Devolutions.Crypto.pdb" target="runtimes/ios/lib/netstandard2.0/Devolutions.Crypto.pdb" />
 
@@ -50,5 +50,8 @@
 
     <!-- Required for iOS and Android -->
     <file src="Devolutions.Crypto.Core.props" target="build/Devolutions.Crypto.Core.props"/>
+
+    <!-- Required for Windows (.Net Framework) -->
+    <file src="Devolutions.Crypto.Core.targets" target="build/Devolutions.Crypto.Core.targets"/>
 </files>
 </package>
