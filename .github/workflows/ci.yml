@@ -152,7 +152,7 @@ jobs:
 
   tests_nuget_android:
     needs: nugets_macos
-    runs-on: "macos-11"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
         with:

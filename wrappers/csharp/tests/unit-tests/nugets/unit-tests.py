@@ -478,51 +478,28 @@ def test_android(script_dir, version, args):
     output = get_output(["nuget", "add", "./Nugets/Devolutions.Crypto.Android." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
     print(output)
 
-    # Small hack to fix broken xamarin support
-    # If a PackageReference element is not present in the csproj
-    # The dotnet add package will fail with an unsupported project error.
-    print("hack csproj")
-
-    fixdata = """    <Reference Include="Xamarin.Android.NUnitLite" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Devolutions.Crypto.Android" Version="*" />
-  </ItemGroup>"""
-
-    filedata = ""
-    with open('./xamarin-android/xamarin-android.csproj','r') as file:
-        filedata = file.read()
-        filedata = filedata.replace("""    <Reference Include="Xamarin.Android.NUnitLite" />
-  </ItemGroup>""", fixdata)
-
-    with open('./xamarin-android/xamarin-android.csproj','w') as file:
-        file.write(filedata)
-
     print("Nuget Add Package Devolutions Crypto to project")
     print("==========================================================================")
     output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Android", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./xamarin-android")
     print(output)
 
-    # Remove the package reference
-    # It will leave the one that was added using dotnet add packge
-    filedata = ""
-    with open('./xamarin-android/xamarin-android.csproj','r') as file:
-        filedata = file.read()
-        filedata = filedata.replace("""<PackageReference Include="Devolutions.Crypto.Android" Version="*" />""", "")
-
-    with open('./xamarin-android/xamarin-android.csproj','w') as file:
-        file.write(filedata)
-
     print("Building Unit tests for XAMARIN ANDROID")
     print("=========================================================================")
-
-    # Install package onto emulator via -e
-    output = get_output(["msbuild", "./xamarin-android/xamarin-android.csproj" , "/t:clean,build,Install", "/p:AdbTarget=-e"])
+    
+    output = get_output(["msbuild", "./xamarin-android/xamarin-android.csproj" , "/t:clean,build,PackageForAndroid"])
     print(output)
     if("FAILED" in output):
         exit(1)
 
-    
+    print("Installing on emulator")
+    output = get_output(["adb", "-s", "emulator-5554", "install", "-r", "./xamarin-android/bin/Debug/xamarin_android.xamarin_android-Signed.apk"])
+    print(output)
+
+    print("List instrumentation")
+    output = get_output(["adb", "shell", "pm", "list", "instrumentation"])
+    print(output)
+
+    print("Running tests")
     output = get_output(["adb", "shell", "am", "instrument", "-w", "xamarin_android.xamarin_android/app.tests.TestInstrumentation"])
     print(output)
 
