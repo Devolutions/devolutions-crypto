@@ -21,24 +21,34 @@ jobs:
     needs: rust_code_format
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/workflows/native/native-build-linux
 
   native_build_macos:
     needs: rust_code_format
     runs-on: "macos-11"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
       - uses: ./.github/workflows/native/native-build-macos
 
+  native_build_ios:
+    needs: rust_code_format
+    runs-on: "macos-11"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/native/native-build-ios
+
   native_build_windows:
     needs: rust_code_format
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -49,27 +59,27 @@ jobs:
     needs: [native_build_linux , csharp_code_format]
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
       - uses: ./.github/workflows/nugets/nugets-linux
 
   nugets_windows:
-    needs: [native_build_linux, native_build_macos, native_build_windows , csharp_code_format] # All Natives for dotnet-core
+    needs: [native_build_linux, native_build_macos, native_build_ios, native_build_windows , csharp_code_format] # All Natives for dotnet-core
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
       - uses: ./.github/workflows/nugets/nugets-windows
 
   nugets_macos:
-    needs: [native_build_macos, native_build_linux, csharp_code_format]
+    needs: [native_build_macos, native_build_ios, native_build_linux, csharp_code_format]
     runs-on: "macos-11"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -81,7 +91,7 @@ jobs:
     needs: rust_code_format
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -92,7 +102,7 @@ jobs:
     needs: webassembly_build
     runs-on: "macos-11"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -103,7 +113,7 @@ jobs:
     needs: nugets_windows
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -113,7 +123,7 @@ jobs:
     needs: [nugets_macos, nugets_windows]
     runs-on: "macos-11"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
           submodules: "recursive"
@@ -124,7 +134,7 @@ jobs:
     needs: nugets_macos
     runs-on: "macos-11"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -134,7 +144,7 @@ jobs:
     needs: [nugets_linux, nugets_windows]
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -144,7 +154,7 @@ jobs:
     needs: nugets_macos
     runs-on: "macos-11"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -154,7 +164,7 @@ jobs:
     needs: tests_nuget_ios
     runs-on: "macos-11"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -164,13 +174,13 @@ jobs:
   rust_code_format:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/workflows/formatting/rust
 
   csharp_code_format:
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -181,7 +191,7 @@ jobs:
   build_python_linux:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -190,7 +200,7 @@ jobs:
   build_python_macos:
     runs-on: "macos-11"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -199,7 +209,7 @@ jobs:
   build_python_windows:
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -210,21 +220,21 @@ jobs:
     needs: build_python_linux
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/workflows/tests/python/linux
 
   test_python_macos:
     needs: build_python_macos
     runs-on: "macos-11"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/workflows/tests/python/macos
 
   test_python_windows:
     needs: build_python_windows
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/workflows/tests/python/windows
 
 
@@ -232,7 +242,7 @@ jobs:
   source_publish:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
@@ -242,7 +252,7 @@ jobs:
     runs-on: "ubuntu-latest"
     if: ${{ github.event.inputs.generate_release == 'true' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check out devolutions/actions
         uses: actions/checkout@v3
         with:

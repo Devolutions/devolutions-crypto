@@ -9,49 +9,10 @@ runs:
         set -e
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
         echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
-
-    - name: Setup Apple Rust toolchain
-      shell: pwsh
-      run: |
-        $RustupToolchains = Resolve-Path "~/.rustup/toolchains"
-        $ToolchainPrefix = Join-Path $RustupToolchains "prebuilt"
-        New-Item -ItemType Directory -Path $ToolchainPrefix | Out-Null
-
-        $DownloadPath = "/tmp/rust-download"
-        New-Item -ItemType Directory -Path $DownloadPath | Out-Null
-        Push-Location
-        Set-Location $DownloadPath
-
-        @(
-          "rustc-1.64.0-x86_64-apple-darwin.tar.xz",
-          "rustc-dev-1.64.0-x86_64-apple-darwin.tar.xz",
-          "rust-dev-1.64.0-x86_64-apple-darwin.tar.xz",
-          "rust-std-1.64.0-x86_64-apple-darwin.tar.xz"
-        ) | % {
-          Write-Host "Downloading $_"
-          wget -q https://github.com/awakecoding/llvm-prebuilt/releases/download/v2022.2.0/$_
-        }
-
-        @(
-          "rust-std-1.64.0-aarch64-apple-darwin.tar.xz",
-          "rust-std-1.64.0-x86_64-apple-ios.tar.xz",
-          "rust-std-1.64.0-aarch64-apple-ios.tar.xz"
-        ) | % {
-          Write-Host "Downloading $_"
-          wget -q https://static.rust-lang.org/dist/2022-09-22/$_
-        }
-
-        Get-Item *.tar.xz | % {
-          $FileName = $_.Name
-          $DirName = $FileName -Replace ".tar.xz",""
-          Write-Host "Extracting $FileName"
-          tar -xf $_
-          & "./${DirName}/install.sh" "--prefix=$ToolchainPrefix"
-        }
-
-        Pop-Location
-
-        rustup default prebuilt
+        source $HOME/.cargo/env
+        
+        rustup target add x86_64-apple-darwin
+        rustup target add aarch64-apple-darwin
 
     - name: Unit tests
       working-directory: ./devolutions-crypto
@@ -74,17 +35,9 @@ runs:
         source $HOME/.cargo/env
         python3 GeneratePackage.py -p mac-modern
 
-    - name: Building IOS
-      working-directory: ./wrappers/csharp
-      shell: bash
-      run: |
-        source $HOME/.cargo/env
-        python3 GeneratePackage.py -p ios
-
     - uses: actions/upload-artifact@v3
       with:
         name: artifact-staging
         path: |
           wrappers/csharp/macos-full/**
           wrappers/csharp/macos-modern/**
-          wrappers/csharp/ios/**
