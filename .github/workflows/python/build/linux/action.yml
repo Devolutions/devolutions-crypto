@@ -2,7 +2,7 @@ name: Build Linux Python
 runs:
   using: composite
   steps:
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
       with:
         python-version: "3.10"
 
@@ -34,7 +34,7 @@ runs:
       shell: bash
       run: maturin build -i python --release --features python --target=x86_64-unknown-linux-gnu
 
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
       with:
         python-version: "3.9"
     
@@ -43,7 +43,7 @@ runs:
       shell: bash
       run: maturin build -i python --release --features python --target=x86_64-unknown-linux-gnu
 
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
       with:
         python-version: "3.8"
       
@@ -52,7 +52,7 @@ runs:
       shell: bash
       run: maturin build -i python --release --features python --target=x86_64-unknown-linux-gnu
 
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
       with:
         python-version: "3.7"
       

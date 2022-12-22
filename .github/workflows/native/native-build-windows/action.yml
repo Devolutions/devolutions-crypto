@@ -3,7 +3,7 @@ description: This builds the windows native libraries
 runs:
   using: composite
   steps:
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
       with:
         python-version: "3.7"
 

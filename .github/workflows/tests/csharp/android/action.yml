@@ -16,23 +16,41 @@ runs:
     - name: Starting ADB Server
       shell: bash
       run: adb start-server
-      
-    - name: Installing SDK Android-29 x86_64
+
+    - name: Installing SDK Android-33 x86_64
       shell: bash
-      run: /Users/runner/Library/Android/sdk/tools/bin/sdkmanager "system-images;android-29;google_apis;x86_64"
+      run: /Users/runner/Library/Android/sdk/tools/bin/sdkmanager --install "system-images;android-33;google_apis;x86_64"
       
     - name: Creating Android device
       shell: bash
-      run: echo "no" | /Users/runner/Library/Android/sdk/tools/bin/avdmanager create avd --force -n test_64 -k "system-images;android-29;google_apis;x86_64" 
+      run: echo "no" | /Users/runner/Library/Android/sdk/tools/bin/avdmanager create avd -n test_emulator -k "system-images;android-33;google_apis;x86_64" 
 
     - name: Starting emulator
       working-directory: /Users/runner/Library/Android/sdk/tools/
       shell: bash
-      run: emulator @test_64 &  
+      run: emulator @test_emulator &  
       
     - name: Waiting for emulator to boot
       shell: bash
-      run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'  
+      run: |
+        adb wait-for-device
+
+        A=$(adb shell getprop sys.boot_completed | tr -d '\r')
+        I=0
+        while [ "$A" != "1" ] && [ $I -le 1800 ]; do
+                sleep 5
+                A=$(adb shell getprop sys.boot_completed | tr -d '\r')
+                ((I=I+5))
+        done
+
+        if [ $I -ge 1800 ]; then
+          echo "Device did not boot in 30 minutes, cancelling."
+          exit 1
+        else
+          echo "Boot Time : $I seconds"
+        fi
+
+        adb shell input keyevent 82 
       
     - name: Unit tests XAMARIN-ANDROID
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
