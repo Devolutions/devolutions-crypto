@@ -486,7 +486,7 @@ def test_android(script_dir, version, args):
     print("Building Unit tests for XAMARIN ANDROID")
     print("=========================================================================")
     
-    output = get_output(["msbuild", "./xamarin-android/xamarin-android.csproj" , "/t:clean,build,PackageForAndroid"])
+    output = get_output(["msbuild", "./xamarin-android/xamarin-android.csproj" , "/t:clean,build,PackageForAndroid,SignAndroidPackage"])
     print(output)
     if("FAILED" in output):
         exit(1)

@@ -32,7 +32,25 @@ runs:
       
     - name: Waiting for emulator to boot
       shell: bash
-      run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'  
+      run: |
+        adb wait-for-device
+
+        A=$(adb shell getprop sys.boot_completed | tr -d '\r')
+        I=0
+        while [ "$A" != "1" ] && [ $I -le 1800 ]; do
+                sleep 5
+                A=$(adb shell getprop sys.boot_completed | tr -d '\r')
+                ((I=I+5))
+        done
+
+        if [ $I -ge 1800 ]; then
+          echo "Device did not boot in 30 minutes, cancelling."
+          exit 1
+        else
+          echo "Boot Time : $I seconds"
+        fi
+
+        adb shell input keyevent 82 
       
     - name: Unit tests XAMARIN-ANDROID
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
