@@ -12,8 +12,7 @@ runs:
     
     - name: Setup iOS minimum version
       shell: bash
-      run: |
-        echo "IPHONEOS_DEPLOYMENT_TARGET=12.1" >> $GITHUB_ENV
+      run: echo "IPHONEOS_DEPLOYMENT_TARGET=12.1" >> $GITHUB_ENV
 
     - name: Setup Apple Rust toolchain
       shell: pwsh
