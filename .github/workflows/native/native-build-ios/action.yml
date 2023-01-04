@@ -15,6 +15,11 @@ runs:
       run: |
         echo "##vso[task.setvariable variable=IPHONEOS_DEPLOYMENT_TARGET;]12.1"
 
+    - name: Setup iOS minimum version v2
+      shell: pwsh
+      run: |
+        echo "IPHONEOS_DEPLOYMENT_TARGET=12.1" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+
     - name: Setup Apple Rust toolchain
       shell: pwsh
       run: |
