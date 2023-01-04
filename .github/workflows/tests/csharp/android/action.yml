@@ -37,14 +37,15 @@ runs:
 
         A=$(adb shell getprop sys.boot_completed | tr -d '\r')
         I=0
-        while [ "$A" != "1" ] && [ $I -le 1800 ]; do
+        while [ "$A" != "1" ] && [ $I -le 900 ]; do
                 sleep 5
                 A=$(adb shell getprop sys.boot_completed | tr -d '\r')
                 ((I=I+5))
+                echo "Waiting : $I seconds"
         done
 
-        if [ $I -ge 1800 ]; then
-          echo "Device did not boot in 30 minutes, cancelling."
+        if [ $I -ge 900 ]; then
+          echo "Device did not boot in 15 minutes, cancelling."
           exit 1
         else
           echo "Boot Time : $I seconds"
