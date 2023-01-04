@@ -32,6 +32,7 @@ runs:
       
     - name: Waiting for emulator to boot
       shell: bash
+      timeout-minutes: 20
       run: |
         adb wait-for-device
 
