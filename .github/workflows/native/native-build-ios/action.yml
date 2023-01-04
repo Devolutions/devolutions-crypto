@@ -8,7 +8,11 @@ runs:
       run: |
         set -e
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
-        echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+    
+    - name: Setup iOS minimum version
+      shell: bash
+      run: echo "IPHONEOS_DEPLOYMENT_TARGET=12.1" >> $GITHUB_ENV
 
     - name: Setup Apple Rust toolchain
       shell: pwsh

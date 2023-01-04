@@ -421,6 +421,13 @@ def build_ios(assembly_manifest, version, args):
             "filename" : "aarch64/libDevolutionsCrypto.dylib"},
         ]
 
+    print("Checking minimum version variable")
+    if "IPHONEOS_DEPLOYMENT_TARGET" in os.environ:
+        print("IPHONEOS_DEPLOYMENT_TARGET = " + os.getenv("IPHONEOS_DEPLOYMENT_TARGET"))
+    else:
+        print("Variable IPHONEOS_DEPLOYMENT_TARGET not found!")
+        exit(1)
+
     target_folder = "./ios"
     if args.output:
         target_folder = args.output
