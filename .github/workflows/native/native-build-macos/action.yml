@@ -9,6 +9,7 @@ runs:
         set -e
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
         source $HOME/.cargo/env
         
         rustup target add x86_64-apple-darwin
