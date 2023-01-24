@@ -12,10 +12,29 @@ on:
         required: true
         type: boolean
       version:
-        required: true
+        required: false
         type: string
+        default: ""
+
+
+env:
+  MANAGED_VERSION : ${{ github.event.inputs.version }}
 
 jobs:
+  setup_env_variable:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Setup MANAGED version"
+        run: |
+          if [ -z "$MANAGED_VERSION" ]
+          then
+            echo "Managed version is empty! Setting it up to $(date '+%Y.%-m.%-d')!"
+            echo "MANAGED_VERSION=$(date '+%Y.%-m.%-d')" >> $GITHUB_ENV
+          else
+            echo "MANAGED_VERSION=$MANAGED_VERSION"
+          fi
+
+
   #### NATIVE BUILD ####
   native_build_linux:
     needs: rust_code_format
@@ -172,8 +191,10 @@ jobs:
 
   #### CODE FORMATTING ####
   rust_code_format:
+    needs: setup_env_variable
     runs-on: "ubuntu-latest"
     steps:
+      - run: echo "Rust code format managed version $MANAGED_VERSION"
       - uses: actions/checkout@v3
       - uses: ./.github/workflows/formatting/rust
 
