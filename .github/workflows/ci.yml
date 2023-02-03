@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: "Setup MANAGED version"
         run: |
-          echo "MANAGED_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          #echo "MANAGED_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
 
           if [ -z "$MANAGED_VERSION" ]
           then
