@@ -30,7 +30,9 @@ jobs:
             echo "MANAGED_VERSION=$(date '+%Y.%-m.%-d')" >> $GITHUB_ENV
           fi
 
-          echo "Version is now : $MANAGED_VERSION"
+      - name: "Print version"
+        run: |
+          echo "Version is now : ${{ env.MANAGED_VERSION }}"
 
 
 
