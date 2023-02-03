@@ -195,7 +195,7 @@ jobs:
     needs: setup_env_variable
     runs-on: "ubuntu-latest"
     steps:
-      - run: echo "Rust code format managed version $MANAGED_VERSION"
+      - run: echo "Rust code format managed version ${{ env.MANAGED_VERSION }}"
       - uses: actions/checkout@v3
       - uses: ./.github/workflows/formatting/rust
 
