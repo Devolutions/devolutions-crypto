@@ -19,20 +19,19 @@ on:
 jobs:
   setup_env_variable:
     runs-on: "ubuntu-latest"
+    outputs:
+      MANAGED_VERSION: ${{ steps.step1.outputs.MANAGED_VERSION }}
     steps:
       - name: "Setup MANAGED version"
+        id: step1
         run: |
-          #echo "MANAGED_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "MANAGED_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
 
           if [ -z "$MANAGED_VERSION" ]
           then
             echo "Managed version is empty! Setting it up to $(date '+%Y.%-m.%-d')!"
-            echo "MANAGED_VERSION=$(date '+%Y.%-m.%-d')" >> $GITHUB_ENV
+            echo "MANAGED_VERSION=$(date '+%Y.%-m.%-d')" >> $GITHUB_OUTPUT
           fi
-
-      - name: "Print version"
-        run: |
-          echo "Version is now : ${{ env.MANAGED_VERSION }}"
 
 
 
@@ -195,7 +194,7 @@ jobs:
     needs: setup_env_variable
     runs-on: "ubuntu-latest"
     steps:
-      - run: echo "Rust code format managed version ${{ env.MANAGED_VERSION }}"
+      - run: echo "Rust code format managed version ${{ needs.setup_env_variable.outputs.MANAGED_VERSION }}"
       - uses: actions/checkout@v3
       - uses: ./.github/workflows/formatting/rust
 
