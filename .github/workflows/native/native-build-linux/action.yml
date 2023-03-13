@@ -45,13 +45,12 @@ runs:
     - name: Configure Android NDK
       shell: bash
       run: |
-        # Install NDK 21 after GitHub update
-        # https://github.com/actions/virtual-environments/issues/5595
+        # Install NDK 25
 
         ANDROID_ROOT="/usr/local/lib/android"
         ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
-        echo "y" | $SDKMANAGER "ndk;21.4.7075529"
+        echo "y" | $SDKMANAGER "ndk;25.2.9519653"
       
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
 
@@ -60,10 +59,10 @@ runs:
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang\"
         [target.armv7-linux-androideabi]
         ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar\"
-        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi16-clang\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi19-clang\"
         [target.i686-linux-android]
         ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-ar\"
-        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android16-clang\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android19-clang\"
         [target.x86_64-linux-android]
         ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ar\"
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> ./.cargo/config
@@ -75,7 +74,7 @@ runs:
         export ANDROID_ROOT="/usr/local/lib/android"
         export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"     
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
-        ln -sfn $ANDROID_SDK_ROOT/ndk/21.4.7075529 $ANDROID_NDK
+        ln -sfn $ANDROID_SDK_ROOT/ndk/25.2.9519653 $ANDROID_NDK
 
         python GeneratePackage.py -p android
 
