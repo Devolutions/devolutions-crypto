@@ -53,7 +53,7 @@ getrandom1 = { package = "getrandom", version = "0.1", features = ["wasm-bindgen
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
 
 [build-dependencies]
-cbindgen = "0.20"
+cbindgen = "0.24.3"
 
 [dependencies.pyo3]
 optional = true
