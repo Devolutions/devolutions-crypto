@@ -34,7 +34,7 @@ jobs:
           echo "Writing to file..."
           cat config.txt
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: config.txt
           path: config.txt
@@ -202,6 +202,7 @@ jobs:
       - uses: ./.github/workflows/formatting/rust
 
   csharp_code_format:
+    needs: setup_config
     runs-on: "windows-latest"
     steps:
       - uses: actions/checkout@v3
@@ -289,7 +290,7 @@ jobs:
           path: devolutions-crypto
       
       - name: Save BOM
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: bom_devolutions_crypto_rust.xml
           path: devolutions-crypto/bom.xml
