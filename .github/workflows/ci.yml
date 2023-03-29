@@ -201,12 +201,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/workflows/formatting/rust
+
+  csharp_code_format:
+    runs-on: "windows-latest"
+    steps:
       - uses: actions/checkout@v3
         with:
           lfs: true
       - run: git lfs pull
       - uses: ./.github/workflows/formatting/csharp
-  
 
   #### PYTHON BUILD ####
   build_python_linux:
