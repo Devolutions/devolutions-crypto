@@ -75,7 +75,7 @@ jobs:
 
   #### NUGET BUILD ####
   nugets_linux:
-    needs: [native_build_linux , csharp_code_format, setup_version_managed]
+    needs: [native_build_linux , csharp_code_format, setup_managed_version]
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v3
@@ -85,7 +85,7 @@ jobs:
       - uses: ./.github/workflows/nugets/nugets-linux
 
   nugets_windows:
-    needs: [native_build_linux, native_build_macos, native_build_ios, native_build_windows , csharp_code_format, setup_version_managed] # All Natives for dotnet-core
+    needs: [native_build_linux, native_build_macos, native_build_ios, native_build_windows , csharp_code_format, setup_managed_version] # All Natives for dotnet-core
     runs-on: "windows-latest"
     steps:
       - uses: actions/checkout@v3
@@ -95,7 +95,7 @@ jobs:
       - uses: ./.github/workflows/nugets/nugets-windows
 
   nugets_macos:
-    needs: [native_build_macos, native_build_ios, native_build_linux, csharp_code_format, setup_version_managed]
+    needs: [native_build_macos, native_build_ios, native_build_linux, csharp_code_format, setup_managed_version]
     runs-on: "macos-11"
     steps:
       - uses: actions/checkout@v3
@@ -180,7 +180,7 @@ jobs:
       - uses: ./.github/workflows/tests/csharp/android
 
   tests_ios_integration:
-    needs: [tests_nuget_ios, setup_version_managed]
+    needs: [tests_nuget_ios, setup_managed_version]
     runs-on: "macos-11"
     steps:
       - uses: actions/checkout@v3
