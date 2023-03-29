@@ -43,7 +43,7 @@ def main():
 
     version = ""
 
-    with open('../../../version-managed.txt', 'r') as filee:
+    with open('../../../config.txt', 'r') as filee:
         data=filee.read()
         version = data.split("version = \"")[1].split("\"", 1)[0]
 

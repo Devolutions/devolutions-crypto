@@ -38,7 +38,7 @@ def main():
 
     version = ""
 
-    with open('../version-managed.txt', 'r') as file:
+    with open('../config.txt', 'r') as file:
         data=file.read()
         version = data.split("version = \"")[1].split("\"", 1)[0]
 
@@ -49,7 +49,7 @@ def main():
 def version_live_change():
     print("Changing version manifest...")
     # Generate assembly manifest with the right version
-    with open('../version-managed.txt', 'r') as file:
+    with open('../config.txt', 'r') as file:
         data=file.read()
         version_managed = data.split("version = \"")[1].split("\"", 1)[0]
 
