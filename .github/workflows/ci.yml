@@ -34,7 +34,6 @@ jobs:
           echo "Writing to file..."
           cat config.txt
 
-                - name: Save BOM
       - uses: actions/upload-artifact@v2
         with:
           name: config.txt
