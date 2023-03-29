@@ -2,7 +2,13 @@ name: Unit Tests Windows Nuget
 description: This tests the windows nuget package.
 runs:
   using: composite
-  steps:  
+  steps:
+    - name: Download Config
+      uses: actions/download-artifact@v3
+      with:
+        name: config.txt
+        path: ./wrappers/csharp
+        
     - uses: actions/setup-python@v4
       with:
         python-version: "3.7"

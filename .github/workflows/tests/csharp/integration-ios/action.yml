@@ -3,6 +3,12 @@ description: Ensure that the iOS package is compatible with other rust projects.
 runs:
   using: composite
   steps:
+    - name: Download Config
+      uses: actions/download-artifact@v3
+      with:
+        name: config.txt
+        path: ./wrappers/csharp
+        
     - name: Download Nugets
       uses: actions/download-artifact@v3
       with:

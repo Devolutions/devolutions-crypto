@@ -3,6 +3,12 @@ description: This tests the macOS nugets package.
 runs:
   using: composite
   steps:
+    - name: Download Config
+      uses: actions/download-artifact@v3
+      with:
+        name: config.txt
+        path: ./wrappers/csharp
+        
     - name: Download Nugets Libs
       uses: actions/download-artifact@v3
       with:

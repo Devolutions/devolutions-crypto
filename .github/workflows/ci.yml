@@ -134,7 +134,7 @@ jobs:
 
   #### TESTS NUGETS ####
   tests_nuget_windows:
-    needs: nugets_windows
+    needs: [nugets_windows, setup_config]
     runs-on: "windows-latest"
     steps:
       - uses: actions/checkout@v3
@@ -144,7 +144,7 @@ jobs:
       - uses: ./.github/workflows/tests/csharp/windows
 
   tests_nuget_macos:
-    needs: [nugets_macos, nugets_windows]
+    needs: [nugets_macos, nugets_windows, setup_config]
     runs-on: "macos-11"
     steps:
       - uses: actions/checkout@v3
@@ -155,7 +155,7 @@ jobs:
       - uses: ./.github/workflows/tests/csharp/macos
 
   tests_nuget_ios:
-    needs: nugets_macos
+    needs: [nugets_macos, setup_config]
     runs-on: "macos-11"
     steps:
       - uses: actions/checkout@v3
@@ -165,7 +165,7 @@ jobs:
       - uses: ./.github/workflows/tests/csharp/ios
 
   tests_nuget_linux:
-    needs: [nugets_linux, nugets_windows]
+    needs: [nugets_linux, nugets_windows, setup_config]
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v3
@@ -175,7 +175,7 @@ jobs:
       - uses: ./.github/workflows/tests/csharp/linux
 
   tests_nuget_android:
-    needs: nugets_macos
+    needs: [nugets_macos, setup_config]
     runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
@@ -185,7 +185,7 @@ jobs:
       - uses: ./.github/workflows/tests/csharp/android
 
   tests_ios_integration:
-    needs: tests_nuget_ios
+    needs: [tests_nuget_ios, setup_config]
     runs-on: "macos-11"
     steps:
       - uses: actions/checkout@v3

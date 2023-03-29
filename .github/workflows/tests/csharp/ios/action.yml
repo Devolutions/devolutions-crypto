@@ -3,6 +3,12 @@ description: This tests the iOS nuget package.
 runs:
   using: composite
   steps:
+    - name: Download Config
+      uses: actions/download-artifact@v3
+      with:
+        name: config.txt
+        path: ./wrappers/csharp
+        
     - name: Download Native Libs
       uses: actions/download-artifact@v3
       with:
