@@ -201,11 +201,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/workflows/formatting/rust
-        uses: actions/upload-artifact@v2
-        with:
-          name: bom_devolutions_crypto_rust.xml
-          path: devolutions-crypto/bom.xml
-
       - uses: actions/checkout@v3
         with:
           lfs: true

@@ -3,7 +3,7 @@ description: This builds the linux compatible nuget
 runs:
   using: composite
   steps:
-  - name: Download Version
+  - name: Download Config
     uses: actions/download-artifact@v3
     with:
       name: config.txt
