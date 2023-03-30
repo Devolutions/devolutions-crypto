@@ -23,14 +23,16 @@ jobs:
       - name: "Setup version artifact"
         run: |
           echo "MANAGED_VERSION=${{ github.event.inputs.version }}"
+          MANAGED_VERSION=${{ github.event.inputs.version }}
 
           if [ -z "$MANAGED_VERSION" ]
           then
             echo "Managed version is empty! Setting it up to $(date '+%Y.%-m.%-d')!"
             echo "MANAGED_VERSION=$(date '+%Y.%-m.%-d')"
+            MANAGED_VERSION=$(date '+%Y.%-m.%-d')
           fi
 
-          echo "version = \"$(date '+%Y.%-m.%-d')\"" >> config.txt
+          echo "version = \"$MANAGED_VERSION\"" >> config.txt
           echo "Writing to file..."
           cat config.txt
 
