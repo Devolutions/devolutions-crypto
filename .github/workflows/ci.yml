@@ -20,7 +20,7 @@ jobs:
   setup_config:
     runs-on: ubuntu-latest
     steps:
-      - name: "Setup config artifact"
+      - name: Setup config artifact
         run: |
           echo "MANAGED_VERSION=${{ inputs.version }}"
           MANAGED_VERSION=${{ inputs.version }}
