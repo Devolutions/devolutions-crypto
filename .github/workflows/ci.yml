@@ -41,7 +41,6 @@ jobs:
           name: config.txt
           path: config.txt
 
-
   #### NATIVE BUILD ####
   native_build_linux:
     needs: [rust_code_format, setup_config]
