@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: "Setup config artifact"
         run: |
-          echo "MANAGED_VERSION=${{ github.event.inputs.version }}"
+          echo "MANAGED_VERSION=${{ inputs.version }}"
           MANAGED_VERSION=${{ inputs.version }}
 
           if [ -z "$MANAGED_VERSION" ]
