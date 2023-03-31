@@ -2,7 +2,13 @@ name: Build Linux Nuget
 description: This builds the linux compatible nuget
 runs:
   using: composite
-  steps:  
+  steps:
+  - name: Download Config
+    uses: actions/download-artifact@v3
+    with:
+      name: config.txt
+      path: ./wrappers/csharp
+        
   - name: Download Native Libs
     uses: actions/download-artifact@v3
     with:
