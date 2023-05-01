@@ -1,72 +1,68 @@
 [package]
 name = "devolutions-crypto"
-version = "0.8.0"
+version = "0.9.0-pre.0"
 authors = ["Philippe Dugre <pdugre@devolutions.net>", "Mathieu Morrissette <mmorrissette@devolutions.net>"]
-edition = "2018"
+edition = "2021"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/devolutions/devolutions-crypto"
 repository = "https://github.com/devolutions/devolutions-crypto"
 description = "An abstraction layer for the cryptography used by Devolutions"
+resolver = "2"
 
 [lib]
 name = "devolutions_crypto"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-aead = "0.4"
-aes = "0.7"
-base64 = "0.13"
-block-modes = "0.8"
+aead = "0.5"
+aes = "0.8"
+base64 = "0.21"
+cbc = { version = "0.1.2", features = ["block-padding", "alloc"] }
 byteorder = "1"
-chacha20poly1305 = "0.9"
+chacha20poly1305 = "0.10"
 cfg-if = "1"
-ed25519-dalek = "1"
-hmac = "0.11"
-num_enum = "0.5"
-pbkdf2 = { version = "0.9", default-features = false }
-scrypt = { version = "0.8", default-features = false }
+hmac = "0.12"
+num_enum = "0.6"
+pbkdf2 = { version = "0.12", default-features = false }
+scrypt = { version = "0.11", default-features = false }
 sharks = "0.5"
-sha2 = "0.9"
-strum = "0.22"
-strum_macros = "0.22"
+sha2 = "0.10"
+strum = { version = "0.24", features = ["derive"] }
 subtle = "2"
-x25519-dalek = "1"
-zeroize = "1"
-zeroize_derive = "1"
+zeroize = { version = "1.6" }
 rand = "0.8"
+rand_core = { version = "0.6" }
 
-# Old version, imported for x25519_dalek
-rand_core = "0.5"
-
-# FIXME: https://docs.rs/getrandom/0.2.2/getrandom/#webassembly-support
-# let `getrandom` know that JavaScript is available for our targets
-# `getrandom` is not used directly, but by adding the right feature here
-# it will be compiled with it in our dependencies as well (since union of
-# all the features selected is used when building a Cargo project)
-getrandom = { version = "0.2", features = ["js"] }
-getrandom1 = { package = "getrandom", version = "0.1", features = ["wasm-bindgen"] }
+ed25519-dalek = { version = "2.0.0-rc.2", features = [ "rand_core" ] }
+x25519-dalek = { version = "2.0.0-rc.2", features = [ "static_secrets" ] }
 
 # used for fuzzing
 # Version is pinned because newer version requires lifetime annotations
 #   that isn't compatible with the header trait
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
 
-[build-dependencies]
-cbindgen = "0.24.3"
+pyo3 = { version = "0.18", features = ["extension-module"], optional = true }
 
-[dependencies.pyo3]
-optional = true
-version = "0.15"
-features = ["extension-module"]
+
+[build-dependencies]
+cbindgen = "0.24"
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
-rust-argon2 = { version = "0.8", default-features = false }
-wasm-bindgen = { version = "0.2.70", features = ["serde-serialize"], optional = true }
-js-sys = { version = "0.3.50", optional = true }
+rust-argon2 = { version = "1.0", default-features = false }
+wasm-bindgen = { version = "0.2.84", optional = true }
+serde-wasm-bindgen = { version = "0.5", optional = true }
+js-sys = { version = "0.3.61", optional = true }
+
+# FIXME: https://docs.rs/getrandom/0.2.2/getrandom/#webassembly-support
+# let `getrandom` know that JavaScript is available for our targets
+# `getrandom` is not used directly, but by adding the right feature here
+# it will be compiled with it in our dependencies as well (since union of
+# all the features selected is used when building a Cargo project)
+getrandom = { version = "0.2", features = ["js", "wasm-bindgen"] }
 
 [target.'cfg(not(target_arch="wasm32"))'.dependencies]
-rust-argon2 = "0.8"
+rust-argon2 = "1.0"
 
 [target.'cfg(target_arch="wasm32")'.dev-dependencies]
 wasm-bindgen-test = "0.3"
@@ -76,5 +72,5 @@ default = []
 ffi = []
 python = ["pyo3"]
 fuzz = ["arbitrary", "sharks/fuzzing"]
-wbindgen = ["wasm-bindgen", "js-sys"]
+wbindgen = ["wasm-bindgen", "serde-wasm-bindgen", "js-sys"]
 

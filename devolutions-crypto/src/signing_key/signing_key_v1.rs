@@ -1,8 +1,9 @@
-///! Signing Keys V1: ed25519
+//! Signing Keys V1: ed25519
 use super::Error;
 use super::Result;
 
-use ed25519_dalek::{Keypair, PublicKey};
+use ed25519_dalek::{SigningKey, VerifyingKey};
+use rand::rngs::OsRng;
 
 use std::convert::TryFrom;
 
@@ -10,13 +11,13 @@ use std::convert::TryFrom;
 use arbitrary::Arbitrary;
 
 pub struct SigningKeyV1Pair {
-    keypair: Keypair,
+    keypair: SigningKey,
 }
 
 impl Clone for SigningKeyV1Pair {
     fn clone(&self) -> Self {
         SigningKeyV1Pair {
-            keypair: clone_keypair(&self.keypair),
+            keypair: self.keypair.clone(),
         }
     }
 }
@@ -39,7 +40,7 @@ impl Arbitrary for SigningKeyV1Pair {
 
 #[derive(Clone, Debug)]
 pub struct SigningKeyV1Public {
-    key: PublicKey,
+    key: VerifyingKey,
 }
 
 #[cfg(feature = "fuzz")]
@@ -54,7 +55,7 @@ impl Arbitrary for SigningKeyV1Public {
 
 impl From<SigningKeyV1Pair> for Vec<u8> {
     fn from(key: SigningKeyV1Pair) -> Self {
-        key.keypair.to_bytes().to_vec()
+        key.keypair.to_keypair_bytes().to_vec()
     }
 }
 
@@ -72,7 +73,7 @@ impl TryFrom<&[u8]> for SigningKeyV1Pair {
             return Err(Error::InvalidLength);
         }
 
-        match Keypair::from_bytes(key) {
+        match SigningKey::from_keypair_bytes(key.try_into().unwrap()) {
             Ok(k) => Ok(Self { keypair: k }),
             Err(_) => Err(Error::InvalidData),
         }
@@ -87,7 +88,7 @@ impl TryFrom<&[u8]> for SigningKeyV1Public {
             return Err(Error::InvalidLength);
         }
 
-        match PublicKey::from_bytes(key) {
+        match VerifyingKey::from_bytes(key.try_into().unwrap()) {
             Ok(k) => Ok(Self { key: k }),
             Err(_) => Err(Error::InvalidData),
         }
@@ -95,8 +96,9 @@ impl TryFrom<&[u8]> for SigningKeyV1Public {
 }
 
 pub fn generate_signing_keypair() -> SigningKeyV1Pair {
-    let mut rng = rand_core::OsRng {};
-    let keypair = Keypair::generate(&mut rng);
+    let mut csprng = OsRng;
+
+    let keypair = SigningKey::generate(&mut csprng);
 
     SigningKeyV1Pair { keypair }
 }
@@ -104,25 +106,19 @@ pub fn generate_signing_keypair() -> SigningKeyV1Pair {
 impl SigningKeyV1Pair {
     pub fn get_public_key(&self) -> SigningKeyV1Public {
         SigningKeyV1Public {
-            key: self.keypair.public,
+            key: self.keypair.verifying_key(),
         }
     }
 }
 
-impl From<&SigningKeyV1Public> for PublicKey {
+impl From<&SigningKeyV1Public> for VerifyingKey {
     fn from(data: &SigningKeyV1Public) -> Self {
         data.key
     }
 }
 
-impl From<&SigningKeyV1Pair> for Keypair {
+impl From<&SigningKeyV1Pair> for SigningKey {
     fn from(data: &SigningKeyV1Pair) -> Self {
-        clone_keypair(&data.keypair)
+        data.keypair.clone()
     }
-}
-
-fn clone_keypair(key: &Keypair) -> Keypair {
-    // Unfortunately, the struct does not implement clone, so we need to hack around it
-    Keypair::from_bytes(&key.to_bytes())
-        .expect("unserializing a freshly serialized key shouldn't fail")
 }

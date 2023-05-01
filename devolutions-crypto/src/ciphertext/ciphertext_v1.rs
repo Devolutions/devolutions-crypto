@@ -1,4 +1,4 @@
-///! Ciphertext V1: AES256-CBC with HMAC-SHA256
+//! Ciphertext V1: AES256-CBC with HMAC-SHA256
 use super::Error;
 use super::Header;
 use super::Result;
@@ -8,8 +8,8 @@ use super::Ciphertext;
 use std::convert::TryFrom;
 
 use aes::Aes256;
-use block_modes::{block_padding::Pkcs7, BlockMode, Cbc};
-use hmac::{Hmac, Mac, NewMac};
+use cbc::cipher::{block_padding::Pkcs7, BlockDecryptMut, BlockEncryptMut, KeyIvInit};
+use hmac::{Hmac, Mac};
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
@@ -63,10 +63,10 @@ impl TryFrom<&[u8]> for CiphertextV1 {
 impl CiphertextV1 {
     fn split_key(secret: &[u8], encryption_key: &mut [u8], signature_key: &mut [u8]) {
         let salt = b"\x00";
-        pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, encryption_key);
+        let _ = pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, encryption_key);
 
         let salt = b"\x01";
-        pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, signature_key);
+        let _ = pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, signature_key);
     }
 
     pub fn encrypt(data: &[u8], key: &[u8], header: &Header<Ciphertext>) -> Result<CiphertextV1> {
@@ -80,8 +80,8 @@ impl CiphertextV1 {
         OsRng.fill_bytes(&mut iv);
 
         // Create cipher object
-        let cipher = Cbc::<Aes256, Pkcs7>::new_from_slices(&encryption_key, &iv)?;
-        let ciphertext = cipher.encrypt_vec(data);
+        let cipher = cbc::Encryptor::<Aes256>::new_from_slices(&encryption_key, &iv)?;
+        let ciphertext = cipher.encrypt_padded_vec_mut::<Pkcs7>(data);
 
         // Zero out the key
         encryption_key.zeroize();
@@ -120,14 +120,14 @@ impl CiphertextV1 {
 
         let mut mac = Hmac::<Sha256>::new_from_slice(&signature_key)?;
         mac.update(&mac_data);
-        mac.verify(&self.hmac)?;
+        mac.verify_slice(&self.hmac)?;
 
         // Zeroize the key
         signature_key.zeroize();
         mac_data.zeroize();
 
-        let cipher = Cbc::<Aes256, Pkcs7>::new_from_slices(&encryption_key, &self.iv)?;
-        let result = cipher.decrypt_vec(&self.ciphertext)?;
+        let cipher = cbc::Decryptor::<Aes256>::new_from_slices(&encryption_key, &self.iv)?;
+        let result = cipher.decrypt_padded_vec_mut::<Pkcs7>(&self.ciphertext)?;
 
         // Zeroize the key
         encryption_key.zeroize();

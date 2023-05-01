@@ -1,4 +1,4 @@
-///! Signature V1: ed25519
+//! Signature V1: ed25519
 use super::Error;
 use super::Result;
 
@@ -6,7 +6,7 @@ use super::{SigningKeyPair, SigningPublicKey};
 
 use std::convert::TryFrom;
 
-use ed25519_dalek::{Keypair, PublicKey, Signature, Signer, Verifier};
+use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -47,14 +47,14 @@ impl TryFrom<&[u8]> for SignatureV1 {
 
 impl SignatureV1 {
     pub fn sign(data: &[u8], key: &SigningKeyPair) -> Self {
-        let key = Keypair::from(key);
+        let key = SigningKey::from(key);
         let signature = key.sign(data);
 
         Self { signature }
     }
 
     pub fn verify(&self, data: &[u8], key: &SigningPublicKey) -> bool {
-        let key = PublicKey::from(key);
+        let key = VerifyingKey::from(key);
 
         key.verify(data, &self.signature).is_ok()
     }

@@ -1,9 +1,8 @@
 use std::convert::{TryFrom as _, TryInto as _};
 
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
 
-use js_sys::{Array, Uint8Array};
+use js_sys::Array;
 
 use super::utils;
 
@@ -220,7 +219,7 @@ pub fn derive_keypair(
 
 #[wasm_bindgen(js_name = "generateSigningKeyPair")]
 pub fn generate_signing_keypair(version: Option<SigningKeyVersion>) -> SigningKeyPair {
-    signing_key::generate_signing_keypair(version.unwrap_or(SigningKeyVersion::Latest))
+    signing_key::generate_signing_keypair(version.unwrap_or(SigningKeyVersion::Latest)).into()
 }
 
 #[wasm_bindgen(js_name = "mixKeyExchange")]
@@ -270,14 +269,16 @@ pub fn generate_shared_key(
         version.unwrap_or(SecretSharingVersion::Latest),
     )?
     .into_iter()
-    .map(|x| match JsValue::from_serde(&Into::<Vec<u8>>::into(x)) {
-        Ok(s) => Ok(s),
-        Err(e) => {
-            let error = js_sys::Error::new(&format!("{}", e));
-            error.set_name("SerializationError");
-            Err(error.into())
-        }
-    })
+    .map(
+        |x| match serde_wasm_bindgen::to_value(&Into::<Vec<u8>>::into(x)) {
+            Ok(s) => Ok(s),
+            Err(e) => {
+                let error = js_sys::Error::new(&format!("{}", e));
+                error.set_name("SerializationError");
+                Err(error.into())
+            }
+        },
+    )
     .collect()
 }
 
@@ -290,17 +291,21 @@ export function joinShares(shares: Uint8Array[]): Uint8Array;"#;
 
 #[wasm_bindgen(js_name = "joinShares", skip_typescript)]
 pub fn join_shares(shares: Array) -> Result<Vec<u8>, JsValue> {
-    // Hack to accept both Array<Array<u8>> and Array<Uint8Array> from Javascript.
-    // Issue linked here: https://github.com/rustwasm/wasm-bindgen/issues/2017
-    let shares = JsValue::from(shares.map(&mut |s, _, _| {
-        if JsCast::is_instance_of::<Uint8Array>(&s) {
-            JsValue::from(Array::from(&s))
-        } else {
-            s
-        }
-    }));
+    // // Hack to accept both Array<Array<u8>> and Array<Uint8Array> from Javascript.
+    // // Issue linked here: https://github.com/rustwasm/wasm-bindgen/issues/2017
+    // let shares = JsValue::from(shares.map(&mut |s, _, _| {
+    //     if JsCast::is_instance_of::<Uint8Array>(&s) {
+    //         JsValue::from(Array::from(&s))
+    //     } else {
+    //         s
+    //     }
+    // }));
+    // TODO: Remove this comment once read in the PR. And tested.
+    //       using serde_wasm_bindgen as discussed in the thread since `.into_serde()` is now
+    //       deprecated.
+    //       - sbergerondrouin
 
-    let shares: Vec<Vec<u8>> = match shares.into_serde() {
+    let shares: Vec<Vec<u8>> = match serde_wasm_bindgen::from_value(JsValue::from(shares)) {
         Ok(s) => s,
         Err(e) => {
             let error = js_sys::Error::new(&format!("{}", e));

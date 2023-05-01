@@ -5,8 +5,7 @@ use std::{
 
 use argon2::{Config, ThreadMode, Variant, Version};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use rand::rngs::OsRng;
-use rand::Rng;
+use rand_core::{OsRng, RngCore};
 
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::prelude::*;
@@ -52,7 +51,7 @@ pub struct Argon2Parameters {
 impl Default for Argon2Parameters {
     fn default() -> Self {
         let mut salt = vec![0u8; 16];
-        OsRng.fill(salt.as_mut_slice());
+        OsRng.fill_bytes(salt.as_mut_slice());
 
         Argon2Parameters {
             associated_data: Vec::new(),

@@ -1,15 +1,14 @@
 //! Possible errors in the library.
 
+use cbc::cipher::block_padding::UnpadError;
 use std::fmt;
 
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::JsValue;
 
-use strum_macros::IntoStaticStr;
+use strum::IntoStaticStr;
 
-use block_modes::{BlockModeError, InvalidKeyIvLength};
-use hmac::crypto_mac::InvalidKeyLength;
-use hmac::crypto_mac::MacError;
+use hmac::digest::MacError;
 
 /// This crate's error type.
 #[derive(Debug, IntoStaticStr)]
@@ -114,8 +113,8 @@ impl fmt::Display for Error {
     }
 }
 
-impl From<InvalidKeyLength> for Error {
-    fn from(_error: InvalidKeyLength) -> Error {
+impl From<hmac::digest::InvalidLength> for Error {
+    fn from(_error: hmac::digest::InvalidLength) -> Error {
         Error::InvalidKeyLength
     }
 }
@@ -126,14 +125,8 @@ impl From<MacError> for Error {
     }
 }
 
-impl From<InvalidKeyIvLength> for Error {
-    fn from(_error: InvalidKeyIvLength) -> Error {
-        Error::InvalidKeyLength
-    }
-}
-
-impl From<BlockModeError> for Error {
-    fn from(_error: BlockModeError) -> Error {
+impl From<UnpadError> for Error {
+    fn from(_error: UnpadError) -> Error {
         Error::CryptoError
     }
 }
