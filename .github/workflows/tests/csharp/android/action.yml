@@ -31,6 +31,10 @@ runs:
       shell: bash
       run: yes | /Users/runner/Library/Android/sdk/tools/bin/sdkmanager --licenses
 
+    - name: Installing SDK Android-33 x86_64
+      shell: bash
+      run: /Users/runner/Library/Android/sdk/tools/bin/sdkmanager --install "system-images;android-33;google_apis;x86_64"
+
     - name: Creating Android device
       shell: bash
       run: echo "no" | /Users/runner/Library/Android/sdk/tools/bin/avdmanager create avd -n test_emulator -k "system-images;android-33;google_apis;x86_64" 
