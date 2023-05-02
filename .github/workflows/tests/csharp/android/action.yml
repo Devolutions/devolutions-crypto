@@ -25,7 +25,7 @@ runs:
 
     - name: Installing SDK Android-33 x86_64
       shell: bash
-      run: /Users/runner/Library/Android/sdk/tools/bin/sdkmanager --install "system-images;android-33;google_apis;x86_64"
+      run: echo "y" | /Users/runner/Library/Android/sdk/tools/bin/sdkmanager --install "system-images;android-33;google_apis;x86_64"
       
     - name: Creating Android device
       shell: bash

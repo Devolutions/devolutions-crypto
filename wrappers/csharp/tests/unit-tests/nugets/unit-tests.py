@@ -239,16 +239,6 @@ def test_mac_full(script_dir, version, args):
         exit(1)
 
 def test_mac_modern(script_dir, version, args):
-    # Patch submodule for pipeline (MSBuildExtensionsPath is wrong)
-    print("patching submodule")
-    filedata = ""
-    with open('./xamarin-mac-modern/guiunit/src/framework/GuiUnit_xammac_mobile.csproj','r') as file:
-        filedata = file.read()
-        filedata = filedata.replace("""<Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />""", """<Import Project="/Library/Frameworks/Xamarin.Mac.framework/Versions/Current/lib/msbuild/Xamarin.Mac.CSharp.targets" />""")
-
-    with open('./xamarin-mac-modern/guiunit/src/framework/GuiUnit_xammac_mobile.csproj','w') as file:
-        file.write(filedata)
-
     print("Nuget Cache Clear")
     print("==========================================================================")    
     

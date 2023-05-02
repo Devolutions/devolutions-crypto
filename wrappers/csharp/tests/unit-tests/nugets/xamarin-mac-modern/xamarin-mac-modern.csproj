@@ -53,6 +53,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Devolutions.Crypto.Mac.Modern" Version="*" />
+    <PackageReference Include="NUnitLite">
+      <Version>3.13.3</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json" />
@@ -111,10 +114,6 @@
     <InterfaceDefinition Include="Main.storyboard" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="guiunit\src\framework\GuiUnit_xammac_mobile.csproj">
-      <Project>{EACFD119-769E-4E6C-89B7-A6CE3757C431}</Project>
-      <Name>GuiUnit_xammac_mobile</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="/Library/Frameworks/Xamarin.Mac.framework/Versions/Current/lib/msbuild/Xamarin.Mac.CSharp.targets" />
 </Project>
