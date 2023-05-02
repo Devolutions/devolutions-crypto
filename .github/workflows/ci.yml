@@ -51,7 +51,7 @@ jobs:
 
   native_build_macos:
     needs: [rust_code_format, setup_config]
-    runs-on: "macos-11"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -61,7 +61,7 @@ jobs:
 
   native_build_ios:
     needs: [rust_code_format, setup_config]
-    runs-on: "macos-11"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -102,7 +102,7 @@ jobs:
 
   nugets_macos:
     needs: [native_build_macos, native_build_ios, native_build_linux, csharp_code_format, setup_config]
-    runs-on: "macos-11"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -125,7 +125,7 @@ jobs:
   #### WEB ASSEMBLY TEST ####
   webassembly_test:
     needs: webassembly_build
-    runs-on: "macos-11"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -146,7 +146,7 @@ jobs:
 
   tests_nuget_macos:
     needs: [nugets_macos, nugets_windows, setup_config]
-    runs-on: "macos-11"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -157,7 +157,7 @@ jobs:
 
   tests_nuget_ios:
     needs: [nugets_macos, setup_config]
-    runs-on: "macos-11"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -187,7 +187,7 @@ jobs:
 
   tests_ios_integration:
     needs: [tests_nuget_ios, setup_config]
-    runs-on: "macos-11"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -223,7 +223,7 @@ jobs:
       - uses: ./.github/workflows/python/build/linux
 
   build_python_macos:
-    runs-on: "macos-11"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -250,7 +250,7 @@ jobs:
 
   test_python_macos:
     needs: build_python_macos
-    runs-on: "macos-11"
+    runs-on: "macos-12"
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/workflows/tests/python/macos

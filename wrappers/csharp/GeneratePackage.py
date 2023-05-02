@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyVersion("||VERSION||")]
 """
+config_path = "./config.txt"
 
 def exec_command(command, cwd="."):
     args = shlex.split(command)
@@ -39,7 +40,7 @@ def exec_command(command, cwd="."):
 def generate_manifest():
     print("Generating assembly manifest...")
     # Generate assembly manifest with the right version
-    with open('./config.txt', 'r') as file:
+    with open(config_path, 'r') as file:
         data=file.read()
         version_managed = data.split("version = \"")[1].split("\"", 1)[0]
         
@@ -50,14 +51,13 @@ def generate_manifest():
 def version_live_change():
     print("Changing version manifest...")
     # Generate assembly manifest with the right version
-    with open('./config.txt', 'r') as file:
+    with open(config_path, 'r') as file:
         data=file.read()
         version_managed = data.split("version = \"")[1].split("\"", 1)[0]
 
     with open('../../devolutions-crypto/Cargo.toml', 'r') as file:
         data=file.read()
         version_native = data.split("version = \"")[1].split("\"", 1)[0]
-
 
     with open('./src/Native.cs', 'r+') as file:
         data=file.read()
@@ -112,6 +112,12 @@ def build_native(architectures, target_folder, manifest=None, clean=True):
 
         shutil.copy(arch["cargo_output"], target_folder + "/bin/" + arch["filename"])
 
+def ensure_config():
+    if(not os.path.exists(config_path)):
+        with open(config_path, "w") as file:
+            today = datetime.datetime.today()
+            file.write("version = \"" + today.strftime("%Y.%m.%d") + "\"")
+
 def main():
     platforms = {
         "windows": build_windows,
@@ -135,12 +141,18 @@ def main():
     parser.add_argument("--no-32", action="store_true", default=False, help="Don't build the 32 bit version of the library")
     
     args = parser.parse_args()
+
+    if(args.platform == "darwin"):
+        args.platform = "mac-modern"
+
     
     script_dir = os.path.dirname(os.path.abspath(__file__))
     print("script directory :")
     print(script_dir)
 
     os.chdir(script_dir)
+
+    ensure_config()
 
     (assembly_manifest, version) = generate_manifest()
     version_live_change()

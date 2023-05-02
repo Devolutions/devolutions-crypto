@@ -22,7 +22,7 @@ runs:
     - name: Install wheel
       working-directory: ./wheels
       shell: bash
-      run: pip install --find-links="./" devolutions_crypto
+      run: pip install --no-index --find-links="./" devolutions_crypto
 
     - name: Run tests
       working-directory: ./wrappers/python/tests/

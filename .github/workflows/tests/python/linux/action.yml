@@ -24,7 +24,7 @@ runs:
     - name: Install wheel
       working-directory: ./wheels
       shell: bash
-      run: pip install --find-links="./" devolutions_crypto
+      run: pip install --no-index --find-links="./" devolutions_crypto
 
     - name: Run 3.10 tests
       working-directory: ./wrappers/python 
@@ -47,7 +47,7 @@ runs:
     - name: Install wheel
       working-directory: ./wheels
       shell: bash
-      run: pip install --find-links="./" devolutions_crypto
+      run: pip install --no-index --find-links="./" devolutions_crypto
 
     - name: Run 3.9 tests
       working-directory: ./wrappers/python 
@@ -70,7 +70,7 @@ runs:
     - name: Install wheel
       working-directory: ./wheels
       shell: bash
-      run: pip install --find-links="./" devolutions_crypto
+      run: pip install --no-index --find-links="./" devolutions_crypto
 
     - name: Run 3.8 tests
       working-directory: ./wrappers/python 
@@ -93,7 +93,7 @@ runs:
     - name: Install wheel
       working-directory: ./wheels
       shell: bash
-      run: pip install --find-links="./" devolutions_crypto
+      run: pip install --no-index --find-links="./" devolutions_crypto
 
     - name: Run 3.7 tests
       working-directory: ./wrappers/python 
