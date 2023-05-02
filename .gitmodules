@@ -1,6 +1,0 @@
-[submodule "wrappers/csharp/tests/unit-tests/manual/xamarin-mac-modern/guiunit"]
-	path = wrappers/csharp/tests/unit-tests/manual/xamarin-mac-modern/guiunit
-	url = https://github.com/mono/guiunit.git
-[submodule "wrappers/csharp/tests/unit-tests/nugets/xamarin-mac-modern/guiunit"]
-	path = wrappers/csharp/tests/unit-tests/nugets/xamarin-mac-modern/guiunit
-	url = https://github.com/mono/guiunit.git

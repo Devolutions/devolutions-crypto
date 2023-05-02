@@ -291,20 +291,6 @@ export function joinShares(shares: Uint8Array[]): Uint8Array;"#;
 
 #[wasm_bindgen(js_name = "joinShares", skip_typescript)]
 pub fn join_shares(shares: Array) -> Result<Vec<u8>, JsValue> {
-    // // Hack to accept both Array<Array<u8>> and Array<Uint8Array> from Javascript.
-    // // Issue linked here: https://github.com/rustwasm/wasm-bindgen/issues/2017
-    // let shares = JsValue::from(shares.map(&mut |s, _, _| {
-    //     if JsCast::is_instance_of::<Uint8Array>(&s) {
-    //         JsValue::from(Array::from(&s))
-    //     } else {
-    //         s
-    //     }
-    // }));
-    // TODO: Remove this comment once read in the PR. And tested.
-    //       using serde_wasm_bindgen as discussed in the thread since `.into_serde()` is now
-    //       deprecated.
-    //       - sbergerondrouin
-
     let shares: Vec<Vec<u8>> = match serde_wasm_bindgen::from_value(JsValue::from(shares)) {
         Ok(s) => s,
         Err(e) => {
