@@ -44,7 +44,7 @@ jobs:
   #### NATIVE BUILD ####
   native_build_linux:
     needs: [rust_code_format, setup_config]
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-20.04" # Ensure we build with the minimum supported sysroot
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/workflows/native/native-build-linux
