@@ -1,4 +1,4 @@
-///! Signing Keys V1: ed25519
+//! Signing Keys V1: ed25519
 use super::Error;
 use super::Result;
 

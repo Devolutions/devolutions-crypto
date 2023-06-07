@@ -1,4 +1,4 @@
-///! Password Hash V1: PBKDF2-HMAC-SHA256
+//! Password Hash V1: PBKDF2-HMAC-SHA256
 use super::Error;
 use super::Result;
 

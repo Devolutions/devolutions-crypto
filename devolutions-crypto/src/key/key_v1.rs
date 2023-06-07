@@ -1,4 +1,4 @@
-///! Key V1: X25519
+//! Key V1: X25519
 use super::Argon2Parameters;
 
 use super::Error;
