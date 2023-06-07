@@ -45,6 +45,7 @@ pub struct Argon2Parameters {
     /// Secret key to sign the hash. Note that this is not serialized.
     secret_key: Vec<u8>,
     /// A 16-bytes salt to use that is generated automatically. Should not be accessed directly.
+    #[wasm_bindgen(skip)]
     pub salt: Vec<u8>,
 }
 
