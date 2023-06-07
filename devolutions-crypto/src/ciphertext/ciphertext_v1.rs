@@ -1,4 +1,4 @@
-///! Ciphertext V1: AES256-CBC with HMAC-SHA256
+//! Ciphertext V1: AES256-CBC with HMAC-SHA256
 use super::Error;
 use super::Header;
 use super::Result;

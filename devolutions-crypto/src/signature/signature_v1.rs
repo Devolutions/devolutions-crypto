@@ -1,4 +1,4 @@
-///! Signature V1: ed25519
+//! Signature V1: ed25519
 use super::Error;
 use super::Result;
 

@@ -1,4 +1,4 @@
-///! Ciphertext V2: XChaCha20Poly1305
+//! Ciphertext V2: XChaCha20Poly1305
 use super::{PrivateKey, PublicKey};
 
 use super::Error;
