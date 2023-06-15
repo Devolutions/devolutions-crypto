@@ -1,5 +1,6 @@
 //! Module for utils that does not use any of the Devolutions custom data types.
 
+use base64::{engine::general_purpose, Engine as _};
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
@@ -49,7 +50,7 @@ pub fn generate_key(length: usize) -> Vec<u8> {
 /// ```
 pub fn derive_key_pbkdf2(key: &[u8], salt: &[u8], iterations: u32, length: usize) -> Vec<u8> {
     let mut new_key = vec![0u8; length];
-    pbkdf2::<Hmac<Sha256>>(key, salt, iterations, &mut new_key);
+    let _ = pbkdf2::<Hmac<Sha256>>(key, salt, iterations, &mut new_key);
     new_key
 }
 
@@ -96,7 +97,6 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
     use super::secret_sharing::Share;
     use super::signature::Signature;
     use super::signing_key::{SigningKeyPair, SigningPublicKey};
-    use std::convert::TryFrom;
 
     if data.len() < Header::len() {
         return false;
@@ -125,8 +125,9 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
 /// Because rand is outdated, I cannot use the crate directly
 pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) -> String {
     use byteorder::{ByteOrder, LittleEndian};
+    use general_purpose::STANDARD;
 
-    let params = scrypt::Params::new(log_n, r, p).expect("params should be valid");
+    let params = scrypt::Params::new(log_n, r, p, 32).expect("params should be valid");
 
     // 256-bit derived key
     let mut dk = [0u8; 32];
@@ -143,43 +144,41 @@ pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) ->
         tmp[0] = log_n;
         tmp[1] = r as u8;
         tmp[2] = p as u8;
-        result.push_str(&base64::encode(tmp));
+        result.push_str(&STANDARD.encode(tmp));
     } else {
         result.push_str("1$");
         let mut tmp = [0u8; 9];
         tmp[0] = log_n;
         LittleEndian::write_u32(&mut tmp[1..5], r);
         LittleEndian::write_u32(&mut tmp[5..9], p);
-        result.push_str(&base64::encode(tmp));
+        result.push_str(&STANDARD.encode(tmp));
     }
     result.push('$');
-    result.push_str(&base64::encode(salt));
+    result.push_str(&STANDARD.encode(salt));
     result.push('$');
-    result.push_str(&base64::encode(dk));
+    result.push_str(&STANDARD.encode(dk));
     result.push('$');
 
     result
 }
 
 pub fn base64_encode(data: &[u8]) -> String {
-    base64::encode(data)
+    general_purpose::STANDARD.encode(data)
 }
 
 pub fn base64_encode_url(data: &[u8]) -> String {
-    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
-    base64::encode_config(data, config)
+    general_purpose::URL_SAFE_NO_PAD.encode(data)
 }
 
 pub fn base64_decode(data: &str) -> Result<Vec<u8>> {
-    match base64::decode(data) {
+    match general_purpose::STANDARD.decode(data) {
         Ok(d) => Ok(d),
         _ => Err(Error::InvalidData),
     }
 }
 
 pub fn base64_decode_url(data: &str) -> Result<Vec<u8>> {
-    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
-    match base64::decode_config(data, config) {
+    match general_purpose::URL_SAFE_NO_PAD.decode(data) {
         Ok(d) => Ok(d),
         _ => Err(Error::InvalidData),
     }
@@ -209,13 +208,13 @@ fn test_derive_key_pbkdf2() {
 
 #[test]
 fn test_validate_header() {
-    use base64::decode;
+    use general_purpose::STANDARD;
 
-    let valid_ciphertext = decode("DQwCAAAAAQA=").unwrap();
-    let valid_password_hash = decode("DQwDAAAAAQA=").unwrap();
-    let valid_share = decode("DQwEAAAAAQA=").unwrap();
-    let valid_private_key = decode("DQwBAAEAAQA=").unwrap();
-    let valid_public_key = decode("DQwBAAEAAQA=").unwrap();
+    let valid_ciphertext = STANDARD.decode("DQwCAAAAAQA=").unwrap();
+    let valid_password_hash = STANDARD.decode("DQwDAAAAAQA=").unwrap();
+    let valid_share = STANDARD.decode("DQwEAAAAAQA=").unwrap();
+    let valid_private_key = STANDARD.decode("DQwBAAEAAQA=").unwrap();
+    let valid_public_key = STANDARD.decode("DQwBAAEAAQA=").unwrap();
 
     assert!(validate_header(&valid_ciphertext, DataType::Ciphertext));
     assert!(validate_header(
@@ -228,17 +227,17 @@ fn test_validate_header() {
 
     assert!(!validate_header(&valid_ciphertext, DataType::PasswordHash));
 
-    let invalid_signature = decode("DAwBAAEAAQA=").unwrap();
-    let invalid_type = decode("DQwIAAEAAQA=").unwrap();
-    let invalid_subtype = decode("DQwBAAgAAQA=").unwrap();
-    let invalid_version = decode("DQwBAAEACAA=").unwrap();
+    let invalid_signature = STANDARD.decode("DAwBAAEAAQA=").unwrap();
+    let invalid_type = STANDARD.decode("DQwIAAEAAQA=").unwrap();
+    let invalid_subtype = STANDARD.decode("DQwBAAgAAQA=").unwrap();
+    let invalid_version = STANDARD.decode("DQwBAAEACAA=").unwrap();
 
     assert!(!validate_header(&invalid_signature, DataType::Key));
     assert!(!validate_header(&invalid_type, DataType::Key));
     assert!(!validate_header(&invalid_subtype, DataType::Key));
     assert!(!validate_header(&invalid_version, DataType::Key));
 
-    let not_long_enough = decode("DQwBAAEAAQ==").unwrap();
+    let not_long_enough = STANDARD.decode("DQwBAAEAAQ==").unwrap();
 
     assert!(!validate_header(&not_long_enough, DataType::Key));
 }

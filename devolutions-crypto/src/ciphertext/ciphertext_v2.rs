@@ -9,8 +9,8 @@ use super::Ciphertext;
 
 use std::convert::TryFrom;
 
-use chacha20poly1305::aead::{Aead, NewAead, Payload};
-use chacha20poly1305::{Key, XChaCha20Poly1305, XNonce};
+use chacha20poly1305::aead::{Aead, Payload};
+use chacha20poly1305::{Key, KeyInit, XChaCha20Poly1305, XNonce};
 
 use rand::{rngs::OsRng, RngCore};
 use sha2::{Digest, Sha256};
@@ -178,7 +178,7 @@ impl CiphertextV2Asymmetric {
     ) -> Result<Self> {
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
-        let ephemeral_private_key = StaticSecret::new(rand_core::OsRng);
+        let ephemeral_private_key = StaticSecret::random_from_rng(rand_core::OsRng);
         let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
 
         let key = ephemeral_private_key.diffie_hellman(&public_key);

@@ -13,6 +13,8 @@ use super::Argon2Parameters;
 use super::DataType;
 use super::Error;
 
+use base64::{engine::general_purpose, Engine as _};
+
 use super::ciphertext::{encrypt, encrypt_asymmetric, Ciphertext, CiphertextVersion};
 use super::key::{
     derive_keypair, generate_keypair, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
@@ -34,8 +36,6 @@ use std::convert::TryFrom as _;
 use std::slice;
 
 use zeroize::Zeroize as _;
-
-use base64::{decode_config_slice, encode_config_slice, STANDARD};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -1113,7 +1113,7 @@ pub unsafe extern "C" fn Decode(
     let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
     let mut output = slice::from_raw_parts_mut(output, output_length);
 
-    match decode_config_slice(&input, STANDARD, &mut output) {
+    match general_purpose::STANDARD.decode_slice_unchecked(&input, &mut output) {
         Ok(res) => res as i64,
         Err(_e) => -1,
     }
@@ -1143,7 +1143,10 @@ pub unsafe extern "C" fn Encode(
     let input = slice::from_raw_parts(input, input_length);
     let mut output = slice::from_raw_parts_mut(output, output_length);
 
-    encode_config_slice(&input, STANDARD, &mut output) as i64
+    match general_purpose::STANDARD.encode_slice(&input, &mut output) {
+        Ok(res) => res as i64,
+        Err(_err) => -1,
+    }
 }
 
 /// Decode a base64 string to bytes using base64url.
@@ -1170,9 +1173,7 @@ pub unsafe extern "C" fn DecodeUrl(
     let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
     let mut output = slice::from_raw_parts_mut(output, output_length);
 
-    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
-
-    match decode_config_slice(&input, config, &mut output) {
+    match general_purpose::URL_SAFE_NO_PAD.decode_slice_unchecked(&input, &mut output) {
         Ok(res) => res as i64,
         Err(_e) => -1,
     }
@@ -1202,9 +1203,10 @@ pub unsafe extern "C" fn EncodeUrl(
     let input = slice::from_raw_parts(input, input_length);
     let mut output = slice::from_raw_parts_mut(output, output_length);
 
-    let config = base64::Config::new(base64::CharacterSet::UrlSafe, false);
-
-    encode_config_slice(&input, config, &mut output) as i64
+    match general_purpose::URL_SAFE_NO_PAD.encode_slice(&input, &mut output) {
+        Ok(res) => res as i64,
+        Err(_err) => -1,
+    }
 }
 
 ///  Size of the version string
@@ -1233,6 +1235,22 @@ pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
     output.copy_from_slice(&VERSION.as_bytes());
 
     output.len() as i64
+}
+
+fn get_decoded_base64_string_length(base64: &str) -> usize {
+    if base64.is_empty() || base64.len() % 4 != 0 {
+        return 0;
+    }
+
+    let mut pad_count = 0;
+
+    for i in (base64.len() - 2..base64.len()).rev() {
+        if base64.as_bytes()[i] == b'=' {
+            pad_count += 1;
+        }
+    }
+
+    (3 * (base64.len() / 4)) - pad_count
 }
 
 #[test]
@@ -1344,6 +1362,23 @@ fn test_get_default_argon2parameters() {
             defaults[..defaults.len() - 16],
             received[..received.len() - 16]
         );
+    }
+}
+
+#[test]
+fn test_decode() {
+    let b64string = "DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg==";
+    let mut decode_output_vec = vec![0u8; get_decoded_base64_string_length(b64string)];
+    let decode_output = decode_output_vec.as_mut_ptr();
+
+    unsafe {
+        let res = Decode(
+            b64string.as_ptr(),
+            b64string.len(),
+            decode_output,
+            get_decoded_base64_string_length(b64string),
+        );
+        assert!(res > 0i64)
     }
 }
 

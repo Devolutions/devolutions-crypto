@@ -99,7 +99,7 @@ impl TryFrom<&[u8]> for KeyV1Public {
 }
 
 pub fn generate_keypair() -> KeyV1Pair {
-    let private = StaticSecret::new(rand_core::OsRng);
+    let private = StaticSecret::random_from_rng(rand_core::OsRng);
     let public = PublicKey::from(&private);
 
     KeyV1Pair {

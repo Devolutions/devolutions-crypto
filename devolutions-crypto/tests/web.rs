@@ -4,13 +4,14 @@ cfg_if! {
     if #[cfg(all(target_arch = "wasm32", feature = "wbindgen"))] {
         wasm_bindgen_test_configure!(run_in_browser);
         use wasm_bindgen_test::*;
+        use base64::{engine::general_purpose, Engine as _};
 
         use devolutions_crypto::wasm;
 
         #[wasm_bindgen_test]
         fn test_encrypt_decrypt() {
             let data = "test".as_bytes();
-            let key = base64::decode("dpxbute8LZ4tqpw1pVWyBvMzOtm+OJQPcIsU52+FFZU=").unwrap();
+            let key = general_purpose::STANDARD.decode("dpxbute8LZ4tqpw1pVWyBvMzOtm+OJQPcIsU52+FFZU=").unwrap();
 
             let ciphertext = wasm::encrypt(data, &key, None).unwrap();
             let plaintext = wasm::decrypt(&ciphertext, &key).unwrap();
@@ -62,10 +63,10 @@ cfg_if! {
         #[wasm_bindgen_test]
         fn test_derive_key_pbkdf2() {
             let password = "ThisIsAGoodPassword123".as_bytes();
-            let salt = base64::decode("u4tv/i1228VOqoZWITseoQ==").unwrap();
+            let salt = general_purpose::STANDARD.decode("u4tv/i1228VOqoZWITseoQ==").unwrap();
             let key = wasm::derive_key_pbkdf2(password, Some(salt), Some(123), Some(32));
 
-            assert_eq!(key, base64::decode("RfIYPWWXRSm/SWjVXvQq1Z3n/mzxGeu/y396bAuYWTI=").unwrap());
+            assert_eq!(key, general_purpose::STANDARD.decode("RfIYPWWXRSm/SWjVXvQq1Z3n/mzxGeu/y396bAuYWTI=").unwrap());
         }
     }
 }
