@@ -8,8 +8,7 @@ type EncryptionServiceInner = typeof import('../service/encryption.inner.service
 
 @Component({
   selector: 'app-utils',
-  templateUrl: './password.component.html',
-  styleUrls: ['./password.component.styl']
+  templateUrl: './password.component.html'
 })
 export class PasswordComponent implements OnInit {
   faKey = faKey;

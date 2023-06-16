@@ -9,7 +9,6 @@ type EncryptionServiceInner = typeof import('../service/encryption.inner.service
 @Component({
   selector: 'app-shamir',
   templateUrl: './secret-sharing.component.html',
-  styleUrls: ['./secret-sharing.component.styl'],
   providers: [EncryptionService]
 })
 export class SecretSharingComponent implements OnInit {

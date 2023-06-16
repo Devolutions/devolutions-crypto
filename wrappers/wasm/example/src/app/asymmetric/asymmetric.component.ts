@@ -10,8 +10,7 @@ type EncryptionServiceInner = typeof import('../service/encryption.inner.service
 
 @Component({
   selector: 'app-asymmetric',
-  templateUrl: './asymmetric.component.html',
-  styleUrls: ['./asymmetric.component.styl']
+  templateUrl: './asymmetric.component.html'
 })
 export class AsymmetricComponent implements OnInit {
 
