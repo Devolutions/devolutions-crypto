@@ -11,7 +11,6 @@ type EncryptionServiceInner = typeof import('../service/encryption.inner.service
 @Component({
   selector: 'app-encryption',
   templateUrl: './encryption.component.html',
-  styleUrls: ['./encryption.component.styl'],
   providers: [EncryptionService]
 })
 export class EncryptionComponent implements OnInit {

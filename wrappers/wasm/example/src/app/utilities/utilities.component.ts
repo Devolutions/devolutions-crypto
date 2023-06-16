@@ -8,8 +8,7 @@ type EncryptionServiceInner = typeof import('../service/encryption.inner.service
 
 @Component({
   selector: 'app-utilities',
-  templateUrl: './utilities.component.html',
-  styleUrls: ['./utilities.component.styl']
+  templateUrl: './utilities.component.html'
 })
 export class UtilitiesComponent implements OnInit {
   faTools = faTools;
