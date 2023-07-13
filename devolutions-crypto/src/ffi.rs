@@ -1237,22 +1237,6 @@ pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
     output.len() as i64
 }
 
-fn get_decoded_base64_string_length(base64: &str) -> usize {
-    if base64.is_empty() || base64.len() % 4 != 0 {
-        return 0;
-    }
-
-    let mut pad_count = 0;
-
-    for i in (base64.len() - 2..base64.len()).rev() {
-        if base64.as_bytes()[i] == b'=' {
-            pad_count += 1;
-        }
-    }
-
-    (3 * (base64.len() / 4)) - pad_count
-}
-
 #[test]
 fn test_encrypt_length() {
     let key = b"supersecret";
@@ -1367,6 +1351,22 @@ fn test_get_default_argon2parameters() {
 
 #[test]
 fn test_decode() {
+    fn get_decoded_base64_string_length(base64: &str) -> usize {
+        if base64.is_empty() || base64.len() % 4 != 0 {
+            return 0;
+        }
+
+        let mut pad_count = 0;
+
+        for i in (base64.len() - 2..base64.len()).rev() {
+            if base64.as_bytes()[i] == b'=' {
+                pad_count += 1;
+            }
+        }
+
+        (3 * (base64.len() / 4)) - pad_count
+    }
+
     let b64string = "DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg==";
     let mut decode_output_vec = vec![0u8; get_decoded_base64_string_length(b64string)];
     let decode_output = decode_output_vec.as_mut_ptr();
