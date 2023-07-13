@@ -61,19 +61,21 @@ impl TryFrom<&[u8]> for CiphertextV1 {
 }
 
 impl CiphertextV1 {
-    fn split_key(secret: &[u8], encryption_key: &mut [u8], signature_key: &mut [u8]) {
+    fn split_key(secret: &[u8], encryption_key: &mut [u8], signature_key: &mut [u8]) -> Result<()> {
         let salt = b"\x00";
-        let _ = pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, encryption_key);
+        pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, encryption_key)?;
 
         let salt = b"\x01";
-        let _ = pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, signature_key);
+        pbkdf2::<Hmac<Sha256>>(secret, &salt[0..1], 1, signature_key)?;
+
+        Ok(())
     }
 
     pub fn encrypt(data: &[u8], key: &[u8], header: &Header<Ciphertext>) -> Result<CiphertextV1> {
         // Split keys
         let mut encryption_key = vec![0u8; 32];
         let mut signature_key = vec![0u8; 32];
-        CiphertextV1::split_key(key, &mut encryption_key, &mut signature_key);
+        CiphertextV1::split_key(key, &mut encryption_key, &mut signature_key)?;
 
         // Generate IV
         let mut iv = [0u8; 16];
@@ -111,7 +113,7 @@ impl CiphertextV1 {
         // Split keys
         let mut encryption_key = vec![0u8; 32];
         let mut signature_key = vec![0u8; 32];
-        CiphertextV1::split_key(key, &mut encryption_key, &mut signature_key);
+        CiphertextV1::split_key(key, &mut encryption_key, &mut signature_key)?;
 
         // Verify HMAC
         let mut mac_data: Vec<u8> = (*header).clone().into();
