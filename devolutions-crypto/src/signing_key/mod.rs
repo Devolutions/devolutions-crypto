@@ -238,7 +238,7 @@ impl From<SigningPublicKeyPayload> for Vec<u8> {
     }
 }
 
-impl From<&SigningPublicKey> for ed25519_dalek::PublicKey {
+impl From<&SigningPublicKey> for ed25519_dalek::VerifyingKey {
     fn from(data: &SigningPublicKey) -> Self {
         match &data.payload {
             SigningPublicKeyPayload::V1(x) => Self::from(x),
@@ -247,7 +247,7 @@ impl From<&SigningPublicKey> for ed25519_dalek::PublicKey {
     }
 }
 
-impl From<&SigningKeyPair> for ed25519_dalek::Keypair {
+impl From<&SigningKeyPair> for ed25519_dalek::SigningKey {
     fn from(data: &SigningKeyPair) -> Self {
         match &data.payload {
             SigningKeyPairPayload::V1(x) => Self::from(x),

@@ -8,5 +8,6 @@ obj
 packages
 .DS_Store
 .idea
+.idea/
 /ios/target
 /devolutions-crypto-cli/target

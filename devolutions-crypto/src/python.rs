@@ -59,6 +59,37 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
     }
 
     #[pyfn(m)]
+    #[pyo3(name = "hash_password")]
+    fn hash_password(
+        py: Python,
+        password: &[u8],
+        iterations: Option<u32>,
+        version: Option<u16>,
+    ) -> PyResult<Py<PyBytes>> {
+        let version =
+            match super::password_hash::PasswordHashVersion::try_from(version.unwrap_or(0)) {
+                Ok(v) => v,
+                Err(_) => {
+                    let error: PyErr = Error::UnknownVersion.into();
+                    return Err(error);
+                }
+            };
+        let iterations = iterations.unwrap_or(10000);
+
+        let hash: Vec<u8> =
+            super::password_hash::hash_password(password, iterations, version).into();
+        Ok(PyBytes::new(py, &hash).into())
+    }
+
+    #[pyfn(m)]
+    #[pyo3(name = "verify_password")]
+    fn verify_password(py: Python, password: &[u8], hash: &[u8]) -> PyResult<Py<PyBool>> {
+        let res = super::password_hash::PasswordHash::try_from(hash)?;
+
+        Ok(PyBool::new(py, res.verify_password(password)).into())
+    }
+
+    #[pyfn(m)]
     #[pyo3(name = "decrypt")]
     fn decrypt(py: Python, data: &[u8], key: &[u8]) -> PyResult<Py<PyBytes>> {
         let ciphertext: Ciphertext = ciphertext::Ciphertext::try_from(data)?;

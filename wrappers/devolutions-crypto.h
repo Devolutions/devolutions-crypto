@@ -263,12 +263,6 @@ int64_t GenerateSigningKeyPairSize(uint16_t _version);
 ///   in `GetSigningPublicKey()`.
 int64_t GetSigningPublicKeySize(const uint8_t *_keypair, uintptr_t _keypair_length);
 
-/// Get the size of the keys in the derived key pair.
-/// # Returns
-/// Returns the length of the keys to input as `private_length`
-///     and `public_length` in `DeriveKeyPair()`.
-int64_t DeriveKeyPairSize();
-
 /// Performs a key exchange.
 /// # Arguments
 ///  * `private` - Pointer to the buffer containing the private key.
@@ -441,30 +435,6 @@ int64_t GetDefaultArgon2Parameters(uint8_t *argon2_parameters,
 /// # Returns
 /// Returns 0 if the operation is successful.
 int64_t GetDefaultArgon2ParametersSize();
-
-/// Derives a key pair from a password.
-/// # Arguments
-///  * password - Pointer to the password to derive.
-///  * password_length - Length of the password to derive.
-///  * parameters - Pointer to the argon2 parameters used for the derivation.
-///  * parameters_length - Length of the argon2 parameters used for the derivation.
-///  * private_key - Pointer to the resulting private key buffer.
-///  * private_key_length - Length of the private key output buffer.
-///  * public_key - Pointer to the resulting public key buffer.
-///  * public_key_length - Length of the public key output buffer.
-/// # Returns
-/// Returns 0 if the operation is successful. If there is an error,
-///     it will return the appropriate error code defined in DevoCryptoError.
-/// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-int64_t DeriveKeyPair(const uint8_t *password,
-                      uintptr_t password_length,
-                      const uint8_t *parameters,
-                      uintptr_t parameters_length,
-                      uint8_t *private_key,
-                      uintptr_t private_key_length,
-                      uint8_t *public_key,
-                      uintptr_t public_key_length);
 
 ///  Size, in bits, of the key used for the current Encrypt() implementation.
 /// # Returns

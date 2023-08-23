@@ -73,7 +73,7 @@
 //! ### Asymmetric
 //! Here, you will need a `PublicKey` to encrypt data and the corresponding
 //! `PrivateKey` to decrypt it. You can generate them by using `generate_keypair`
-//! or `derive_keypair` in the [Key module](#key).
+//! in the [Key module](#key).
 //!
 //! ```rust
 //! use devolutions_crypto::key::{generate_keypair, KeyVersion, KeyPair};
@@ -96,7 +96,7 @@
 //!
 //! ### Generation/Derivation
 //!
-//! You have two ways to generate a `KeyPair`: Using `generate_keypair` will generate a random one, using `derive_keypair` will derive one from another password or key along with derivation parameters(including salt). Except in specific circumstances, you should use `generate_keypair`.  
+//! Using `generate_keypair` will generate a random keypair.
 //!
 //! Asymmetric keys have two uses. They can be used to [encrypt and decrypt data](##asymmetric) and to perform a [key exchange](#key-exchange).
 //!
@@ -105,15 +105,6 @@
 //! use devolutions_crypto::key::{generate_keypair, KeyVersion, KeyPair};
 //!
 //! let keypair: KeyPair = generate_keypair(KeyVersion::Latest);
-//! ```
-//!
-//! #### `derive_keypair`
-//! ```rust
-//! use devolutions_crypto::Argon2Parameters;
-//! use devolutions_crypto::key::{KeyVersion, KeyPair, derive_keypair};
-//!
-//! let parameters: Argon2Parameters = Default::default();
-//! let keypair: KeyPair = derive_keypair(b"thisisapassword", &parameters, KeyVersion::Latest).expect("derivation should not fail");
 //! ```
 //!
 //! ### Key Exchange

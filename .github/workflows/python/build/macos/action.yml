@@ -21,13 +21,29 @@ runs:
       shell: bash
       run: pip install maturin
 
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Building x86_64 3.11 Wheel
+      working-directory: ./devolutions-crypto
+      shell: bash
+      run: |
+        source $HOME/.cargo/env
+        
+        maturin build --release -i python --target=x86_64-apple-darwin
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
     - name: Building x86_64 3.10 Wheel
       working-directory: ./devolutions-crypto
       shell: bash
       run:
         source $HOME/.cargo/env
         
-        maturin build --release -i python --features python --target=x86_64-apple-darwin
+        maturin build --release -i python --target=x86_64-apple-darwin
 
     - uses: actions/setup-python@v4
       with:
@@ -36,10 +52,10 @@ runs:
     - name: Building x86_64 3.9 Wheel
       working-directory: ./devolutions-crypto
       shell: bash
-      run:
+      run: |
         source $HOME/.cargo/env
         
-        maturin build --release -i python --features python --target=x86_64-apple-darwin
+        maturin build --release -i python --target=x86_64-apple-darwin
 
     - uses: actions/setup-python@v4
       with:
@@ -51,7 +67,7 @@ runs:
       run: |
         source $HOME/.cargo/env
         
-        maturin build --release -i python --features python --target=x86_64-apple-darwin
+        maturin build --release -i python --target=x86_64-apple-darwin
     
     - uses: actions/setup-python@v4
       with:
@@ -63,7 +79,7 @@ runs:
       run: |
         source $HOME/.cargo/env
         
-        maturin build --release -i python --features python --target=x86_64-apple-darwin
+        maturin build --release -i python --target=x86_64-apple-darwin
     
     - name: Place Artifacts
       shell: bash
