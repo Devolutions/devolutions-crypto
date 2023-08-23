@@ -16,9 +16,7 @@ use super::Error;
 use base64::{engine::general_purpose, Engine as _};
 
 use super::ciphertext::{encrypt, encrypt_asymmetric, Ciphertext, CiphertextVersion};
-use super::key::{
-    derive_keypair, generate_keypair, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
-};
+use super::key::{generate_keypair, mix_key_exchange, KeyVersion, PrivateKey, PublicKey};
 use super::password_hash::{hash_password, PasswordHash, PasswordHashVersion};
 use super::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion, Share};
 use super::{
@@ -634,15 +632,6 @@ pub extern "C" fn GetSigningPublicKeySize(_keypair: *const u8, _keypair_length: 
     8 + 32 // header + public key length
 }
 
-/// Get the size of the keys in the derived key pair.
-/// # Returns
-/// Returns the length of the keys to input as `private_length`
-///     and `public_length` in `DeriveKeyPair()`.
-#[no_mangle]
-pub extern "C" fn DeriveKeyPairSize() -> i64 {
-    GenerateKeyPairSize()
-}
-
 /// Performs a key exchange.
 /// # Arguments
 ///  * `private` - Pointer to the buffer containing the private key.
@@ -1021,66 +1010,6 @@ pub extern "C" fn GetDefaultArgon2ParametersSize() -> i64 {
     46
 }
 
-/// Derives a key pair from a password.
-/// # Arguments
-///  * password - Pointer to the password to derive.
-///  * password_length - Length of the password to derive.
-///  * parameters - Pointer to the argon2 parameters used for the derivation.
-///  * parameters_length - Length of the argon2 parameters used for the derivation.
-///  * private_key - Pointer to the resulting private key buffer.
-///  * private_key_length - Length of the private key output buffer.
-///  * public_key - Pointer to the resulting public key buffer.
-///  * public_key_length - Length of the public key output buffer.
-/// # Returns
-/// Returns 0 if the operation is successful. If there is an error,
-///     it will return the appropriate error code defined in DevoCryptoError.
-/// # Safety
-/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
-pub unsafe extern "C" fn DeriveKeyPair(
-    password: *const u8,
-    password_length: usize,
-    parameters: *const u8,
-    parameters_length: usize,
-    private_key: *mut u8,
-    private_key_length: usize,
-    public_key: *mut u8,
-    public_key_length: usize,
-) -> i64 {
-    if password.is_null() || parameters.is_null() || private_key.is_null() || public_key.is_null() {
-        return Error::NullPointer.error_code();
-    };
-
-    if private_key_length != DeriveKeyPairSize() as usize
-        || public_key_length != DeriveKeyPairSize() as usize
-    {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let password = slice::from_raw_parts(password, password_length);
-    let private_key = slice::from_raw_parts_mut(private_key, private_key_length);
-    let public_key = slice::from_raw_parts_mut(public_key, public_key_length);
-
-    let parameters =
-        Argon2Parameters::try_from(slice::from_raw_parts(parameters, parameters_length));
-
-    let parameters = match parameters {
-        Ok(x) => x,
-        Err(e) => return e.error_code(),
-    };
-
-    match derive_keypair(password, &parameters, KeyVersion::Latest) {
-        Ok(keypair) => {
-            let private: Vec<u8> = keypair.private_key.into();
-            let public: Vec<u8> = keypair.public_key.into();
-            private_key.copy_from_slice(&private);
-            public_key.copy_from_slice(&public);
-            0
-        }
-        Err(e) => e.error_code(),
-    }
-}
-
 ///  Size, in bits, of the key used for the current Encrypt() implementation.
 /// # Returns
 /// Returns the size, in bits, of the key used fot the current Encrypt() implementation.
@@ -1379,81 +1308,5 @@ fn test_decode() {
             get_decoded_base64_string_length(b64string),
         );
         assert!(res > 0i64)
-    }
-}
-
-#[test]
-fn test_derive_keypair() {
-    let small_password = b"pass".to_vec();
-    let long_password = b"this is a very long and complicated password that is, I hope,\
-     longer than the length of the actual hash. It also contains we1rd pa$$w0rd///s.\\"
-        .to_vec();
-
-    let parameters: Vec<u8> = Argon2Parameters::default().into();
-
-    let mut private_key_vec = vec![0u8; DeriveKeyPairSize() as usize];
-    let private_key = private_key_vec.as_mut_ptr();
-    let mut public_key_vec = vec![0u8; DeriveKeyPairSize() as usize];
-    let public_key = public_key_vec.as_mut_ptr();
-
-    unsafe {
-        let result_small = DeriveKeyPair(
-            small_password.as_ptr(),
-            small_password.len(),
-            parameters.as_ptr(),
-            parameters.len(),
-            private_key,
-            DeriveKeyPairSize() as usize,
-            public_key,
-            DeriveKeyPairSize() as usize,
-        );
-        assert_eq!(0i64, result_small);
-        let result_long = DeriveKeyPair(
-            long_password.as_ptr(),
-            long_password.len(),
-            parameters.as_ptr(),
-            parameters.len(),
-            private_key,
-            DeriveKeyPairSize() as usize,
-            public_key,
-            DeriveKeyPairSize() as usize,
-        );
-        assert_eq!(0i64, result_long);
-    }
-
-    let data = b"SomeData".to_vec();
-    let encrypt_size = EncryptAsymmetricSize(data.len(), 2);
-
-    let mut result_encrypt_vec = vec![0u8; encrypt_size as usize];
-    let result_encrypt = result_encrypt_vec.as_mut_ptr();
-    unsafe {
-        let result_code_encrypt = EncryptAsymmetric(
-            data.as_ptr(),
-            data.len(),
-            public_key,
-            DeriveKeyPairSize() as usize,
-            result_encrypt,
-            encrypt_size as usize,
-            2,
-        );
-        assert_eq!(encrypt_size, result_code_encrypt)
-    }
-
-    let mut result_decrypt_vec = vec![0u8; encrypt_size as usize];
-    let result_decrypt = result_decrypt_vec.as_mut_ptr();
-    unsafe {
-        let result_code_decrypt = DecryptAsymmetric(
-            result_encrypt,
-            encrypt_size as usize,
-            private_key,
-            DeriveKeyPairSize() as usize,
-            result_decrypt,
-            encrypt_size as usize,
-        );
-
-        assert!(result_code_decrypt >= 0);
-
-        let decrypt_data = slice::from_raw_parts_mut(result_decrypt, result_code_decrypt as usize);
-        assert_eq!(data, decrypt_data);
     }
 }

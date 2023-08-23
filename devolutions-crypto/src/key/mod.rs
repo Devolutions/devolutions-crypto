@@ -4,7 +4,7 @@
 //!
 //! ### Generation/Derivation
 //!
-//! You have two ways to generate a `KeyPair`: Using `generate_keypair` will generate a random one, using `derive_keypair` will derive one from another password or key along with derivation parameters(including salt). Except in specific circumstances, you should use `generate_keypair`.
+//! Using `generate_keypair` will generate a random keypair.
 //!
 //! Asymmetric keys have two uses. They can be used to [encrypt and decrypt data](##asymmetric) and to perform a [key exchange](#key-exchange).
 //!
@@ -13,15 +13,6 @@
 //! use devolutions_crypto::key::{generate_keypair, KeyVersion, KeyPair};
 //!
 //! let keypair: KeyPair = generate_keypair(KeyVersion::Latest);
-//! ```
-//!
-//! #### `derive_keypair`
-//! ```rust
-//! use devolutions_crypto::Argon2Parameters;
-//! use devolutions_crypto::key::{KeyVersion, KeyPair, derive_keypair};
-//!
-//! let parameters: Argon2Parameters = Default::default();
-//! let keypair: KeyPair = derive_keypair(b"thisisapassword", &parameters, KeyVersion::Latest).expect("derivation should not fail");
 //! ```
 //!
 //! ### Key Exchange
@@ -51,7 +42,6 @@
 
 mod key_v1;
 
-use super::Argon2Parameters;
 use super::DataType;
 use super::Error;
 use super::Header;
@@ -169,51 +159,6 @@ pub fn generate_keypair(version: KeyVersion) -> KeyPair {
             payload: public_key,
         },
     }
-}
-
-/// Derive a `KeyPair` from a password and parameters to use in a key exchange or to encrypt data.
-/// # Arguments
-///  * `password` - The password to derive.
-///  * `parameters` - The derivation  parameters to use. You should use Argon2Parameters::default() for each new
-///    key to generate and reuse the same parameters(including the salt) to regenerate the full key.
-///  * `version` - Version of the key scheme to use. Use `KeyVersion::Latest` if you're not dealing with shared data.
-/// # Returns
-/// Returns a `KeyPair` containing the private key and the public key.
-/// # Example
-/// ```rust
-/// use devolutions_crypto::Argon2Parameters;
-/// use devolutions_crypto::key::{KeyVersion, KeyPair, derive_keypair};
-///
-/// let parameters: Argon2Parameters = Default::default();
-/// let keypair: KeyPair = derive_keypair(b"thisisapassword", &parameters, KeyVersion::Latest).expect("derivation should not fail");
-/// ```
-pub fn derive_keypair(
-    password: &[u8],
-    parameters: &Argon2Parameters,
-    version: KeyVersion,
-) -> Result<KeyPair> {
-    let (private_header, public_header) = keypair_headers(version);
-
-    let (private_key, public_key) = match version {
-        KeyVersion::V1 | KeyVersion::Latest => {
-            let keypair = key_v1::derive_keypair(password, parameters)?;
-            (
-                PrivateKeyPayload::V1(keypair.private_key),
-                PublicKeyPayload::V1(keypair.public_key),
-            )
-        }
-    };
-
-    Ok(KeyPair {
-        private_key: PrivateKey {
-            header: private_header,
-            payload: private_key,
-        },
-        public_key: PublicKey {
-            header: public_header,
-            payload: public_key,
-        },
-    })
 }
 
 /// Mix a `PrivateKey` with another client `PublicKey` to get a secret shared between the two parties.
@@ -396,48 +341,5 @@ fn ecdh_test() {
     let alice_shared =
         mix_key_exchange(&alice_keypair.private_key, &bob_keypair.public_key).unwrap();
 
-    assert_eq!(bob_shared, alice_shared);
-}
-
-#[test]
-fn derive_keypair_test() {
-    let mut bob_parameters = Argon2Parameters::default();
-    bob_parameters.memory = 32;
-    bob_parameters.iterations = 2;
-
-    let bob_keypair =
-        derive_keypair("password1".as_bytes(), &bob_parameters, KeyVersion::Latest).unwrap();
-    let bob_keypair2 =
-        derive_keypair("password1".as_bytes(), &bob_parameters, KeyVersion::Latest).unwrap();
-
-    // Derivation should be repeatable with the same parameters
-    assert_eq!(
-        Into::<Vec<u8>>::into(bob_keypair.private_key),
-        Into::<Vec<u8>>::into(bob_keypair2.private_key)
-    );
-    assert_eq!(
-        Into::<Vec<u8>>::into(bob_keypair.public_key),
-        Into::<Vec<u8>>::into(bob_keypair2.public_key)
-    );
-
-    let bob_keypair =
-        derive_keypair("password1".as_bytes(), &bob_parameters, KeyVersion::Latest).unwrap();
-
-    let mut alice_parameters = Argon2Parameters::default();
-    alice_parameters.memory = 64;
-    alice_parameters.iterations = 4;
-
-    let alice_keypair = derive_keypair(
-        "password5".as_bytes(),
-        &alice_parameters,
-        KeyVersion::Latest,
-    )
-    .unwrap();
-
-    let bob_shared = mix_key_exchange(&bob_keypair.private_key, &alice_keypair.public_key).unwrap();
-    let alice_shared =
-        mix_key_exchange(&alice_keypair.private_key, &bob_keypair.public_key).unwrap();
-
-    // Should be a regular keypair
     assert_eq!(bob_shared, alice_shared);
 }

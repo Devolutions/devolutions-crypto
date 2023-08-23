@@ -1,7 +1,7 @@
 use base64::{engine::general_purpose, Engine as _};
 use devolutions_crypto::{
     ciphertext::Ciphertext,
-    key::{derive_keypair, KeyVersion, PrivateKey},
+    key::PrivateKey,
     password_hash::PasswordHash,
     utils::{derive_key_argon2, derive_key_pbkdf2},
     Argon2Parameters,
@@ -100,35 +100,6 @@ fn test_symmetric_decrypt_v2() {
     let result = ciphertext.decrypt(&key).unwrap();
 
     assert_eq!(result, b"test Ciph3rtext~2");
-}
-
-#[test]
-fn test_derive_keypair_v1() {
-    let params = Argon2Parameters::try_from(
-        general_purpose::STANDARD
-            .decode("AQAAACAAAAABAAAAIAAAAAEAAAACEwAAAAAQAAAAimFBkm3f8+f+YfLRnF5OoQ==")
-            .unwrap()
-            .as_slice(),
-    )
-    .unwrap();
-
-    let keypair = derive_keypair(b"password", &params, KeyVersion::V1).unwrap();
-
-    let private_key: Vec<u8> = keypair.private_key.into();
-    let public_key: Vec<u8> = keypair.public_key.into();
-
-    assert_eq!(
-        private_key,
-        general_purpose::STANDARD
-            .decode("DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ==")
-            .unwrap()
-    );
-    assert_eq!(
-        public_key,
-        general_purpose::STANDARD
-            .decode("DQwBAAIAAQBwfx5kOF4iEHXF+jyYRjfQYZnGCy0SQMHeRZCxRVvmCg==")
-            .unwrap()
-    );
 }
 
 #[test]

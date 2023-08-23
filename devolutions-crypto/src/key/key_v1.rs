@@ -1,11 +1,8 @@
 //! Key V1: X25519
-use super::Argon2Parameters;
-
 use super::Error;
 use super::Result;
 
 use x25519_dalek::{PublicKey, StaticSecret};
-use zeroize::Zeroize;
 
 use std::convert::TryFrom;
 
@@ -106,26 +103,6 @@ pub fn generate_keypair() -> KeyV1Pair {
         private_key: KeyV1Private { key: private },
         public_key: KeyV1Public { key: public },
     }
-}
-
-pub fn derive_keypair(password: &[u8], parameters: &Argon2Parameters) -> Result<KeyV1Pair> {
-    if parameters.length != 32 {
-        return Err(Error::InvalidLength);
-    }
-    let mut derived_pass = parameters.compute(password)?;
-
-    let mut key_bytes = [0u8; 32];
-    key_bytes.copy_from_slice(&derived_pass[0..32]);
-
-    derived_pass.zeroize();
-
-    let private = StaticSecret::from(key_bytes);
-    let public = PublicKey::from(&private);
-
-    Ok(KeyV1Pair {
-        private_key: KeyV1Private { key: private },
-        public_key: KeyV1Public { key: public },
-    })
 }
 
 pub fn mix_key_exchange(private: &KeyV1Private, public: &KeyV1Public) -> Vec<u8> {

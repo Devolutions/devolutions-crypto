@@ -95,19 +95,6 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
-        public void DeriveKeyPair_Test()
-        {
-            KeyPair keyPair = Managed.DeriveKeyPair(new byte[] { 0, 1, 2, 3, 4, 5 }, Argon2Parameters.FromByteArray(Convert.FromBase64String(TestData.Argon2DefaultParametersb64)));
-
-            Assert.IsTrue(keyPair != null);
-            Assert.IsTrue(keyPair.PrivateKey != null);
-            Assert.IsTrue(keyPair.PublicKey != null);
-
-            Assert.IsTrue(keyPair.PrivateKeyString == "DQwBAAEAAQAgbzkrw3lP9KH/2MyTQlamDU39c5WziNWDZYMvqorEXw==");
-            Assert.IsTrue(keyPair.PublicKeyString == "DQwBAAIAAQDY3Zz8t28PsxnT+CWk1Jftz5KTXnP6Tngjnaa+IZQ5Ug==");
-        }
-
-        [TestMethod]
         public void DerivePassword()
         {
             byte[] derivedPassword = Managed.DerivePassword(TestData.Base64TestData, null, 100);

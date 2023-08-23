@@ -85,20 +85,6 @@ fn main() {
                 ),
         )
         .subcommand(
-            SubCommand::with_name("derive-keypair")
-                .about("Derive a password or key into a keypair")
-                .arg(
-                    Arg::with_name("DATA")
-                        .help("The password or key to derive")
-                        .required(true),
-                )
-                .arg(
-                    Arg::with_name("parameters")
-                        .required(true)
-                        .help("The parameters to use for derivation"),
-                )
-        )
-        .subcommand(
             SubCommand::with_name("encrypt")
                 .about("Encrypt data")
                 .arg(Arg::with_name("DATA").help("The plaintext").required(true))
@@ -213,7 +199,6 @@ fn main() {
         ("generate", Some(matches)) => generate_key(matches),
         ("generate-argon2parameters", Some(matches)) => generate_argon2parameters(matches),
         ("derive", Some(matches)) => derive_key(matches),
-        ("derive-keypair", Some(matches)) => derive_keypair(matches),
         ("encrypt", Some(matches)) => encrypt(matches),
         ("encrypt-asymmetric", Some(matches)) => encrypt_asymmetric(matches),
         ("decrypt", Some(matches)) => decrypt(matches),
@@ -290,21 +275,6 @@ fn derive_key(matches: &ArgMatches) {
 
     let key = devolutions_crypto::utils::derive_key_pbkdf2(data, &salt, iterations, length);
     println!("{}", base64::encode(&key));
-}
-
-fn derive_keypair(matches: &ArgMatches) {
-    let data = matches.value_of("DATA").unwrap().as_bytes();
-    let parameters = base64::decode(&matches.value_of("parameters").unwrap()).unwrap();
-
-    let parameters = devolutions_crypto::Argon2Parameters::try_from(parameters.as_slice()).unwrap();
-    let keypair =
-        devolutions_crypto::key::derive_keypair(data, &parameters, Default::default()).unwrap();
-
-    println!(
-        "Private Key: {}\nPublic Key: {}",
-        base64::encode(&Vec::<u8>::from(keypair.private_key)),
-        base64::encode(&Vec::<u8>::from(keypair.public_key))
-    );
 }
 
 fn encrypt(matches: &ArgMatches) {

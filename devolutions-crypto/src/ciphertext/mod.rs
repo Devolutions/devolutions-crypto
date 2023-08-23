@@ -23,7 +23,7 @@
 //! ### Asymmetric
 //! Here, you will need a `PublicKey` to encrypt data and the corresponding
 //! `PrivateKey` to decrypt it. You can generate them by using `generate_keypair`
-//! or `derive_keypair` in the [Key module](#key).
+//! in the [Key module](#key).
 //!
 //! ```rust
 //! use devolutions_crypto::key::{generate_keypair, KeyVersion, KeyPair};
@@ -125,7 +125,7 @@ pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ci
 /// You will need the corresponding `PrivateKey` to decrypt it.
 /// # Arguments
 ///  * `data` - The data to encrypt.
-///  * `public_key` - The `PublicKey` to use. Use either `generate_keypair` or `derive_keypair` to generate a keypair.
+///  * `public_key` - The `PublicKey` to use. Use `generate_keypair` to generate a keypair.
 ///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
@@ -315,17 +315,11 @@ fn encrypt_decrypt_v2_test() {
 
 #[test]
 fn asymmetric_test() {
-    use super::key::{derive_keypair, KeyVersion};
-    use super::Argon2Parameters;
+    use super::key::{generate_keypair, KeyVersion};
 
     let test_plaintext = b"this is a test data";
-    let test_password = b"test password";
 
-    let mut params = Argon2Parameters::default();
-    params.memory = 32;
-    params.iterations = 2;
-
-    let keypair = derive_keypair(test_password, &params, KeyVersion::Latest).unwrap();
+    let keypair = generate_keypair(KeyVersion::Latest);
 
     let encrypted_data =
         encrypt_asymmetric(test_plaintext, &keypair.public_key, CiphertextVersion::V2).unwrap();
@@ -345,17 +339,11 @@ fn asymmetric_test() {
 
 #[test]
 fn asymmetric_test_v2() {
-    use super::key::{derive_keypair, KeyVersion};
-    use super::Argon2Parameters;
+    use super::key::{generate_keypair, KeyVersion};
 
     let test_plaintext = b"this is a test data";
-    let test_password = b"test password";
 
-    let mut params = Argon2Parameters::default();
-    params.memory = 32;
-    params.iterations = 2;
-
-    let keypair = derive_keypair(test_password, &params, KeyVersion::Latest).unwrap();
+    let keypair = generate_keypair(KeyVersion::V1);
 
     let encrypted_data =
         encrypt_asymmetric(test_plaintext, &keypair.public_key, CiphertextVersion::V2).unwrap();

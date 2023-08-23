@@ -84,59 +84,6 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
-        /// Generates a key pair from a password.
-        /// </summary>
-        /// <param name="password">The password to use for the derivation.</param>
-        /// <param name="parameters">The argon2 parameters to use.</param>
-        /// <returns>Returns a keypair.</returns>
-        public static KeyPair DeriveKeyPair(byte[] password, Argon2Parameters parameters)
-        {
-            if (password == null || password.Length == 0)
-            {
-                return null;
-            }
-
-            if (parameters == null)
-            {
-                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
-            }
-
-            long size = Native.DeriveKeyPairSizeNative();
-
-            if (size < 0)
-            {
-                Utils.HandleError(size);
-            }
-
-            byte[] parameters_raw = parameters.ToByteArray();
-
-            byte[] privateKey = new byte[size];
-
-            byte[] publicKey = new byte[size];
-
-            long res = Native.DeriveKeyPairNative(
-                password,
-                (UIntPtr)password.Length,
-                parameters_raw,
-                (UIntPtr)parameters_raw.Length,
-                privateKey,
-                (UIntPtr)privateKey.Length,
-                publicKey,
-                (UIntPtr)publicKey.Length);
-
-            if (res < 0)
-            {
-                Utils.HandleError(res);
-            }
-
-            return new KeyPair()
-                {
-                    PrivateKey = privateKey,
-                    PublicKey = publicKey,
-                };
-        }
-
-        /// <summary>
         /// Encrypts the data (which will be encoded into a UTF8 byte array) with the provided key.
         /// </summary>
         /// <param name="data">The data to encrypt.</param>

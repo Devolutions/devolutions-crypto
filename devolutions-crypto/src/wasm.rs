@@ -208,15 +208,6 @@ pub fn generate_keypair(version: Option<KeyVersion>) -> KeyPair {
     key::generate_keypair(version.unwrap_or(KeyVersion::Latest)).into()
 }
 
-#[wasm_bindgen(js_name = "deriveKeyPair")]
-pub fn derive_keypair(
-    password: &[u8],
-    parameters: &Argon2Parameters,
-    version: Option<KeyVersion>,
-) -> Result<KeyPair, JsValue> {
-    Ok(key::derive_keypair(password, parameters, version.unwrap_or(KeyVersion::Latest))?.into())
-}
-
 #[wasm_bindgen(js_name = "generateSigningKeyPair")]
 pub fn generate_signing_keypair(version: Option<SigningKeyVersion>) -> SigningKeyPair {
     signing_key::generate_signing_keypair(version.unwrap_or(SigningKeyVersion::Latest)).into()
