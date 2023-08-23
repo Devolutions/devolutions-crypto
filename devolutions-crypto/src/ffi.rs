@@ -33,7 +33,7 @@ use super::Result;
 use std::convert::TryFrom as _;
 use std::slice;
 
-use zeroize::Zeroize as _;
+use zeroize::Zeroizing;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -81,10 +81,9 @@ pub unsafe extern "C" fn Encrypt(
 
     match encrypt(data, key, version) {
         Ok(res) => {
-            let mut res: Vec<u8> = res.into();
+            let res: Zeroizing<Vec<u8>> = Zeroizing::new(res.into());
             let length = res.len();
             result[0..length].copy_from_slice(&res);
-            res.zeroize();
             length as i64
         }
         Err(e) => e.error_code(),
@@ -138,11 +137,10 @@ pub unsafe extern "C" fn EncryptAsymmetric(
 
             match encrypt_asymmetric(data, &public_key, version) {
                 Ok(res) => {
-                    let mut res: Vec<u8> = res.into();
+                    let res: Zeroizing<Vec<u8>> = Zeroizing::new(res.into());
                     let length = res.len();
 
                     result[0..length].copy_from_slice(&res);
-                    res.zeroize();
                     length as i64
                 }
                 Err(e) => e.error_code(),
@@ -218,14 +216,14 @@ pub unsafe extern "C" fn Decrypt(
 
     match Ciphertext::try_from(data) {
         Ok(res) => match res.decrypt(key) {
-            Ok(mut res) => {
+            Ok(res) => {
+                let res = Zeroizing::new(res);
+
                 if result.len() >= res.len() {
                     let length = res.len();
                     result[0..length].copy_from_slice(&res);
-                    res.zeroize();
                     length as i64
                 } else {
-                    res.zeroize();
                     Error::InvalidOutputLength.error_code()
                 }
             }
@@ -271,14 +269,13 @@ pub unsafe extern "C" fn DecryptAsymmetric(
 
             match Ciphertext::try_from(data) {
                 Ok(res) => match res.decrypt_asymmetric(&private_key) {
-                    Ok(mut res) => {
+                    Ok(res) => {
+                        let res = Zeroizing::new(res);
                         if result.len() >= res.len() {
                             let length = res.len();
                             result[0..length].copy_from_slice(&res);
-                            res.zeroize();
                             length as i64
                         } else {
-                            res.zeroize();
                             Error::InvalidOutputLength.error_code()
                         }
                     }
@@ -431,10 +428,10 @@ pub unsafe extern "C" fn HashPassword(
     let password = slice::from_raw_parts(password, password_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    let mut res: Vec<u8> = hash_password(password, iterations, PasswordHashVersion::Latest).into();
+    let res: Zeroizing<Vec<u8>> =
+        Zeroizing::new(hash_password(password, iterations, PasswordHashVersion::Latest).into());
     let length = res.len();
     result[0..length].copy_from_slice(&res);
-    res.zeroize();
     length as i64
 }
 
@@ -517,12 +514,12 @@ pub unsafe extern "C" fn GenerateKeyPair(
     let public = slice::from_raw_parts_mut(public, public_length);
 
     let keypair = generate_keypair(KeyVersion::Latest);
-    let mut priv_res: Vec<u8> = keypair.private_key.into();
-    let mut pub_res: Vec<u8> = keypair.public_key.into();
+
+    let priv_res: Zeroizing<Vec<u8>> = Zeroizing::new(keypair.private_key.into());
+    let pub_res: Zeroizing<Vec<u8>> = Zeroizing::new(keypair.public_key.into());
+
     public[0..pub_res.len()].copy_from_slice(&pub_res);
     private[0..priv_res.len()].copy_from_slice(&priv_res);
-    priv_res.zeroize();
-    pub_res.zeroize();
     0
 }
 
@@ -560,11 +557,10 @@ pub unsafe extern "C" fn GenerateSigningKeyPair(
 
     let generated_keypair = signing_key::generate_signing_keypair(version);
 
-    let mut keypair_bytes: Vec<u8> = generated_keypair.into();
+    let keypair_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(generated_keypair.into());
 
     keypair[0..keypair_bytes.len()].copy_from_slice(&keypair_bytes);
 
-    keypair_bytes.zeroize();
     0
 }
 
@@ -668,9 +664,9 @@ pub unsafe extern "C" fn MixKeyExchange(
 
     match (PrivateKey::try_from(private), PublicKey::try_from(public)) {
         (Ok(private), Ok(public)) => match mix_key_exchange(&private, &public) {
-            Ok(mut res) => {
+            Ok(res) => {
+                let res = Zeroizing::new(res);
                 shared[0..res.len()].copy_from_slice(&res);
-                res.zeroize();
                 0
             }
             Err(e) => e.error_code(),
@@ -814,9 +810,8 @@ pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
 
     let key = slice::from_raw_parts_mut(key, key_length);
 
-    let mut k = utils::generate_key(key_length);
+    let k = Zeroizing::new(utils::generate_key(key_length));
     key.copy_from_slice(&k);
-    k.zeroize();
     0
 }
 
@@ -855,15 +850,14 @@ pub unsafe extern "C" fn DeriveKeyArgon2(
         Err(e) => return e.error_code(),
     };
 
-    let mut native_result = match utils::derive_key_argon2(&key, &argon2_parameters) {
-        Ok(x) => x,
+    let native_result = match utils::derive_key_argon2(&key, &argon2_parameters) {
+        Ok(x) => Zeroizing::new(x),
         Err(e) => return e.error_code(),
     };
 
     let result = slice::from_raw_parts_mut(result, result_length);
 
     result.copy_from_slice(&native_result);
-    native_result.zeroize();
     0
 }
 
@@ -903,9 +897,13 @@ pub unsafe extern "C" fn DeriveKeyPbkdf2(
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    let mut native_result = utils::derive_key_pbkdf2(&key, &salt, niterations, result_length);
+    let native_result = Zeroizing::new(utils::derive_key_pbkdf2(
+        &key,
+        &salt,
+        niterations,
+        result_length,
+    ));
     result.copy_from_slice(&native_result);
-    native_result.zeroize();
     0
 }
 

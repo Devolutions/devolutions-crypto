@@ -15,7 +15,7 @@ use chacha20poly1305::{Key, KeyInit, XChaCha20Poly1305, XNonce};
 use rand::{rngs::OsRng, RngCore};
 use sha2::{Digest, Sha256};
 use x25519_dalek::StaticSecret;
-use zeroize::Zeroize;
+use zeroize::{Zeroize, Zeroizing};
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -82,7 +82,7 @@ impl CiphertextV2Symmetric {
 
     pub fn encrypt(data: &[u8], key: &[u8], header: &Header<Ciphertext>) -> Result<Self> {
         // Derive key
-        let mut key = CiphertextV2Symmetric::derive_key(key);
+        let key = Zeroizing::new(CiphertextV2Symmetric::derive_key(key));
 
         // Generate nonce
         let mut nonce_bytes = [0u8; 24];
@@ -99,13 +99,10 @@ impl CiphertextV2Symmetric {
 
         // Encrypt
         let ciphertext = {
-            let key = Key::from_slice(&key);
+            let key = Key::from_slice(key.as_slice());
             let cipher = XChaCha20Poly1305::new(key);
             cipher.encrypt(nonce, payload)?
         };
-
-        // Zero out the key
-        key.zeroize();
 
         Ok(CiphertextV2Symmetric {
             nonce: nonce_bytes,
@@ -115,7 +112,7 @@ impl CiphertextV2Symmetric {
 
     pub fn decrypt(&self, key: &[u8], header: &Header<Ciphertext>) -> Result<Vec<u8>> {
         // Derive key
-        let mut key = CiphertextV2Symmetric::derive_key(key);
+        let key = Zeroizing::new(CiphertextV2Symmetric::derive_key(key));
 
         // Authenticate the header
         let aad: Vec<u8> = (*header).clone().into();
@@ -126,15 +123,12 @@ impl CiphertextV2Symmetric {
 
         let result = {
             // Decrypt
-            let key = Key::from_slice(&key);
+            let key = Key::from_slice(key.as_slice());
             let nonce = XNonce::from_slice(&self.nonce);
 
             let cipher = XChaCha20Poly1305::new(key);
             cipher.decrypt(nonce, payload)?
         };
-
-        // Zeroize the key
-        key.zeroize();
 
         Ok(result)
     }

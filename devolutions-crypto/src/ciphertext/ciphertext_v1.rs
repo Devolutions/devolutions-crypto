@@ -13,7 +13,7 @@ use hmac::{Hmac, Mac};
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
-use zeroize::Zeroize;
+use zeroize::{Zeroize, Zeroizing};
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -73,8 +73,8 @@ impl CiphertextV1 {
 
     pub fn encrypt(data: &[u8], key: &[u8], header: &Header<Ciphertext>) -> Result<CiphertextV1> {
         // Split keys
-        let mut encryption_key = vec![0u8; 32];
-        let mut signature_key = vec![0u8; 32];
+        let mut encryption_key = Zeroizing::new(vec![0u8; 32]);
+        let mut signature_key = Zeroizing::new(vec![0u8; 32]);
         CiphertextV1::split_key(key, &mut encryption_key, &mut signature_key)?;
 
         // Generate IV
@@ -84,9 +84,6 @@ impl CiphertextV1 {
         // Create cipher object
         let cipher = cbc::Encryptor::<Aes256>::new_from_slices(&encryption_key, &iv)?;
         let ciphertext = cipher.encrypt_padded_vec_mut::<Pkcs7>(data);
-
-        // Zero out the key
-        encryption_key.zeroize();
 
         // Append MAC data
         let mut mac_data: Vec<u8> = (*header).clone().into();
@@ -99,9 +96,6 @@ impl CiphertextV1 {
 
         let hmac: [u8; 32] = mac.finalize().into_bytes().into();
 
-        // Zero out the key
-        signature_key.zeroize();
-
         Ok(CiphertextV1 {
             iv,
             ciphertext,
@@ -111,12 +105,12 @@ impl CiphertextV1 {
 
     pub fn decrypt(&self, key: &[u8], header: &Header<Ciphertext>) -> Result<Vec<u8>> {
         // Split keys
-        let mut encryption_key = vec![0u8; 32];
-        let mut signature_key = vec![0u8; 32];
+        let mut encryption_key = Zeroizing::new(vec![0u8; 32]);
+        let mut signature_key = Zeroizing::new(vec![0u8; 32]);
         CiphertextV1::split_key(key, &mut encryption_key, &mut signature_key)?;
 
         // Verify HMAC
-        let mut mac_data: Vec<u8> = (*header).clone().into();
+        let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new((*header).clone().into());
         mac_data.extend_from_slice(&self.iv);
         mac_data.append(&mut self.ciphertext.clone());
 
@@ -124,15 +118,8 @@ impl CiphertextV1 {
         mac.update(&mac_data);
         mac.verify_slice(&self.hmac)?;
 
-        // Zeroize the key
-        signature_key.zeroize();
-        mac_data.zeroize();
-
         let cipher = cbc::Decryptor::<Aes256>::new_from_slices(&encryption_key, &self.iv)?;
         let result = cipher.decrypt_padded_vec_mut::<Pkcs7>(&self.ciphertext)?;
-
-        // Zeroize the key
-        encryption_key.zeroize();
 
         Ok(result)
     }
