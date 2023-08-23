@@ -28,7 +28,7 @@ runs:
     - name: Building x86_64 3.11 Wheel
       working-directory: ./devolutions-crypto
       shell: bash
-      run:
+      run: |
         source $HOME/.cargo/env
         
         maturin build --release -i python --target=x86_64-apple-darwin
