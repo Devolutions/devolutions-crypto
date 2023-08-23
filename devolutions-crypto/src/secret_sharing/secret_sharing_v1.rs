@@ -5,7 +5,7 @@ use super::Result;
 use std::convert::TryFrom;
 
 use sharks::{Share, Sharks};
-use zeroize::Zeroize;
+use zeroize::Zeroizing;
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -64,11 +64,9 @@ impl ShareV1 {
             return Err(Error::NotEnoughShares);
         }
 
-        let mut secret = crate::utils::generate_key(length);
+        let secret = Zeroizing::new(crate::utils::generate_key(length));
         let sharks = Sharks(threshold);
         let dealer = sharks.dealer(&secret);
-
-        secret.zeroize();
 
         Ok(dealer.take(n_shares as usize).map(move |s| ShareV1 {
             threshold,

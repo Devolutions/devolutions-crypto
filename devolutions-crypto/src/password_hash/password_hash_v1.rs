@@ -11,7 +11,7 @@ use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
-use zeroize::Zeroize;
+use zeroize::{Zeroize, Zeroizing};
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -92,12 +92,9 @@ impl PasswordHashV1 {
     }
 
     pub fn verify_password(&self, pass: &[u8]) -> bool {
-        let mut res = vec![0u8; 32];
+        let mut res = Zeroizing::new(vec![0u8; 32]);
         let _ = pbkdf2::<Hmac<Sha256>>(pass, &self.salt, self.iterations, &mut res);
 
-        let is_equal = res.ct_eq(&self.hash).into();
-
-        res.zeroize();
-        is_equal
+        res.ct_eq(&self.hash).into()
     }
 }
