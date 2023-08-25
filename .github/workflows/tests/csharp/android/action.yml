@@ -8,7 +8,7 @@ runs:
       with:
         name: config.txt
         path: ./wrappers/csharp
-        
+
     - name: Download Native Libs
       uses: actions/download-artifact@v3
       with:
@@ -29,13 +29,13 @@ runs:
 
     - name: Creating Android device
       shell: bash
-      run: echo "no" | /Users/runner/Library/Android/sdk/tools/bin/avdmanager create avd -n test_emulator -k "system-images;android-33;google_apis;x86_64" 
+      run: echo "no" | /Users/runner/Library/Android/sdk/tools/bin/avdmanager create avd -n test_emulator -k "system-images;android-33;google_apis;x86_64"
 
     - name: Starting emulator
       working-directory: /Users/runner/Library/Android/sdk/tools/
       shell: bash
-      run: emulator @test_emulator &  
-      
+      run: emulator @test_emulator &
+
     - name: Waiting for emulator to boot
       shell: bash
       run: |
@@ -57,8 +57,8 @@ runs:
           echo "Boot Time : $I seconds"
         fi
 
-        adb shell input keyevent 82 
-      
+        adb shell input keyevent 82
+
     - name: Unit tests XAMARIN-ANDROID
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash

@@ -15,12 +15,12 @@ runs:
         set -e
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-    
+
     - name: Setup iOS minimum version
       shell: bash
       run: echo "IPHONEOS_DEPLOYMENT_TARGET=12.1" >> $GITHUB_ENV
 
-    - name: Install rust 
+    - name: Install rust
       shell: bash
       run: |
         rustup update
@@ -43,7 +43,6 @@ runs:
         python3 GeneratePackage.py -p ios
         mkdir output
         mv ./ios ./output/ios
-        
 
     - uses: actions/upload-artifact@v3
       with:

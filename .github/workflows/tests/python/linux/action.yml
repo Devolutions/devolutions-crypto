@@ -27,7 +27,7 @@ runs:
       run: pip install --no-index --find-links="./" devolutions_crypto
 
     - name: Run 3.10 tests
-      working-directory: ./wrappers/python 
+      working-directory: ./wrappers/python
       shell: bash
       run: python -m unittest tests/*.py
 
@@ -50,10 +50,10 @@ runs:
       run: pip install --no-index --find-links="./" devolutions_crypto
 
     - name: Run 3.9 tests
-      working-directory: ./wrappers/python 
+      working-directory: ./wrappers/python
       shell: bash
       run: python -m unittest tests/*.py
-    
+
 # 3.8
     - uses: actions/setup-python@v4
       with:
@@ -73,7 +73,7 @@ runs:
       run: pip install --no-index --find-links="./" devolutions_crypto
 
     - name: Run 3.8 tests
-      working-directory: ./wrappers/python 
+      working-directory: ./wrappers/python
       shell: bash
       run: python -m unittest tests/*.py
 
@@ -96,6 +96,6 @@ runs:
       run: pip install --no-index --find-links="./" devolutions_crypto
 
     - name: Run 3.7 tests
-      working-directory: ./wrappers/python 
+      working-directory: ./wrappers/python
       shell: bash
       run: python -m unittest tests/*.py

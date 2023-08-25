@@ -8,13 +8,12 @@ on:
   workflow_dispatch:
     inputs:
       generate_release:
-        description: "Generate release"
+        description: Generate release
         required: true
         type: boolean
       version:
         required: false
         type: string
-        default: ''
 
 jobs:
   setup_config:
@@ -261,7 +260,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/workflows/tests/python/windows
 
-
   #### PUBLISH SOURCE ####
   source_publish:
     runs-on: "ubuntu-latest"
@@ -277,18 +275,20 @@ jobs:
     if: ${{ github.event.inputs.generate_release == 'true' }}
     steps:
       - uses: actions/checkout@v3
+
       - name: Check out devolutions/actions
         uses: actions/checkout@v3
         with:
+          path: ./.github/workflows
+          ref: v1
           repository: Devolutions/actions
           token: ${{ secrets.DEVOLUTIONSBOT_TOKEN }}
-          path: ./.github/workflows
 
       - name: Generate Rust SBOM
         uses:  ./.github/workflows/cyclonedx-rust-generate
         with:
           path: devolutions-crypto
-      
+
       - name: Save BOM
         uses: actions/upload-artifact@v3
         with:
@@ -298,9 +298,9 @@ jobs:
       - name: Upload SBOM
         uses:  ./.github/workflows/dtrack-upload-sbom
         with:
-          serverhostname: 'dtrack-api.devolutions.com'
-          apikey: ${{ secrets.DTRACK_AUTOMATION_API_KEY }}
-          projectname: 'devolutions-crypto'
-          projectversion: ${{ github.event.inputs.version }}
+          api_key: ${{ secrets.DTRACK_AUTOMATION_API_KEY }}
           autocreate: 'true'
-          bomfilename: devolutions-crypto/bom.xml
+          bom_filename: devolutions-crypto/bom.xml
+          project_name: 'devolutions-crypto'
+          project_version: ${{ github.event.inputs.version }}
+          server_hostname: 'dtrack-api.devolutions.com'

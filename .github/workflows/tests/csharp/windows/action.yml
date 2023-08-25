@@ -8,7 +8,7 @@ runs:
       with:
         name: config.txt
         path: ./wrappers/csharp
-        
+
     - uses: actions/setup-python@v4
       with:
         python-version: "3.7"
@@ -37,7 +37,7 @@ runs:
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash
       run: python unit-tests.py -p framework
-    
+
     - name: Unit tests DOTNET CORE
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash
