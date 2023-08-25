@@ -23,7 +23,7 @@ runs:
       working-directory: ./wrappers/csharp/nuget
       shell: bash
       run : curl https://dist.nuget.org/win-x86-commandline/latest/nuget.exe --output nuget.exe
-    
+
     - name: Generating WIN Nuget
       working-directory: ./wrappers/csharp/nuget
       shell: bash
@@ -39,7 +39,7 @@ runs:
       run: |
         mv wrappers/csharp/nuget/Windows/package/*.nupkg .
         mv wrappers/csharp/nuget/dotnet-core/package/*.nupkg .
-        
+
     - uses: actions/upload-artifact@v3
       with:
         name: nugets

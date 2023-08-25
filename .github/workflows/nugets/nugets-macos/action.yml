@@ -54,7 +54,7 @@ runs:
         mv wrappers/csharp/nuget/macOS/Full/package/*.nupkg .
         mv wrappers/csharp/nuget/macOS/Modern/Devolutions.Crypto.Mac/package/*.nupkg .
         mv wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/package/*.nupkg .
-        
+
     - uses: actions/upload-artifact@v3
       with:
         name: nugets

@@ -15,12 +15,12 @@ runs:
 
     - name:  Installing dependencies
       shell: bash
-      run: | 
+      run: |
         sudo apt-get update
-        sudo apt-get install nuget gcc-multilib software-properties-common 
+        sudo apt-get install nuget gcc-multilib software-properties-common
         sudo apt-get install -y gcc-aarch64-linux-gnu
 
-    - name: Install rust 
+    - name: Install rust
       shell: bash
       run: |
         rustup update
@@ -35,7 +35,7 @@ runs:
         rustup target add x86_64-linux-android
 
         mkdir .cargo
-      
+
     - name: Unit tests
       working-directory: ./devolutions-crypto
       shell: bash
@@ -57,7 +57,7 @@ runs:
         ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
         echo "y" | $SDKMANAGER "ndk;25.2.9519653"
-      
+
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
 
         echo "[target.aarch64-linux-android]
@@ -78,7 +78,7 @@ runs:
       shell: bash
       run: |
         export ANDROID_ROOT="/usr/local/lib/android"
-        export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"     
+        export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
         ln -sfn $ANDROID_SDK_ROOT/ndk/25.2.9519653 $ANDROID_NDK
 

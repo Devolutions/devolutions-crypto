@@ -1,8 +1,8 @@
-name: Build WebAssembly 
+name: Build WebAssembly
 description: This builds the webassembly version of Devolutions Crypto
 runs:
   using: composite
-  steps:  
+  steps:
     - name: Update rust and install wasm-pack
       shell: bash
       run: |

@@ -32,7 +32,7 @@ runs:
       shell: bash
       run: |
         cargo test
-      
+
     - name: Building WIN
       working-directory: ./wrappers/csharp
       shell: bash

@@ -8,7 +8,7 @@ runs:
     with:
       name: config.txt
       path: ./wrappers/csharp
-        
+
   - name: Download Native Libs
     uses: actions/download-artifact@v3
     with:
