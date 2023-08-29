@@ -186,7 +186,7 @@ pub fn base64_decode_url(data: &str) -> Result<Vec<u8>> {
 }
 
 pub fn constant_time_equals(x: &[u8], y: &[u8]) -> bool {
-    x.ct_eq(y).unwrap_u8() == 1
+    x.ct_eq(y).into()
 }
 
 #[test]
