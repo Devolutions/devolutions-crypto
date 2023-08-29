@@ -5,6 +5,7 @@ use hmac::Hmac;
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
+use subtle::ConstantTimeEq as _;
 
 use super::Argon2Parameters;
 use super::DataType;
@@ -182,6 +183,27 @@ pub fn base64_decode_url(data: &str) -> Result<Vec<u8>> {
         Ok(d) => Ok(d),
         _ => Err(Error::InvalidData),
     }
+}
+
+pub fn constant_time_equals(x: &[u8], y: &[u8]) -> bool {
+    x.ct_eq(y).unwrap_u8() == 1
+}
+
+#[test]
+fn test_constant_time_equals() {
+    let x: [u8; 3] = [0, 1, 2];
+    let y: [u8; 3] = [4, 5, 6];
+    let z: [u8; 4] = [0, 1, 2, 3];
+
+    assert!(constant_time_equals(&x, &x));
+    assert!(!constant_time_equals(&x, &y));
+    assert!(!constant_time_equals(&x, &z));
+    assert!(!constant_time_equals(&y, &x));
+    assert!(constant_time_equals(&y, &y));
+    assert!(!constant_time_equals(&y, &z));
+    assert!(!constant_time_equals(&z, &x));
+    assert!(!constant_time_equals(&z, &y));
+    assert!(constant_time_equals(&z, &z));
 }
 
 #[test]

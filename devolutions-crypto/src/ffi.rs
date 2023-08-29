@@ -23,6 +23,7 @@ use super::{
     signature,
     signature::{Signature, SignatureVersion},
 };
+
 use super::{
     signing_key,
     signing_key::{SigningKeyPair, SigningKeyVersion, SigningPublicKey},
@@ -1133,6 +1134,38 @@ pub unsafe extern "C" fn EncodeUrl(
     match general_purpose::URL_SAFE_NO_PAD.encode_slice(&input, &mut output) {
         Ok(res) => res as i64,
         Err(_err) => -1,
+    }
+}
+
+/// Compare two byte arrays with constant-time equality.
+/// # Arguments
+///  * `x` - Pointer to the first value to compare.
+///  * `x_length` - Length of the first value to compare.
+///  * `y` - Pointer to the second value to compare.
+///  * `y_length` - Length of the second value to compare.
+/// # Returns
+/// Returns 0 if the values are not equal is invalid or 1 if the values are equal. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn ConstantTimeEquals(
+    x: *const u8,
+    x_length: usize,
+    y: *const u8,
+    y_length: usize,
+) -> i64 {
+    if x.is_null() || y.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let x = slice::from_raw_parts(x, x_length);
+    let y = slice::from_raw_parts(y, y_length);
+
+    if utils::constant_time_equals(x, y) {
+        1
+    } else {
+        0
     }
 }
 
