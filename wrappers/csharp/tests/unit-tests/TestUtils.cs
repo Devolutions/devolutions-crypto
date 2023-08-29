@@ -2,11 +2,6 @@
 
 namespace Devolutions.Crypto.Tests
 {
-    using System;
-    using System.IO;
-
-    using Devolutions.Cryptography;
-
 #if XAMARIN_MAC_FULL || XAMARIN_MAC_MODERN || XAMARIN_IOS || XAMARIN_ANDROID
     using NUnit.Framework;
     using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
@@ -14,6 +9,10 @@ namespace Devolutions.Crypto.Tests
 #else
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
+    using System;
+    using System.IO;
+
+    using Devolutions.Cryptography;
 
     [TestClass]
     public class TestUtils
@@ -22,7 +21,7 @@ namespace Devolutions.Crypto.Tests
         public void Base64StringToByteArray()
         {
             byte[] data = Utils.Base64StringToByteArray(TestData.Base64TestData);
-            Assert.AreEqual(Convert.ToBase64String(data),  Convert.ToBase64String(TestData.BytesTestData));
+            Assert.AreEqual(Convert.ToBase64String(data), Convert.ToBase64String(TestData.BytesTestData));
         }
 
         [TestMethod]
@@ -34,17 +33,28 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
+        public void ConstantTimeEqual()
+        {
+            byte[] x = { 0, 1, 2 };
+            byte[] y = { 4, 5, 6 };
+            byte[] z = { 0, 1, 2, 3 };
+
+            Assert.IsTrue(Utils.ConstantTimeEquals(x, x));
+            Assert.IsTrue(!Utils.ConstantTimeEquals(x, y));
+            Assert.IsTrue(!Utils.ConstantTimeEquals(x, z));
+            Assert.IsTrue(!Utils.ConstantTimeEquals(y, x));
+            Assert.IsTrue(Utils.ConstantTimeEquals(y, y));
+            Assert.IsTrue(!Utils.ConstantTimeEquals(y, z));
+            Assert.IsTrue(!Utils.ConstantTimeEquals(z, x));
+            Assert.IsTrue(!Utils.ConstantTimeEquals(z, y));
+            Assert.IsTrue(Utils.ConstantTimeEquals(z, z));
+        }
+
+        [TestMethod]
         public void Decode()
         {
             byte[] decodedData = Utils.DecodeFromBase64(TestData.Base64TestData);
             Assert.AreEqual(Convert.ToBase64String(decodedData), Convert.ToBase64String(TestData.BytesTestData));
-        }
-
-        [TestMethod]
-        public void Encode()
-        {
-            string y = Utils.EncodeToBase64String(TestData.BytesTestData);
-            Assert.AreEqual(y, TestData.Base64TestData);
         }
 
         [TestMethod]
@@ -56,6 +66,13 @@ namespace Devolutions.Crypto.Tests
             Assert.AreEqual(Convert.ToBase64String(d1), Convert.ToBase64String(TestData.Base64UrlBytes1));
             Assert.AreEqual(Convert.ToBase64String(d2), Convert.ToBase64String(TestData.Base64UrlBytes2));
             Assert.AreEqual(Convert.ToBase64String(d3), Convert.ToBase64String(TestData.Base64UrlBytes3));
+        }
+
+        [TestMethod]
+        public void Encode()
+        {
+            string y = Utils.EncodeToBase64String(TestData.BytesTestData);
+            Assert.AreEqual(y, TestData.Base64TestData);
         }
 
         [TestMethod]
@@ -98,6 +115,17 @@ namespace Devolutions.Crypto.Tests
         {
             int encodedLength = Utils.GetEncodedBase64StringLength(TestData.BytesTestData);
             Assert.AreEqual(4, encodedLength);
+        }
+
+        [TestMethod]
+        public void ScryptSimple()
+        {
+            byte[] password = Utils.StringToUtf8ByteArray(TestData.TestPassword);
+            byte[] salt = TestData.Salt;
+
+            string hash = Utils.ScryptSimple(password, salt, 10, 8, 1);
+
+            Assert.AreEqual(TestData.ScryptHash, hash);
         }
 
         [TestMethod]
@@ -154,7 +182,8 @@ namespace Devolutions.Crypto.Tests
             }
 
             // Xamarin has a space between Cannot (Can not)
-            bool validException = exception.ManagedException.Message.Contains("Cannot access a closed Stream.") || exception.ManagedException.Message.Contains("Can not access a closed Stream.");
+            bool validException = exception.ManagedException.Message.Contains("Cannot access a closed Stream.")
+                || exception.ManagedException.Message.Contains("Can not access a closed Stream.");
 
             Assert.AreEqual(validException, true);
         }
@@ -218,17 +247,6 @@ namespace Devolutions.Crypto.Tests
             bool validationResult = Utils.ValidateHeaderFromStream(stream, DataType.Cipher);
 
             Assert.AreEqual(validationResult, true);
-        }
-
-        [TestMethod]
-        public void ScryptSimple()
-        {
-            byte[] password = Utils.StringToUtf8ByteArray(TestData.TestPassword);
-            byte[] salt = TestData.Salt;
-
-            string hash = Utils.ScryptSimple(password, salt, 10, 8, 1);
-
-            Assert.AreEqual(TestData.ScryptHash, hash);
         }
     }
 }

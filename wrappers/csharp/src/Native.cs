@@ -1,10 +1,10 @@
 namespace Devolutions.Cryptography
 {
     using System;
+    using System.Runtime.InteropServices;
 #if WIN
     using System.IO;
 #endif
-    using System.Runtime.InteropServices;
 #if !DEBUG
     using System.Reflection;
 #endif
@@ -521,6 +521,16 @@ namespace Devolutions.Cryptography
             return VersionSize86();
         }
 
+        internal static long ConstantTimeEquals(byte[] x, UIntPtr xLength, byte[] y, UIntPtr yLength)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return ConstantTimeEquals64(x, xLength, y, yLength);
+            }
+
+            return ConstantTimeEquals86(x, xLength, y, yLength);
+        }
+
         [DllImport(LibName86, EntryPoint = "GenerateKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         private static extern long GenerateKeyExchangeSizeNative86();
 
@@ -820,6 +830,12 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName64, EntryPoint = "VerifyPassword", CallingConvention = CallingConvention.Cdecl)]
         private static extern long VerifyPasswordNative64(byte[] password, UIntPtr passwordLength, byte[] hash, UIntPtr hashLength);
+
+        [DllImport(LibName86, EntryPoint = "ConstantTimeEquals", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long ConstantTimeEquals86(byte[] x, UIntPtr xLength, byte[] y, UIntPtr yLength);
+
+        [DllImport(LibName64, EntryPoint = "ConstantTimeEquals", CallingConvention = CallingConvention.Cdecl)]
+        private static extern long ConstantTimeEquals64(byte[] x, UIntPtr xLength, byte[] y, UIntPtr yLength);
 #endif
     }
 }
