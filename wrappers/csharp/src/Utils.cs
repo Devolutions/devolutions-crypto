@@ -81,6 +81,30 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// Compare two byte arrays with constant-time equality.
+        /// </summary>
+        /// <param name="x">The first value to compare.</param>
+        /// <param name="y">The second value to compare.</param>
+        /// <returns>Returns false if the values are not equal is invalid or true if the values are equal. If there is an error,
+        ///     it will trigger a DevolutionsCryptoException.</returns>
+        public static bool ConstantTimeEquals(byte[] x, byte[] y)
+        {
+            if (x == null || y == null)
+            {
+                return x == null && y == null;
+            }
+
+            long res = Native.ConstantTimeEquals(x, (UIntPtr)x.Length, y, (UIntPtr)y.Length);
+
+            if (res < 0)
+            {
+                throw GetDevolutionsCryptoException(res);
+            }
+
+            return res == 1;
+        }
+
+        /// <summary>
         /// Converts a base 64 string to a byte array.
         /// </summary>
         /// <param name="data">The data to convert.</param>
@@ -214,18 +238,6 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="base64">The base 64 string to calculate the resulting length.</param>
         /// <returns>The original buffer length.</returns>
-        [Obsolete("This method has been deprecated. Use GetDecodedBase64StringLength instead.")]
-        public static int GetDecodedLength(string base64)
-        {
-            return GetDecodedBase64StringLength(base64);
-        }
-
-        /// <summary>
-        /// Calculate the length of the original buffer if the base 64 string is converted back.
-        /// Warning this method doesn't validate if the string is valid base64.
-        /// </summary>
-        /// <param name="base64">The base 64 string to calculate the resulting length.</param>
-        /// <returns>The original buffer length.</returns>
         public static int GetDecodedBase64StringLength(string base64)
         {
             if (string.IsNullOrEmpty(base64) || base64.Length % 4 != 0)
@@ -247,14 +259,15 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
-        /// Calculate the length of the resulting array if the buffer is encoded in base64.
+        /// Calculate the length of the original buffer if the base 64 string is converted back.
+        /// Warning this method doesn't validate if the string is valid base64.
         /// </summary>
-        /// <param name="buffer">The buffer to calculate the resulting length.</param>
-        /// <returns>The resulting base 64 buffer lentgh.</returns>
-        [Obsolete("This method has been deprecated. Use GetEncodedBase64StringLength instead.")]
-        public static int GetEncodedLength(byte[] buffer)
+        /// <param name="base64">The base 64 string to calculate the resulting length.</param>
+        /// <returns>The original buffer length.</returns>
+        [Obsolete("This method has been deprecated. Use GetDecodedBase64StringLength instead.")]
+        public static int GetDecodedLength(string base64)
         {
-            return GetEncodedBase64StringLength(buffer);
+            return GetDecodedBase64StringLength(base64);
         }
 
         /// <summary>
@@ -270,6 +283,17 @@ namespace Devolutions.Cryptography
             }
 
             return ((4 * buffer.Length / 3) + 3) & ~3;
+        }
+
+        /// <summary>
+        /// Calculate the length of the resulting array if the buffer is encoded in base64.
+        /// </summary>
+        /// <param name="buffer">The buffer to calculate the resulting length.</param>
+        /// <returns>The resulting base 64 buffer lentgh.</returns>
+        [Obsolete("This method has been deprecated. Use GetEncodedBase64StringLength instead.")]
+        public static int GetEncodedLength(byte[] buffer)
+        {
+            return GetEncodedBase64StringLength(buffer);
         }
 
         /// <summary>
@@ -347,18 +371,6 @@ namespace Devolutions.Cryptography
         /// <param name="data">The buffer to validate.</param>
         /// <param name="type">The data type to validate.</param>
         /// <returns>Returns true if the buffer received matches the data type.</returns>
-        [Obsolete("This method has been deprecated. Use ValidateHeader instead.")]
-        public static bool ValidateSignature(byte[] data, DataType type)
-        {
-            return ValidateHeader(data, type);
-        }
-
-        /// <summary>
-        /// Validate that the buffer is from the Devolutions Crypto Library.
-        /// </summary>
-        /// <param name="data">The buffer to validate.</param>
-        /// <param name="type">The data type to validate.</param>
-        /// <returns>Returns true if the buffer received matches the data type.</returns>
         public static bool ValidateHeader(byte[] data, DataType type)
         {
             if (data == null)
@@ -383,38 +395,11 @@ namespace Devolutions.Cryptography
         /// <param name="base64">The buffer to validate.</param>
         /// <param name="type">The data type to validate.</param>
         /// <returns>Returns true if the base 64 string received matches the data type.</returns>
-        [Obsolete("This method has been deprecated. Use ValidateHeaderFromBase64 instead.")]
-        public static bool ValidateSignatureFromBase64(string base64, DataType type)
-        {
-            return ValidateHeaderFromBase64(base64, type);
-        }
-
-        /// <summary>
-        /// Validate that the base 64 string is from the Devolutions Crypto Library.
-        /// Performance : Use ValidateHeader(byte[], DataType) for more performance if possible.
-        /// </summary>
-        /// <param name="base64">The buffer to validate.</param>
-        /// <param name="type">The data type to validate.</param>
-        /// <returns>Returns true if the base 64 string received matches the data type.</returns>
         public static bool ValidateHeaderFromBase64(string base64, DataType type)
         {
             byte[] data = DecodeFromBase64(base64);
 
             return ValidateHeader(data, type);
-        }
-
-        /// <summary>
-        /// Validate that the stream data is from the Devolutions Crypto Library.
-        /// The stream must support both Seeking and Reading.
-        /// Performance : Use ValidateHeader(byte[], DataType) for more performance if possible.
-        /// </summary>
-        /// <param name="stream">The stream to validate.</param>
-        /// <param name="type">The data type to validate.</param>
-        /// <returns>Returns true if the stream data received matches the data type.</returns>
-        [Obsolete("This method has been deprecated. Use ValidateHeaderFromStream instead.")]
-        public static bool ValidateSignatureFromStream(Stream stream, DataType type)
-        {
-            return ValidateHeaderFromStream(stream, type);
         }
 
         /// <summary>
@@ -471,6 +456,45 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// Validate that the buffer is from the Devolutions Crypto Library.
+        /// </summary>
+        /// <param name="data">The buffer to validate.</param>
+        /// <param name="type">The data type to validate.</param>
+        /// <returns>Returns true if the buffer received matches the data type.</returns>
+        [Obsolete("This method has been deprecated. Use ValidateHeader instead.")]
+        public static bool ValidateSignature(byte[] data, DataType type)
+        {
+            return ValidateHeader(data, type);
+        }
+
+        /// <summary>
+        /// Validate that the base 64 string is from the Devolutions Crypto Library.
+        /// Performance : Use ValidateHeader(byte[], DataType) for more performance if possible.
+        /// </summary>
+        /// <param name="base64">The buffer to validate.</param>
+        /// <param name="type">The data type to validate.</param>
+        /// <returns>Returns true if the base 64 string received matches the data type.</returns>
+        [Obsolete("This method has been deprecated. Use ValidateHeaderFromBase64 instead.")]
+        public static bool ValidateSignatureFromBase64(string base64, DataType type)
+        {
+            return ValidateHeaderFromBase64(base64, type);
+        }
+
+        /// <summary>
+        /// Validate that the stream data is from the Devolutions Crypto Library.
+        /// The stream must support both Seeking and Reading.
+        /// Performance : Use ValidateHeader(byte[], DataType) for more performance if possible.
+        /// </summary>
+        /// <param name="stream">The stream to validate.</param>
+        /// <param name="type">The data type to validate.</param>
+        /// <returns>Returns true if the stream data received matches the data type.</returns>
+        [Obsolete("This method has been deprecated. Use ValidateHeaderFromStream instead.")]
+        public static bool ValidateSignatureFromStream(Stream stream, DataType type)
+        {
+            return ValidateHeaderFromStream(stream, type);
+        }
+
+        /// <summary>
         /// Gets the native library version.
         /// </summary>
         /// <returns>Returns the native library version string.</returns>
@@ -496,6 +520,21 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// Method used to return the right exception depending on the error code.
+        /// </summary>
+        /// <param name="errorCode">The error code to handle.</param>
+        /// <returns>The exception matching the error code.</returns>
+        internal static DevolutionsCryptoException GetDevolutionsCryptoException(long errorCode)
+        {
+            if (Enum.IsDefined(typeof(NativeError), (int)errorCode))
+            {
+                return new DevolutionsCryptoException((NativeError)errorCode);
+            }
+
+            return new DevolutionsCryptoException(ManagedError.Error);
+        }
+
+        /// <summary>
         /// Method used to throw the right exception depending on the error code.
         /// </summary>
         /// <param name="errorCode">The error code to handle.</param>
@@ -509,21 +548,6 @@ namespace Devolutions.Cryptography
             {
                 throw new DevolutionsCryptoException(ManagedError.Error);
             }
-        }
-
-        /// <summary>
-        /// Method used to return the right exception depending on the error code.
-        /// </summary>
-        /// <param name="errorCode">The error code to handle.</param>
-        /// <returns>The exception matching the error code.</returns>
-        internal static DevolutionsCryptoException GetDevolutionsCryptoException(long errorCode)
-        {
-            if (Enum.IsDefined(typeof(NativeError), (int)errorCode))
-            {
-                return new DevolutionsCryptoException((NativeError)errorCode);
-            }
-
-            return new DevolutionsCryptoException(ManagedError.Error);
         }
     }
 }

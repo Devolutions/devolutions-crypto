@@ -139,6 +139,9 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName, EntryPoint = "GetSigningPublicKeySize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long GetSigningPublicKeySize(byte[] keypair, UIntPtr keypairLength);
+
+        [DllImport(LibName, EntryPoint = "ConstantTimeEquals", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long ConstantTimeEquals(byte[] x, UIntPtr xLength, byte[] y, UIntPtr yLength);
     }
 }
 #endif

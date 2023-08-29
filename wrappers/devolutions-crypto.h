@@ -501,6 +501,22 @@ int64_t EncodeUrl(const uint8_t *input,
                   uint8_t *output,
                   uintptr_t output_length);
 
+/// Compare two byte arrays with constant-time equality.
+/// # Arguments
+///  * `x` - Pointer to the first value to compare.
+///  * `x_length` - Length of the first value to compare.
+///  * `y` - Pointer to the second value to compare.
+///  * `y_length` - Length of the second value to compare.
+/// # Returns
+/// Returns 0 if the values are not equal is invalid or 1 if the values are equal. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+int64_t ConstantTimeEquals(const uint8_t *x,
+                           uintptr_t x_length,
+                           const uint8_t *y,
+                           uintptr_t y_length);
+
 ///  Size of the version string
 /// # Returns
 /// Returns the size of the version string
