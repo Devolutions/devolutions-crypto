@@ -30,18 +30,6 @@ on:
         description: "Publish Devolutions.Crypto.Core.*.nupkg"
         required: true
         type: boolean
-      publish_crate_rust:
-        description: "Publish Rust Crate [not working yet]"
-        required: true
-        type: boolean
-      publish_npm:
-        description: "Publish NPM [not working yet]"
-        required: true
-        type: boolean
-      publish_python:
-        description: "Publish Python"
-        required: true
-        type: boolean
       publish_dry_run:
         description: "Dry Run Mode"
         required: true
@@ -207,37 +195,4 @@ jobs:
 
         if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
           eval "$COMMAND"
-        fi
-
-    - name: Publish Rust Crate
-      if: ${{ inputs.publish_crate_rust }}
-      working-directory: ./devolutions-crypto
-      run: |
-        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
-          cargo publish --dry-run
-        else
-          cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
-        fi
-
-    - name: Publish NPM
-      if: ${{ inputs.publish_npm }}
-      working-directory: ./devolutions-crypto-npm/bundler
-      run: |
-        npm set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
-
-        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
-          npm publish --access=public --dry-run
-        else
-          npm publish --access=public
-        fi
-
-    - name: Publish Python
-      if: ${{ inputs.publish_npm }}
-      run: |
-        pip install twine
-
-        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
-          twine upload --verbose  --repository testpypi -u "__token__" -p ${{ secrets.TESTPYPI_OWNER_API_KEY  }} ./devolutions-crypto-wheels/*
-        else
-          twine upload --verbose -u "__token__" -p ${{ secrets.PYPI_OWNER_API_KEY }} ./devolutions-crypto-wheels/*
         fi
