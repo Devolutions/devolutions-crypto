@@ -31,11 +31,11 @@ on:
         required: true
         type: boolean
       publish_crate_rust:
-        description: "Publish Rust Crate"
+        description: "Publish Rust Crate [not working yet]"
         required: true
         type: boolean
       publish_npm:
-        description: "Publish NPM"
+        description: "Publish NPM [not working yet]"
         required: true
         type: boolean
       publish_python:
@@ -223,6 +223,8 @@ jobs:
       if: ${{ inputs.publish_npm }}
       working-directory: ./devolutions-crypto-npm/bundler
       run: |
+        npm set //registry.npmjs.org/:_authToken= ${{ secrets.NPM_TOKEN }}
+
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           npm publish --access=public --dry-run
         else
@@ -235,7 +237,7 @@ jobs:
         pip install twine
 
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
-          twine upload --verbose  --repository testpypi -u "__token__" -p ${{ secrets.TWINE_API_TOKEN_TEST }} ./devolutions-crypto-wheels/*
+          twine upload --verbose  --repository testpypi -u "__token__" -p ${{ secrets.TESTPYPI_OWNER_API_KEY  }} ./devolutions-crypto-wheels/*
         else
-          twine upload --verbose -u "__token__" -p ${{ secrets.TWINE_API_TOKEN }} ./devolutions-crypto-wheels/*
+          twine upload --verbose -u "__token__" -p ${{ secrets.PYPI_OWNER_API_KEY }} ./devolutions-crypto-wheels/*
         fi
