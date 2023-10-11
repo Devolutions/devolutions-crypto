@@ -30,8 +30,8 @@ on:
         description: "Publish Devolutions.Crypto.Core.*.nupkg"
         required: true
         type: boolean
-      publish_nuget_dry_run:
-        description: "NuGet Dry Run Publish Mode"
+      publish_dry_run:
+        description: "Dry Run Mode"
         required: true
         type: boolean
 jobs:
@@ -59,16 +59,31 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CI: true
+  
+    - name: Download Python Artifact
+      run: dv github download-artifact python-wheels . devolutions-crypto
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CI: true
 
-    - name: Extract Artifact
-      run: 7z x nugets.zip -o./devolutions-crypto-nugets
+    - name: Download NPM Artifact
+      run: dv github download-artifact wasm . devolutions-crypto
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CI: true
+
+    - name: Extract Artifacts
+      run: |
+        7z x nugets.zip -o ./devolutions-crypto-nugets
+        7z x python-wheels.zip -o ./devolutions-crypto-wheels
+        7z x wasm.zip -o ./devolutions-crypto-npm
 
     - name: Publish iOS NuGet
       if: ${{ inputs.publish_ios_nuget }}
       run: |
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.iOS.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
 
-        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           echo "Dry Run : True"
         else
           echo "Dry Run : False"
@@ -76,7 +91,7 @@ jobs:
 
         echo "Running : $COMMAND"
 
-        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+        if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
           eval "$COMMAND"
         fi
 
@@ -85,7 +100,7 @@ jobs:
       run: |
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Android.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
 
-        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           echo "Dry Run : True"
         else
           echo "Dry Run : False"
@@ -93,7 +108,7 @@ jobs:
 
         echo "Running : $COMMAND"
 
-        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+        if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
           eval "$COMMAND"
         fi
 
@@ -102,7 +117,7 @@ jobs:
       run: |
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Mac.Full.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
 
-        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           echo "Dry Run : True"
         else
           echo "Dry Run : False"
@@ -110,7 +125,7 @@ jobs:
 
         echo "Running : $COMMAND"
 
-        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+        if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
           eval "$COMMAND"
         fi
 
@@ -119,7 +134,7 @@ jobs:
       run: |
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Mac.Modern.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
 
-        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           echo "Dry Run : True"
         else
           echo "Dry Run : False"
@@ -127,7 +142,7 @@ jobs:
 
         echo "Running : $COMMAND"
 
-        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+        if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
           eval "$COMMAND"
         fi
 
@@ -136,7 +151,7 @@ jobs:
       run: |
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Windows.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
 
-        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           echo "Dry Run : True"
         else
           echo "Dry Run : False"
@@ -144,7 +159,7 @@ jobs:
 
         echo "Running : $COMMAND"
 
-        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+        if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
           eval "$COMMAND"
         fi
 
@@ -153,7 +168,7 @@ jobs:
       run: |
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Linux.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
 
-        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           echo "Dry Run : True"
         else
           echo "Dry Run : False"
@@ -161,7 +176,7 @@ jobs:
 
         echo "Running : $COMMAND"
 
-        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+        if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
           eval "$COMMAND"
         fi
 
@@ -170,7 +185,7 @@ jobs:
       run: |
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Core.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
 
-        if [ '${{ inputs.publish_nuget_dry_run }}' == 'true' ]; then
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           echo "Dry Run : True"
         else
           echo "Dry Run : False"
@@ -178,6 +193,6 @@ jobs:
 
         echo "Running : $COMMAND"
 
-        if [ "${{ inputs.publish_nuget_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+        if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
           eval "$COMMAND"
         fi

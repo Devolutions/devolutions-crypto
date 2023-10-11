@@ -1,0 +1,89 @@
+name: Deploy to production
+on:
+  workflow_dispatch:
+    inputs:
+      publish_crate_rust:
+        description: "Publish Rust Crate [not working yet]"
+        required: true
+        type: boolean
+      publish_npm:
+        description: "Publish NPM [not working yet]"
+        required: true
+        type: boolean
+      publish_python:
+        description: "Publish Python"
+        required: true
+        type: boolean
+      publish_dry_run:
+        description: "Dry Run Mode"
+        required: true
+        type: boolean
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: publish
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Check out devolutions/actions
+      uses: actions/checkout@v3
+      with:
+        path: ./.github/workflows
+        ref: v1
+        repository: Devolutions/actions
+        token: ${{ secrets.DEVOLUTIONSBOT_TOKEN }}
+
+    - name: Install toolbox
+      uses: ./.github/workflows/toolbox-install
+      with:
+        github_token: ${{ secrets.DEVOLUTIONSBOT_TOKEN }}
+  
+    - name: Download Python Artifact
+      run: dv github download-artifact python-wheels . devolutions-crypto
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CI: true
+
+    - name: Download NPM Artifact
+      run: dv github download-artifact wasm . devolutions-crypto
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CI: true
+
+    - name: Extract Artifacts
+      run: |
+        7z x python-wheels.zip -o ./devolutions-crypto-wheels
+        7z x wasm.zip -o ./devolutions-crypto-npm
+
+    - name: Publish Rust Crate
+      if: ${{ inputs.publish_crate_rust }}
+      working-directory: ./devolutions-crypto
+      run: |
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
+          cargo publish --dry-run
+        else
+          cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
+        fi
+
+    - name: Publish NPM
+      if: ${{ inputs.publish_npm }}
+      working-directory: ./devolutions-crypto-npm/bundler
+      run: |
+        npm set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
+          npm publish --access=public --dry-run
+        else
+          npm publish --access=public
+        fi
+
+    - name: Publish Python
+      if: ${{ inputs.publish_npm }}
+      run: |
+        pip install twine
+
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
+          twine upload --verbose  --repository testpypi -u "__token__" -p ${{ secrets.TESTPYPI_OWNER_API_KEY  }} ./devolutions-crypto-wheels/*
+        else
+          twine upload --verbose -u "__token__" -p ${{ secrets.PYPI_OWNER_API_KEY }} ./devolutions-crypto-wheels/*
+        fi
