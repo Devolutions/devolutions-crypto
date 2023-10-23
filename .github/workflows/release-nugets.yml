@@ -1,4 +1,4 @@
-name: Deploy to production
+name: Deploy to production (Nugets)
 on:
   workflow_dispatch:
     inputs:
@@ -74,9 +74,7 @@ jobs:
 
     - name: Extract Artifacts
       run: |
-        7z x nugets.zip -o ./devolutions-crypto-nugets
-        7z x python-wheels.zip -o ./devolutions-crypto-wheels
-        7z x wasm.zip -o ./devolutions-crypto-npm
+        7z x nugets.zip -o./devolutions-crypto-nugets
 
     - name: Publish iOS NuGet
       if: ${{ inputs.publish_ios_nuget }}
