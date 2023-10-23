@@ -1,4 +1,4 @@
-name: Deploy to production
+name: Deploy to production (Others)
 on:
   workflow_dispatch:
     inputs:
@@ -52,8 +52,8 @@ jobs:
 
     - name: Extract Artifacts
       run: |
-        7z x python-wheels.zip -o ./devolutions-crypto-wheels
-        7z x wasm.zip -o ./devolutions-crypto-npm
+        7z x python-wheels.zip -o./devolutions-crypto-wheels
+        7z x wasm.zip -o./devolutions-crypto-npm
 
     - name: Publish Rust Crate
       if: ${{ inputs.publish_crate_rust }}
