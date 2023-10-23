@@ -13,10 +13,8 @@ fn main() {
         .display()
         .to_string();
 
-    let config = Config {
-        namespace: Some(String::from("ffi")),
-        ..Default::default()
-    };
+    let mut config = Config::default();
+    config.namespace = Some(String::from("ffi"));
 
     cbindgen::generate_with_config(crate_dir, config)
         .unwrap()

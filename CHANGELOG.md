@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [0.9.0] - 2023-10-23
+ - Removes the `derive_keypair` function as it was not used and was broken.
+ - Added `constant_time_equals` in the utils.
+
 ## [0.8.0] - 2021-11-25
 
 ### Added
