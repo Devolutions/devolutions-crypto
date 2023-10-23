@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       publish_crate_rust:
-        description: "Publish Rust Crate [not working yet]"
+        description: "Publish Rust Crate"
         required: true
         type: boolean
       publish_npm:
@@ -78,7 +78,7 @@ jobs:
         fi
 
     - name: Publish Python
-      if: ${{ inputs.publish_npm }}
+      if: ${{ inputs.publish_python }}
       run: |
         pip install twine
 
