@@ -21,7 +21,7 @@ def get_output(args, cwd=None):
 
 version = ""
 
-with open('../../devolutions-crypto/Cargo.toml', 'r') as filee:
+with open('../../Cargo.toml', 'r') as filee:
     data=filee.read()
     version = data.split("version = \"")[1].split("\"", 1)[0]
 

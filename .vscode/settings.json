@@ -1,6 +1,6 @@
 {
     "rust-analyzer.linkedProjects": [
-        "./devolutions-crypto/Cargo.toml",
-        ".\\devolutions-crypto\\Cargo.toml"
+        "./Cargo.toml",
+        ".\\Cargo.toml"
     ]
 }
