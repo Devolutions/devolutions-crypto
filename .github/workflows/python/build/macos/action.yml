@@ -17,7 +17,7 @@ runs:
         rustup target add x86_64-apple-darwin
 
     - name: Install maturin
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: pip install maturin
 
@@ -26,7 +26,7 @@ runs:
         python-version: "3.11"
 
     - name: Building x86_64 3.11 Wheel
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: |
         source $HOME/.cargo/env
@@ -38,7 +38,7 @@ runs:
         python-version: "3.10"
 
     - name: Building x86_64 3.10 Wheel
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run:
         source $HOME/.cargo/env
@@ -50,7 +50,7 @@ runs:
         python-version: "3.9"
 
     - name: Building x86_64 3.9 Wheel
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: |
         source $HOME/.cargo/env
@@ -62,7 +62,7 @@ runs:
         python-version: "3.8"
 
     - name: Building x86_64 3.8 Wheel
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: |
         source $HOME/.cargo/env
@@ -74,7 +74,7 @@ runs:
         python-version: "3.7"
 
     - name: Building x86_64 3.7 Wheel
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: |
         source $HOME/.cargo/env
@@ -84,7 +84,7 @@ runs:
     - name: Place Artifacts
       shell: bash
       run: |
-        mv devolutions-crypto/target/wheels/*.whl .
+        mv target/wheels/*.whl .
 
     - uses: actions/upload-artifact@v3
       with:

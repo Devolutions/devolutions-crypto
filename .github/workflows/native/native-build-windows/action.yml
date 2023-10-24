@@ -28,7 +28,7 @@ runs:
         rustup target add aarch64-pc-windows-msvc
 
     - name: Unit tests
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: |
         cargo test

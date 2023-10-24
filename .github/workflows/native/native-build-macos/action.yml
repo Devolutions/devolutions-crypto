@@ -22,7 +22,7 @@ runs:
         rustup target add aarch64-apple-darwin
 
     - name: Unit tests
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: |
         source $HOME/.cargo/env

@@ -105,7 +105,7 @@ def build_native(architectures, target_folder, manifest=None, clean=True):
         if arch.get("manifest_path"):
             command = command + " --manifest-path " + arch.get("manifest_path")
 
-        output = exec_command(command, "../../devolutions-crypto")
+        output = exec_command(command, "../../")
         print(output)
 
         os.mkdir(target_folder + "/bin/" + arch["name"])
@@ -214,7 +214,7 @@ def build_windows(assembly_manifest, version, args):
 
         print("Building Native Libraries...")
 
-        output = exec_command("cargo build --features ffi --release --target " + arch["value"], "../../devolutions-crypto")
+        output = exec_command("cargo build --features ffi --release --target " + arch["value"], "../../")
         print(output)
         
         dllpath = "./" + folder + "/bin/DevolutionsCrypto-" + arch["name"] + ".dll"

@@ -18,7 +18,6 @@ runs:
     - name: Update Nuget
       shell: bash
       run: |
-        ls /Users/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/Nugets
         sudo nuget update -self
 
     - name: Unit tests DOTNET CORE

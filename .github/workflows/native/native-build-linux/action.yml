@@ -34,10 +34,8 @@ runs:
         rustup target add i686-linux-android
         rustup target add x86_64-linux-android
 
-        mkdir .cargo
-
     - name: Unit tests
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: |
         ls
