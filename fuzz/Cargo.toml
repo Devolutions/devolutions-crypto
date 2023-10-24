@@ -17,10 +17,6 @@ arbitrary = { version = "0.4.2", features = ["derive"] }
 path = ".."
 features = ["fuzz"]
 
-# Prevent this from interfering with workspaces
-[workspace]
-members = ["."]
-
 [[bin]]
 name = "ciphertext_deserialization"
 path = "fuzz_targets/ciphertext/ciphertext_deserialization.rs"
