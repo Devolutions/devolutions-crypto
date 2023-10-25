@@ -1,7 +1,7 @@
 # devolutions-crypto
 [![Build Status](https://dev.azure.com/devolutions-net/Open%20Source/_apis/build/status/devolutions-crypto?branchName=master)](https://dev.azure.com/devolutions-net/Open%20Source/_build/latest?definitionId=170&branchName=master) [![](https://meritbadge.herokuapp.com/devolutions-crypto)](https://crates.io/crates/devolutions-crypto)  
 Cryptographic library used in Devolutions products. It is made to be fast, easy to use and misuse-resistant.
-
+[![crates.io](https://img.shields.io/crates/v/devolutions-crypto.svg)](https://crates.io/crates/devolutions-crypto) 
 [Documentation](https://docs.rs/devolutions-crypto/)
 
 # Usage

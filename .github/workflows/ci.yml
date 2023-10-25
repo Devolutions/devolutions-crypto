@@ -287,13 +287,13 @@ jobs:
       - name: Generate Rust SBOM
         uses:  ./.github/workflows/cyclonedx-rust-generate
         with:
-          path: devolutions-crypto
+          path: .
 
       - name: Save BOM
         uses: actions/upload-artifact@v3
         with:
           name: bom_devolutions_crypto_rust.xml
-          path: devolutions-crypto/bom.xml
+          path: ./bom.xml
 
       - name: Upload SBOM
         uses:  ./.github/workflows/dtrack-upload-sbom

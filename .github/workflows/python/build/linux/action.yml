@@ -17,16 +17,15 @@ runs:
       run: |
         rustup update
         rustup target add x86_64-unknown-linux-gnu
-        mkdir .cargo
 
     - name: Install Maturin
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: pip install maturin
 
     - name: Building sdist
       run: maturin sdist
-      working-directory: "./devolutions-crypto"
+      working-directory: "./"
       shell: bash
 
     - uses: actions/setup-python@v4
@@ -34,7 +33,7 @@ runs:
         python-version: "3.11"
 
     - name: Building x86_64 3.11 Wheel
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 
@@ -43,7 +42,7 @@ runs:
         python-version: "3.10"
 
     - name: Building x86_64 3.10 Wheel
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 
@@ -52,7 +51,7 @@ runs:
         python-version: "3.9"
 
     - name: Building x86_64 3.9 Wheel
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 
@@ -61,7 +60,7 @@ runs:
         python-version: "3.8"
 
     - name: Building x86_64 3.8 Wheel
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 
@@ -70,14 +69,14 @@ runs:
         python-version: "3.7"
 
     - name: Building x86_64 3.7 Wheel
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 
     - name: Place Artifacts
       shell: bash
       run: |
-        mv devolutions-crypto/target/wheels/*.whl .
+        mv target/wheels/*.whl .
 
     - uses: actions/upload-artifact@v3
       with:

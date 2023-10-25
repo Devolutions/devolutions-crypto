@@ -57,7 +57,7 @@ jobs:
 
     - name: Publish Rust Crate
       if: ${{ inputs.publish_crate_rust }}
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       run: |
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           cargo publish --dry-run

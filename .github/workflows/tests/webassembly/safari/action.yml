@@ -12,7 +12,7 @@ runs:
         cargo install wasm-pack
 
     - name: Unit tests
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: |
         sudo npm i -g n

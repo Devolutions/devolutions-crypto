@@ -7,6 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-devolutions-crypto = {path = "../devolutions-crypto"}
+devolutions-crypto = {path = ".."}
 clap = { version = "4", features = ["derive"] }
 base64 = "0.11.0"

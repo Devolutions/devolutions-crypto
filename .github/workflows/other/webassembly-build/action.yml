@@ -10,7 +10,7 @@ runs:
         cargo install wasm-pack
 
     - name: Platform tests
-      working-directory: ./devolutions-crypto
+      working-directory: ./
       shell: bash
       run: |
         wasm-pack test --firefox --headless -- --features=wbindgen

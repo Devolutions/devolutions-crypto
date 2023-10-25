@@ -53,7 +53,7 @@ def version_live_change():
         data=file.read()
         version_managed = data.split("version = \"")[1].split("\"", 1)[0]
 
-    with open('../../../devolutions-crypto/Cargo.toml', 'r') as file:
+    with open('../../../Cargo.toml', 'r') as file:
         data=file.read()
         version_native = data.split("version = \"")[1].split("\"", 1)[0]
 
