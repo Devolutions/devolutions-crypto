@@ -230,13 +230,7 @@ pub use enums::{
 pub use argon2parameters::Argon2Parameters;
 pub use error::Error;
 
-type Result<T> = std::result::Result<T, error::Error>;
+pub type Result<T> = std::result::Result<T, error::Error>;
 
 #[cfg(feature = "wbindgen")]
 pub mod wasm;
-
-#[cfg(feature = "ffi")]
-pub mod ffi;
-
-#[cfg(feature = "python")]
-pub mod python;
