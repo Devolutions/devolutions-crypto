@@ -1,4 +1,5 @@
 [workspace]
+package.version = "0.9.0"
 members = [
   "cli",
   "ffi",
@@ -8,7 +9,7 @@ members = [
 
 [package]
 name = "devolutions-crypto"
-version = "0.9.0"
+version.workspace = true
 authors = ["Philippe Dugre <pdugre@devolutions.net>", "Mathieu Morrissette <mmorrissette@devolutions.net>"]
 edition = "2021"
 readme = "README_RUST.md"
@@ -20,7 +21,7 @@ resolver = "2"
 
 [lib]
 name = "devolutions_crypto"
-crate-type = ["rlib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 aead = "0.5"

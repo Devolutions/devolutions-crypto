@@ -1202,7 +1202,7 @@ pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
 
 #[test]
 fn test_encrypt_length() {
-    let key = b"devolutions_cryptosecret";
+    let key = b"supersecret";
     let length_zero = b"";
     let length_one_block = b"hello";
     let one_full_block = b"0123456789abcdef";

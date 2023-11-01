@@ -1,5 +1,5 @@
 [project]
-name = "devolutions_crypto"
+name = "devolutions-crypto"
 
 [build-system]
 requires = ["maturin>=0.13"]

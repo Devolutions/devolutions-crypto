@@ -19,21 +19,30 @@ runs:
         rustup target add x86_64-unknown-linux-gnu
 
     - name: Install Maturin
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: pip install maturin
 
     - name: Building sdist
       run: maturin sdist
-      working-directory: "./"
+      working-directory: "./python"
       shell: bash
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+
+    - name: Building x86_64 3.12 Wheel
+      working-directory: ./python
+      shell: bash
+      run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 
     - uses: actions/setup-python@v4
       with:
         python-version: "3.11"
 
     - name: Building x86_64 3.11 Wheel
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 
@@ -42,7 +51,7 @@ runs:
         python-version: "3.10"
 
     - name: Building x86_64 3.10 Wheel
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 
@@ -51,7 +60,7 @@ runs:
         python-version: "3.9"
 
     - name: Building x86_64 3.9 Wheel
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 
@@ -60,7 +69,7 @@ runs:
         python-version: "3.8"
 
     - name: Building x86_64 3.8 Wheel
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 
@@ -69,7 +78,7 @@ runs:
         python-version: "3.7"
 
     - name: Building x86_64 3.7 Wheel
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
 

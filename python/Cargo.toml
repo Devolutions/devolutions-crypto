@@ -1,9 +1,10 @@
 [package]
 name = "devolutions-crypto-python"
-version = "0.9.0"
+version.workspace = true
 edition = "2021"
 
 [lib]
+name = "devolutions_crypto"
 crate-type = ["cdylib"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

@@ -409,7 +409,7 @@ dependencies = [
 
 [[package]]
 name = "devolutions-crypto-cli"
-version = "0.1.0"
+version = "0.9.0"
 dependencies = [
  "base64 0.11.0",
  "clap",
@@ -427,7 +427,7 @@ dependencies = [
 
 [[package]]
 name = "devolutions-crypto-fuzz"
-version = "0.0.0"
+version = "0.9.0"
 dependencies = [
  "arbitrary",
  "devolutions-crypto",

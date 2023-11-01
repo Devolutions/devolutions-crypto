@@ -15,16 +15,25 @@ runs:
       run: rustup target add x86_64-pc-windows-msvc
 
     - name: Install maturin
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: pip install maturin
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+
+    - name: Building x86_64 3.12
+      working-directory: ./python
+      shell: bash
+      run: maturin build -i python --release --target=x86_64-pc-windows-msvc
 
     - uses: actions/setup-python@v4
       with:
         python-version: "3.11"
 
     - name: Building x86_64 3.11
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: maturin build -i python --release --target=x86_64-pc-windows-msvc
 
@@ -33,7 +42,7 @@ runs:
         python-version: "3.10"
 
     - name: Building x86_64 3.10
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: maturin build -i python --release --target=x86_64-pc-windows-msvc
 
@@ -42,7 +51,7 @@ runs:
         python-version: "3.9"
 
     - name: Building x86_64 3.9
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: maturin build -i python --release --target=x86_64-pc-windows-msvc
 
@@ -51,7 +60,7 @@ runs:
         python-version: "3.8"
 
     - name: Building x86_64 3.8
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: maturin build -i python --release --target=x86_64-pc-windows-msvc
 
@@ -60,7 +69,7 @@ runs:
         python-version: "3.7"
 
     - name: Building x86_64 3.7
-      working-directory: ./
+      working-directory: ./python
       shell: bash
       run: maturin build -i python --release --target=x86_64-pc-windows-msvc
 
