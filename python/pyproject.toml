@@ -1,8 +1,9 @@
+[project]
+name = "devolutions-crypto"
+
 [build-system]
 requires = ["maturin>=0.13"]
 build-backend = "maturin"
 
 [tool.maturin]
 bindings = "pyo3"
-features = ["python"]
-cargo-extra-args = "--features python"

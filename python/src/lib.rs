@@ -4,30 +4,38 @@ use pyo3::types::{PyBool, PyBytes, PyDict};
 
 use std::convert::TryFrom;
 
-use super::argon2parameters::Argon2Parameters;
-use super::utils;
-use super::Error;
-use super::{ciphertext, ciphertext::Ciphertext};
-use super::{
+use devolutions_crypto::utils;
+use devolutions_crypto::Argon2Parameters;
+use devolutions_crypto::Error;
+use devolutions_crypto::{ciphertext, ciphertext::Ciphertext};
+use devolutions_crypto::{
     key,
     key::{PrivateKey, PublicKey},
 };
-use super::{signature, signature::Signature};
-use super::{
+use devolutions_crypto::{signature, signature::Signature};
+use devolutions_crypto::{
     signing_key,
     signing_key::{SigningKeyPair, SigningPublicKey},
 };
-use super::{CiphertextVersion, KeyVersion, SignatureVersion, SigningKeyVersion};
+use devolutions_crypto::{CiphertextVersion, KeyVersion, SignatureVersion, SigningKeyVersion};
+
+enum MyError {
+    DevolutionsCrypto(Error),
+    Python(PyErr),
+}
+
+type Result<T> = std::result::Result<T, MyError>;
 
 #[pymodule]
-fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
+#[pyo3(name = "devolutions_crypto")]
+fn devolutions_crypto_module(_py: Python, m: &PyModule) -> PyResult<()> {
     #[pyfn(m)]
     #[pyo3(name = "encrypt")]
-    fn encrypt(py: Python, data: &[u8], key: &[u8], version: Option<u16>) -> PyResult<Py<PyBytes>> {
+    fn encrypt(py: Python, data: &[u8], key: &[u8], version: Option<u16>) -> Result<Py<PyBytes>> {
         let version = match CiphertextVersion::try_from(version.unwrap_or(0)) {
             Ok(v) => v,
             Err(_) => {
-                let error: PyErr = Error::UnknownVersion.into();
+                let error: MyError = Error::UnknownVersion.into();
                 return Err(error);
             }
         };
@@ -43,11 +51,11 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
         data: &[u8],
         key: &[u8],
         version: Option<u16>,
-    ) -> PyResult<Py<PyBytes>> {
+    ) -> Result<Py<PyBytes>> {
         let version = match CiphertextVersion::try_from(version.unwrap_or(0)) {
             Ok(v) => v,
             Err(_) => {
-                let error: PyErr = Error::UnknownVersion.into();
+                let error: MyError = Error::UnknownVersion.into();
                 return Err(error);
             }
         };
@@ -65,33 +73,34 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
         password: &[u8],
         iterations: Option<u32>,
         version: Option<u16>,
-    ) -> PyResult<Py<PyBytes>> {
-        let version =
-            match super::password_hash::PasswordHashVersion::try_from(version.unwrap_or(0)) {
-                Ok(v) => v,
-                Err(_) => {
-                    let error: PyErr = Error::UnknownVersion.into();
-                    return Err(error);
-                }
-            };
+    ) -> Result<Py<PyBytes>> {
+        let version = match devolutions_crypto::password_hash::PasswordHashVersion::try_from(
+            version.unwrap_or(0),
+        ) {
+            Ok(v) => v,
+            Err(_) => {
+                let error: MyError = Error::UnknownVersion.into();
+                return Err(error);
+            }
+        };
         let iterations = iterations.unwrap_or(10000);
 
         let hash: Vec<u8> =
-            super::password_hash::hash_password(password, iterations, version).into();
+            devolutions_crypto::password_hash::hash_password(password, iterations, version).into();
         Ok(PyBytes::new(py, &hash).into())
     }
 
     #[pyfn(m)]
     #[pyo3(name = "verify_password")]
-    fn verify_password(py: Python, password: &[u8], hash: &[u8]) -> PyResult<Py<PyBool>> {
-        let res = super::password_hash::PasswordHash::try_from(hash)?;
+    fn verify_password(py: Python, password: &[u8], hash: &[u8]) -> Result<Py<PyBool>> {
+        let res = devolutions_crypto::password_hash::PasswordHash::try_from(hash)?;
 
         Ok(PyBool::new(py, res.verify_password(password)).into())
     }
 
     #[pyfn(m)]
     #[pyo3(name = "decrypt")]
-    fn decrypt(py: Python, data: &[u8], key: &[u8]) -> PyResult<Py<PyBytes>> {
+    fn decrypt(py: Python, data: &[u8], key: &[u8]) -> Result<Py<PyBytes>> {
         let ciphertext: Ciphertext = ciphertext::Ciphertext::try_from(data)?;
         let plaintext: Vec<u8> = ciphertext.decrypt(key)?.into();
         Ok(PyBytes::new(py, &plaintext).into())
@@ -99,7 +108,7 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m)]
     #[pyo3(name = "decrypt_asymmetric")]
-    fn decrypt_asymmetric(py: Python, data: &[u8], key: &[u8]) -> PyResult<Py<PyBytes>> {
+    fn decrypt_asymmetric(py: Python, data: &[u8], key: &[u8]) -> Result<Py<PyBytes>> {
         let ciphertext: Ciphertext = ciphertext::Ciphertext::try_from(data)?;
         let key: PrivateKey = PrivateKey::try_from(key)?;
         let plaintext: Vec<u8> = ciphertext.decrypt_asymmetric(&key)?.into();
@@ -114,7 +123,7 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
         salt: Option<Vec<u8>>,
         iterations: Option<u32>,
         length: Option<usize>,
-    ) -> PyResult<Py<PyBytes>> {
+    ) -> Result<Py<PyBytes>> {
         let salt = salt.unwrap_or_else(|| vec![0u8; 0]);
         let iterations = iterations.unwrap_or(10000);
         let length = length.unwrap_or(32);
@@ -125,7 +134,7 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m)]
     #[pyo3(name = "derive_key_argon2")]
-    fn derive_key_argon2(py: Python, key: &[u8], parameters: &[u8]) -> PyResult<Py<PyBytes>> {
+    fn derive_key_argon2(py: Python, key: &[u8], parameters: &[u8]) -> Result<Py<PyBytes>> {
         let parameters = Argon2Parameters::try_from(parameters)?;
 
         let key = utils::derive_key_argon2(key, &parameters)?;
@@ -134,16 +143,11 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m)]
     #[pyo3(name = "sign")]
-    fn sign(
-        py: Python,
-        data: &[u8],
-        keypair: &[u8],
-        version: Option<u16>,
-    ) -> PyResult<Py<PyBytes>> {
+    fn sign(py: Python, data: &[u8], keypair: &[u8], version: Option<u16>) -> Result<Py<PyBytes>> {
         let version = match SignatureVersion::try_from(version.unwrap_or(0)) {
             Ok(v) => v,
             Err(_) => {
-                let error: PyErr = Error::UnknownVersion.into();
+                let error: MyError = Error::UnknownVersion.into();
                 return Err(error);
             }
         };
@@ -161,7 +165,7 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
         data: &[u8],
         public_key: &[u8],
         signature: &[u8],
-    ) -> PyResult<Py<PyBool>> {
+    ) -> Result<Py<PyBool>> {
         let public_key = SigningPublicKey::try_from(public_key)?;
         let signature = Signature::try_from(signature)?;
 
@@ -170,11 +174,11 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m)]
     #[pyo3(name = "generate_keypair")]
-    fn generate_keypair(py: Python, version: Option<u16>) -> PyResult<Py<PyDict>> {
+    fn generate_keypair(py: Python, version: Option<u16>) -> Result<Py<PyDict>> {
         let version = match KeyVersion::try_from(version.unwrap_or(0)) {
             Ok(v) => v,
             Err(_) => {
-                let error: PyErr = Error::UnknownVersion.into();
+                let error: MyError = Error::UnknownVersion.into();
                 return Err(error);
             }
         };
@@ -192,11 +196,11 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m)]
     #[pyo3(name = "generate_signing_keypair")]
-    fn generate_signing_keypair(py: Python, version: Option<u16>) -> PyResult<Py<PyBytes>> {
+    fn generate_signing_keypair(py: Python, version: Option<u16>) -> Result<Py<PyBytes>> {
         let version = match SigningKeyVersion::try_from(version.unwrap_or(0)) {
             Ok(v) => v,
             Err(_) => {
-                let error: PyErr = Error::UnknownVersion.into();
+                let error: MyError = Error::UnknownVersion.into();
                 return Err(error);
             }
         };
@@ -210,7 +214,7 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m)]
     #[pyo3(name = "get_signing_public_key")]
-    fn get_signing_public_key(py: Python, keypair: &[u8]) -> PyResult<Py<PyBytes>> {
+    fn get_signing_public_key(py: Python, keypair: &[u8]) -> Result<Py<PyBytes>> {
         let keypair = SigningKeyPair::try_from(keypair)?;
 
         let public_key: Vec<u8> = keypair.get_public_key().into();
@@ -221,10 +225,27 @@ fn devolutions_crypto(_py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-impl From<Error> for PyErr {
-    fn from(error: Error) -> PyErr {
-        let description: String = error.to_string();
-        let name: &str = error.into();
-        exceptions::PyBaseException::new_err((name, description))
+impl From<MyError> for PyErr {
+    fn from(error: MyError) -> Self {
+        match error {
+            MyError::DevolutionsCrypto(error) => {
+                let description: String = error.to_string();
+                let name: &str = error.into();
+                exceptions::PyBaseException::new_err((name, description))
+            }
+            MyError::Python(error) => error,
+        }
+    }
+}
+
+impl From<Error> for MyError {
+    fn from(error: Error) -> Self {
+        Self::DevolutionsCrypto(error)
+    }
+}
+
+impl From<PyErr> for MyError {
+    fn from(error: PyErr) -> Self {
+        Self::Python(error)
     }
 }

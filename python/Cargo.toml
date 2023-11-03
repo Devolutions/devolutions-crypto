@@ -1,0 +1,16 @@
+[package]
+name = "devolutions-crypto-python"
+version.workspace = true
+edition = "2021"
+
+[lib]
+name = "devolutions_crypto"
+crate-type = ["cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+devolutions-crypto = { path = "../" }
+zeroize = "1"
+base64 = "0.21"
+pyo3 = { version = "0.20", features = ["extension-module"] }

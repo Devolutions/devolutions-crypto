@@ -1,12 +1,15 @@
 [workspace]
+package.version = "0.9.0"
 members = [
+  "cli",
+  "ffi",
   "fuzz",
-  "cli"
+  "python",
 ]
 
 [package]
 name = "devolutions-crypto"
-version = "0.9.0"
+version.workspace = true
 authors = ["Philippe Dugre <pdugre@devolutions.net>", "Mathieu Morrissette <mmorrissette@devolutions.net>"]
 edition = "2021"
 readme = "README_RUST.md"
@@ -48,8 +51,6 @@ x25519-dalek = { version = "2.0.0", features = [ "static_secrets" ] }
 #   that isn't compatible with the header trait
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
 
-pyo3 = { version = "0.19", features = ["extension-module"], optional = true }
-
 [target.'cfg(target_arch="wasm32")'.dependencies]
 rust-argon2 = { version = "1.0", default-features = false }
 wasm-bindgen = { version = "0.2.87", optional = true }
@@ -71,8 +72,6 @@ wasm-bindgen-test = "0.3"
 
 [features]
 default = []
-ffi = []
-python = ["pyo3"]
 fuzz = ["arbitrary", "sharks/fuzzing"]
 wbindgen = ["wasm-bindgen", "serde-wasm-bindgen", "js-sys"]
 

@@ -53,6 +53,7 @@ def version_live_change():
     # Generate assembly manifest with the right version
     with open(config_path, 'r') as file:
         data=file.read()
+        print(data)
         version_managed = data.split("version = \"")[1].split("\"", 1)[0]
 
     with open('../../Cargo.toml', 'r') as file:
@@ -101,11 +102,11 @@ def build_native(architectures, target_folder, manifest=None, clean=True):
 
         print("Building Native Libraries...")
 
-        command = "cargo build --features ffi --release --target " + arch["value"]
+        command = "cargo build --release --target " + arch["value"]
         if arch.get("manifest_path"):
             command = command + " --manifest-path " + arch.get("manifest_path")
 
-        output = exec_command(command, "../../")
+        output = exec_command(command, "../../ffi/")
         print(output)
 
         os.mkdir(target_folder + "/bin/" + arch["name"])
@@ -214,7 +215,7 @@ def build_windows(assembly_manifest, version, args):
 
         print("Building Native Libraries...")
 
-        output = exec_command("cargo build --features ffi --release --target " + arch["value"], "../../")
+        output = exec_command("cargo build --release --target " + arch["value"], "../../ffi")
         print(output)
         
         dllpath = "./" + folder + "/bin/DevolutionsCrypto-" + arch["name"] + ".dll"

@@ -8,30 +8,33 @@
 //! The Size functions must be called to get the required length of the returned array before
 //!     calling it.
 
-use super::utils;
-use super::Argon2Parameters;
-use super::DataType;
-use super::Error;
+use devolutions_crypto::utils;
+use devolutions_crypto::Argon2Parameters;
+use devolutions_crypto::DataType;
+use devolutions_crypto::Error;
 
 use base64::{engine::general_purpose, Engine as _};
 
-use super::ciphertext::{encrypt, encrypt_asymmetric, Ciphertext, CiphertextVersion};
-use super::key::{generate_keypair, mix_key_exchange, KeyVersion, PrivateKey, PublicKey};
-use super::password_hash::{hash_password, PasswordHash, PasswordHashVersion};
-use super::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion, Share};
-use super::{
+use devolutions_crypto::ciphertext::{encrypt, encrypt_asymmetric, Ciphertext, CiphertextVersion};
+use devolutions_crypto::key::{
+    generate_keypair, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
+};
+use devolutions_crypto::password_hash::{hash_password, PasswordHash, PasswordHashVersion};
+use devolutions_crypto::secret_sharing::{
+    generate_shared_key, join_shares, SecretSharingVersion, Share,
+};
+use devolutions_crypto::{
     signature,
     signature::{Signature, SignatureVersion},
 };
 
-use super::{
+use devolutions_crypto::{
     signing_key,
     signing_key::{SigningKeyPair, SigningKeyVersion, SigningPublicKey},
 };
 
-use super::Result;
+use devolutions_crypto::Result;
 
-use std::convert::TryFrom as _;
 use std::slice;
 
 use zeroize::Zeroizing;

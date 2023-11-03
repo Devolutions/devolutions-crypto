@@ -1,0 +1,15 @@
+[package]
+name = "devolutions-crypto-ffi"
+version.workspace = true
+edition = "2021"
+
+[lib]
+name = "devolutions_crypto"
+crate-type = ["cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+devolutions-crypto = { path = "../" }
+zeroize = "1"
+base64 = "0.21"
