@@ -18,6 +18,7 @@ wrappers/csharp/dotnet-core/bin
 wrappers/csharp/tests/unit-tests/manual/dotnet-framework/bin/
 wrappers/csharp/tests/unit-tests/manual/dotnet-core/bin/
 target/
+hooks/
 **/*.rs.bk
 .vscode
 bin

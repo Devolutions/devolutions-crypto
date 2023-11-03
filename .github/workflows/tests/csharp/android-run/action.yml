@@ -1,4 +1,4 @@
-name: Unit Tests Android Nuget
+name: Run Unit Tests Android Nuget
 description: This tests the Android nuget package.
 runs:
   using: composite
@@ -15,24 +15,45 @@ runs:
         name: nugets
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
 
+    - name: Download Unit-test-builds
+      uses: actions/download-artifact@v3
+      with:
+        name: unit-test-build
+        path: ./wrappers/csharp/tests/unit-tests/nugets/xamarin-android/bin/Debug/
+
     - name: Update Nuget
       shell: bash
       run: sudo nuget update -self
+
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '8'
+
+    - name:  Setting up PATH environment variable
+      shell: bash
+      run: |
+        echo "/usr/local/lib/android/sdk/platform-tools/" >> $GITHUB_PATH
+        echo "/usr/local/lib/android/sdk/tools/bin/" >> $GITHUB_PATH
+        echo "/usr/local/lib/android/sdk/emulator/" >> $GITHUB_PATH
 
     - name: Starting ADB Server
       shell: bash
       run: adb start-server
 
-    - name: Installing SDK Android-33 x86_64
+    - name: Install Pulseaudio # required by qemu
       shell: bash
-      run: echo "y" | /Users/runner/Library/Android/sdk/tools/bin/sdkmanager --install "system-images;android-33;google_apis;x86_64"
+      run: sudo apt-get install pulseaudio
+
+    - name: Installing SDK Android-34 x86_64
+      shell: bash
+      run: echo "y" | sdkmanager --install "system-images;android-34;google_apis;x86_64"
 
     - name: Creating Android device
       shell: bash
-      run: echo "no" | /Users/runner/Library/Android/sdk/tools/bin/avdmanager create avd -n test_emulator -k "system-images;android-33;google_apis;x86_64"
+      run: echo "no" | avdmanager create avd -n test_emulator -k "system-images;android-34;google_apis;x86_64"
 
     - name: Starting emulator
-      working-directory: /Users/runner/Library/Android/sdk/tools/
       shell: bash
       run: emulator @test_emulator &
 
@@ -62,4 +83,4 @@ runs:
     - name: Unit tests XAMARIN-ANDROID
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash
-      run: python3 unit-tests.py -p android
+      run: python3 unit-tests.py -p android -a run

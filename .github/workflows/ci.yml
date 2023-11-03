@@ -173,7 +173,7 @@ jobs:
       - run: git lfs pull
       - uses: ./.github/workflows/tests/csharp/linux
 
-  tests_nuget_android:
+  tests_nuget_android_build:
     needs: [nugets_macos, setup_config]
     runs-on: "macos-12"
     steps:
@@ -181,7 +181,17 @@ jobs:
         with:
           lfs: true
       - run: git lfs pull
-      - uses: ./.github/workflows/tests/csharp/android
+      - uses: ./.github/workflows/tests/csharp/android-build
+
+  tests_nuget_android_run:
+    needs: [tests_nuget_android_build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/csharp/android-run
 
   tests_ios_integration:
     needs: [tests_nuget_ios, setup_config]

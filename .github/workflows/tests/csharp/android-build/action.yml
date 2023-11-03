@@ -1,0 +1,30 @@
+name: Build Unit Tests Android Nuget
+description: This tests the Android nuget package.
+runs:
+  using: composite
+  steps:
+    - name: Download Config
+      uses: actions/download-artifact@v3
+      with:
+        name: config.txt
+        path: ./wrappers/csharp
+
+    - name: Download Native Libs
+      uses: actions/download-artifact@v3
+      with:
+        name: nugets
+        path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
+
+    - name: Update Nuget
+      shell: bash
+      run: sudo nuget update -self
+
+    - name: Build Unit tests XAMARIN-ANDROID
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: python3 unit-tests.py -p android -a build
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: unit-test-build
+        path: ./wrappers/csharp/tests/unit-tests/nugets/xamarin-android/bin/Debug/*.apk

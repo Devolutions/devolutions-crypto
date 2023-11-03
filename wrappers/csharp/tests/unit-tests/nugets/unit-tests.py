@@ -33,6 +33,7 @@ def main():
         choices=platforms.keys(), 
         help="The platform to build for.")
 
+    parser.add_argument("-a", "--action", default="")
     args = parser.parse_args()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -433,68 +434,74 @@ def test_ios(script_dir, version, args):
             exit(1)
 
 def test_android(script_dir, version, args):
-    print("Nuget Cache Clear")
-    print("==========================================================================")    
-    
-    # CLEAN
-    output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./xamarin-android")
-    print(output)
-
-    print("Remove Local NuGet Source")
-    print("==========================================================================")
-    output = get_output(["nuget", "sources", "remove", "-Name", "LOCALDEVOCRYPTO"])
-    print(output)
-
-    print("Nuget Remove Nuget.org Devolutions.Crypto Package")
-    print("==========================================================================")
-    output = get_output(["dotnet", "remove", "package", "Devolutions.Crypto.Android"], cwd="./xamarin-android")
-    print(output)
-
-    # Restore    
-    print("Nuget Restore Global Packages")
-    print("==========================================================================")
-    output = get_output(["dotnet", "restore", "./xamarin-android", "--verbosity", "normal"])
-    print(output)
-
-    print("Add Local NuGet Source")
-    print("==========================================================================")
-    print(os.path.join(script_dir, "Nugets"))
-    output = get_output(["nuget", "sources", "add", "-Name", "LOCALDEVOCRYPTO", "-Source", os.path.join(script_dir, "Nugets")])
-    print(output)
-
-    print("Installing Nuget Package in Nugets Source")
-    print("==========================================================================")
-    
-    output = get_output(["nuget", "add", "./Nugets/Devolutions.Crypto.Android." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
-    print(output)
-
-    print("Nuget Add Package Devolutions Crypto to project")
-    print("==========================================================================")
-    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Android", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./xamarin-android")
-    print(output)
-
-    print("Building Unit tests for XAMARIN ANDROID")
-    print("=========================================================================")
-    
-    output = get_output(["msbuild", "./xamarin-android/xamarin-android.csproj" , "/t:clean,build,PackageForAndroid,SignAndroidPackage"])
-    print(output)
-    if("FAILED" in output):
+    if args.action == "":
+        print("MISSING ACTION ARGUMENT")
         exit(1)
 
-    print("Installing on emulator")
-    output = get_output(["adb", "-s", "emulator-5554", "install", "-r", "./xamarin-android/bin/Debug/xamarin_android.xamarin_android-Signed.apk"])
-    print(output)
+    if args.action == "build":
+        print("Nuget Cache Clear")
+        print("==========================================================================")    
+        
+        # CLEAN
+        output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./xamarin-android")
+        print(output)
 
-    print("List instrumentation")
-    output = get_output(["adb", "shell", "pm", "list", "instrumentation"])
-    print(output)
+        print("Remove Local NuGet Source")
+        print("==========================================================================")
+        output = get_output(["nuget", "sources", "remove", "-Name", "LOCALDEVOCRYPTO"])
+        print(output)
 
-    print("Running tests")
-    output = get_output(["adb", "shell", "am", "instrument", "-w", "xamarin_android.xamarin_android/app.tests.TestInstrumentation"])
-    print(output)
+        print("Nuget Remove Nuget.org Devolutions.Crypto Package")
+        print("==========================================================================")
+        output = get_output(["dotnet", "remove", "package", "Devolutions.Crypto.Android"], cwd="./xamarin-android")
+        print(output)
 
-    if("INSTRUMENTATION_CODE: -1" not in output):
-        exit(1)
+        # Restore    
+        print("Nuget Restore Global Packages")
+        print("==========================================================================")
+        output = get_output(["dotnet", "restore", "./xamarin-android", "--verbosity", "normal"])
+        print(output)
+
+        print("Add Local NuGet Source")
+        print("==========================================================================")
+        print(os.path.join(script_dir, "Nugets"))
+        output = get_output(["nuget", "sources", "add", "-Name", "LOCALDEVOCRYPTO", "-Source", os.path.join(script_dir, "Nugets")])
+        print(output)
+
+        print("Installing Nuget Package in Nugets Source")
+        print("==========================================================================")
+        
+        output = get_output(["nuget", "add", "./Nugets/Devolutions.Crypto.Android." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
+        print(output)
+
+        print("Nuget Add Package Devolutions Crypto to project")
+        print("==========================================================================")
+        output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Android", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./xamarin-android")
+        print(output)
+
+        print("Building Unit tests for XAMARIN ANDROID")
+        print("=========================================================================")
+        
+        output = get_output(["msbuild", "./xamarin-android/xamarin-android.csproj" , "/t:clean,build,PackageForAndroid,SignAndroidPackage"])
+        print(output)
+        if("FAILED" in output):
+            exit(1)
+
+    if args.action == "run":
+        print("Installing on emulator")
+        output = get_output(["adb", "-s", "emulator-5554", "install", "-r", "./xamarin-android/bin/Debug/xamarin_android.xamarin_android-Signed.apk"])
+        print(output)
+
+        print("List instrumentation")
+        output = get_output(["adb", "shell", "pm", "list", "instrumentation"])
+        print(output)
+
+        print("Running tests")
+        output = get_output(["adb", "shell", "am", "instrument", "-w", "xamarin_android.xamarin_android/app.tests.TestInstrumentation"])
+        print(output)
+
+        if("INSTRUMENTATION_CODE: -1" not in output):
+            exit(1)
 
 if __name__=="__main__":
     main()
