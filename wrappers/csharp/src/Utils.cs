@@ -4,6 +4,9 @@ namespace Devolutions.Cryptography
     using System.IO;
     using System.Text;
 
+    /// <summary>
+    /// Useful functions from Devolutions Crypto
+    /// </summary>
     public static class Utils
     {
         /// <summary>
@@ -78,6 +81,46 @@ namespace Devolutions.Cryptography
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Compare two strings with constant-time equality.
+        /// </summary>
+        /// <param name="x">The first value to compare.</param>
+        /// <param name="y">The second value to compare.</param>
+        /// <returns>Returns false if the values are not equal is invalid or true if the values are equal. If there is an error,
+        ///     it will trigger a DevolutionsCryptoException.</returns>
+        public static bool ConstantTimeEquals(string x, string y)
+        {
+            if (x == null)
+            {
+                x = string.Empty;
+            }
+
+            if (y == null)
+            {
+                y = string.Empty;
+            }
+
+            byte[] xBytes = Encoding.UTF8.GetBytes(x);
+            byte[] yBytes = Encoding.UTF8.GetBytes(y);
+
+            return ConstantTimeEquals(xBytes, yBytes);
+        }
+
+        /// <summary>
+        /// Compare two guids with constant-time equality.
+        /// </summary>
+        /// <param name="x">The first value to compare.</param>
+        /// <param name="y">The second value to compare.</param>
+        /// <returns>Returns false if the values are not equal is invalid or true if the values are equal. If there is an error,
+        ///     it will trigger a DevolutionsCryptoException.</returns>
+        public static bool ConstantTimeEquals(Guid x, Guid y)
+        {
+            byte[] xBytes = x.ToByteArray();
+            byte[] yBytes = y.ToByteArray();
+
+            return ConstantTimeEquals(xBytes, yBytes);
         }
 
         /// <summary>
