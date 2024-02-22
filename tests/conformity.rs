@@ -87,6 +87,21 @@ fn test_symmetric_decrypt_v1() {
 }
 
 #[test]
+fn test_symmetric_decrypt_aad_v1() {
+    let key = general_purpose::STANDARD
+        .decode("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=")
+        .unwrap();
+    let aad = b"this is some public data";
+
+    let ciphertext = general_purpose::STANDARD.decode("DQwCAAEAAQCeKfbTqYjfVCEPEiAJjiypBstPmZz0AnpliZKoR+WXTKdj2f/4ops0++dDBVZ+XdyE1KfqxViWVc9djy/HSCcPR4nDehtNI69heGCIFudXfQ==").unwrap();
+
+    let ciphertext = Ciphertext::try_from(ciphertext.as_slice()).unwrap();
+    let result = ciphertext.decrypt_with_aad(&key, aad).unwrap();
+
+    assert_eq!(result, b"test Ciph3rtext~");
+}
+
+#[test]
 fn test_symmetric_decrypt_v2() {
     let key = general_purpose::STANDARD
         .decode("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=")
@@ -100,6 +115,20 @@ fn test_symmetric_decrypt_v2() {
     let result = ciphertext.decrypt(&key).unwrap();
 
     assert_eq!(result, b"test Ciph3rtext~2");
+}
+
+#[test]
+fn test_symmetric_decrypt_aad_v2() {
+    let key = general_purpose::STANDARD
+        .decode("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=")
+        .unwrap();
+
+    let ciphertext = general_purpose::STANDARD.decode("DQwCAAEAAgA9bh989dao0Pvaz1NpJTI5m7M4br2qVjZtFwXXoXZOlkCjtqU/uif4pbNCcpEodzeP4YG1QvfKVQ==").unwrap();
+
+    let ciphertext = Ciphertext::try_from(ciphertext.as_slice()).unwrap();
+    let result = ciphertext.decrypt_with_aad(&key, aad).unwrap();
+
+    assert_eq!(result, b"test Ciph3rtext~");
 }
 
 #[test]

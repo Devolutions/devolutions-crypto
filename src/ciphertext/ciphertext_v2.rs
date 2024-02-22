@@ -80,7 +80,12 @@ impl CiphertextV2Symmetric {
         hasher.finalize().into()
     }
 
-    pub fn encrypt(data: &[u8], key: &[u8], header: &Header<Ciphertext>) -> Result<Self> {
+    pub fn encrypt(
+        data: &[u8],
+        key: &[u8],
+        aad: &[u8],
+        header: &Header<Ciphertext>,
+    ) -> Result<Self> {
         // Derive key
         let key = Zeroizing::new(CiphertextV2Symmetric::derive_key(key));
 
@@ -91,10 +96,12 @@ impl CiphertextV2Symmetric {
         let nonce = XNonce::from_slice(&nonce_bytes);
 
         // Authenticate the header
-        let aad: Vec<u8> = (*header).clone().into();
+        let mut mac_data: Vec<u8> = (*header).clone().into();
+        mac_data.extend_from_slice(&aad);
+
         let payload = Payload {
             msg: data,
-            aad: &aad,
+            aad: &mac_data,
         };
 
         // Encrypt
@@ -110,15 +117,17 @@ impl CiphertextV2Symmetric {
         })
     }
 
-    pub fn decrypt(&self, key: &[u8], header: &Header<Ciphertext>) -> Result<Vec<u8>> {
+    pub fn decrypt(&self, key: &[u8], aad: &[u8], header: &Header<Ciphertext>) -> Result<Vec<u8>> {
         // Derive key
         let key = Zeroizing::new(CiphertextV2Symmetric::derive_key(key));
 
         // Authenticate the header
-        let aad: Vec<u8> = (*header).clone().into();
+        let mut mac_data: Vec<u8> = (*header).clone().into();
+        mac_data.extend_from_slice(&aad);
+
         let payload = Payload {
             msg: self.ciphertext.as_slice(),
-            aad: &aad,
+            aad: &mac_data,
         };
 
         let result = {
@@ -168,6 +177,7 @@ impl CiphertextV2Asymmetric {
     pub fn encrypt(
         data: &[u8],
         public_key: &PublicKey,
+        aad: &[u8],
         header: &Header<Ciphertext>,
     ) -> Result<Self> {
         let public_key = x25519_dalek::PublicKey::from(public_key);
@@ -177,7 +187,7 @@ impl CiphertextV2Asymmetric {
 
         let key = ephemeral_private_key.diffie_hellman(&public_key);
 
-        let ciphertext = CiphertextV2Symmetric::encrypt(data, key.as_bytes(), header)?;
+        let ciphertext = CiphertextV2Symmetric::encrypt(data, key.as_bytes(), aad, header)?;
 
         Ok(Self {
             public_key: ephemeral_public_key,
@@ -188,12 +198,13 @@ impl CiphertextV2Asymmetric {
     pub fn decrypt(
         &self,
         private_key: &PrivateKey,
+        aad: &[u8],
         header: &Header<Ciphertext>,
     ) -> Result<Vec<u8>> {
         let private_key = StaticSecret::from(private_key);
 
         let key = private_key.diffie_hellman(&self.public_key);
 
-        self.ciphertext.decrypt(key.as_bytes(), header)
+        self.ciphertext.decrypt(key.as_bytes(), aad, header)
     }
 }

@@ -103,6 +103,33 @@ enum CiphertextPayload {
 /// let encrypted_data = encrypt(data, key, CiphertextVersion::Latest).unwrap();
 /// ```
 pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ciphertext> {
+    encrypt_with_aad(data, key, [].as_slice(), version)
+}
+
+/// Returns an `Ciphertext` from cleartext data and a key.
+/// # Arguments
+///  * `data` - The data to encrypt.
+///  * `key` - The key to use. The recommended size is 32 bytes.
+///  * `aad` - Additionnal data to authenticate alongside the ciphertext.
+///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+/// # Returns
+/// Returns a `Ciphertext` containing the encrypted data, which also authenticates the `aad` argument.
+/// # Example
+/// ```rust
+/// use devolutions_crypto::ciphertext::{ encrypt_with_aad, CiphertextVersion };
+///
+/// let data = b"somesecretdata";
+/// let key = b"somesecretkey";
+/// let aad = b"somepublicdata";
+///
+/// let encrypted_data = encrypt_with_aad(data, key, aad, CiphertextVersion::Latest).unwrap();
+/// ```
+pub fn encrypt_with_aad(
+    data: &[u8],
+    key: &[u8],
+    aad: &[u8],
+    version: CiphertextVersion,
+) -> Result<Ciphertext> {
     let mut header = Header::default();
 
     header.data_subtype = CiphertextSubtype::Symmetric;
@@ -110,11 +137,11 @@ pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ci
     let payload = match version {
         CiphertextVersion::V1 => {
             header.version = CiphertextVersion::V1;
-            CiphertextPayload::V1(CiphertextV1::encrypt(data, key, &header)?)
+            CiphertextPayload::V1(CiphertextV1::encrypt(data, key, aad, &header)?)
         }
         CiphertextVersion::V2 | CiphertextVersion::Latest => {
             header.version = CiphertextVersion::V2;
-            CiphertextPayload::V2Symmetric(CiphertextV2Symmetric::encrypt(data, key, &header)?)
+            CiphertextPayload::V2Symmetric(CiphertextV2Symmetric::encrypt(data, key, aad, &header)?)
         } //_ => return Err(DevoCryptoError::UnknownVersion),
     };
 
@@ -144,6 +171,35 @@ pub fn encrypt_asymmetric(
     public_key: &PublicKey,
     version: CiphertextVersion,
 ) -> Result<Ciphertext> {
+    encrypt_asymmetric_with_aad(data, public_key, [].as_slice(), version)
+}
+
+/// Returns an `Ciphertext` from cleartext data and a `PublicKey`.
+/// You will need the corresponding `PrivateKey` to decrypt it.
+/// # Arguments
+///  * `data` - The data to encrypt.
+///  * `public_key` - The `PublicKey` to use. Use `generate_keypair` to generate a keypair.
+///  * `aad` - Additionnal data to authenticate alongside the ciphertext.
+///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+/// # Returns
+/// Returns a `Ciphertext` containing the encrypted data.
+/// # Example
+/// ```rust
+/// use devolutions_crypto::ciphertext::{ encrypt_asymmetric_with_aad, CiphertextVersion };
+/// use devolutions_crypto::key::{ generate_keypair, KeyVersion };
+///
+/// let data = b"somesecretdata";
+/// let aad = b"somepublicdata";
+/// let keypair = generate_keypair(KeyVersion::Latest);
+///
+/// let encrypted_data = encrypt_asymmetric_with_aad(data, &keypair.public_key, aad, CiphertextVersion::Latest).unwrap();
+/// ```
+pub fn encrypt_asymmetric_with_aad(
+    data: &[u8],
+    public_key: &PublicKey,
+    aad: &[u8],
+    version: CiphertextVersion,
+) -> Result<Ciphertext> {
     let mut header = Header::default();
 
     header.data_subtype = CiphertextSubtype::Asymmetric;
@@ -152,7 +208,7 @@ pub fn encrypt_asymmetric(
         CiphertextVersion::V2 | CiphertextVersion::Latest => {
             header.version = CiphertextVersion::V2;
             CiphertextPayload::V2Asymmetric(CiphertextV2Asymmetric::encrypt(
-                data, public_key, &header,
+                data, public_key, aad, &header,
             )?)
         }
         _ => return Err(Error::UnknownVersion),
@@ -180,9 +236,32 @@ impl Ciphertext {
     /// assert_eq!(data.to_vec(), decrypted_data);
     ///```
     pub fn decrypt(&self, key: &[u8]) -> Result<Vec<u8>> {
+        self.decrypt_with_aad(key, [].as_slice())
+    }
+
+    /// Decrypt the data blob using a key.
+    /// # Arguments
+    ///  * `key` - Key to use. The recommended size is 32 bytes.
+    ///  * `aad` - Additionnal data to authenticate alongside the ciphertext.
+    /// # Returns
+    /// Returns the decrypted data.
+    /// # Example
+    /// ```rust
+    /// use devolutions_crypto::ciphertext::{ encrypt_with_aad, CiphertextVersion};
+    ///
+    /// let data = b"somesecretdata";
+    /// let key = b"somesecretkey";
+    /// let aad = b"somepublicdata";
+    ///
+    /// let encrypted_data = encrypt_with_aad(data, key, aad, CiphertextVersion::Latest).unwrap();
+    /// let decrypted_data = encrypted_data.decrypt_with_aad(key, aad).unwrap();
+    ///
+    /// assert_eq!(data.to_vec(), decrypted_data);
+    ///```
+    pub fn decrypt_with_aad(&self, key: &[u8], aad: &[u8]) -> Result<Vec<u8>> {
         match &self.payload {
-            CiphertextPayload::V1(x) => x.decrypt(key, &self.header),
-            CiphertextPayload::V2Symmetric(x) => x.decrypt(key, &self.header),
+            CiphertextPayload::V1(x) => x.decrypt(key, aad, &self.header),
+            CiphertextPayload::V2Symmetric(x) => x.decrypt(key, aad, &self.header),
             _ => Err(Error::InvalidDataType),
         }
     }
@@ -206,8 +285,36 @@ impl Ciphertext {
     /// assert_eq!(decrypted_data, data);
     ///```
     pub fn decrypt_asymmetric(&self, private_key: &PrivateKey) -> Result<Vec<u8>> {
+        self.decrypt_asymmetric_with_aad(private_key, [].as_slice())
+    }
+
+    /// Decrypt the data blob using a `PrivateKey`.
+    /// # Arguments
+    ///  * `private_key` - Key to use. Must be the one in the same keypair as the `PublicKey` used for encryption.
+    ///  * `aad` - Additionnal data to authenticate alongside the ciphertext.
+    /// # Returns
+    /// Returns the decrypted data.
+    /// # Example
+    /// ```rust
+    /// use devolutions_crypto::ciphertext::{ encrypt_asymmetric_with_aad, CiphertextVersion };
+    /// use devolutions_crypto::key::{ generate_keypair, KeyVersion };
+    ///
+    /// let data = b"somesecretdata";
+    /// let keypair = generate_keypair(KeyVersion::Latest);
+    /// let aad = b"somepublicdata";
+    ///
+    /// let encrypted_data = encrypt_asymmetric_with_aad(data, &keypair.public_key, aad, CiphertextVersion::Latest).unwrap();
+    /// let decrypted_data = encrypted_data.decrypt_asymmetric_with_aad(&keypair.private_key, aad).unwrap();
+    ///
+    /// assert_eq!(decrypted_data, data);
+    ///```
+    pub fn decrypt_asymmetric_with_aad(
+        &self,
+        private_key: &PrivateKey,
+        aad: &[u8],
+    ) -> Result<Vec<u8>> {
         match &self.payload {
-            CiphertextPayload::V2Asymmetric(x) => x.decrypt(private_key, &self.header),
+            CiphertextPayload::V2Asymmetric(x) => x.decrypt(private_key, aad, &self.header),
             CiphertextPayload::V1(_) => Err(Error::UnknownVersion),
             _ => Err(Error::InvalidDataType),
         }
@@ -282,6 +389,31 @@ fn encrypt_decrypt_test() {
 }
 
 #[test]
+fn encrypt_decrypt_aad_test() {
+    let key = b"0123456789abcdefghijkl";
+    let data = b"This is a very complex string of character that we need to encrypt";
+    let aad = b"This is some public data that we want to authenticate";
+    let wrong_aad = b"this is some public data that we want to authenticate";
+
+    let encrypted = encrypt_with_aad(data, key, aad, CiphertextVersion::Latest).unwrap();
+
+    let encrypted: Vec<u8> = encrypted.into();
+
+    let encrypted = Ciphertext::try_from(encrypted.as_slice()).unwrap();
+    let decrypted = encrypted.decrypt_with_aad(key, aad).unwrap();
+
+    assert_eq!(decrypted, data);
+
+    let decrypted = encrypted.decrypt_with_aad(key, wrong_aad);
+
+    assert!(decrypted.is_err());
+
+    let decrypted = encrypted.decrypt(key);
+
+    assert!(decrypted.is_err());
+}
+
+#[test]
 fn encrypt_decrypt_v1_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
     let data = "This is a very complex string of character that we need to encrypt".as_bytes();
@@ -295,6 +427,31 @@ fn encrypt_decrypt_v1_test() {
     let decrypted = encrypted.decrypt(key).unwrap();
 
     assert_eq!(decrypted, data);
+}
+
+#[test]
+fn encrypt_decrypt_aad_v1_test() {
+    let key = b"0123456789abcdefghijkl";
+    let data = b"This is a very complex string of character that we need to encrypt";
+    let aad = b"This is some public data that we want to authenticate";
+    let wrong_aad = b"this is some public data that we want to authenticate";
+
+    let encrypted = encrypt_with_aad(data, key, aad, CiphertextVersion::V1).unwrap();
+
+    let encrypted: Vec<u8> = encrypted.into();
+
+    let encrypted = Ciphertext::try_from(encrypted.as_slice()).unwrap();
+    let decrypted = encrypted.decrypt_with_aad(key, aad).unwrap();
+
+    assert_eq!(decrypted, data);
+
+    let decrypted = encrypted.decrypt_with_aad(key, wrong_aad);
+
+    assert!(decrypted.is_err());
+
+    let decrypted = encrypted.decrypt(key);
+
+    assert!(decrypted.is_err());
 }
 
 #[test]
@@ -314,6 +471,31 @@ fn encrypt_decrypt_v2_test() {
 }
 
 #[test]
+fn encrypt_decrypt_aad_v2_test() {
+    let key = b"0123456789abcdefghijkl";
+    let data = b"This is a very complex string of character that we need to encrypt";
+    let aad = b"This is some public data that we want to authenticate";
+    let wrong_aad = b"this is some public data that we want to authenticate";
+
+    let encrypted = encrypt_with_aad(data, key, aad, CiphertextVersion::V2).unwrap();
+
+    let encrypted: Vec<u8> = encrypted.into();
+
+    let encrypted = Ciphertext::try_from(encrypted.as_slice()).unwrap();
+    let decrypted = encrypted.decrypt_with_aad(key, aad).unwrap();
+
+    assert_eq!(decrypted, data);
+
+    let decrypted = encrypted.decrypt_with_aad(key, wrong_aad);
+
+    assert!(decrypted.is_err());
+
+    let decrypted = encrypted.decrypt(key);
+
+    assert!(decrypted.is_err());
+}
+
+#[test]
 fn asymmetric_test() {
     use super::key::{generate_keypair, KeyVersion};
 
@@ -321,8 +503,12 @@ fn asymmetric_test() {
 
     let keypair = generate_keypair(KeyVersion::Latest);
 
-    let encrypted_data =
-        encrypt_asymmetric(test_plaintext, &keypair.public_key, CiphertextVersion::V2).unwrap();
+    let encrypted_data = encrypt_asymmetric(
+        test_plaintext,
+        &keypair.public_key,
+        CiphertextVersion::Latest,
+    )
+    .unwrap();
 
     let encrypted_data_vec: Vec<u8> = encrypted_data.into();
 
@@ -335,6 +521,45 @@ fn asymmetric_test() {
         .unwrap();
 
     assert_eq!(decrypted_data, test_plaintext);
+}
+
+#[test]
+fn asymmetric_aad_test() {
+    use super::key::{generate_keypair, KeyVersion};
+
+    let test_plaintext = b"this is a test data";
+    let aad = b"This is some public data that we want to authenticate";
+    let wrong_aad = b"this is some public data that we want to authenticate";
+
+    let keypair = generate_keypair(KeyVersion::Latest);
+
+    let encrypted_data = encrypt_asymmetric_with_aad(
+        test_plaintext,
+        &keypair.public_key,
+        aad,
+        CiphertextVersion::Latest,
+    )
+    .unwrap();
+
+    let encrypted_data_vec: Vec<u8> = encrypted_data.into();
+
+    assert_ne!(encrypted_data_vec.len(), 0);
+
+    let encrypted_data = Ciphertext::try_from(encrypted_data_vec.as_slice()).unwrap();
+
+    let decrypted_data = encrypted_data
+        .decrypt_asymmetric_with_aad(&keypair.private_key, aad)
+        .unwrap();
+
+    assert_eq!(decrypted_data, test_plaintext);
+
+    let decrypted = encrypted_data.decrypt_asymmetric_with_aad(&keypair.private_key, wrong_aad);
+
+    assert!(decrypted.is_err());
+
+    let decrypted = encrypted_data.decrypt_asymmetric(&keypair.private_key);
+
+    assert!(decrypted.is_err());
 }
 
 #[test]
@@ -360,4 +585,43 @@ fn asymmetric_test_v2() {
         .unwrap();
 
     assert_eq!(decrypted_data, test_plaintext);
+}
+
+#[test]
+fn asymmetric_aad_test_v2() {
+    use super::key::{generate_keypair, KeyVersion};
+
+    let test_plaintext = b"this is a test data";
+    let aad = b"This is some public data that we want to authenticate";
+    let wrong_aad = b"this is some public data that we want to authenticate";
+
+    let keypair = generate_keypair(KeyVersion::V1);
+
+    let encrypted_data = encrypt_asymmetric_with_aad(
+        test_plaintext,
+        &keypair.public_key,
+        aad,
+        CiphertextVersion::V2,
+    )
+    .unwrap();
+
+    let encrypted_data_vec: Vec<u8> = encrypted_data.into();
+
+    assert_ne!(encrypted_data_vec.len(), 0);
+
+    let encrypted_data = Ciphertext::try_from(encrypted_data_vec.as_slice()).unwrap();
+
+    let decrypted_data = encrypted_data
+        .decrypt_asymmetric_with_aad(&keypair.private_key, aad)
+        .unwrap();
+
+    assert_eq!(decrypted_data, test_plaintext);
+
+    let decrypted = encrypted_data.decrypt_asymmetric_with_aad(&keypair.private_key, wrong_aad);
+
+    assert!(decrypted.is_err());
+
+    let decrypted = encrypted_data.decrypt_asymmetric(&keypair.private_key);
+
+    assert!(decrypted.is_err());
 }
