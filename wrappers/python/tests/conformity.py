@@ -13,6 +13,13 @@ class TestComformity(unittest.TestCase):
         ciphertext = b64decode(b'DQwCAAAAAQCK1twEut+TeJfFbTWCRgHjyS6bOPOZUEQAeBtSFFRl2jHggM/34n68zIZWGbsZHkufVzU6mTN5N2Dx9bTplrycv5eNVevT4P9FdVHJ751D+A==')
 
         self.assertEqual(devolutions_crypto.decrypt(ciphertext, key), b'test Ciph3rtext~')
+    
+    def test_decrypt_v1_with_aad(self):
+        key = b64decode(b'ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=')
+        aad = b"this is some public data"
+        ciphertext = b64decode(b'DQwCAAEAAQCeKfbTqYjfVCEPEiAJjiypBstPmZz0AnpliZKoR+WXTKdj2f/4ops0++dDBVZ+XdyE1KfqxViWVc9djy/HSCcPR4nDehtNI69heGCIFudXfQ==')
+
+        self.assertEqual(devolutions_crypto.decrypt(ciphertext, key, aad=aad), b'test Ciph3rtext~')
 
     def test_decrypt_v2(self):
         key = b64decode(b'ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=')
@@ -20,8 +27,25 @@ class TestComformity(unittest.TestCase):
 
         self.assertEqual(devolutions_crypto.decrypt(ciphertext, key), b'test Ciph3rtext~2')
 
-    def test_asymmetric(self):
-        self.assertEqual(devolutions_crypto.decrypt_asymmetric(b64decode(b'DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg=='), b64decode(b'DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ==')), b"testdata")
+    def test_decrypt_v2_with_aad(self):
+        key = b64decode(b'ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=')
+        aad = b"this is some public data"
+        ciphertext = b64decode(b'DQwCAAEAAgA9bh989dao0Pvaz1NpJTI5m7M4br2qVjZtFwXXoXZOlkCjtqU/uif4pbNCcpEodzeP4YG1QvfKVQ==')
+
+        self.assertEqual(devolutions_crypto.decrypt(ciphertext, key, aad=aad), b'test Ciph3rtext~')
+
+    def test_asymmetric_v2(self):
+        private_key = b64decode(b'DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ==')
+        ciphertext = b64decode(b'DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg==')
+        
+        self.assertEqual(devolutions_crypto.decrypt_asymmetric(ciphertext, private_key), b"testdata")
+
+    def test_asymmetric_v2_with_aad(self):
+        private_key = b64decode(b'DQwBAAEAAQC9qf9UY1ovL/48ALGHL9SLVpVozbdjYsw0EPerUl3zYA==')
+        ciphertext = b64decode(b'DQwCAAIAAgB1u62xYeyppWf83QdWwbwGUt5QuiAFZr+hIiFEvMRbXiNCE3RMBNbmgQkLr/vME0BeQa+uUTXZARvJcyNXHyAE4tSdw6o/psU/kw/Z/FbsPw==')
+        aad = b"this is some public data"
+        
+        self.assertEqual(devolutions_crypto.decrypt_asymmetric(ciphertext, private_key, aad=aad), b"testdata")
 
     def test_signature(self):
         signature = b64decode(b'DQwGAAAAAQD82uRk4sFC8vEni6pDNw/vOdN1IEDg9cAVfprWJZ/JBls9Gi61cUt5u6uBJtseNGZFT7qKLvp4NUZrAOL8FH0K')
