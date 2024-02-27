@@ -13,8 +13,8 @@ cfg_if! {
             let data = "test".as_bytes();
             let key = general_purpose::STANDARD.decode("dpxbute8LZ4tqpw1pVWyBvMzOtm+OJQPcIsU52+FFZU=").unwrap();
 
-            let ciphertext = wasm::encrypt(data, &key, None).unwrap();
-            let plaintext = wasm::decrypt(&ciphertext, &key).unwrap();
+            let ciphertext = wasm::encrypt(data, &key, None, None).unwrap();
+            let plaintext = wasm::decrypt(&ciphertext, &key, None).unwrap();
 
             assert_eq!(plaintext, data);
         }
