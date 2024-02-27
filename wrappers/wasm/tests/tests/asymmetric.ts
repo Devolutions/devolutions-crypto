@@ -25,6 +25,27 @@ describe('asymmetricEncrypt/asymmetricDecrypt', () => {
     expect(encrypted).to.not.contains(input)
     expect(decrypted).to.eql(input)
   })
+
+  it('should be able to encrypt and decrypt with an AAD', () => {
+    const input: Uint8Array = encoder.encode('This is some test data')
+    const aad: Uint8Array = encoder.encode('This is some public data')
+    const keypair: KeyPair = generateKeyPair()
+    const encrypted: Uint8Array = encryptAsymmetric(input, keypair.public, aad)
+    const decrypted: Uint8Array = decryptAsymmetric(encrypted, keypair.private, aad)
+    expect(encrypted).to.not.contains(input)
+    expect(decrypted).to.eql(input)
+  })
+
+  it('should fail if AAD is invalid', () => {
+    const input: Uint8Array = encoder.encode('This is some test data')
+    const aad: Uint8Array = encoder.encode('This is some public data')
+    const wrongAad: Uint8Array = encoder.encode('this is some public data')
+    const keypair: KeyPair = generateKeyPair()
+    const encrypted: Uint8Array = encryptAsymmetric(input, keypair.public, aad)
+
+    expect(() => decryptAsymmetric(encrypted, keypair.private)).to.throw()
+    expect(() => decryptAsymmetric(encrypted, keypair.private, wrongAad)).to.throw()
+  })
 })
 
 describe('mixKeyExchange', () => {
