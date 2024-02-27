@@ -1,6 +1,6 @@
+use pyo3::create_exception;
 use pyo3::prelude::*;
 use pyo3::types::{PyBool, PyBytes};
-use pyo3::create_exception;
 
 use std::convert::TryFrom;
 
@@ -24,7 +24,11 @@ enum DevolutionsCryptoError {
     Python(PyErr),
 }
 
-create_exception!(devolutions_crypto, DevolutionsCryptoException, pyo3::exceptions::PyException);
+create_exception!(
+    devolutions_crypto,
+    DevolutionsCryptoException,
+    pyo3::exceptions::PyException
+);
 
 #[pyclass]
 pub struct Keypair {
@@ -267,7 +271,10 @@ fn devolutions_crypto_module(py: Python, m: &PyModule) -> PyResult<()> {
         Ok(PyBytes::new(py, &public_key).into())
     }
 
-    m.add("DevolutionsCryptoException", py.get_type::<DevolutionsCryptoException>())?;
+    m.add(
+        "DevolutionsCryptoException",
+        py.get_type::<DevolutionsCryptoException>(),
+    )?;
 
     Ok(())
 }

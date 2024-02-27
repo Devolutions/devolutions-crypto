@@ -155,7 +155,13 @@ pub fn encrypt(
     aad: Option<Vec<u8>>,
     version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>, JsValue> {
-    Ok(ciphertext::encrypt_with_aad(&data, &key, &aad.unwrap_or(Vec::new()), version.unwrap_or(CiphertextVersion::Latest))?.into())
+    Ok(ciphertext::encrypt_with_aad(
+        &data,
+        &key,
+        &aad.unwrap_or(Vec::new()),
+        version.unwrap_or(CiphertextVersion::Latest),
+    )?
+    .into())
 }
 
 #[wasm_bindgen(js_name = "encryptAsymmetric")]
@@ -181,7 +187,11 @@ pub fn decrypt(data: &[u8], key: &[u8], aad: Option<Vec<u8>>) -> Result<Vec<u8>,
 }
 
 #[wasm_bindgen(js_name = "decryptAsymmetric")]
-pub fn decrypt_asymmetric(data: &[u8], private_key: PrivateKey, aad: Option<Vec<u8>>) -> Result<Vec<u8>, JsValue> {
+pub fn decrypt_asymmetric(
+    data: &[u8],
+    private_key: PrivateKey,
+    aad: Option<Vec<u8>>,
+) -> Result<Vec<u8>, JsValue> {
     let data_blob = Ciphertext::try_from(data)?;
     Ok(data_blob.decrypt_asymmetric_with_aad(&private_key, &aad.unwrap_or(Vec::new()))?)
 }

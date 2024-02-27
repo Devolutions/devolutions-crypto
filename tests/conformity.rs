@@ -160,7 +160,9 @@ fn test_asymmetric_decrypt_aad_v2() {
     let ciphertext = Ciphertext::try_from(general_purpose::STANDARD.decode("DQwCAAIAAgB1u62xYeyppWf83QdWwbwGUt5QuiAFZr+hIiFEvMRbXiNCE3RMBNbmgQkLr/vME0BeQa+uUTXZARvJcyNXHyAE4tSdw6o/psU/kw/Z/FbsPw==").unwrap().as_slice()).unwrap();
     let aad = b"this is some public data";
 
-    let result = ciphertext.decrypt_asymmetric_with_aad(&private_key, aad).unwrap();
+    let result = ciphertext
+        .decrypt_asymmetric_with_aad(&private_key, aad)
+        .unwrap();
 
     assert_eq!(result, b"testdata");
 }
