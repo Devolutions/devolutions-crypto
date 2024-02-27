@@ -96,7 +96,7 @@ namespace Devolutions.Cryptography
         [Obsolete("This method has been deprecated. Use Managed.Encrypt instead.")]
         public static byte[] Encrypt(byte[] data, byte[] key, uint version = 0)
         {
-            return Managed.Encrypt(data, key, (CipherTextVersion)version);
+            return Managed.Encrypt(data, key, null, (CipherTextVersion)version);
         }
 
         [Obsolete("This method has been deprecated. Use Managed.GenerateKey instead.")]
@@ -164,24 +164,40 @@ namespace Devolutions.Cryptography
             return GenerateSharedKeySize86(secretLength);
         }
 
-        internal static long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength)
+        internal static long DecryptNative(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] key,
+            UIntPtr keyLength,
+            byte[] aad,
+            UIntPtr aadLength,
+            byte[] result,
+            UIntPtr resultLength)
         {
             if (Environment.Is64BitProcess)
             {
-                return DecryptNative64(data, dataLength, key, keyLength, result, resultLength);
+                return DecryptNative64(data, dataLength, key, keyLength, aad, aadLength, result, resultLength);
             }
 
-            return DecryptNative86(data, dataLength, key, keyLength, result, resultLength);
+            return DecryptNative86(data, dataLength, key, keyLength, aad, aadLength, result, resultLength);
         }
 
-        internal static long DecryptAsymmetricNative(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] result, UIntPtr resultLength)
+        internal static long DecryptAsymmetricNative(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] privateKey,
+            UIntPtr privateKeyLength,
+            byte[] aad,
+            UIntPtr aadLength,
+            byte[] result,
+            UIntPtr resultLength)
         {
             if (Environment.Is64BitProcess)
             {
-                return DecryptAsymmetricNative64(data, dataLength, privateKey, privateKeyLength, result, resultLength);
+                return DecryptAsymmetricNative64(data, dataLength, privateKey, privateKeyLength, aad, aadLength, result, resultLength);
             }
 
-            return DecryptAsymmetricNative86(data, dataLength, privateKey, privateKeyLength, result, resultLength);
+            return DecryptAsymmetricNative86(data, dataLength, privateKey, privateKeyLength, aad, aadLength, result, resultLength);
         }
 
         internal static long DeriveKeyArgon2Native(byte[] key, UIntPtr keyLength, byte[] argon2Parameters, UIntPtr argon2ParametersLength, byte[] result, UIntPtr resultLength)
@@ -224,14 +240,23 @@ namespace Devolutions.Cryptography
             return GetDefaultArgon2ParametersSizeNative86();
         }
 
-        internal static long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version)
+        internal static long EncryptNative(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] key,
+            UIntPtr keyLength,
+            byte[] aad,
+            UIntPtr aadLength,
+            byte[] result,
+            UIntPtr resultLength,
+            ushort version)
         {
             if (Environment.Is64BitProcess)
             {
-                return EncryptNative64(data, dataLength, key, keyLength, result, resultLength, version);
+                return EncryptNative64(data, dataLength, key, keyLength, aad, aadLength, result, resultLength, version);
             }
 
-            return EncryptNative86(data, dataLength, key, keyLength, result, resultLength, version);
+            return EncryptNative86(data, dataLength, key, keyLength, aad, aadLength, result, resultLength, version);
         }
 
         internal static long EncryptAsymmetricNative(
@@ -239,16 +264,18 @@ namespace Devolutions.Cryptography
             UIntPtr dataLength,
             byte[] publicKey,
             UIntPtr publicKeyLength,
+            byte[] aad,
+            UIntPtr aadLength,
             byte[] result,
             UIntPtr resultLength,
             ushort version)
         {
             if (Environment.Is64BitProcess)
             {
-                return EncryptAsymmetricNative64(data, dataLength, publicKey, publicKeyLength, result, resultLength, version);
+                return EncryptAsymmetricNative64(data, dataLength, publicKey, publicKeyLength, aad, aadLength, result, resultLength, version);
             }
 
-            return EncryptAsymmetricNative86(data, dataLength, publicKey, publicKeyLength, result, resultLength, version);
+            return EncryptAsymmetricNative86(data, dataLength, publicKey, publicKeyLength, aad, aadLength, result, resultLength, version);
         }
 
         internal static long EncryptAsymmetricSizeNative(UIntPtr dataLength, ushort version)
@@ -576,16 +603,48 @@ namespace Devolutions.Cryptography
 #pragma warning restore CA2101 // Specify marshaling for P/Invoke string arguments
 
         [DllImport(LibName64, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DecryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
+        private static extern long DecryptNative64(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] key,
+            UIntPtr keyLength,
+            byte[] aad,
+            UIntPtr aadLength,
+            byte[] result,
+            UIntPtr resultLength);
 
         [DllImport(LibName86, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DecryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
+        private static extern long DecryptNative86(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] key,
+            UIntPtr keyLength,
+            byte[] aad,
+            UIntPtr aadLength,
+            byte[] result,
+            UIntPtr resultLength);
 
         [DllImport(LibName64, EntryPoint = "DecryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DecryptAsymmetricNative64(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] result, UIntPtr resultLength);
+        private static extern long DecryptAsymmetricNative64(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] privateKey,
+            UIntPtr privateKeyLength,
+            byte[] aad,
+            UIntPtr aadLength,
+            byte[] result,
+            UIntPtr resultLength);
 
         [DllImport(LibName86, EntryPoint = "DecryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long DecryptAsymmetricNative86(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] result, UIntPtr resultLength);
+        private static extern long DecryptAsymmetricNative86(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] privateKey,
+            UIntPtr privateKeyLength,
+            byte[] aad,
+            UIntPtr aadLength,
+            byte[] result,
+            UIntPtr resultLength);
 
         [DllImport(LibName86, EntryPoint = "DeriveKeyArgon2", CallingConvention = CallingConvention.Cdecl)]
         private static extern long DeriveKeyArgon2Native86(
@@ -638,10 +697,28 @@ namespace Devolutions.Cryptography
         private static extern long EncodeUrl64(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
         [DllImport(LibName86, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptNative86(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version);
+        private static extern long EncryptNative86(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] key,
+            UIntPtr keyLength,
+            byte[] aad,
+            UIntPtr aadLength,
+            byte[] result,
+            UIntPtr resultLength,
+            ushort version);
 
         [DllImport(LibName64, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
-        private static extern long EncryptNative64(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, ushort version);
+        private static extern long EncryptNative64(
+            byte[] data,
+            UIntPtr dataLength,
+            byte[] key,
+            UIntPtr keyLength,
+            byte[] aad,
+            UIntPtr aadLength,
+            byte[] result,
+            UIntPtr resultLength,
+            ushort version);
 
         [DllImport(LibName86, EntryPoint = "EncryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
         private static extern long EncryptAsymmetricNative86(
@@ -649,6 +726,8 @@ namespace Devolutions.Cryptography
             UIntPtr dataLength,
             byte[] publicKey,
             UIntPtr publicKeyLength,
+            byte[] aad,
+            UIntPtr aadLength,
             byte[] result,
             UIntPtr resultLength,
             ushort version);
@@ -659,6 +738,8 @@ namespace Devolutions.Cryptography
             UIntPtr dataLength,
             byte[] publicKey,
             UIntPtr publicKeyLength,
+            byte[] aad,
+            UIntPtr aadLength,
             byte[] result,
             UIntPtr resultLength,
             ushort version);

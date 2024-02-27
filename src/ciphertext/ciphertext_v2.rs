@@ -97,7 +97,7 @@ impl CiphertextV2Symmetric {
 
         // Authenticate the header
         let mut mac_data: Vec<u8> = (*header).clone().into();
-        mac_data.extend_from_slice(&aad);
+        mac_data.extend_from_slice(aad);
 
         let payload = Payload {
             msg: data,
@@ -123,7 +123,7 @@ impl CiphertextV2Symmetric {
 
         // Authenticate the header
         let mut mac_data: Vec<u8> = (*header).clone().into();
-        mac_data.extend_from_slice(&aad);
+        mac_data.extend_from_slice(aad);
 
         let payload = Payload {
             msg: self.ciphertext.as_slice(),

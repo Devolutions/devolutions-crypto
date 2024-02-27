@@ -92,7 +92,7 @@ impl CiphertextV1 {
 
         // Append MAC data
         let mut mac_data: Vec<u8> = (*header).clone().into();
-        mac_data.extend_from_slice(&aad);
+        mac_data.extend_from_slice(aad);
         mac_data.extend_from_slice(&iv);
         mac_data.extend_from_slice(&ciphertext);
 
@@ -117,7 +117,7 @@ impl CiphertextV1 {
 
         // Verify HMAC
         let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new((*header).clone().into());
-        mac_data.extend_from_slice(&aad);
+        mac_data.extend_from_slice(aad);
         mac_data.extend_from_slice(&self.iv);
         mac_data.extend_from_slice(&self.ciphertext);
 
