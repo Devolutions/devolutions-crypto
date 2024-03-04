@@ -30,6 +30,17 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
+        public void DecryptAsymmetricAadV2()
+        {
+            byte[] decryptResult = Managed.DecryptAsymmetric(
+                Utils.Base64StringToByteArray("DQwCAAIAAgB1u62xYeyppWf83QdWwbwGUt5QuiAFZr+hIiFEvMRbXiNCE3RMBNbmgQkLr/vME0BeQa+uUTXZARvJcyNXHyAE4tSdw6o/psU/kw/Z/FbsPw=="),
+                Utils.Base64StringToByteArray("DQwBAAEAAQC9qf9UY1ovL/48ALGHL9SLVpVozbdjYsw0EPerUl3zYA=="),
+                aad: Utils.StringToUtf8ByteArray("this is some public data"));
+
+            Assert.IsTrue(Utils.ByteArrayToUtf8String(decryptResult) == "testdata");
+        }
+
+        [TestMethod]
         public void DecryptV1()
         {
             byte[] encryptedData = Utils.Base64StringToByteArray(
@@ -37,6 +48,19 @@ namespace Devolutions.Crypto.Tests
             byte[] encryptKey = Utils.Base64StringToByteArray("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=");
 
             byte[] decryptResult = Managed.Decrypt(encryptedData, encryptKey);
+            string decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
+            Assert.AreEqual(decryptResultAsUtf8String, "test Ciph3rtext~");
+        }
+
+        [TestMethod]
+        public void DecryptAadV1()
+        {
+            byte[] encryptedData = Utils.Base64StringToByteArray(
+                "DQwCAAEAAQCeKfbTqYjfVCEPEiAJjiypBstPmZz0AnpliZKoR+WXTKdj2f/4ops0++dDBVZ+XdyE1KfqxViWVc9djy/HSCcPR4nDehtNI69heGCIFudXfQ==");
+            byte[] encryptKey = Utils.Base64StringToByteArray("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=");
+            byte[] aad = Utils.StringToUtf8ByteArray("this is some public data");
+
+            byte[] decryptResult = Managed.Decrypt(encryptedData, encryptKey, aad: aad);
             string decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
             Assert.AreEqual(decryptResultAsUtf8String, "test Ciph3rtext~");
         }
@@ -50,6 +74,19 @@ namespace Devolutions.Crypto.Tests
             byte[] decryptResult = Managed.Decrypt(encryptedData, encryptKey);
             string decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
             Assert.AreEqual(decryptResultAsUtf8String, "test Ciph3rtext~2");
+        }
+
+        [TestMethod]
+        public void DecryptAadV2()
+        {
+            byte[] encryptedData = Utils.Base64StringToByteArray(
+                "DQwCAAEAAgA9bh989dao0Pvaz1NpJTI5m7M4br2qVjZtFwXXoXZOlkCjtqU/uif4pbNCcpEodzeP4YG1QvfKVQ==");
+            byte[] encryptKey = Utils.Base64StringToByteArray("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=");
+            byte[] aad = Utils.StringToUtf8ByteArray("this is some public data");
+
+            byte[] decryptResult = Managed.Decrypt(encryptedData, encryptKey, aad: aad);
+            string decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
+            Assert.AreEqual(decryptResultAsUtf8String, "test Ciph3rtext~");
         }
 
         [TestMethod]
