@@ -694,7 +694,7 @@ namespace Devolutions.Cryptography
         /// <param name="publicKey">The public key to use for encryption.</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as byte array.</returns>
-        public static byte[] EncryptAsymmetric(byte[] data, byte[] publicKey, byte[] aad, CipherTextVersion version = CIPHERTEXT_VERSION)
+        public static byte[] EncryptAsymmetric(byte[] data, byte[] publicKey, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             if (data == null || data.Length == 0)
             {

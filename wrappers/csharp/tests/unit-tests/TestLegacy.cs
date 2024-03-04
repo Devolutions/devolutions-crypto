@@ -29,12 +29,12 @@ namespace Devolutions.Crypto.Tests
             byte[] data = Utils.DecodeFromBase64(base64Data);
             byte[] key = Utils.DecodeFromBase64("5toYYi+R4MH/ZV1W0dCQ2C8xRYtgwFrmIR2qfEQRP6k=");
 
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.Decrypt(data, key, legacy)));
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(data, key, legacy)));
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(base64Data, key, legacy)));
+            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.Decrypt(data, key, legacyDecryptor: legacy)));
+            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(data, key, legacyDecryptor: legacy)));
+            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(base64Data, key, legacyDecryptor: legacy)));
 
-            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(data, key, legacy));
-            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(base64Data, key, legacy));
+            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(data, key, legacyDecryptor: legacy));
+            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(base64Data, key, legacyDecryptor: legacy));
         }
 
         [TestMethod]
@@ -46,12 +46,12 @@ namespace Devolutions.Crypto.Tests
             byte[] data = Utils.DecodeFromBase64(base64Data);
             byte[] key = Utils.DecodeFromBase64("XCF4aJBny9LHFmUBt8zha5O2oOVttykWKrmUl4ujlVg=");
 
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.Decrypt(data, key, legacy)));
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(data, key, legacy)));
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(base64Data, key, legacy)));
+            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.Decrypt(data, key, legacyDecryptor: legacy)));
+            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(data, key, legacyDecryptor: legacy)));
+            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(base64Data, key, legacyDecryptor: legacy)));
 
-            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(data, key, legacy));
-            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(base64Data, key, legacy));
+            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(data, key, legacyDecryptor: legacy));
+            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(base64Data, key, legacyDecryptor: legacy));
         }
 
         [TestMethod]

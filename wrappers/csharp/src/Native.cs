@@ -29,8 +29,8 @@ namespace Devolutions.Cryptography
 #endif
 
 #if !DEBUG
-        private const string NativeVersion = "0.9.0";
-        private const string ManagedVersion = "2024.02.27";
+        private const string NativeVersion = "||NATIVE_VERSION||";
+        private const string ManagedVersion = "||MANAGED_VERSION||";
 #endif
 
         static Native()
