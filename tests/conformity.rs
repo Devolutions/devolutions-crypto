@@ -87,6 +87,21 @@ fn test_symmetric_decrypt_v1() {
 }
 
 #[test]
+fn test_symmetric_decrypt_aad_v1() {
+    let key = general_purpose::STANDARD
+        .decode("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=")
+        .unwrap();
+    let aad = b"this is some public data";
+
+    let ciphertext = general_purpose::STANDARD.decode("DQwCAAEAAQCeKfbTqYjfVCEPEiAJjiypBstPmZz0AnpliZKoR+WXTKdj2f/4ops0++dDBVZ+XdyE1KfqxViWVc9djy/HSCcPR4nDehtNI69heGCIFudXfQ==").unwrap();
+
+    let ciphertext = Ciphertext::try_from(ciphertext.as_slice()).unwrap();
+    let result = ciphertext.decrypt_with_aad(&key, aad).unwrap();
+
+    assert_eq!(result, b"test Ciph3rtext~");
+}
+
+#[test]
 fn test_symmetric_decrypt_v2() {
     let key = general_purpose::STANDARD
         .decode("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=")
@@ -103,6 +118,21 @@ fn test_symmetric_decrypt_v2() {
 }
 
 #[test]
+fn test_symmetric_decrypt_aad_v2() {
+    let key = general_purpose::STANDARD
+        .decode("ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=")
+        .unwrap();
+    let aad = b"this is some public data";
+
+    let ciphertext = general_purpose::STANDARD.decode("DQwCAAEAAgA9bh989dao0Pvaz1NpJTI5m7M4br2qVjZtFwXXoXZOlkCjtqU/uif4pbNCcpEodzeP4YG1QvfKVQ==").unwrap();
+
+    let ciphertext = Ciphertext::try_from(ciphertext.as_slice()).unwrap();
+    let result = ciphertext.decrypt_with_aad(&key, aad).unwrap();
+
+    assert_eq!(result, b"test Ciph3rtext~");
+}
+
+#[test]
 fn test_asymmetric_decrypt_v2() {
     let private_key = PrivateKey::try_from(
         general_purpose::STANDARD
@@ -114,6 +144,25 @@ fn test_asymmetric_decrypt_v2() {
     let ciphertext = Ciphertext::try_from(general_purpose::STANDARD.decode("DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg==").unwrap().as_slice()).unwrap();
 
     let result = ciphertext.decrypt_asymmetric(&private_key).unwrap();
+
+    assert_eq!(result, b"testdata");
+}
+
+#[test]
+fn test_asymmetric_decrypt_aad_v2() {
+    let private_key = PrivateKey::try_from(
+        general_purpose::STANDARD
+            .decode("DQwBAAEAAQC9qf9UY1ovL/48ALGHL9SLVpVozbdjYsw0EPerUl3zYA==")
+            .unwrap()
+            .as_slice(),
+    )
+    .unwrap();
+    let ciphertext = Ciphertext::try_from(general_purpose::STANDARD.decode("DQwCAAIAAgB1u62xYeyppWf83QdWwbwGUt5QuiAFZr+hIiFEvMRbXiNCE3RMBNbmgQkLr/vME0BeQa+uUTXZARvJcyNXHyAE4tSdw6o/psU/kw/Z/FbsPw==").unwrap().as_slice()).unwrap();
+    let aad = b"this is some public data";
+
+    let result = ciphertext
+        .decrypt_asymmetric_with_aad(&private_key, aad)
+        .unwrap();
 
     assert_eq!(result, b"testdata");
 }

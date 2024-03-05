@@ -152,35 +152,48 @@ impl SigningKeyPair {
 pub fn encrypt(
     data: &[u8],
     key: &[u8],
+    aad: Option<Vec<u8>>,
     version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>, JsValue> {
-    Ok(ciphertext::encrypt(&data, &key, version.unwrap_or(CiphertextVersion::Latest))?.into())
+    Ok(ciphertext::encrypt_with_aad(
+        &data,
+        &key,
+        &aad.unwrap_or(Vec::new()),
+        version.unwrap_or(CiphertextVersion::Latest),
+    )?
+    .into())
 }
 
 #[wasm_bindgen(js_name = "encryptAsymmetric")]
 pub fn encrypt_asymmetric(
     data: &[u8],
     public_key: PublicKey,
+    aad: Option<Vec<u8>>,
     version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>, JsValue> {
-    Ok(ciphertext::encrypt_asymmetric(
+    Ok(ciphertext::encrypt_asymmetric_with_aad(
         &data,
         &public_key,
+        &aad.unwrap_or(Vec::new()),
         version.unwrap_or(CiphertextVersion::Latest),
     )?
     .into())
 }
 
 #[wasm_bindgen]
-pub fn decrypt(data: &[u8], key: &[u8]) -> Result<Vec<u8>, JsValue> {
+pub fn decrypt(data: &[u8], key: &[u8], aad: Option<Vec<u8>>) -> Result<Vec<u8>, JsValue> {
     let data_blob = Ciphertext::try_from(data)?;
-    Ok(data_blob.decrypt(&key)?)
+    Ok(data_blob.decrypt_with_aad(&key, &aad.unwrap_or(Vec::new()))?)
 }
 
 #[wasm_bindgen(js_name = "decryptAsymmetric")]
-pub fn decrypt_asymmetric(data: &[u8], private_key: PrivateKey) -> Result<Vec<u8>, JsValue> {
+pub fn decrypt_asymmetric(
+    data: &[u8],
+    private_key: PrivateKey,
+    aad: Option<Vec<u8>>,
+) -> Result<Vec<u8>, JsValue> {
     let data_blob = Ciphertext::try_from(data)?;
-    Ok(data_blob.decrypt_asymmetric(&private_key)?)
+    Ok(data_blob.decrypt_asymmetric_with_aad(&private_key, &aad.unwrap_or(Vec::new()))?)
 }
 
 #[wasm_bindgen(js_name = "hashPassword")]

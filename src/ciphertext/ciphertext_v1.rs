@@ -71,7 +71,12 @@ impl CiphertextV1 {
         Ok(())
     }
 
-    pub fn encrypt(data: &[u8], key: &[u8], header: &Header<Ciphertext>) -> Result<CiphertextV1> {
+    pub fn encrypt(
+        data: &[u8],
+        key: &[u8],
+        aad: &[u8],
+        header: &Header<Ciphertext>,
+    ) -> Result<CiphertextV1> {
         // Split keys
         let mut encryption_key = Zeroizing::new(vec![0u8; 32]);
         let mut signature_key = Zeroizing::new(vec![0u8; 32]);
@@ -87,8 +92,9 @@ impl CiphertextV1 {
 
         // Append MAC data
         let mut mac_data: Vec<u8> = (*header).clone().into();
+        mac_data.extend_from_slice(aad);
         mac_data.extend_from_slice(&iv);
-        mac_data.append(&mut ciphertext.clone());
+        mac_data.extend_from_slice(&ciphertext);
 
         // HMAC
         let mut mac = Hmac::<Sha256>::new_from_slice(&signature_key)?;
@@ -103,7 +109,7 @@ impl CiphertextV1 {
         })
     }
 
-    pub fn decrypt(&self, key: &[u8], header: &Header<Ciphertext>) -> Result<Vec<u8>> {
+    pub fn decrypt(&self, key: &[u8], aad: &[u8], header: &Header<Ciphertext>) -> Result<Vec<u8>> {
         // Split keys
         let mut encryption_key = Zeroizing::new(vec![0u8; 32]);
         let mut signature_key = Zeroizing::new(vec![0u8; 32]);
@@ -111,8 +117,9 @@ impl CiphertextV1 {
 
         // Verify HMAC
         let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new((*header).clone().into());
+        mac_data.extend_from_slice(aad);
         mac_data.extend_from_slice(&self.iv);
-        mac_data.append(&mut self.ciphertext.clone());
+        mac_data.extend_from_slice(&self.ciphertext);
 
         let mut mac = Hmac::<Sha256>::new_from_slice(&signature_key)?;
         mac.update(&mac_data);

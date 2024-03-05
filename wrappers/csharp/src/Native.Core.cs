@@ -35,10 +35,10 @@ namespace Devolutions.Cryptography
         internal static extern long DecodeUrlNative(string input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
         [DllImport(LibName, EntryPoint = "Decrypt", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength);
+        internal static extern long DecryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] aad, UIntPtr aadLength, byte[] result, UIntPtr resultLength);
 
         [DllImport(LibName, EntryPoint = "DecryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long DecryptAsymmetricNative(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] result, UIntPtr resultLength);
+        internal static extern long DecryptAsymmetricNative(byte[] data, UIntPtr dataLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] aad, UIntPtr aadLength, byte[] result, UIntPtr resultLength);
 
         [DllImport(LibName, EntryPoint = "DeriveKeyArgon2", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long DeriveKeyArgon2Native(byte[] key, UIntPtr keyLength, byte[] argon2Parameters, UIntPtr argon2ParametersLength, byte[] result, UIntPtr resultLength);
@@ -60,10 +60,10 @@ namespace Devolutions.Cryptography
         internal static extern long EncodeUrlNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 
         [DllImport(LibName, EntryPoint = "Encrypt", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] result, UIntPtr resultLength, UInt16 version);
+        internal static extern long EncryptNative(byte[] data, UIntPtr dataLength, byte[] key, UIntPtr keyLength, byte[] aad, UIntPtr aadLength, byte[] result, UIntPtr resultLength, UInt16 version);
 
         [DllImport(LibName, EntryPoint = "EncryptAsymmetric", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long EncryptAsymmetricNative(byte[] data, UIntPtr dataLength, byte[] publicKey, UIntPtr publicKeyLength, byte[] result, UIntPtr resultLength, ushort version);
+        internal static extern long EncryptAsymmetricNative(byte[] data, UIntPtr dataLength, byte[] publicKey, UIntPtr publicKeyLength, byte[] aad, UIntPtr aadLength, byte[] result, UIntPtr resultLength, ushort version);
 
         [DllImport(LibName, EntryPoint = "EncryptAsymmetricSize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long EncryptAsymmetricSizeNative(UIntPtr dataLength, ushort version);

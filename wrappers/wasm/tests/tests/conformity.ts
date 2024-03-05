@@ -35,6 +35,16 @@ describe('Conformity Tests', () => {
     expect(decoder.decode(decrypted)).to.eql('test Ciph3rtext~')
   })
 
+  it('Symmetric Decrypt with AAD V1', () => {
+    const key: Uint8Array = base64decode('ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=')
+    const ciphertext: Uint8Array = base64decode('DQwCAAEAAQCeKfbTqYjfVCEPEiAJjiypBstPmZz0AnpliZKoR+WXTKdj2f/4ops0++dDBVZ+XdyE1KfqxViWVc9djy/HSCcPR4nDehtNI69heGCIFudXfQ==')
+    const aad: Uint8Array = encoder.encode('this is some public data')
+
+    const decrypted: Uint8Array = decrypt(ciphertext, key, aad)
+
+    expect(decoder.decode(decrypted)).to.eql('test Ciph3rtext~')
+  })
+
   it('Symmetric Decrypt V2', () => {
     const key: Uint8Array = base64decode('ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=')
     const ciphertext: Uint8Array = base64decode('DQwCAAAAAgAA0iPpI4IEzcrWAQiy6tqDqLbRYduGvlMC32mVH7tpIN2CXDUu5QHF91I7pMrmjt/61pm5CeR/IcU=')
@@ -44,9 +54,28 @@ describe('Conformity Tests', () => {
     expect(decoder.decode(decrypted)).to.eql('test Ciph3rtext~2')
   })
 
+  it('Symmetric Decrypt with AAD V2', () => {
+    const key: Uint8Array = base64decode('ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=')
+    const ciphertext: Uint8Array = base64decode('DQwCAAEAAgA9bh989dao0Pvaz1NpJTI5m7M4br2qVjZtFwXXoXZOlkCjtqU/uif4pbNCcpEodzeP4YG1QvfKVQ==')
+    const aad: Uint8Array = encoder.encode('this is some public data')
+
+    const decrypted: Uint8Array = decrypt(ciphertext, key, aad)
+
+    expect(decoder.decode(decrypted)).to.eql('test Ciph3rtext~')
+  })
+
   it('Asymmetric Decrypt V2', () => {
     const privateKey: PrivateKey = PrivateKey.fromBytes(base64decode('DQwBAAEAAQAAwQ3oJvU6bq2iZlJwAzvbmqJczNrFoeWPeIyJP9SSbQ=='))
     const result: Uint8Array = decryptAsymmetric(base64decode('DQwCAAIAAgCIG9L2MTiumytn7H/p5I3aGVdhV3WUL4i8nIeMWIJ1YRbNQ6lEiQDAyfYhbs6gg1cD7+5Ft2Q5cm7ArsGfiFYWnscm1y7a8tAGfjFFTonzrg=='), privateKey)
+
+    expect(decoder.decode(result)).to.eql('testdata')
+  })
+
+  it('Asymmetric Decrypt V2 with AAD', () => {
+    const privateKey: PrivateKey = PrivateKey.fromBytes(base64decode('DQwBAAEAAQC9qf9UY1ovL/48ALGHL9SLVpVozbdjYsw0EPerUl3zYA=='))
+    const aad: Uint8Array = encoder.encode('this is some public data')
+
+    const result: Uint8Array = decryptAsymmetric(base64decode('DQwCAAIAAgB1u62xYeyppWf83QdWwbwGUt5QuiAFZr+hIiFEvMRbXiNCE3RMBNbmgQkLr/vME0BeQa+uUTXZARvJcyNXHyAE4tSdw6o/psU/kw/Z/FbsPw=='), privateKey, aad)
 
     expect(decoder.decode(result)).to.eql('testdata')
   })

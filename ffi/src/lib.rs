@@ -15,7 +15,9 @@ use devolutions_crypto::Error;
 
 use base64::{engine::general_purpose, Engine as _};
 
-use devolutions_crypto::ciphertext::{encrypt, encrypt_asymmetric, Ciphertext, CiphertextVersion};
+use devolutions_crypto::ciphertext::{
+    encrypt_asymmetric_with_aad, encrypt_with_aad, Ciphertext, CiphertextVersion,
+};
 use devolutions_crypto::key::{
     generate_keypair, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
 };
@@ -47,6 +49,9 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 ///  * `data_length` - Length of the data to encrypt.
 ///  * `key` - Pointer to the key to use to encrypt.
 ///  * `key_length` - Length of the key to use to encrypt.
+///  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
+///             Pass null if there is not additionnal data to authenticate.
+///  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
 ///  * `result` - Pointer to the buffer to write the ciphertext to.
 ///  * `result_length` - Length of the buffer to write the ciphertext to. You can get the value by
 ///                         calling EncryptSize() beforehand.
@@ -62,6 +67,8 @@ pub unsafe extern "C" fn Encrypt(
     data_length: usize,
     key: *const u8,
     key_length: usize,
+    aad: *const u8,
+    aad_length: usize,
     result: *mut u8,
     result_length: usize,
     version: u16,
@@ -74,6 +81,12 @@ pub unsafe extern "C" fn Encrypt(
         return Error::InvalidOutputLength.error_code();
     }
 
+    let aad = if aad.is_null() {
+        &[]
+    } else {
+        slice::from_raw_parts(aad, aad_length)
+    };
+
     let data = slice::from_raw_parts(data, data_length);
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
@@ -83,7 +96,7 @@ pub unsafe extern "C" fn Encrypt(
         Err(_) => return Error::UnknownVersion.error_code(),
     };
 
-    match encrypt(data, key, version) {
+    match encrypt_with_aad(data, key, aad, version) {
         Ok(res) => {
             let res: Zeroizing<Vec<u8>> = Zeroizing::new(res.into());
             let length = res.len();
@@ -100,6 +113,9 @@ pub unsafe extern "C" fn Encrypt(
 ///  * `data_length` - Length of the data to encrypt.
 ///  * `public_key` - Pointer to the public key to use to encrypt.
 ///  * `public_key_length` - Length of the public key to use to encrypt.
+///  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
+///             Pass null if there is not additionnal data to authenticate.
+///  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
 ///  * `result` - Pointer to the buffer to write the ciphertext to.
 ///  * `result_length` - Length of the buffer to write the ciphertext to. You can get the value by
 ///                         calling EncryptAsymmetricSize() beforehand.
@@ -115,6 +131,8 @@ pub unsafe extern "C" fn EncryptAsymmetric(
     data_length: usize,
     public_key: *const u8,
     public_key_length: usize,
+    aad: *const u8,
+    aad_length: usize,
     result: *mut u8,
     result_length: usize,
     version: u16,
@@ -126,6 +144,12 @@ pub unsafe extern "C" fn EncryptAsymmetric(
     if result_length != EncryptAsymmetricSize(data_length, version) as usize {
         return Error::InvalidOutputLength.error_code();
     }
+
+    let aad = if aad.is_null() {
+        &[]
+    } else {
+        slice::from_raw_parts(aad, aad_length)
+    };
 
     let data = slice::from_raw_parts(data, data_length);
     let public_key = PublicKey::try_from(slice::from_raw_parts(public_key, public_key_length));
@@ -139,7 +163,7 @@ pub unsafe extern "C" fn EncryptAsymmetric(
                 Err(_) => return Error::UnknownVersion.error_code(),
             };
 
-            match encrypt_asymmetric(data, &public_key, version) {
+            match encrypt_asymmetric_with_aad(data, &public_key, aad, version) {
                 Ok(res) => {
                     let res: Zeroizing<Vec<u8>> = Zeroizing::new(res.into());
                     let length = res.len();
@@ -193,6 +217,9 @@ pub extern "C" fn EncryptAsymmetricSize(data_length: usize, version: u16) -> i64
 ///  * `data_length` - Length of the data to decrypt.
 ///  * `key` - Pointer to the key to use to decrypt.
 ///  * `key_length` - Length of the key to use to decrypt.
+///  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
+///             Pass null if there is not additionnal data to authenticate.
+///  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
 ///  * `result` - Pointer to the buffer to write the plaintext to.
 ///  * `result_length` - Length of the buffer to write the plaintext to.
 ///                     The safest size is the same size as the ciphertext.
@@ -207,6 +234,8 @@ pub unsafe extern "C" fn Decrypt(
     data_length: usize,
     key: *const u8,
     key_length: usize,
+    aad: *const u8,
+    aad_length: usize,
     result: *mut u8,
     result_length: usize,
 ) -> i64 {
@@ -214,12 +243,18 @@ pub unsafe extern "C" fn Decrypt(
         return Error::NullPointer.error_code();
     };
 
+    let aad = if aad.is_null() {
+        &[]
+    } else {
+        slice::from_raw_parts(aad, aad_length)
+    };
+
     let data = slice::from_raw_parts(data, data_length);
     let key = slice::from_raw_parts(key, key_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
     match Ciphertext::try_from(data) {
-        Ok(res) => match res.decrypt(key) {
+        Ok(res) => match res.decrypt_with_aad(key, aad) {
             Ok(res) => {
                 let res = Zeroizing::new(res);
 
@@ -243,6 +278,9 @@ pub unsafe extern "C" fn Decrypt(
 ///  * `data_length` - Length of the data to decrypt.
 ///  * `private_key` - Pointer to the private key to use to decrypt.
 ///  * `private_key_length` - Length of the private key to use to decrypt.
+///  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
+///             Pass null if there is not additionnal data to authenticate.
+///  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
 ///  * `result` - Pointer to the buffer to write the plaintext to.
 ///  * `result_length` - Length of the buffer to write the plaintext to.
 ///                     The safest size is the same size as the ciphertext.
@@ -257,11 +295,19 @@ pub unsafe extern "C" fn DecryptAsymmetric(
     data_length: usize,
     private_key: *const u8,
     private_key_length: usize,
+    aad: *const u8,
+    aad_length: usize,
     result: *mut u8,
     result_length: usize,
 ) -> i64 {
     if data.is_null() || private_key.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
+    };
+
+    let aad = if aad.is_null() {
+        &[]
+    } else {
+        slice::from_raw_parts(aad, aad_length)
     };
 
     let data = slice::from_raw_parts(data, data_length);
@@ -272,7 +318,7 @@ pub unsafe extern "C" fn DecryptAsymmetric(
             let result = slice::from_raw_parts_mut(result, result_length);
 
             match Ciphertext::try_from(data) {
-                Ok(res) => match res.decrypt_asymmetric(&private_key) {
+                Ok(res) => match res.decrypt_asymmetric_with_aad(&private_key, aad) {
                     Ok(res) => {
                         let res = Zeroizing::new(res);
                         if result.len() >= res.len() {
