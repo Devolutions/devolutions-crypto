@@ -877,7 +877,7 @@ namespace Devolutions.Cryptography
         [Obsolete("This method has been deprecated. Use DecryptWithKeyAsUtf8String instead.")]
         public static string DecryptWithKeyAsString(string b64data, byte[] key, byte[] aad = null)
         {
-            return DecryptWithKeyAsUtf8String(b64data, key);
+            return DecryptWithKeyAsUtf8String(b64data, key, aad);
         }
 
         /// <summary>
