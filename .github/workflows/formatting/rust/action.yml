@@ -3,7 +3,7 @@ description: Ensure that the Rust code format is compliant
 runs:
   using: composite
   steps:
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.7"
 

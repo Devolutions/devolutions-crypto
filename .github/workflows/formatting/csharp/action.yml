@@ -4,12 +4,12 @@ runs:
   using: composite
   steps:
     - name: Download Config
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: config.txt
         path: ./wrappers/csharp
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.7"
 
@@ -31,7 +31,7 @@ runs:
       run: python GeneratePackage.py -p windows
 
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
 
     - name: Code Analysis
       working-directory: ./wrappers/csharp/tests/unit-tests/manual/dotnet-framework

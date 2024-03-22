@@ -2,7 +2,7 @@ name: Build macOS Python
 runs:
   using: composite
   steps:
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
@@ -21,7 +21,7 @@ runs:
       shell: bash
       run: pip install maturin
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.12"
 
@@ -33,7 +33,7 @@ runs:
 
         maturin build --release -i python --target=x86_64-apple-darwin
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
@@ -45,7 +45,7 @@ runs:
 
         maturin build --release -i python --target=x86_64-apple-darwin
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
@@ -57,7 +57,7 @@ runs:
 
         maturin build --release -i python --target=x86_64-apple-darwin
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.9"
 
@@ -69,7 +69,7 @@ runs:
 
         maturin build --release -i python --target=x86_64-apple-darwin
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.8"
 
@@ -81,7 +81,7 @@ runs:
 
         maturin build --release -i python --target=x86_64-apple-darwin
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.7"
 
@@ -98,7 +98,7 @@ runs:
       run: |
         mv target/wheels/*.whl .
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: python-wheels
+        name: python-wheels-macos
         path: ./*.whl

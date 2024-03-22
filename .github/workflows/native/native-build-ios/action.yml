@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Download Config
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: config.txt
         path: ./wrappers/csharp
@@ -44,7 +44,7 @@ runs:
         mkdir output
         mv ./ios ./output/ios
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: artifact-staging
+        name: native-ios
         path: wrappers/csharp/output/**

@@ -4,19 +4,20 @@ runs:
   using: composite
   steps:
     - name: Download Config
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: config.txt
         path: ./wrappers/csharp
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.7"
 
     - name: Download Native Libs
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: nugets
+        pattern: nugets-*
+        merge-multiple: true
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
 
     - name: Install nuget
