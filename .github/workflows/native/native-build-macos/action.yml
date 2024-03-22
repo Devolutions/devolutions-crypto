@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Download Config
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: config.txt
         path: ./wrappers/csharp
@@ -42,9 +42,9 @@ runs:
         source $HOME/.cargo/env
         python3 GeneratePackage.py -p mac-modern
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: artifact-staging
+        name: native-macos
         path: |
           wrappers/csharp/macos-full/**
           wrappers/csharp/macos-modern/**

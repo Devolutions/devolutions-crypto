@@ -35,7 +35,7 @@ jobs:
           echo "Writing to file..."
           cat config.txt
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: config.txt
           path: config.txt
@@ -45,14 +45,14 @@ jobs:
     needs: [rust_code_format, setup_config]
     runs-on: "ubuntu-20.04" # Ensure we build with the minimum supported sysroot
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/workflows/native/native-build-linux
 
   native_build_macos:
     needs: [rust_code_format, setup_config]
     runs-on: "macos-12"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -62,7 +62,7 @@ jobs:
     needs: [rust_code_format, setup_config]
     runs-on: "macos-12"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -72,7 +72,7 @@ jobs:
     needs: [rust_code_format, setup_config]
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -83,7 +83,7 @@ jobs:
     needs: [native_build_linux , csharp_code_format, setup_config]
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -93,7 +93,7 @@ jobs:
     needs: [native_build_linux, native_build_macos, native_build_ios, native_build_windows , csharp_code_format, setup_config] # All Natives for dotnet-core
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -103,7 +103,7 @@ jobs:
     needs: [native_build_macos, native_build_ios, native_build_linux, csharp_code_format, setup_config]
     runs-on: "macos-12"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -115,7 +115,7 @@ jobs:
     needs: rust_code_format
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -126,7 +126,7 @@ jobs:
     needs: webassembly_build
     runs-on: "macos-12"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -137,7 +137,7 @@ jobs:
     needs: [nugets_windows, setup_config]
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -147,7 +147,7 @@ jobs:
     needs: [nugets_macos, nugets_windows, setup_config]
     runs-on: "macos-12"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -157,7 +157,7 @@ jobs:
     needs: [nugets_macos, setup_config]
     runs-on: "macos-12"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -167,7 +167,7 @@ jobs:
     needs: [nugets_linux, nugets_windows, setup_config]
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -180,7 +180,7 @@ jobs:
   #  needs: [nugets_macos, setup_config]
   #  runs-on: "macos-12"
   #  steps:
-  #    - uses: actions/checkout@v3
+  #    - uses: actions/checkout@v4
   #      with:
   #        lfs: true
   #    - run: git lfs pull
@@ -190,7 +190,7 @@ jobs:
     needs: [tests_nuget_ios, setup_config]
     runs-on: "macos-12"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -200,14 +200,14 @@ jobs:
   rust_code_format:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/workflows/formatting/rust
 
   csharp_code_format:
     needs: setup_config
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -217,7 +217,7 @@ jobs:
   build_python_linux:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -226,7 +226,7 @@ jobs:
   build_python_macos:
     runs-on: "macos-12"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -235,7 +235,7 @@ jobs:
   build_python_windows:
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -246,28 +246,28 @@ jobs:
     needs: build_python_linux
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/workflows/tests/python/linux
 
   test_python_macos:
     needs: build_python_macos
     runs-on: "macos-12"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/workflows/tests/python/macos
 
   test_python_windows:
     needs: build_python_windows
     runs-on: "windows-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/workflows/tests/python/windows
 
   #### PUBLISH SOURCE ####
   source_publish:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
@@ -277,10 +277,10 @@ jobs:
     runs-on: "ubuntu-latest"
     if: ${{ github.event.inputs.generate_release == 'true' }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Check out devolutions/actions
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ./.github/workflows
           ref: v1
@@ -293,7 +293,7 @@ jobs:
           path: .
 
       - name: Save BOM
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bom_devolutions_crypto_rust.xml
           path: ./bom.xml

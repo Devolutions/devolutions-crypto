@@ -4,16 +4,18 @@ runs:
   using: composite
   steps:
     - name: Download Config
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: config.txt
         path: ./wrappers/csharp
 
-    - name: Download Native Libs
-      uses: actions/download-artifact@v3
+    - name: Download Nugets Libs
+      uses: actions/download-artifact@v4
       with:
-        name: nugets
+        pattern: nugets-*
+        merge-multiple: true
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
+        
 
     - name: Update Nuget
       shell: bash

@@ -28,7 +28,7 @@ runs:
         npm install
         npm test
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: wasm
         path: wrappers/wasm/dist/**

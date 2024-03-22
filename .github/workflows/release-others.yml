@@ -7,7 +7,7 @@ on:
         required: true
         type: boolean
       publish_npm:
-        description: "Publish NPM [not working yet]"
+        description: "Publish NPM"
         required: true
         type: boolean
       publish_python:
@@ -23,10 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: publish
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Check out devolutions/actions
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: ./.github/workflows
         ref: v1
@@ -39,10 +39,13 @@ jobs:
         github_token: ${{ secrets.DEVOLUTIONSBOT_TOKEN }}
   
     - name: Download Python Artifact
-      run: dv github download-artifact python-wheels . devolutions-crypto
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CI: true
+      run: | 
+        dv github download-artifact python-wheels-linux . devolutions-crypto
+        dv github download-artifact python-wheels-macos . devolutions-crypto
+        dv github download-artifact python-wheels-windows . devolutions-crypto
 
     - name: Download NPM Artifact
       run: dv github download-artifact wasm . devolutions-crypto
@@ -52,7 +55,10 @@ jobs:
 
     - name: Extract Artifacts
       run: |
-        7z x python-wheels.zip -o./devolutions-crypto-wheels
+        7z x python-wheels-linux.zip -o./devolutions-crypto-wheels
+        7z x python-wheels-macos.zip -o./devolutions-crypto-wheels
+        7z x python-wheels-windows.zip -o./devolutions-crypto-wheels
+
         7z x wasm.zip -o./devolutions-crypto-npm
 
     - name: Publish Rust Crate
