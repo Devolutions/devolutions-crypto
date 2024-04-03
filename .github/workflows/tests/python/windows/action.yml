@@ -2,14 +2,14 @@ name: Test Python Wheels for Windows
 runs:
   using: composite
   steps:
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.9"
 
     - name: Download Python Wheels
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: python-wheels
+        name: python-wheels-windows
         path: ./wheels
 
     - name: Create virtual environment

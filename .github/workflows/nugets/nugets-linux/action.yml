@@ -4,15 +4,16 @@ runs:
   using: composite
   steps:
   - name: Download Config
-    uses: actions/download-artifact@v3
+    uses: actions/download-artifact@v4
     with:
       name: config.txt
       path: ./wrappers/csharp
 
   - name: Download Native Libs
-    uses: actions/download-artifact@v3
+    uses: actions/download-artifact@v4
     with:
-      name: artifact-staging
+      pattern: native-*
+      merge-multiple: true
       path: ./wrappers/csharp
 
   - name: Install nuget
@@ -28,7 +29,7 @@ runs:
     shell: bash
     run: mv wrappers/csharp/nuget/Linux/package/*.nupkg .
 
-  - uses: actions/upload-artifact@v3
+  - uses: actions/upload-artifact@v4
     with:
-      name: nugets
+      name: nugets-linux
       path: ./*.nupkg

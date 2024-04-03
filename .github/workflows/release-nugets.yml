@@ -39,10 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: publish
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Check out devolutions/actions
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: ./.github/workflows
         ref: v1
@@ -55,26 +55,19 @@ jobs:
         github_token: ${{ secrets.DEVOLUTIONSBOT_TOKEN }}
 
     - name: Download Nugets Artifact
-      run: dv github download-artifact nugets . devolutions-crypto
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CI: true
-  
-    - name: Download Python Artifact
-      run: dv github download-artifact python-wheels . devolutions-crypto
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CI: true
-
-    - name: Download NPM Artifact
-      run: dv github download-artifact wasm . devolutions-crypto
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CI: true
+      run: |
+        dv github download-artifact nugets-linux . devolutions-crypto
+        dv github download-artifact nugets-macos . devolutions-crypto
+        dv github download-artifact nugets-windows . devolutions-crypto
 
     - name: Extract Artifacts
       run: |
-        7z x nugets.zip -o./devolutions-crypto-nugets
+        7z x nugets-linux.zip -o./devolutions-crypto-nugets
+        7z x nugets-macos.zip -o./devolutions-crypto-nugets
+        7z x nugets-windows.zip -o./devolutions-crypto-nugets
 
     - name: Publish iOS NuGet
       if: ${{ inputs.publish_ios_nuget }}
