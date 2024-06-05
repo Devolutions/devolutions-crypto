@@ -71,9 +71,21 @@ jobs:
           cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
         fi
 
-    - name: Publish NPM
+    - name: Publish NPM Bundler
       if: ${{ inputs.publish_npm }}
       working-directory: ./devolutions-crypto-npm/bundler
+      run: |
+        npm set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+
+        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
+          npm publish --access=public --dry-run
+        else
+          npm publish --access=public
+        fi
+
+    - name: Publish NPM Web
+      if: ${{ inputs.publish_npm }}
+      working-directory: ./devolutions-crypto-npm/web
       run: |
         npm set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
 

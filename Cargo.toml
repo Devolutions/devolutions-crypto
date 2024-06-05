@@ -53,9 +53,9 @@ arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
 rust-argon2 = { version = "1.0", default-features = false }
-wasm-bindgen = { version = "0.2.87", optional = true }
-serde-wasm-bindgen = { version = "0.5", optional = true }
-js-sys = { version = "0.3.64", optional = true }
+wasm-bindgen = { version = "0.2.92", optional = true }
+serde-wasm-bindgen = { version = "0.6.5", optional = true }
+js-sys = { version = "0.3.69", optional = true }
 
 # FIXME: https://docs.rs/getrandom/0.2.2/getrandom/#webassembly-support
 # let `getrandom` know that JavaScript is available for our targets
