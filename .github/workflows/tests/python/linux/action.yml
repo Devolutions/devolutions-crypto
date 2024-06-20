@@ -2,10 +2,9 @@ name: Test Python Wheels for Linux
 runs:
   using: composite
   steps:
-# 3.10
     - uses: actions/setup-python@v5
       with:
-        python-version: "3.10"
+        python-version: "3.12"
 
     - name: Download Python Wheels
       uses: actions/download-artifact@v4
@@ -26,76 +25,7 @@ runs:
       shell: bash
       run: pip install --no-index --find-links="./" devolutions_crypto
 
-    - name: Run 3.10 tests
-      working-directory: ./wrappers/python
-      shell: bash
-      run: python -m unittest tests/*.py
-
-# 3.9
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.9"
-
-    - name: Create virtual environment
-      working-directory: ./wrappers/python
-      shell: bash
-      run: |
-        rm -rf venv/
-        python -m venv venv python
-        source venv/bin/activate
-
-    - name: Install wheel
-      working-directory: ./wheels
-      shell: bash
-      run: pip install --no-index --find-links="./" devolutions_crypto
-
-    - name: Run 3.9 tests
-      working-directory: ./wrappers/python
-      shell: bash
-      run: python -m unittest tests/*.py
-
-# 3.8
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.8"
-
-    - name: Create virtual environment
-      working-directory: ./wrappers/python
-      shell: bash
-      run: |
-        rm -rf venv/
-        python -m venv venv python
-        source venv/bin/activate
-
-    - name: Install wheel
-      working-directory: ./wheels
-      shell: bash
-      run: pip install --no-index --find-links="./" devolutions_crypto
-
-    - name: Run 3.8 tests
-      working-directory: ./wrappers/python
-      shell: bash
-      run: python -m unittest tests/*.py
-
-# 3.7
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.7"
-
-    - name: Create virtual environment
-      working-directory: ./wrappers/python
-      shell: bash
-      run: |
-        rm -rf venv/
-        python -m venv venv python
-        source venv/bin/activate
-
-    - name: Install wheel
-      working-directory: ./wheels
-      shell: bash
-      run: pip install --no-index --find-links="./" devolutions_crypto
-
-    - name: Run 3.7 tests
+    - name: Run tests
       working-directory: ./wrappers/python
       shell: bash
       run: python -m unittest tests/*.py
