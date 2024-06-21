@@ -81,18 +81,6 @@ runs:
 
         maturin build --release -i python --target=x86_64-apple-darwin
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.7"
-
-    - name: Building x86_64 3.7 Wheel
-      working-directory: ./python
-      shell: bash
-      run: |
-        source $HOME/.cargo/env
-
-        maturin build --release -i python --target=x86_64-apple-darwin
-
     - name: Place Artifacts
       shell: bash
       run: |

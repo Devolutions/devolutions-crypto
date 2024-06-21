@@ -64,15 +64,6 @@ runs:
       shell: bash
       run: maturin build -i python --release --target=x86_64-pc-windows-msvc
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.7"
-
-    - name: Building x86_64 3.7
-      working-directory: ./python
-      shell: bash
-      run: maturin build -i python --release --target=x86_64-pc-windows-msvc
-
     - name: Place Artifacts
       shell: bash
       run: |
