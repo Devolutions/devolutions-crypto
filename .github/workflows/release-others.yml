@@ -25,6 +25,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Check out for Rust release
+      uses: actions/checkout@v4
+      with: 
+        path: ./rust-release/
+
     - name: Check out devolutions/actions
       uses: actions/checkout@v4
       with:
@@ -63,7 +68,7 @@ jobs:
 
     - name: Publish Rust Crate
       if: ${{ inputs.publish_crate_rust }}
-      working-directory: ./
+      working-directory: ./rust-release
       run: |
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           cargo publish --dry-run
