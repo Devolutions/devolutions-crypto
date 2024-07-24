@@ -1,0 +1,11 @@
+[package]
+name = "uniffi-lib"
+edition = "2021"
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+devolutions-crypto = { path = "../../" }
+uniffi = "0.28.0"
