@@ -1,6 +1,7 @@
 #[uniffi::export]
-fn hello() {
+fn hello() -> Vec<u8>{
 println!("baba");
+Vec::new()
 }
 
 

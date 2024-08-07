@@ -708,7 +708,7 @@ internal interface UniffiLib : Library {
     }
 
     fun uniffi_uniffi_lib_fn_func_hello(uniffi_out_err: UniffiRustCallStatus, 
-    ): Unit
+    ): RustBuffer.ByValue
     fun ffi_uniffi_lib_rustbuffer_alloc(`size`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun ffi_uniffi_lib_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -840,7 +840,7 @@ private fun uniffiCheckContractApiVersion(lib: UniffiLib) {
 
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: UniffiLib) {
-    if (lib.uniffi_uniffi_lib_checksum_func_hello() != 17287.toShort()) {
+    if (lib.uniffi_uniffi_lib_checksum_func_hello() != 40685.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -935,13 +935,30 @@ public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
         buf.putInt(byteBuf.limit())
         buf.put(byteBuf)
     }
-} fun `hello`()
-        = 
+}
+
+public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
+    override fun read(buf: ByteBuffer): ByteArray {
+        val len = buf.getInt()
+        val byteArr = ByteArray(len)
+        buf.get(byteArr)
+        return byteArr
+    }
+    override fun allocationSize(value: ByteArray): ULong {
+        return 4UL + value.size.toULong()
+    }
+    override fun write(value: ByteArray, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        buf.put(value)
+    }
+} fun `hello`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_uniffi_lib_fn_func_hello(
         _status)
 }
-    
+    )
+    }
     
 
 

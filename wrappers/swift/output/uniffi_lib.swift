@@ -419,10 +419,26 @@ fileprivate struct FfiConverterString: FfiConverter {
         writeBytes(&buf, value.utf8)
     }
 }
-public func hello() {try! rustCall() {
+
+fileprivate struct FfiConverterData: FfiConverterRustBuffer {
+    typealias SwiftType = Data
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Data {
+        let len: Int32 = try readInt(&buf)
+        return Data(try readBytes(&buf, count: Int(len)))
+    }
+
+    public static func write(_ value: Data, into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        writeBytes(&buf, value)
+    }
+}
+public func hello() -> Data {
+    return try!  FfiConverterData.lift(try! rustCall() {
     uniffi_uniffi_lib_fn_func_hello($0
     )
-}
+})
 }
 
 private enum InitializationResult {
@@ -440,7 +456,7 @@ private var initializationResult: InitializationResult = {
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if (uniffi_uniffi_lib_checksum_func_hello() != 17287) {
+    if (uniffi_uniffi_lib_checksum_func_hello() != 40685) {
         return InitializationResult.apiChecksumMismatch
     }
 

@@ -253,7 +253,7 @@ typedef void (*UniffiForeignFutureCompleteVoid)(uint64_t, UniffiForeignFutureStr
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_UNIFFI_LIB_FN_FUNC_HELLO
 #define UNIFFI_FFIDEF_UNIFFI_UNIFFI_LIB_FN_FUNC_HELLO
-void uniffi_uniffi_lib_fn_func_hello(RustCallStatus *_Nonnull out_status
+RustBuffer uniffi_uniffi_lib_fn_func_hello(RustCallStatus *_Nonnull out_status
     
 );
 #endif
