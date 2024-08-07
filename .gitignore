@@ -4,6 +4,8 @@ packages
 .vs
 *.nupkg
 *.user
+wrappers/swift/bindings/*
+wrappers/swift/output/*
 wrappers/csharp/nuget/dotnet/package/*
 wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/package/*
 wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/package/*
