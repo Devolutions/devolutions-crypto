@@ -9,6 +9,8 @@ LIBNAMEBUILD="uniffi-lib"
 rm -rf bindings
 rm -rf output
 
+cargo build -p "$LIBNAMEBUILD"
+
 cargo run -p uniffi-bindgen generate --library "../../target/debug/lib$LIBNAME.dylib"  --language swift -o bindings --no-format
 
 mkdir ./bindings/mac
