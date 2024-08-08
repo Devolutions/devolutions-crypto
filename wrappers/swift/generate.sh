@@ -2,7 +2,7 @@
 # based on https://rhonabwy.com/2023/02/10/creating-an-xcframework
 
 
-XCFRAMEWORK_FOLDER="./output/devolutions-crypto.xcframework"
+XCFRAMEWORK_FOLDER="./output/DevolutionsCrypto.xcframework"
 LIBNAME="uniffi_lib"
 LIBNAMEBUILD="uniffi-lib"
 
@@ -50,7 +50,7 @@ xcodebuild -create-xcframework \
             -library "./bindings/ios-simulator/lib$LIBNAME.a" -headers ./bindings \
             -library "./bindings/mac/lib$LIBNAME.a" -headers ./bindings \
             -library "../../target/aarch64-apple-ios/release/lib$LIBNAME.a" -headers ./bindings \
-            -output "./output/devolutions-crypto.xcframework"
+            -output "$XCFRAMEWORK_FOLDER"
 
 # Compress XCFramework
 ditto -c -k --sequesterRsrc --keepParent "$XCFRAMEWORK_FOLDER" "$XCFRAMEWORK_FOLDER.zip"
@@ -58,6 +58,12 @@ ditto -c -k --sequesterRsrc --keepParent "$XCFRAMEWORK_FOLDER" "$XCFRAMEWORK_FOL
 # Compute checksum
 swift package compute-checksum "$XCFRAMEWORK_FOLDER.zip"
 
+# Move swift file to package
+cp "./bindings/$LIBNAME.swift" ./DevolutionsCryptoSwift/Sources/DevolutionsCryptoSwift/DevolutionsCryptoSwift.swift
 
+# Tests
+cd ./DevolutionsCryptoSwift
+
+swift test
 
 
