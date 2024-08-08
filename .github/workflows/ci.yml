@@ -172,6 +172,16 @@ jobs:
           lfs: true
       - run: git lfs pull
       - uses: ./.github/workflows/tests/csharp/linux
+
+##### SWIFT TESTS #####
+  tests_swift:
+    runs-on: "macos-12"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/swift
   
   #=================================================
   # Disabled for now, Android Emulator doesn't boot. - mmorrissette 2024-02-21
