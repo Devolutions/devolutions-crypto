@@ -26,3 +26,5 @@ bin
 obj
 .angular
 node_modules
+__pycache__
+config.txt
