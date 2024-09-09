@@ -35,7 +35,7 @@ jobs:
           echo "Writing to file..."
           cat config.txt
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4.3.6
         with:
           name: config.txt
           path: config.txt
@@ -293,7 +293,7 @@ jobs:
           path: .
 
       - name: Save BOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.3.6
         with:
           name: bom_devolutions_crypto_rust.xml
           path: ./bom.xml
