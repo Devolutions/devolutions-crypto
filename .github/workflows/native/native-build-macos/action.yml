@@ -42,7 +42,7 @@ runs:
         source $HOME/.cargo/env
         python3 GeneratePackage.py -p mac-modern
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v4.3.6
       with:
         name: native-macos
         path: |

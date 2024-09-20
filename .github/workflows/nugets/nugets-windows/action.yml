@@ -19,7 +19,6 @@ runs:
         pattern: native-*
         merge-multiple: true
         path: ./wrappers/csharp
-        
 
     - name: Downloading nuget
       working-directory: ./wrappers/csharp/nuget
@@ -42,7 +41,7 @@ runs:
         mv wrappers/csharp/nuget/Windows/package/*.nupkg .
         mv wrappers/csharp/nuget/dotnet-core/package/*.nupkg .
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v4.3.6
       with:
         name: nugets-windows
         path: ./*.nupkg

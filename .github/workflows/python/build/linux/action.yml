@@ -78,7 +78,7 @@ runs:
       run: |
         mv target/wheels/*.whl .
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v4.3.6
       with:
         name: python-wheels-linux
         path: ./*.whl

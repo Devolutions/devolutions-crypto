@@ -44,7 +44,7 @@ runs:
         mkdir output
         mv ./ios ./output/ios
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v4.3.6
       with:
         name: native-ios
         path: wrappers/csharp/output/**
