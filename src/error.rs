@@ -1,7 +1,6 @@
 //! Possible errors in the library.
 
 use cbc::cipher::block_padding::UnpadError;
-use std::fmt;
 
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::JsValue;
@@ -11,39 +10,55 @@ use strum::IntoStaticStr;
 use hmac::digest::MacError;
 
 /// This crate's error type.
-#[derive(Debug, IntoStaticStr)]
+#[derive(Debug, IntoStaticStr, thiserror::Error)]
 pub enum Error {
     /// The provided data has an invalid length. Error code: -1
+    #[error("The provided data has an invalid length")]
     InvalidLength,
     /// The key length is invalid. Error code: -2
+    #[error("The key length is invalid.")]
     InvalidKeyLength,
     /// The length of the FFI output buffer is invalid. Error code: -3
+    #[error("The length of the FFI output buffer is invalid.")]
     InvalidOutputLength,
     /// The signature of the data blob does not match 0x0d0c. Error code: -11
+    #[error("The signature of the data blob does not match 0x0d0c.")]
     InvalidSignature,
     /// The MAC is invalid. Error code: -12
+    #[error("The MAC is invalid.")]
     InvalidMac,
     /// The operation cannot be done with this type. Error code: -13
+    #[error("The operation cannot be done with this type.")]
     InvalidDataType,
     /// The data type is unknown. Error code: -21
+    #[error("The data type is unknown.")]
     UnknownType,
     /// The data subtype is unknown. Error code: -22
+    #[error("The data subtype is unknown.")]
     UnknownSubtype,
     /// The data type version is unknown. Error code: -23
+    #[error("The data type version is unknown.")]
     UnknownVersion,
     /// The data is invalid. Error code: -24
+    #[error("The data is invalid.")]
     InvalidData,
     /// A null pointer has been passed to the FFI interface. Error code: -31
+    #[error("A null pointer has been passed to the FFI interface.")]
     NullPointer,
     /// A cryptographic error occurred. Error code: -32
+    #[error("A cryptographic error occurred.")]
     CryptoError,
     /// An error with the Random Number Generator occurred. Error code: -33
+    #[error("An error with the Random Number Generator occurred.")]
     RandomError,
     /// A generic IO error has occurred. Error code: -34
-    IoError(std::io::Error),
+    #[error("Generic IO error: {0}")]
+    IoError(#[from] std::io::Error),
     /// There is not enough shares to regenerate a secret: -41
+    #[error("There wasn't enough share to regenerate the secret.")]
     NotEnoughShares,
     /// The version of the multiple data is inconsistent: -42
+    #[error("The version is not the same for all the data.")]
     InconsistentVersion,
 }
 
@@ -68,47 +83,6 @@ impl Error {
             Error::IoError(_) => -34,
             Error::NotEnoughShares => -41,
             Error::InconsistentVersion => -42,
-        }
-    }
-
-    /// Returns a description of the error
-    pub fn description(&self) -> String {
-        match *self {
-            Error::InvalidLength => "The provided data has an invalid length.".to_string(),
-            Error::InvalidKeyLength => "The key length is invalid.".to_string(),
-            Error::InvalidOutputLength => {
-                "The length of the FFI output buffer is invalid.".to_string()
-            }
-            Error::InvalidSignature => {
-                "The signature of the data blob does not match 0x0d0c.".to_string()
-            }
-            Error::InvalidMac => "The MAC is invalid.".to_string(),
-            Error::InvalidDataType => "The operation cannot be done with this type.".to_string(),
-            Error::UnknownType => "The data type is unknown.".to_string(),
-            Error::UnknownSubtype => "The data subtype is unknown.".to_string(),
-            Error::InvalidData => "The data is invalid.".to_string(),
-            Error::UnknownVersion => "The data type version is unknown.".to_string(),
-            Error::NullPointer => {
-                "A null pointer has been passed to the FFI interface.".to_string()
-            }
-            Error::CryptoError => "A cryptographic error occurred.".to_string(),
-            Error::RandomError => "An error with the Random Number Generator occurred.".to_string(),
-            Error::IoError(ref error) => error.to_string(),
-            Error::NotEnoughShares => {
-                "There wasn't enough share to regenerate the secret.".to_string()
-            }
-            Error::InconsistentVersion => {
-                "The version is not the same for all the data.".to_string()
-            }
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        match *self {
-            Error::IoError(ref error) => error.fmt(f),
-            _ => write!(f, "Error {}: {}", self.error_code(), self.description()),
         }
     }
 }
@@ -139,12 +113,6 @@ impl From<aead::Error> for Error {
 
 impl From<rand::Error> for Error {
     fn from(_error: rand::Error) -> Error {
-        Error::RandomError
-    }
-}
-
-impl From<std::io::Error> for Error {
-    fn from(_error: std::io::Error) -> Error {
         Error::RandomError
     }
 }

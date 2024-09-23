@@ -8,6 +8,9 @@ members = [
   "uniffi/uniffi-bindgen"
 , "uniffi/uniffi-lib"]
 
+[workspace.dependencies]
+uniffi = "0.28"
+
 [package]
 name = "devolutions-crypto"
 version.workspace = true
@@ -43,7 +46,6 @@ subtle = "2"
 zeroize = { version = "1.8" }
 rand = "0.8"
 rand_core = { version = "0.6" }
-uniffi = { version = "0.28" }
 
 ed25519-dalek = { version = "2", features = [ "rand_core" ] }
 x25519-dalek = { version = "2", features = [ "static_secrets" ] }
@@ -52,6 +54,8 @@ x25519-dalek = { version = "2", features = [ "static_secrets" ] }
 # Version is pinned because newer version requires lifetime annotations
 #   that isn't compatible with the header trait
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
+uniffi = { workspace = true, optional = true }
+thiserror = "1.0.64"
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
 rust-argon2 = { version = "1.0", default-features = false }
@@ -80,4 +84,5 @@ fuzz = ["arbitrary", "blahaj/fuzzing"]
 fuzz = ["arbitrary", "sharks/fuzzing"]
 >>>>>>> d4b0a2d (initial commit)
 wbindgen = ["wasm-bindgen", "serde-wasm-bindgen", "js-sys"]
+uniffi = ["dep:uniffi"]
 

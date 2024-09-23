@@ -1,0 +1,28 @@
+enum CiphertextVersion {
+    "Latest",
+    "V1",
+    "V2",
+};
+
+[Error]
+enum DevolutionsCryptoError {
+    "InvalidLength",
+    "InvalidKeyLength",
+    "InvalidOutputLength",
+    "InvalidSignature",
+    "InvalidMac",
+    "InvalidDataType",
+    "UnknownType",
+    "UnknownSubtype",
+    "UnknownVersion",
+    "InvalidData",
+    "NullPointer",
+    "CryptoError",
+    "RandomError",
+    "IoError",
+    "NotEnoughShares",
+    "InconsistentVersion",
+};
+
+namespace devolutions_crypto {
+};
