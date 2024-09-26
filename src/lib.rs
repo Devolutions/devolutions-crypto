@@ -228,9 +228,13 @@ pub use enums::{
 };
 
 pub use argon2parameters::Argon2Parameters;
+pub use argon2parameters::Argon2ParametersBuilder;
 pub use error::Error;
 
 pub type Result<T> = std::result::Result<T, error::Error>;
+
+pub const DEFAULT_KEY_SIZE: usize = 32;
+pub const DEFAULT_PBKDF2_ITERATIONS: u32 = 10000;
 
 #[cfg(feature = "wbindgen")]
 pub mod wasm;

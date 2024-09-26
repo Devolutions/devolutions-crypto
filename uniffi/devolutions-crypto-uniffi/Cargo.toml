@@ -1,5 +1,5 @@
 [package]
-name = "uniffi-lib"
+name = "devolutions-crypto-uniffi"
 edition = "2021"
 version.workspace = true
 

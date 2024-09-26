@@ -1,11 +1,11 @@
 use std::{
-    convert::TryFrom,
-    io::{Cursor, Read},
+    convert::TryFrom, io::{Cursor, Read}
 };
 
 use argon2::{Config, ThreadMode, Variant, Version};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use rand_core::{OsRng, RngCore};
+use derive_builder::Builder;
 
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::prelude::*;
@@ -24,27 +24,49 @@ use super::Result;
 ///  so two calls to `default()` will not generate the same structure.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[derive(Clone)]
+#[derive(Builder)]
+#[builder(build_fn(error = "Error"))]
 pub struct Argon2Parameters {
     /// Length of the desired hash. Should be 32 in most case.
+    #[builder(default="32")]
     pub length: u32,
     /// Number of parallel jobs to run. Only use if always computed in a multithreaded environment.
+    #[builder(default="1")]
     pub lanes: u32,
     /// Memory used by the algorithm in KiB. Higher is better.
+    #[builder(default="4096")]
     pub memory: u32,
     /// Number of iterations(time cost). Higher is better.
+    #[builder(default="2")]
     pub iterations: u32,
     /// The variant to use. You should almost always use Argon2Id.
+    #[builder(default="Variant::Argon2id")]
     variant: Variant,
     /// The version of Argon2 to use. Use the latest.
+    #[builder(default="Version::Version13")]
     version: Version,
     /// Version of this structure in DevolutionsCrypto.
+    #[builder(default="1")]
     dc_version: u32,
     /// Authenticated but not secret data.
+    #[builder(default)]
     associated_data: Vec<u8>,
     /// Secret key to sign the hash. Note that this is not serialized.
+    #[builder(default)]
     secret_key: Vec<u8>,
     /// A 16-bytes salt to use that is generated automatically. Should not be accessed directly.
+    #[builder(default = r#"{
+        let mut salt = vec![0u8; 16];
+        OsRng.fill_bytes(salt.as_mut_slice());
+        salt
+    }"#)]
     salt: Vec<u8>,
+}
+
+impl Argon2ParametersBuilder {
+    pub fn new() -> Self {
+        Default::default()
+    }
 }
 
 impl Argon2Parameters {
