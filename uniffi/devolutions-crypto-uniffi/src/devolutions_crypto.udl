@@ -1,0 +1,87 @@
+enum DataType {
+    "None",
+    "Key",
+    "Ciphertext",
+    "PasswordHash",
+    "Share",
+    "SigningKey",
+    "Signature",
+};
+
+enum CiphertextVersion {
+    "Latest",
+    "V1",
+    "V2",
+};
+
+enum PasswordHashVersion {
+    "Latest",
+    "V1",
+};
+
+enum KeyVersion {
+    "Latest",
+    "V1",
+};
+
+enum SigningKeyVersion {
+    "Latest",
+    "V1",
+};
+
+enum SecretSharingVersion {
+    "Latest",
+    "V1",
+};
+
+enum SignatureVersion {
+    "Latest",
+    "V1",
+};
+
+enum Argon2Version {
+    "Version10",
+    "Version13",
+};
+
+enum Argon2Variant {
+    "Argon2d",
+    "Argon2i",
+    "Argon2id",
+};
+
+[Error]
+enum DevolutionsCryptoError {
+    "InvalidLength",
+    "InvalidKeyLength",
+    "InvalidOutputLength",
+    "InvalidSignature",
+    "InvalidMac",
+    "InvalidDataType",
+    "UnknownType",
+    "UnknownSubtype",
+    "UnknownVersion",
+    "InvalidData",
+    "NullPointer",
+    "CryptoError",
+    "RandomError",
+    "IoError",
+    "NotEnoughShares",
+    "InconsistentVersion",
+};
+
+interface Argon2ParametersBuilder {
+        constructor();
+        [Self=ByArc]
+        Argon2ParametersBuilder length(u32 length);
+        [Self=ByArc]
+        Argon2Parameters build();
+};
+
+interface Argon2Parameters {
+    [Name=new_from_bytes, Throws=DevolutionsCryptoError]
+    constructor([ByRef] bytes data);
+    bytes get_bytes();
+};
+
+namespace devolutions_crypto {};
