@@ -1,17 +1,37 @@
 use std::{
-    convert::TryFrom, io::{Cursor, Read}
+    convert::TryFrom, io::{Cursor, Read, Write}
 };
 
 use argon2::{Config, ThreadMode, Variant, Version};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use rand_core::{OsRng, RngCore};
-use derive_builder::Builder;
+use typed_builder::TypedBuilder;
 
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::prelude::*;
 
 use super::Error;
 use super::Result;
+
+pub mod defaults {
+    use argon2::Variant;
+    use argon2::Version;
+    use rand_core::{OsRng, RngCore};
+
+    pub const LENGTH: u32 = 32;
+    pub const LANES: u32 = 1;
+    pub const MEMORY: u32 = 4096;
+    pub const ITERATIONS: u32 = 2;
+    pub const VARIANT: Variant = Variant::Argon2id;
+    pub const VERSION: Version = Version::Version13;
+    pub const DC_VERSION: u32 = 1;
+
+    pub fn salt() -> Vec<u8> {
+        let mut salt = vec![0u8; 16];
+        OsRng.fill_bytes(salt.as_mut_slice());
+        salt
+    }
+}
 
 /// Parameters used to derive the password into an Argon2 hash.
 /// It is used to derive a password into a keypair.
@@ -24,29 +44,28 @@ use super::Result;
 ///  so two calls to `default()` will not generate the same structure.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 #[derive(Clone)]
-#[derive(Builder)]
-#[builder(build_fn(error = "Error"))]
+#[derive(TypedBuilder)]
 pub struct Argon2Parameters {
     /// Length of the desired hash. Should be 32 in most case.
-    #[builder(default="32")]
+    #[builder(default=defaults::LENGTH)]
     pub length: u32,
     /// Number of parallel jobs to run. Only use if always computed in a multithreaded environment.
-    #[builder(default="1")]
+    #[builder(default=defaults::LANES)]
     pub lanes: u32,
     /// Memory used by the algorithm in KiB. Higher is better.
-    #[builder(default="4096")]
+    #[builder(default=defaults::MEMORY)]
     pub memory: u32,
     /// Number of iterations(time cost). Higher is better.
-    #[builder(default="2")]
+    #[builder(default=defaults::ITERATIONS)]
     pub iterations: u32,
     /// The variant to use. You should almost always use Argon2Id.
-    #[builder(default="Variant::Argon2id")]
+    #[builder(default=defaults::VARIANT)]
     variant: Variant,
     /// The version of Argon2 to use. Use the latest.
-    #[builder(default="Version::Version13")]
+    #[builder(default=defaults::VERSION)]
     version: Version,
     /// Version of this structure in DevolutionsCrypto.
-    #[builder(default="1")]
+    #[builder(default=defaults::DC_VERSION)]
     dc_version: u32,
     /// Authenticated but not secret data.
     #[builder(default)]
@@ -55,18 +74,8 @@ pub struct Argon2Parameters {
     #[builder(default)]
     secret_key: Vec<u8>,
     /// A 16-bytes salt to use that is generated automatically. Should not be accessed directly.
-    #[builder(default = r#"{
-        let mut salt = vec![0u8; 16];
-        OsRng.fill_bytes(salt.as_mut_slice());
-        salt
-    }"#)]
+    #[builder(default = defaults::salt())]
     salt: Vec<u8>,
-}
-
-impl Argon2ParametersBuilder {
-    pub fn new() -> Self {
-        Default::default()
-    }
 }
 
 impl Argon2Parameters {
@@ -100,8 +109,8 @@ impl Default for Argon2Parameters {
     }
 }
 
-impl From<Argon2Parameters> for Vec<u8> {
-    fn from(mut params: Argon2Parameters) -> Self {
+impl From<&Argon2Parameters> for Vec<u8> {
+    fn from(params: &Argon2Parameters) -> Self {
         // Data is encoded this way:
         // All the u32 data -> enums(as u8) -> Vectors(length as u32 + vec))
         // Note that the secret key is not serialized.
@@ -120,11 +129,13 @@ impl From<Argon2Parameters> for Vec<u8> {
 
         data.write_u32::<LittleEndian>(params.associated_data.len() as u32)
             .unwrap();
-        data.append(&mut params.associated_data);
+
+        data.write_all(&params.associated_data).unwrap();
 
         data.write_u32::<LittleEndian>(params.salt.len() as u32)
             .unwrap();
-        data.append(&mut params.salt);
+
+        data.write_all(&params.salt).unwrap();
 
         data
     }

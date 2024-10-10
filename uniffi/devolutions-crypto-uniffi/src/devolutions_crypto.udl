@@ -39,6 +39,17 @@ enum SignatureVersion {
     "V1",
 };
 
+enum Argon2Version {
+    "Version10",
+    "Version13",
+};
+
+enum Argon2Variant {
+    "Argon2d",
+    "Argon2i",
+    "Argon2id",
+};
+
 [Error]
 enum DevolutionsCryptoError {
     "InvalidLength",
@@ -59,22 +70,18 @@ enum DevolutionsCryptoError {
     "InconsistentVersion",
 };
 
-interface Argon2Parameters {
-
+interface Argon2ParametersBuilder {
+        constructor();
+        [Self=ByArc]
+        Argon2ParametersBuilder length(u32 length);
+        [Self=ByArc]
+        Argon2Parameters build();
 };
 
-interface Argon2ParametersBuilder {
-    constructor();
-    Argon2ParametersBuilder length(u32 length);
-    Argon2ParametersBuilder lanes(u32 lanes);
-    Argon2ParametersBuilder memory(u32 memory);
-    Argon2ParametersBuilder iterations(u32 iterations);
-    Argon2ParametersBuilder associated_data(bytes associated_data);
-    Argon2ParametersBuilder secret_key(bytes secret_key);
-    Argon2ParametersBuilder salt(bytes salt);
-
-    [Throws=DevolutionsCryptoError]
-    Argon2Parameters build();
+interface Argon2Parameters {
+    [Name=new_from_bytes, Throws=DevolutionsCryptoError]
+    constructor([ByRef] bytes data);
+    bytes get_bytes();
 };
 
 namespace devolutions_crypto {};
