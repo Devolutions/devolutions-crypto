@@ -73,7 +73,25 @@ enum DevolutionsCryptoError {
 interface Argon2ParametersBuilder {
         constructor();
         [Self=ByArc]
-        Argon2ParametersBuilder length(u32 length);
+        Argon2ParametersBuilder length(u32 value);
+        [Self=ByArc]
+        Argon2ParametersBuilder lanes(u32 value);
+        [Self=ByArc]
+        Argon2ParametersBuilder memory(u32 value);
+        [Self=ByArc]
+        Argon2ParametersBuilder iterations(u32 value);
+        [Self=ByArc]
+        Argon2ParametersBuilder variant(Argon2Variant value);
+        [Self=ByArc]
+        Argon2ParametersBuilder version(Argon2Version value);
+        [Self=ByArc]
+        Argon2ParametersBuilder dc_version(u32 value);
+        [Self=ByArc]
+        Argon2ParametersBuilder associated_data(bytes value);
+        [Self=ByArc]
+        Argon2ParametersBuilder secret_key(bytes value);
+        [Self=ByArc]
+        Argon2ParametersBuilder salt(bytes value);
         [Self=ByArc]
         Argon2Parameters build();
 };

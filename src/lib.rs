@@ -227,11 +227,11 @@ pub use enums::{
     SignatureVersion, SigningKeyVersion,
 };
 
-pub use argon2parameters::Argon2Parameters;
-pub use argon2parameters::Argon2ParametersBuilder;
 pub use argon2::Variant as Argon2Variant;
 pub use argon2::Version as Argon2Version;
 pub use argon2parameters::defaults as argon2parameters_defaults;
+pub use argon2parameters::Argon2Parameters;
+pub use argon2parameters::Argon2ParametersBuilder;
 pub use error::Error;
 
 pub type Result<T> = std::result::Result<T, error::Error>;

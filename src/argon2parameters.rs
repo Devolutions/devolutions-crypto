@@ -1,5 +1,6 @@
 use std::{
-    convert::TryFrom, io::{Cursor, Read, Write}
+    convert::TryFrom,
+    io::{Cursor, Read, Write},
 };
 
 use argon2::{Config, ThreadMode, Variant, Version};
@@ -43,8 +44,7 @@ pub mod defaults {
 /// Note that calling `default()` will also generate a new random salt,
 ///  so two calls to `default()` will not generate the same structure.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
-#[derive(Clone)]
-#[derive(TypedBuilder)]
+#[derive(Clone, TypedBuilder)]
 pub struct Argon2Parameters {
     /// Length of the desired hash. Should be 32 in most case.
     #[builder(default=defaults::LENGTH)]
