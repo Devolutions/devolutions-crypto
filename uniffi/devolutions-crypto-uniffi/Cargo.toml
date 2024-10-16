@@ -8,6 +8,7 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 devolutions-crypto = { path = "../../" }
+uniffi-builder-macro = { path = "./uniffi-builder-macro" }
 uniffi = { workspace = true }
 
 [build-dependencies]
