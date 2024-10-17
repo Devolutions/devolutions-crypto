@@ -1,6 +1,9 @@
+cd "..\..\uniffi\devolutions-crypto-uniffi\"
+cargo build --release
 
-cargo run -p uniffi-bindgen generate --library "..\..\target\release\uniffi_lib.dll"  --language kotlin -o output --no-format
+cd "../uniffi-bindgen"
+cargo run -p uniffi-bindgen generate --library "..\..\target\release\devolutions_crypto_uniffi.dll"  --language kotlin -o ../../wrappers/kotlin/lib/src/main/kotlin --no-format
 
+cd "../../"
 
-
-
+copy ".\target\release\devolutions_crypto_uniffi.dll" ".\wrappers\kotlin\lib\win32-amd64\"

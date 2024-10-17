@@ -102,4 +102,10 @@ interface Argon2Parameters {
     bytes get_bytes();
 };
 
-namespace devolutions_crypto {};
+namespace devolutions_crypto {
+    [Throws=DevolutionsCryptoError]
+    bytes encrypt([ByRef] bytes data, [ByRef] bytes key, optional CiphertextVersion version = "Latest");
+
+    [Throws=DevolutionsCryptoError]
+    bytes encrypt_with_aad([ByRef] bytes data, [ByRef] bytes key, [ByRef] bytes aad, optional CiphertextVersion version = "Latest");
+};

@@ -1,10 +1,8 @@
 use crate::{Argon2Parameters, DataType, Result};
 
-#[uniffi::export]
-pub fn generate_key(length: Option<u64>) -> Vec<u8> {
-    devolutions_crypto::utils::generate_key(
-        length.unwrap_or(devolutions_crypto::DEFAULT_KEY_SIZE as u64) as usize,
-    )
+#[uniffi::export(default(length = 32))]
+pub fn generate_key(length: u64) -> Vec<u8> {
+    devolutions_crypto::utils::generate_key(length as usize)
 }
 
 #[uniffi::export]

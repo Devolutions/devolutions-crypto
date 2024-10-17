@@ -1,23 +1,21 @@
 use crate::CiphertextVersion;
 use crate::Result;
 
-#[uniffi::export]
-pub fn encrypt(data: &[u8], key: &[u8], version: Option<CiphertextVersion>) -> Result<Vec<u8>> {
-    Ok(devolutions_crypto::ciphertext::encrypt(data, key, version.unwrap_or_default())?.into())
+pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Vec<u8>> {
+    Ok(devolutions_crypto::ciphertext::encrypt(data, key, version)?.into())
 }
 
-#[uniffi::export]
 pub fn encrypt_with_aad(
     data: &[u8],
     key: &[u8],
     aad: &[u8],
-    version: Option<CiphertextVersion>,
+    version: CiphertextVersion,
 ) -> Result<Vec<u8>> {
     Ok(devolutions_crypto::ciphertext::encrypt_with_aad(
         data,
         key,
         aad,
-        version.unwrap_or_default(),
+        version,
     )?
     .into())
 }
