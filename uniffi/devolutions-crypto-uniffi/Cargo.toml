@@ -1,0 +1,15 @@
+[package]
+name = "devolutions-crypto-uniffi"
+edition = "2021"
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+devolutions-crypto = { path = "../../" }
+uniffi-builder-macro = { path = "./uniffi-builder-macro" }
+uniffi = { workspace = true }
+
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }

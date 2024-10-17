@@ -1,0 +1,8 @@
+name: Test Swift Package
+runs:
+  using: composite
+  steps:
+    - name: Run tests
+      working-directory: ./wrappers/swift
+      shell: bash
+      run: sh generate.sh
