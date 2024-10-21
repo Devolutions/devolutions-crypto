@@ -1,16 +1,15 @@
 use crate::PasswordHashVersion;
 use crate::Result;
 
-#[uniffi::export]
 pub fn hash_password(
     password: &[u8],
-    iterations: Option<u32>,
-    version: Option<PasswordHashVersion>,
+    iterations: u32,
+    version: PasswordHashVersion,
 ) -> Vec<u8> {
     devolutions_crypto::password_hash::hash_password(
         password,
-        iterations.unwrap_or(devolutions_crypto::DEFAULT_PBKDF2_ITERATIONS),
-        version.unwrap_or_default(),
+        iterations,
+        version,
     )
     .into()
 }

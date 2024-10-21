@@ -7,8 +7,7 @@ mod signature;
 mod signing_key;
 mod utils;
 
-pub use argon2parameters::Argon2Parameters;
-pub use argon2parameters::Argon2ParametersBuilder;
+pub use argon2parameters::*;
 pub use ciphertext::*;
 pub use key::*;
 pub use password_hash::*;

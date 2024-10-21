@@ -1,11 +1,10 @@
 use crate::Result;
 use crate::SignatureVersion;
 
-#[uniffi::export]
-pub fn sign(data: &[u8], keypair: &[u8], version: Option<SignatureVersion>) -> Result<Vec<u8>> {
+pub fn sign(data: &[u8], keypair: &[u8], version: SignatureVersion) -> Result<Vec<u8>> {
     let keypair = keypair.try_into()?;
 
-    Ok(devolutions_crypto::signature::sign(data, &keypair, version.unwrap_or_default()).into())
+    Ok(devolutions_crypto::signature::sign(data, &keypair, version).into())
 }
 
 #[uniffi::export]

@@ -102,10 +102,46 @@ interface Argon2Parameters {
     bytes get_bytes();
 };
 
+dictionary KeyPair {
+    bytes public_key;
+    bytes private_key;
+};
+
+interface SigningKeyPair {
+    [Name=new_from_bytes, Throws=DevolutionsCryptoError]
+    constructor([ByRef] bytes data);
+    bytes get_public_key();
+    bytes get_private_key();
+};
+
 namespace devolutions_crypto {
+    // Ciphertext
     [Throws=DevolutionsCryptoError]
     bytes encrypt([ByRef] bytes data, [ByRef] bytes key, optional CiphertextVersion version = "Latest");
 
     [Throws=DevolutionsCryptoError]
     bytes encrypt_with_aad([ByRef] bytes data, [ByRef] bytes key, [ByRef] bytes aad, optional CiphertextVersion version = "Latest");
+
+    [Throws=DevolutionsCryptoError]
+    bytes encrypt_asymmetric([ByRef] bytes data, [ByRef] bytes key, optional CiphertextVersion version = "Latest");
+
+    [Throws=DevolutionsCryptoError]
+    bytes encrypt_asymmetric_with_aad([ByRef] bytes data, [ByRef] bytes key, [ByRef] bytes aad, optional CiphertextVersion version = "Latest");
+
+    // Keys
+    KeyPair generate_keypair(optional KeyVersion version = "Latest");
+
+    // Password Hash
+    bytes hash_password([ByRef] bytes password, optional u32 iterations = 10000, optional PasswordHashVersion version = "Latest");
+
+    // Secret Sharing
+    [Throws=DevolutionsCryptoError]
+    sequence<bytes> generate_shared_key(u8 n_shares, u8 threshold, optional u32 length = 32, optional SecretSharingVersion version = "Latest");
+
+    // Signature
+    [Throws=DevolutionsCryptoError]
+    bytes sign([ByRef] bytes data, [ByRef] bytes keypair, optional SignatureVersion version = "Latest");
+
+    // Signing Key
+    SigningKeyPair generate_signing_keypair(optional SigningKeyVersion version = "Latest");  
 };

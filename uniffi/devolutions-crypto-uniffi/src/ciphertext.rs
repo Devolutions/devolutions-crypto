@@ -11,13 +11,7 @@ pub fn encrypt_with_aad(
     aad: &[u8],
     version: CiphertextVersion,
 ) -> Result<Vec<u8>> {
-    Ok(devolutions_crypto::ciphertext::encrypt_with_aad(
-        data,
-        key,
-        aad,
-        version,
-    )?
-    .into())
+    Ok(devolutions_crypto::ciphertext::encrypt_with_aad(data, key, aad, version)?.into())
 }
 
 #[uniffi::export]
@@ -32,38 +26,22 @@ fn decrypt_with_aad(data: &[u8], key: &[u8], aad: &[u8]) -> Result<Vec<u8>> {
     data.decrypt_with_aad(key, aad)
 }
 
-#[uniffi::export]
-pub fn encrypt_asymmetric(
-    data: &[u8],
-    key: &[u8],
-    version: Option<CiphertextVersion>,
-) -> Result<Vec<u8>> {
+pub fn encrypt_asymmetric(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Vec<u8>> {
     let key = key.try_into()?;
-    Ok(
-        devolutions_crypto::ciphertext::encrypt_asymmetric(
-            data,
-            &key,
-            version.unwrap_or_default(),
-        )?
-        .into(),
-    )
+    Ok(devolutions_crypto::ciphertext::encrypt_asymmetric(data, &key, version)?.into())
 }
 
-#[uniffi::export]
 pub fn encrypt_asymmetric_with_aad(
     data: &[u8],
     key: &[u8],
     aad: &[u8],
-    version: Option<CiphertextVersion>,
+    version: CiphertextVersion,
 ) -> Result<Vec<u8>> {
     let key = key.try_into()?;
-    Ok(devolutions_crypto::ciphertext::encrypt_asymmetric_with_aad(
-        data,
-        &key,
-        aad,
-        version.unwrap_or_default(),
-    )?
-    .into())
+    Ok(
+        devolutions_crypto::ciphertext::encrypt_asymmetric_with_aad(data, &key, aad, version)?
+            .into(),
+    )
 }
 
 #[uniffi::export]

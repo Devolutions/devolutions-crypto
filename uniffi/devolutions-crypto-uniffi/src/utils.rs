@@ -1,27 +1,29 @@
+use std::sync::Arc;
+
 use crate::{Argon2Parameters, DataType, Result};
 
 #[uniffi::export(default(length = 32))]
-pub fn generate_key(length: u64) -> Vec<u8> {
+pub fn generate_key(length: u32) -> Vec<u8> {
     devolutions_crypto::utils::generate_key(length as usize)
 }
 
-#[uniffi::export]
+#[uniffi::export(default(iterations = 10000, length = 32))]
 pub fn derive_key_pbkdf2(
     key: &[u8],
     salt: Option<Vec<u8>>,
-    iterations: Option<u32>,
-    length: Option<u64>,
+    iterations: u32,
+    length: u32,
 ) -> Vec<u8> {
     devolutions_crypto::utils::derive_key_pbkdf2(
         key,
         &salt.unwrap_or_default(),
-        iterations.unwrap_or(devolutions_crypto::DEFAULT_PBKDF2_ITERATIONS),
-        length.unwrap_or(devolutions_crypto::DEFAULT_KEY_SIZE as u64) as usize,
+        iterations,
+        length as usize,
     )
 }
 
 #[uniffi::export]
-pub fn derive_key_argon2(key: &[u8], parameters: &Argon2Parameters) -> Result<Vec<u8>> {
+pub fn derive_key_argon2(key: &[u8], parameters: &Arc<Argon2Parameters>) -> Result<Vec<u8>> {
     devolutions_crypto::utils::derive_key_argon2(key, &parameters.0)
 }
 

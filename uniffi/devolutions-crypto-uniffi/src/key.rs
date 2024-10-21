@@ -1,7 +1,6 @@
 use crate::KeyVersion;
 use crate::Result;
 
-#[derive(uniffi::Object)]
 pub struct KeyPair {
     pub private_key: Vec<u8>,
     pub public_key: Vec<u8>,
@@ -16,9 +15,8 @@ impl From<devolutions_crypto::key::KeyPair> for KeyPair {
     }
 }
 
-#[uniffi::export]
-pub fn generate_keypair(version: Option<KeyVersion>) -> KeyPair {
-    devolutions_crypto::key::generate_keypair(version.unwrap_or_default()).into()
+pub fn generate_keypair(version: KeyVersion) -> KeyPair {
+    devolutions_crypto::key::generate_keypair(version).into()
 }
 
 #[uniffi::export]
