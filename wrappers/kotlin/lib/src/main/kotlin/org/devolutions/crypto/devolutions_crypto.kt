@@ -777,6 +777,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -832,17 +836,33 @@ internal interface UniffiLib : Library {
     ): Pointer
     fun uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_version(`ptr`: Pointer,`value`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Pointer
-    fun uniffi_devolutions_crypto_uniffi_fn_clone_keypair(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
-    ): Pointer
-    fun uniffi_devolutions_crypto_uniffi_fn_free_keypair(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
-    ): Unit
     fun uniffi_devolutions_crypto_uniffi_fn_clone_signingkeypair(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
     ): Pointer
     fun uniffi_devolutions_crypto_uniffi_fn_free_signingkeypair(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
+    fun uniffi_devolutions_crypto_uniffi_fn_constructor_signingkeypair_new_from_bytes(`data`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Pointer
+    fun uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_private_key(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_public_key(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_devolutions_crypto_uniffi_fn_func_encrypt(`data`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_devolutions_crypto_uniffi_fn_func_encrypt_asymmetric(`data`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_devolutions_crypto_uniffi_fn_func_encrypt_asymmetric_with_aad(`data`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`aad`: RustBuffer.ByValue,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_devolutions_crypto_uniffi_fn_func_encrypt_with_aad(`data`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`aad`: RustBuffer.ByValue,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_devolutions_crypto_uniffi_fn_func_generate_keypair(`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_devolutions_crypto_uniffi_fn_func_generate_shared_key(`nShares`: Byte,`threshold`: Byte,`length`: Int,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_devolutions_crypto_uniffi_fn_func_generate_signing_keypair(`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Pointer
+    fun uniffi_devolutions_crypto_uniffi_fn_func_hash_password(`password`: RustBuffer.ByValue,`iterations`: Int,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_devolutions_crypto_uniffi_fn_func_sign(`data`: RustBuffer.ByValue,`keypair`: RustBuffer.ByValue,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_devolutions_crypto_uniffi_fn_func_base64_decode(`data`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -862,27 +882,13 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_devolutions_crypto_uniffi_fn_func_derive_key_argon2(`key`: RustBuffer.ByValue,`parameters`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_devolutions_crypto_uniffi_fn_func_derive_key_pbkdf2(`key`: RustBuffer.ByValue,`salt`: RustBuffer.ByValue,`iterations`: RustBuffer.ByValue,`length`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_devolutions_crypto_uniffi_fn_func_derive_key_pbkdf2(`key`: RustBuffer.ByValue,`salt`: RustBuffer.ByValue,`iterations`: Int,`length`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_devolutions_crypto_uniffi_fn_func_encrypt_asymmetric(`data`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-    ): RustBuffer.ByValue
-    fun uniffi_devolutions_crypto_uniffi_fn_func_encrypt_asymmetric_with_aad(`data`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`aad`: RustBuffer.ByValue,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-    ): RustBuffer.ByValue
-    fun uniffi_devolutions_crypto_uniffi_fn_func_generate_key(`length`: Long,uniffi_out_err: UniffiRustCallStatus, 
-    ): RustBuffer.ByValue
-    fun uniffi_devolutions_crypto_uniffi_fn_func_generate_keypair(`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-    ): Pointer
-    fun uniffi_devolutions_crypto_uniffi_fn_func_generate_shared_key(`nShares`: Byte,`threshold`: Byte,`length`: RustBuffer.ByValue,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-    ): RustBuffer.ByValue
-    fun uniffi_devolutions_crypto_uniffi_fn_func_generate_signing_keypair(`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-    ): Pointer
-    fun uniffi_devolutions_crypto_uniffi_fn_func_hash_password(`password`: RustBuffer.ByValue,`iterations`: RustBuffer.ByValue,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_devolutions_crypto_uniffi_fn_func_generate_key(`length`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_devolutions_crypto_uniffi_fn_func_join_shares(`shares`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_devolutions_crypto_uniffi_fn_func_mix_key_exchange(`privateKey`: RustBuffer.ByValue,`publicKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-    ): RustBuffer.ByValue
-    fun uniffi_devolutions_crypto_uniffi_fn_func_sign(`data`: RustBuffer.ByValue,`keypair`: RustBuffer.ByValue,`version`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_devolutions_crypto_uniffi_fn_func_validate_header(`data`: RustBuffer.ByValue,`dataType`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Byte
@@ -1004,7 +1010,21 @@ internal interface UniffiLib : Library {
     ): Unit
     fun uniffi_devolutions_crypto_uniffi_checksum_func_encrypt(
     ): Short
+    fun uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric(
+    ): Short
+    fun uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric_with_aad(
+    ): Short
     fun uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_with_aad(
+    ): Short
+    fun uniffi_devolutions_crypto_uniffi_checksum_func_generate_keypair(
+    ): Short
+    fun uniffi_devolutions_crypto_uniffi_checksum_func_generate_shared_key(
+    ): Short
+    fun uniffi_devolutions_crypto_uniffi_checksum_func_generate_signing_keypair(
+    ): Short
+    fun uniffi_devolutions_crypto_uniffi_checksum_func_hash_password(
+    ): Short
+    fun uniffi_devolutions_crypto_uniffi_checksum_func_sign(
     ): Short
     fun uniffi_devolutions_crypto_uniffi_checksum_func_base64_decode(
     ): Short
@@ -1026,25 +1046,11 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_devolutions_crypto_uniffi_checksum_func_derive_key_pbkdf2(
     ): Short
-    fun uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric(
-    ): Short
-    fun uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric_with_aad(
-    ): Short
     fun uniffi_devolutions_crypto_uniffi_checksum_func_generate_key(
-    ): Short
-    fun uniffi_devolutions_crypto_uniffi_checksum_func_generate_keypair(
-    ): Short
-    fun uniffi_devolutions_crypto_uniffi_checksum_func_generate_shared_key(
-    ): Short
-    fun uniffi_devolutions_crypto_uniffi_checksum_func_generate_signing_keypair(
-    ): Short
-    fun uniffi_devolutions_crypto_uniffi_checksum_func_hash_password(
     ): Short
     fun uniffi_devolutions_crypto_uniffi_checksum_func_join_shares(
     ): Short
     fun uniffi_devolutions_crypto_uniffi_checksum_func_mix_key_exchange(
-    ): Short
-    fun uniffi_devolutions_crypto_uniffi_checksum_func_sign(
     ): Short
     fun uniffi_devolutions_crypto_uniffi_checksum_func_validate_header(
     ): Short
@@ -1076,9 +1082,15 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_version(
     ): Short
+    fun uniffi_devolutions_crypto_uniffi_checksum_method_signingkeypair_get_private_key(
+    ): Short
+    fun uniffi_devolutions_crypto_uniffi_checksum_method_signingkeypair_get_public_key(
+    ): Short
     fun uniffi_devolutions_crypto_uniffi_checksum_constructor_argon2parameters_new_from_bytes(
     ): Short
     fun uniffi_devolutions_crypto_uniffi_checksum_constructor_argon2parametersbuilder_new(
+    ): Short
+    fun uniffi_devolutions_crypto_uniffi_checksum_constructor_signingkeypair_new_from_bytes(
     ): Short
     fun ffi_devolutions_crypto_uniffi_uniffi_contract_version(
     ): Int
@@ -1100,7 +1112,28 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_encrypt() != 21235.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric() != 16258.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric_with_aad() != 34280.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_with_aad() != 56466.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_generate_keypair() != 13437.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_generate_shared_key() != 9340.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_generate_signing_keypair() != 33572.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_hash_password() != 62085.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_sign() != 54825.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_base64_decode() != 64610.toShort()) {
@@ -1130,37 +1163,16 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_derive_key_argon2() != 60451.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_derive_key_pbkdf2() != 27537.toShort()) {
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_derive_key_pbkdf2() != 12853.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric() != 44426.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric_with_aad() != 37507.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_generate_key() != 46119.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_generate_keypair() != 3523.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_generate_shared_key() != 38176.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_generate_signing_keypair() != 3830.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_hash_password() != 4426.toShort()) {
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_generate_key() != 42956.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_join_shares() != 64867.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_mix_key_exchange() != 52615.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_sign() != 6663.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_devolutions_crypto_uniffi_checksum_func_validate_header() != 50316.toShort()) {
@@ -1208,10 +1220,19 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_version() != 39743.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_method_signingkeypair_get_private_key() != 10265.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_method_signingkeypair_get_public_key() != 47363.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_devolutions_crypto_uniffi_checksum_constructor_argon2parameters_new_from_bytes() != 48784.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_devolutions_crypto_uniffi_checksum_constructor_argon2parametersbuilder_new() != 58740.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_devolutions_crypto_uniffi_checksum_constructor_signingkeypair_new_from_bytes() != 42998.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -1291,26 +1312,6 @@ public object FfiConverterUInt: FfiConverter<UInt, Int> {
 
     override fun write(value: UInt, buf: ByteBuffer) {
         buf.putInt(value.toInt())
-    }
-}
-
-public object FfiConverterULong: FfiConverter<ULong, Long> {
-    override fun lift(value: Long): ULong {
-        return value.toULong()
-    }
-
-    override fun read(buf: ByteBuffer): ULong {
-        return lift(buf.getLong())
-    }
-
-    override fun lower(value: ULong): Long {
-        return value.toLong()
-    }
-
-    override fun allocationSize(value: ULong) = 8UL
-
-    override fun write(value: ULong, buf: ByteBuffer) {
-        buf.putLong(value.toLong())
     }
 }
 
@@ -2185,225 +2186,11 @@ public object FfiConverterTypeArgon2ParametersBuilder: FfiConverter<Argon2Parame
 //
 
 
-public interface KeyPairInterface {
-    
-    companion object
-}
-
-open class KeyPair: Disposable, AutoCloseable, KeyPairInterface {
-
-    constructor(pointer: Pointer) {
-        this.pointer = pointer
-        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
-    }
-
-    /**
-     * This constructor can be used to instantiate a fake object. Only used for tests. Any
-     * attempt to actually use an object constructed this way will fail as there is no
-     * connected Rust object.
-     */
-    @Suppress("UNUSED_PARAMETER")
-    constructor(noPointer: NoPointer) {
-        this.pointer = null
-        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
-    }
-
-    protected val pointer: Pointer?
-    protected val cleanable: UniffiCleaner.Cleanable
-
-    private val wasDestroyed = AtomicBoolean(false)
-    private val callCounter = AtomicLong(1)
-
-    override fun destroy() {
-        // Only allow a single call to this method.
-        // TODO: maybe we should log a warning if called more than once?
-        if (this.wasDestroyed.compareAndSet(false, true)) {
-            // This decrement always matches the initial count of 1 given at creation time.
-            if (this.callCounter.decrementAndGet() == 0L) {
-                cleanable.clean()
-            }
-        }
-    }
-
-    @Synchronized
-    override fun close() {
-        this.destroy()
-    }
-
-    internal inline fun <R> callWithPointer(block: (ptr: Pointer) -> R): R {
-        // Check and increment the call counter, to keep the object alive.
-        // This needs a compare-and-set retry loop in case of concurrent updates.
-        do {
-            val c = this.callCounter.get()
-            if (c == 0L) {
-                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
-            }
-            if (c == Long.MAX_VALUE) {
-                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
-            }
-        } while (! this.callCounter.compareAndSet(c, c + 1L))
-        // Now we can safely do the method call without the pointer being freed concurrently.
-        try {
-            return block(this.uniffiClonePointer())
-        } finally {
-            // This decrement always matches the increment we performed above.
-            if (this.callCounter.decrementAndGet() == 0L) {
-                cleanable.clean()
-            }
-        }
-    }
-
-    // Use a static inner class instead of a closure so as not to accidentally
-    // capture `this` as part of the cleanable's action.
-    private class UniffiCleanAction(private val pointer: Pointer?) : Runnable {
-        override fun run() {
-            pointer?.let { ptr ->
-                uniffiRustCall { status ->
-                    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_free_keypair(ptr, status)
-                }
-            }
-        }
-    }
-
-    fun uniffiClonePointer(): Pointer {
-        return uniffiRustCall() { status ->
-            UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_clone_keypair(pointer!!, status)
-        }
-    }
-
-    
-
-    
-    
-    companion object
-    
-}
-
-public object FfiConverterTypeKeyPair: FfiConverter<KeyPair, Pointer> {
-
-    override fun lower(value: KeyPair): Pointer {
-        return value.uniffiClonePointer()
-    }
-
-    override fun lift(value: Pointer): KeyPair {
-        return KeyPair(value)
-    }
-
-    override fun read(buf: ByteBuffer): KeyPair {
-        // The Rust code always writes pointers as 8 bytes, and will
-        // fail to compile if they don't fit.
-        return lift(Pointer(buf.getLong()))
-    }
-
-    override fun allocationSize(value: KeyPair) = 8UL
-
-    override fun write(value: KeyPair, buf: ByteBuffer) {
-        // The Rust code always expects pointers written as 8 bytes,
-        // and will fail to compile if they don't fit.
-        buf.putLong(Pointer.nativeValue(lower(value)))
-    }
-}
-
-
-// This template implements a class for working with a Rust struct via a Pointer/Arc<T>
-// to the live Rust struct on the other side of the FFI.
-//
-// Each instance implements core operations for working with the Rust `Arc<T>` and the
-// Kotlin Pointer to work with the live Rust struct on the other side of the FFI.
-//
-// There's some subtlety here, because we have to be careful not to operate on a Rust
-// struct after it has been dropped, and because we must expose a public API for freeing
-// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
-//
-//   * Each instance holds an opaque pointer to the underlying Rust struct.
-//     Method calls need to read this pointer from the object's state and pass it in to
-//     the Rust FFI.
-//
-//   * When an instance is no longer needed, its pointer should be passed to a
-//     special destructor function provided by the Rust FFI, which will drop the
-//     underlying Rust struct.
-//
-//   * Given an instance, calling code is expected to call the special
-//     `destroy` method in order to free it after use, either by calling it explicitly
-//     or by using a higher-level helper like the `use` method. Failing to do so risks
-//     leaking the underlying Rust struct.
-//
-//   * We can't assume that calling code will do the right thing, and must be prepared
-//     to handle Kotlin method calls executing concurrently with or even after a call to
-//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
-//
-//   * We must never allow Rust code to operate on the underlying Rust struct after
-//     the destructor has been called, and must never call the destructor more than once.
-//     Doing so may trigger memory unsafety.
-//
-//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
-//     is implemented to call the destructor when the Kotlin object becomes unreachable.
-//     This is done in a background thread. This is not a panacea, and client code should be aware that
-//      1. the thread may starve if some there are objects that have poorly performing
-//     `drop` methods or do significant work in their `drop` methods.
-//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
-//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
-//
-// If we try to implement this with mutual exclusion on access to the pointer, there is the
-// possibility of a race between a method call and a concurrent call to `destroy`:
-//
-//    * Thread A starts a method call, reads the value of the pointer, but is interrupted
-//      before it can pass the pointer over the FFI to Rust.
-//    * Thread B calls `destroy` and frees the underlying Rust struct.
-//    * Thread A resumes, passing the already-read pointer value to Rust and triggering
-//      a use-after-free.
-//
-// One possible solution would be to use a `ReadWriteLock`, with each method call taking
-// a read lock (and thus allowed to run concurrently) and the special `destroy` method
-// taking a write lock (and thus blocking on live method calls). However, we aim not to
-// generate methods with any hidden blocking semantics, and a `destroy` method that might
-// block if called incorrectly seems to meet that bar.
-//
-// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
-// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
-// has been called. These are updated according to the following rules:
-//
-//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
-//      The initial value for the flag is false.
-//
-//    * At the start of each method call, we atomically check the counter.
-//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
-//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
-//
-//    * At the end of each method call, we atomically decrement and check the counter.
-//      If it has reached zero then we destroy the underlying Rust struct.
-//
-//    * When `destroy` is called, we atomically flip the flag from false to true.
-//      If the flag was already true we silently fail.
-//      Otherwise we atomically decrement and check the counter.
-//      If it has reached zero then we destroy the underlying Rust struct.
-//
-// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
-// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
-//
-// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
-// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
-// of the underlying Rust code.
-//
-// This makes a cleaner a better alternative to _not_ calling `destroy()` as
-// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
-// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
-// thread may be starved, and the app will leak memory.
-//
-// In this case, `destroy`ing manually may be a better solution.
-//
-// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
-// with Rust peers are reclaimed:
-//
-// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
-// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
-// 3. The memory is reclaimed when the process terminates.
-//
-// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
-//
-
-
 public interface SigningKeyPairInterface {
+    
+    fun `getPrivateKey`(): kotlin.ByteArray
+    
+    fun `getPublicKey`(): kotlin.ByteArray
     
     companion object
 }
@@ -2489,11 +2276,47 @@ open class SigningKeyPair: Disposable, AutoCloseable, SigningKeyPairInterface {
         }
     }
 
+    override fun `getPrivateKey`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_private_key(
+        it, _status)
+}
+    }
+    )
+    }
+    
+
+    override fun `getPublicKey`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_public_key(
+        it, _status)
+}
+    }
+    )
+    }
     
 
     
+
     
-    companion object
+    companion object {
+        
+    @Throws(DevolutionsCryptoException::class) fun `newFromBytes`(`data`: kotlin.ByteArray): SigningKeyPair {
+            return FfiConverterTypeSigningKeyPair.lift(
+    uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
+    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_constructor_signingkeypair_new_from_bytes(
+        FfiConverterByteArray.lower(`data`),_status)
+}
+    )
+    }
+    
+
+        
+    }
     
 }
 
@@ -2519,6 +2342,35 @@ public object FfiConverterTypeSigningKeyPair: FfiConverter<SigningKeyPair, Point
         // The Rust code always expects pointers written as 8 bytes,
         // and will fail to compile if they don't fit.
         buf.putLong(Pointer.nativeValue(lower(value)))
+    }
+}
+
+
+
+data class KeyPair (
+    var `publicKey`: kotlin.ByteArray, 
+    var `privateKey`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+public object FfiConverterTypeKeyPair: FfiConverterRustBuffer<KeyPair> {
+    override fun read(buf: ByteBuffer): KeyPair {
+        return KeyPair(
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: KeyPair) = (
+            FfiConverterByteArray.allocationSize(value.`publicKey`) +
+            FfiConverterByteArray.allocationSize(value.`privateKey`)
+    )
+
+    override fun write(value: KeyPair, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`publicKey`, buf)
+            FfiConverterByteArray.write(value.`privateKey`, buf)
     }
 }
 
@@ -2919,64 +2771,6 @@ public object FfiConverterTypeSigningKeyVersion: FfiConverterRustBuffer<SigningK
 
 
 
-public object FfiConverterOptionalUInt: FfiConverterRustBuffer<kotlin.UInt?> {
-    override fun read(buf: ByteBuffer): kotlin.UInt? {
-        if (buf.get().toInt() == 0) {
-            return null
-        }
-        return FfiConverterUInt.read(buf)
-    }
-
-    override fun allocationSize(value: kotlin.UInt?): ULong {
-        if (value == null) {
-            return 1UL
-        } else {
-            return 1UL + FfiConverterUInt.allocationSize(value)
-        }
-    }
-
-    override fun write(value: kotlin.UInt?, buf: ByteBuffer) {
-        if (value == null) {
-            buf.put(0)
-        } else {
-            buf.put(1)
-            FfiConverterUInt.write(value, buf)
-        }
-    }
-}
-
-
-
-
-public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
-    override fun read(buf: ByteBuffer): kotlin.ULong? {
-        if (buf.get().toInt() == 0) {
-            return null
-        }
-        return FfiConverterULong.read(buf)
-    }
-
-    override fun allocationSize(value: kotlin.ULong?): ULong {
-        if (value == null) {
-            return 1UL
-        } else {
-            return 1UL + FfiConverterULong.allocationSize(value)
-        }
-    }
-
-    override fun write(value: kotlin.ULong?, buf: ByteBuffer) {
-        if (value == null) {
-            buf.put(0)
-        } else {
-            buf.put(1)
-            FfiConverterULong.write(value, buf)
-        }
-    }
-}
-
-
-
-
 public object FfiConverterOptionalByteArray: FfiConverterRustBuffer<kotlin.ByteArray?> {
     override fun read(buf: ByteBuffer): kotlin.ByteArray? {
         if (buf.get().toInt() == 0) {
@@ -2999,180 +2793,6 @@ public object FfiConverterOptionalByteArray: FfiConverterRustBuffer<kotlin.ByteA
         } else {
             buf.put(1)
             FfiConverterByteArray.write(value, buf)
-        }
-    }
-}
-
-
-
-
-public object FfiConverterOptionalTypeCiphertextVersion: FfiConverterRustBuffer<CiphertextVersion?> {
-    override fun read(buf: ByteBuffer): CiphertextVersion? {
-        if (buf.get().toInt() == 0) {
-            return null
-        }
-        return FfiConverterTypeCiphertextVersion.read(buf)
-    }
-
-    override fun allocationSize(value: CiphertextVersion?): ULong {
-        if (value == null) {
-            return 1UL
-        } else {
-            return 1UL + FfiConverterTypeCiphertextVersion.allocationSize(value)
-        }
-    }
-
-    override fun write(value: CiphertextVersion?, buf: ByteBuffer) {
-        if (value == null) {
-            buf.put(0)
-        } else {
-            buf.put(1)
-            FfiConverterTypeCiphertextVersion.write(value, buf)
-        }
-    }
-}
-
-
-
-
-public object FfiConverterOptionalTypeKeyVersion: FfiConverterRustBuffer<KeyVersion?> {
-    override fun read(buf: ByteBuffer): KeyVersion? {
-        if (buf.get().toInt() == 0) {
-            return null
-        }
-        return FfiConverterTypeKeyVersion.read(buf)
-    }
-
-    override fun allocationSize(value: KeyVersion?): ULong {
-        if (value == null) {
-            return 1UL
-        } else {
-            return 1UL + FfiConverterTypeKeyVersion.allocationSize(value)
-        }
-    }
-
-    override fun write(value: KeyVersion?, buf: ByteBuffer) {
-        if (value == null) {
-            buf.put(0)
-        } else {
-            buf.put(1)
-            FfiConverterTypeKeyVersion.write(value, buf)
-        }
-    }
-}
-
-
-
-
-public object FfiConverterOptionalTypePasswordHashVersion: FfiConverterRustBuffer<PasswordHashVersion?> {
-    override fun read(buf: ByteBuffer): PasswordHashVersion? {
-        if (buf.get().toInt() == 0) {
-            return null
-        }
-        return FfiConverterTypePasswordHashVersion.read(buf)
-    }
-
-    override fun allocationSize(value: PasswordHashVersion?): ULong {
-        if (value == null) {
-            return 1UL
-        } else {
-            return 1UL + FfiConverterTypePasswordHashVersion.allocationSize(value)
-        }
-    }
-
-    override fun write(value: PasswordHashVersion?, buf: ByteBuffer) {
-        if (value == null) {
-            buf.put(0)
-        } else {
-            buf.put(1)
-            FfiConverterTypePasswordHashVersion.write(value, buf)
-        }
-    }
-}
-
-
-
-
-public object FfiConverterOptionalTypeSecretSharingVersion: FfiConverterRustBuffer<SecretSharingVersion?> {
-    override fun read(buf: ByteBuffer): SecretSharingVersion? {
-        if (buf.get().toInt() == 0) {
-            return null
-        }
-        return FfiConverterTypeSecretSharingVersion.read(buf)
-    }
-
-    override fun allocationSize(value: SecretSharingVersion?): ULong {
-        if (value == null) {
-            return 1UL
-        } else {
-            return 1UL + FfiConverterTypeSecretSharingVersion.allocationSize(value)
-        }
-    }
-
-    override fun write(value: SecretSharingVersion?, buf: ByteBuffer) {
-        if (value == null) {
-            buf.put(0)
-        } else {
-            buf.put(1)
-            FfiConverterTypeSecretSharingVersion.write(value, buf)
-        }
-    }
-}
-
-
-
-
-public object FfiConverterOptionalTypeSignatureVersion: FfiConverterRustBuffer<SignatureVersion?> {
-    override fun read(buf: ByteBuffer): SignatureVersion? {
-        if (buf.get().toInt() == 0) {
-            return null
-        }
-        return FfiConverterTypeSignatureVersion.read(buf)
-    }
-
-    override fun allocationSize(value: SignatureVersion?): ULong {
-        if (value == null) {
-            return 1UL
-        } else {
-            return 1UL + FfiConverterTypeSignatureVersion.allocationSize(value)
-        }
-    }
-
-    override fun write(value: SignatureVersion?, buf: ByteBuffer) {
-        if (value == null) {
-            buf.put(0)
-        } else {
-            buf.put(1)
-            FfiConverterTypeSignatureVersion.write(value, buf)
-        }
-    }
-}
-
-
-
-
-public object FfiConverterOptionalTypeSigningKeyVersion: FfiConverterRustBuffer<SigningKeyVersion?> {
-    override fun read(buf: ByteBuffer): SigningKeyVersion? {
-        if (buf.get().toInt() == 0) {
-            return null
-        }
-        return FfiConverterTypeSigningKeyVersion.read(buf)
-    }
-
-    override fun allocationSize(value: SigningKeyVersion?): ULong {
-        if (value == null) {
-            return 1UL
-        } else {
-            return 1UL + FfiConverterTypeSigningKeyVersion.allocationSize(value)
-        }
-    }
-
-    override fun write(value: SigningKeyVersion?, buf: ByteBuffer) {
-        if (value == null) {
-            buf.put(0)
-        } else {
-            buf.put(1)
-            FfiConverterTypeSigningKeyVersion.write(value, buf)
         }
     }
 }
@@ -3211,11 +2831,78 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
     }
     
 
+    @Throws(DevolutionsCryptoException::class) fun `encryptAsymmetric`(`data`: kotlin.ByteArray, `key`: kotlin.ByteArray, `version`: CiphertextVersion = CiphertextVersion.LATEST): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
+    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_encrypt_asymmetric(
+        FfiConverterByteArray.lower(`data`),FfiConverterByteArray.lower(`key`),FfiConverterTypeCiphertextVersion.lower(`version`),_status)
+}
+    )
+    }
+    
+
+    @Throws(DevolutionsCryptoException::class) fun `encryptAsymmetricWithAad`(`data`: kotlin.ByteArray, `key`: kotlin.ByteArray, `aad`: kotlin.ByteArray, `version`: CiphertextVersion = CiphertextVersion.LATEST): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
+    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_encrypt_asymmetric_with_aad(
+        FfiConverterByteArray.lower(`data`),FfiConverterByteArray.lower(`key`),FfiConverterByteArray.lower(`aad`),FfiConverterTypeCiphertextVersion.lower(`version`),_status)
+}
+    )
+    }
+    
+
     @Throws(DevolutionsCryptoException::class) fun `encryptWithAad`(`data`: kotlin.ByteArray, `key`: kotlin.ByteArray, `aad`: kotlin.ByteArray, `version`: CiphertextVersion = CiphertextVersion.LATEST): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
     UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_encrypt_with_aad(
         FfiConverterByteArray.lower(`data`),FfiConverterByteArray.lower(`key`),FfiConverterByteArray.lower(`aad`),FfiConverterTypeCiphertextVersion.lower(`version`),_status)
+}
+    )
+    }
+    
+ fun `generateKeypair`(`version`: KeyVersion = KeyVersion.LATEST): KeyPair {
+            return FfiConverterTypeKeyPair.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_generate_keypair(
+        FfiConverterTypeKeyVersion.lower(`version`),_status)
+}
+    )
+    }
+    
+
+    @Throws(DevolutionsCryptoException::class) fun `generateSharedKey`(`nShares`: kotlin.UByte, `threshold`: kotlin.UByte, `length`: kotlin.UInt = 32u, `version`: SecretSharingVersion = SecretSharingVersion.LATEST): List<kotlin.ByteArray> {
+            return FfiConverterSequenceByteArray.lift(
+    uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
+    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_generate_shared_key(
+        FfiConverterUByte.lower(`nShares`),FfiConverterUByte.lower(`threshold`),FfiConverterUInt.lower(`length`),FfiConverterTypeSecretSharingVersion.lower(`version`),_status)
+}
+    )
+    }
+    
+ fun `generateSigningKeypair`(`version`: SigningKeyVersion = SigningKeyVersion.LATEST): SigningKeyPair {
+            return FfiConverterTypeSigningKeyPair.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_generate_signing_keypair(
+        FfiConverterTypeSigningKeyVersion.lower(`version`),_status)
+}
+    )
+    }
+    
+ fun `hashPassword`(`password`: kotlin.ByteArray, `iterations`: kotlin.UInt = 10000u, `version`: PasswordHashVersion = PasswordHashVersion.LATEST): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_hash_password(
+        FfiConverterByteArray.lower(`password`),FfiConverterUInt.lower(`iterations`),FfiConverterTypePasswordHashVersion.lower(`version`),_status)
+}
+    )
+    }
+    
+
+    @Throws(DevolutionsCryptoException::class) fun `sign`(`data`: kotlin.ByteArray, `keypair`: kotlin.ByteArray, `version`: SignatureVersion = SignatureVersion.LATEST): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
+    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_sign(
+        FfiConverterByteArray.lower(`data`),FfiConverterByteArray.lower(`keypair`),FfiConverterTypeSignatureVersion.lower(`version`),_status)
 }
     )
     }
@@ -3308,77 +2995,20 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
     )
     }
     
- fun `deriveKeyPbkdf2`(`key`: kotlin.ByteArray, `salt`: kotlin.ByteArray?, `iterations`: kotlin.UInt?, `length`: kotlin.ULong?): kotlin.ByteArray {
+ fun `deriveKeyPbkdf2`(`key`: kotlin.ByteArray, `salt`: kotlin.ByteArray?, `iterations`: kotlin.UInt = 10000u, `length`: kotlin.UInt = 32u): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_derive_key_pbkdf2(
-        FfiConverterByteArray.lower(`key`),FfiConverterOptionalByteArray.lower(`salt`),FfiConverterOptionalUInt.lower(`iterations`),FfiConverterOptionalULong.lower(`length`),_status)
+        FfiConverterByteArray.lower(`key`),FfiConverterOptionalByteArray.lower(`salt`),FfiConverterUInt.lower(`iterations`),FfiConverterUInt.lower(`length`),_status)
 }
     )
     }
     
-
-    @Throws(DevolutionsCryptoException::class) fun `encryptAsymmetric`(`data`: kotlin.ByteArray, `key`: kotlin.ByteArray, `version`: CiphertextVersion?): kotlin.ByteArray {
-            return FfiConverterByteArray.lift(
-    uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
-    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_encrypt_asymmetric(
-        FfiConverterByteArray.lower(`data`),FfiConverterByteArray.lower(`key`),FfiConverterOptionalTypeCiphertextVersion.lower(`version`),_status)
-}
-    )
-    }
-    
-
-    @Throws(DevolutionsCryptoException::class) fun `encryptAsymmetricWithAad`(`data`: kotlin.ByteArray, `key`: kotlin.ByteArray, `aad`: kotlin.ByteArray, `version`: CiphertextVersion?): kotlin.ByteArray {
-            return FfiConverterByteArray.lift(
-    uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
-    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_encrypt_asymmetric_with_aad(
-        FfiConverterByteArray.lower(`data`),FfiConverterByteArray.lower(`key`),FfiConverterByteArray.lower(`aad`),FfiConverterOptionalTypeCiphertextVersion.lower(`version`),_status)
-}
-    )
-    }
-    
- fun `generateKey`(`length`: kotlin.ULong = 32uL): kotlin.ByteArray {
+ fun `generateKey`(`length`: kotlin.UInt = 32u): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_generate_key(
-        FfiConverterULong.lower(`length`),_status)
-}
-    )
-    }
-    
- fun `generateKeypair`(`version`: KeyVersion?): KeyPair {
-            return FfiConverterTypeKeyPair.lift(
-    uniffiRustCall() { _status ->
-    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_generate_keypair(
-        FfiConverterOptionalTypeKeyVersion.lower(`version`),_status)
-}
-    )
-    }
-    
-
-    @Throws(DevolutionsCryptoException::class) fun `generateSharedKey`(`nShares`: kotlin.UByte, `threshold`: kotlin.UByte, `length`: kotlin.ULong?, `version`: SecretSharingVersion?): List<kotlin.ByteArray> {
-            return FfiConverterSequenceByteArray.lift(
-    uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
-    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_generate_shared_key(
-        FfiConverterUByte.lower(`nShares`),FfiConverterUByte.lower(`threshold`),FfiConverterOptionalULong.lower(`length`),FfiConverterOptionalTypeSecretSharingVersion.lower(`version`),_status)
-}
-    )
-    }
-    
- fun `generateSigningKeypair`(`version`: SigningKeyVersion?): SigningKeyPair {
-            return FfiConverterTypeSigningKeyPair.lift(
-    uniffiRustCall() { _status ->
-    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_generate_signing_keypair(
-        FfiConverterOptionalTypeSigningKeyVersion.lower(`version`),_status)
-}
-    )
-    }
-    
- fun `hashPassword`(`password`: kotlin.ByteArray, `iterations`: kotlin.UInt?, `version`: PasswordHashVersion?): kotlin.ByteArray {
-            return FfiConverterByteArray.lift(
-    uniffiRustCall() { _status ->
-    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_hash_password(
-        FfiConverterByteArray.lower(`password`),FfiConverterOptionalUInt.lower(`iterations`),FfiConverterOptionalTypePasswordHashVersion.lower(`version`),_status)
+        FfiConverterUInt.lower(`length`),_status)
 }
     )
     }
@@ -3399,16 +3029,6 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
     uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
     UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_mix_key_exchange(
         FfiConverterByteArray.lower(`privateKey`),FfiConverterByteArray.lower(`publicKey`),_status)
-}
-    )
-    }
-    
-
-    @Throws(DevolutionsCryptoException::class) fun `sign`(`data`: kotlin.ByteArray, `keypair`: kotlin.ByteArray, `version`: SignatureVersion?): kotlin.ByteArray {
-            return FfiConverterByteArray.lift(
-    uniffiRustCallWithError(DevolutionsCryptoException) { _status ->
-    UniffiLib.INSTANCE.uniffi_devolutions_crypto_uniffi_fn_func_sign(
-        FfiConverterByteArray.lower(`data`),FfiConverterByteArray.lower(`keypair`),FfiConverterOptionalTypeSignatureVersion.lower(`version`),_status)
 }
     )
     }

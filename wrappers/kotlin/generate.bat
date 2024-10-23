@@ -6,4 +6,4 @@ cargo run -p uniffi-bindgen generate --library "..\..\target\release\devolutions
 
 cd "../../"
 
-copy ".\target\release\devolutions_crypto_uniffi.dll" ".\wrappers\kotlin\lib\win32-amd64\"
+copy ".\target\release\devolutions_crypto_uniffi.dll" ".\wrappers\kotlin\lib\src\main\resources\win32-x86-64\"
