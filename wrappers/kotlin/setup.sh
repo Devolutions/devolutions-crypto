@@ -2,8 +2,7 @@
 apt install build-essential unzip openjdk-18-jre-headless
 
 rm -rf /usr/local/lib/android
-mkdir /usr/local/lib/android
-mkdir /usr/local/lib/android/sdk
+mkdir -p /usr/local/lib/android/sdk
 
 ANDROID_ROOT="/usr/local/lib/android"
 ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
