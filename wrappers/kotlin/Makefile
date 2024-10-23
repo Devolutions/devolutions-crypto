@@ -67,5 +67,6 @@ $(KOTLIN_WRAPPER_FILE): $(DEBUG_DLL) $(UNIFFI_BINDGEN_EXE)
 
 clean:
 	cargo clean
-	rm $(KOTLIN_WRAPPER_FILE)
-	rm $(KT_RELEASE_PATH)
+	rm -f $(KOTLIN_WRAPPER_FILE)
+	rm -f $(KT_RELEASE_PATH)
+	rm -f $(KT_DEBUG_PATH)
