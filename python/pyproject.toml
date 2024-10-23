@@ -7,3 +7,4 @@ build-backend = "maturin"
 
 [tool.maturin]
 bindings = "pyo3"
+module-name = "devolutions_crypto"

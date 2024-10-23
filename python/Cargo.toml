@@ -4,7 +4,7 @@ version.workspace = true
 edition = "2021"
 
 [lib]
-name = "devolutions_crypto"
+name = "devolutions_crypto_python"
 crate-type = ["cdylib"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
