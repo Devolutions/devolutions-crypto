@@ -24,11 +24,11 @@ Cryptographic library used in Devolutions products. It is made to be fast, easy 
 
 ## Overview
 
-The library is splitted into multiple modules, which are explained below. When
-dealing with "managed" data, that includes an header and versionning, you deal
+The library is split into multiple modules, which are explained below. When
+dealing with "managed" data, that includes an header and versioning, you deal
 with structures like `Ciphertext`, `PublicKey`, etc. 
 
-These all implements `TryFrom<&[u8]>` and `Into<Vec<u8>>` which are the implemented way to serialize and deserialize data.
+These structures all implement `TryFrom<&[u8]>` and `Into<Vec<u8>>` which are the implemented way to serialize and deserialize data.
 
 ```rust
 use std::convert::TryFrom as _;
@@ -44,9 +44,9 @@ let encrypted_data: Ciphertext = encrypt(data, &key, CiphertextVersion::Latest).
 // The ciphertext can be serialized.
 let encrypted_data_vec: Vec<u8> = encrypted_data.into();
 
-// This data can be saved somewhere, passed to another language or over the network
-// ...
-// When you receive the data as a byte array, you can deserialize it into a struct using TryFrom
+// This data can be saved somewhere, passed to another language or over the network.
+// 
+// When you receive the data as a byte array, you can deserialize it into a struct using TryFrom.
 
 let ciphertext = Ciphertext::try_from(encrypted_data_vec.as_slice()).expect("deserialization shouldn't fail");
 
@@ -119,11 +119,11 @@ let keypair: KeyPair = generate_keypair(KeyVersion::Latest);
 The goal of using a key exchange is to get a shared secret key between
 two parties without making it possible for users listening on the conversation
 to guess that shared key.
-1. Alice and Bob generates a `KeyPair` each.
-2. Alice and Bob exchanges their `PublicKey`.
-3. Alice mix her `PrivateKey` with Bob's `PublicKey`. This gives her the shared key.
+1. Alice and Bob each generate a `KeyPair`.
+2. Alice and Bob exchange their `PublicKey`.
+3. Alice mixes her `PrivateKey` with Bob's `PublicKey`. This gives her the shared key.
 4. Bob mixes his `PrivateKey` with Alice's `PublicKey`. This gives him the shared key.
-5. Both Bob and Alice has the same shared key, which they can use for symmetric encryption for further communications.
+5. Both Bob and Alice have the same shared key, which they can use for symmetric encryption for further communications.
 
 ```rust
 use devolutions_crypto::key::{generate_keypair, mix_key_exchange, KeyVersion, KeyPair};
@@ -141,6 +141,7 @@ assert_eq!(bob_shared, alice_shared);
 
 ## PasswordHash
 You can use this module to hash a password and validate it afterward. This is the recommended way to verify a user password on login.
+
 ```rust
 use devolutions_crypto::password_hash::{hash_password, PasswordHashVersion};
 
@@ -153,17 +154,17 @@ assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));
 ```
 
 ## SecretSharing
-This module is used to generate a key that is splitted in multiple `Share`
+This module is used to generate a key that is split in multiple `Share`
 and that requires a specific amount of them to regenerate the key.  
-You can think of it as a "Break The Glass" scenario. You can
-generate a key using this, lock your entire data by encrypting it
-and then you will need, let's say, 3 out of the 5 administrators to decrypt
-the data. That data could also be an API key or password of a super admin account.
+You can think of it as a "Break The Glass" scenario. You can for example 
+generate a key, encrypt your data and then require 3 out of the 5 administrators
+to decrypt the data. That data could also be an API key or password of a super 
+admin account.
 
 ```rust
 use devolutions_crypto::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion, Share};
 
-// You want a key of 32 bytes, splitted between 5 people, and I want a 
+// You want a key of 32 bytes, split between 5 people, and a 
 // minimum of 3 of these shares to regenerate the key.
 let shares: Vec<Share> = generate_shared_key(5, 3, 32, SecretSharingVersion::Latest).expect("generation shouldn't fail with the right parameters");
 
@@ -196,12 +197,11 @@ assert!(signature.verify(b"this is some test data", &public_key));
 
 ## Utils
 
-These are a bunch of functions that can
-be useful when dealing with the library.
+These are a bunch of functions that can be useful when dealing with the library.
 
 ### Key Generation
 
-This is a method used to generate a random key. In almost all case, the `length` parameter should be 32.
+This is a method used to generate a random key. In almost all cases, the `length` parameter should be 32.
 
 ```rust
 use devolutions_crypto::utils::generate_key;
@@ -229,8 +229,8 @@ assert_eq!(32, new_key.len());
 # Underlying algorithms
 As of the current version:
  * Symmetric cryptography uses XChaCha20Poly1305
- * Asymmetric cryptography uses Curve25519.
- * Asymmetric encryption uses ECIES.
+ * Asymmetric cryptography uses Curve25519
+ * Asymmetric encryption uses ECIES
  * Key exchange uses x25519, or ECDH over Curve25519
  * Password Hashing uses PBKDF2-HMAC-SHA2-256
  * Secret Sharing uses Shamir Secret sharing over GF256
