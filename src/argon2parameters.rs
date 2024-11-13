@@ -228,7 +228,7 @@ fn test_argon2() {
 
     // Computes the first hash
     let hash1 = config.compute(b"Password1").unwrap();
-    let config_vec: Vec<u8> = config.into();
+    let config_vec: Vec<u8> = (&config).into();
 
     assert_ne!(config_vec.len(), 0);
 

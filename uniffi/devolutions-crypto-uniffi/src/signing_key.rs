@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use crate::SigningKeyVersion;
-use crate::Result;
 use crate::DevolutionsCryptoError;
+use crate::Result;
+use crate::SigningKeyVersion;
 
 pub struct SigningKeyPair(devolutions_crypto::signing_key::SigningKeyPair);
 
