@@ -621,6 +621,8 @@ pub unsafe extern "C" fn GenerateSigningKeyPair(
 ///  * `public` - Pointer to the buffer to write the public key to.
 ///  * `public_length` - Length of the buffer to write the public key to.
 ///                         You can get the value by calling `GetSigningPublicKeySize()` beforehand.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn GetSigningPublicKey(
     keypair: *const u8,
@@ -900,7 +902,7 @@ pub unsafe extern "C" fn DeriveKeyArgon2(
         Err(e) => return e.error_code(),
     };
 
-    let native_result = match utils::derive_key_argon2(&key, &argon2_parameters) {
+    let native_result = match utils::derive_key_argon2(key, &argon2_parameters) {
         Ok(x) => Zeroizing::new(x),
         Err(e) => return e.error_code(),
     };
@@ -948,8 +950,8 @@ pub unsafe extern "C" fn DeriveKeyPbkdf2(
     let result = slice::from_raw_parts_mut(result, result_length);
 
     let native_result = Zeroizing::new(utils::derive_key_pbkdf2(
-        &key,
-        &salt,
+        key,
+        salt,
         niterations,
         result_length,
     ));
@@ -1042,7 +1044,7 @@ pub unsafe extern "C" fn GetDefaultArgon2Parameters(
 ) -> i64 {
     let argon2_parameters = slice::from_raw_parts_mut(argon2_parameters, argon2_parameters_length);
 
-    let argon2_parameters_raw: Vec<u8> = Argon2Parameters::default().into();
+    let argon2_parameters_raw: Vec<u8> = (&Argon2Parameters::default()).into();
     argon2_parameters.copy_from_slice(&argon2_parameters_raw);
     0
 }
@@ -1088,9 +1090,9 @@ pub unsafe extern "C" fn Decode(
     };
 
     let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
-    let mut output = slice::from_raw_parts_mut(output, output_length);
+    let output = slice::from_raw_parts_mut(output, output_length);
 
-    match general_purpose::STANDARD.decode_slice_unchecked(&input, &mut output) {
+    match general_purpose::STANDARD.decode_slice_unchecked(input, output) {
         Ok(res) => res as i64,
         Err(_e) => -1,
     }
@@ -1118,9 +1120,9 @@ pub unsafe extern "C" fn Encode(
     };
 
     let input = slice::from_raw_parts(input, input_length);
-    let mut output = slice::from_raw_parts_mut(output, output_length);
+    let output = slice::from_raw_parts_mut(output, output_length);
 
-    match general_purpose::STANDARD.encode_slice(&input, &mut output) {
+    match general_purpose::STANDARD.encode_slice(input, output) {
         Ok(res) => res as i64,
         Err(_err) => -1,
     }
@@ -1148,9 +1150,9 @@ pub unsafe extern "C" fn DecodeUrl(
     };
 
     let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
-    let mut output = slice::from_raw_parts_mut(output, output_length);
+    let output = slice::from_raw_parts_mut(output, output_length);
 
-    match general_purpose::URL_SAFE_NO_PAD.decode_slice_unchecked(&input, &mut output) {
+    match general_purpose::URL_SAFE_NO_PAD.decode_slice_unchecked(input, output) {
         Ok(res) => res as i64,
         Err(_e) => -1,
     }
@@ -1178,9 +1180,9 @@ pub unsafe extern "C" fn EncodeUrl(
     };
 
     let input = slice::from_raw_parts(input, input_length);
-    let mut output = slice::from_raw_parts_mut(output, output_length);
+    let output = slice::from_raw_parts_mut(output, output_length);
 
-    match general_purpose::URL_SAFE_NO_PAD.encode_slice(&input, &mut output) {
+    match general_purpose::URL_SAFE_NO_PAD.encode_slice(input, output) {
         Ok(res) => res as i64,
         Err(_err) => -1,
     }
@@ -1241,7 +1243,7 @@ pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
     };
 
     let output = slice::from_raw_parts_mut(output, output_length);
-    output.copy_from_slice(&VERSION.as_bytes());
+    output.copy_from_slice(VERSION.as_bytes());
 
     output.len() as i64
 }
@@ -1254,18 +1256,22 @@ fn test_encrypt_length() {
     let one_full_block = b"0123456789abcdef";
     let multiple_blocks = b"0123456789abcdefghijkl";
 
-    let length_zero_enc: Vec<u8> = encrypt(length_zero, key, CiphertextVersion::Latest)
-        .unwrap()
-        .into();
-    let length_one_block_enc: Vec<u8> = encrypt(length_one_block, key, CiphertextVersion::Latest)
-        .unwrap()
-        .into();
-    let one_full_block_enc: Vec<u8> = encrypt(one_full_block, key, CiphertextVersion::Latest)
-        .unwrap()
-        .into();
-    let multiple_blocks_enc: Vec<u8> = encrypt(multiple_blocks, key, CiphertextVersion::Latest)
-        .unwrap()
-        .into();
+    let length_zero_enc: Vec<u8> =
+        devolutions_crypto::ciphertext::encrypt(length_zero, key, CiphertextVersion::Latest)
+            .unwrap()
+            .into();
+    let length_one_block_enc: Vec<u8> =
+        devolutions_crypto::ciphertext::encrypt(length_one_block, key, CiphertextVersion::Latest)
+            .unwrap()
+            .into();
+    let one_full_block_enc: Vec<u8> =
+        devolutions_crypto::ciphertext::encrypt(one_full_block, key, CiphertextVersion::Latest)
+            .unwrap()
+            .into();
+    let multiple_blocks_enc: Vec<u8> =
+        devolutions_crypto::ciphertext::encrypt(multiple_blocks, key, CiphertextVersion::Latest)
+            .unwrap()
+            .into();
 
     assert_eq!(
         length_zero_enc.len() as i64,
@@ -1347,7 +1353,7 @@ fn test_get_default_argon2parameters() {
 
         let _params = Argon2Parameters::try_from(argon2_parameters).unwrap();
 
-        let defaults: Vec<u8> = Argon2Parameters::default().into();
+        let defaults: Vec<u8> = (&Argon2Parameters::default()).into();
         let received: Vec<u8> = argon2_parameters.to_vec();
 
         // The -16 is to remove the salt, since it is random
