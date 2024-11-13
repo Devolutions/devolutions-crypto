@@ -4,6 +4,7 @@ packages
 .vs
 *.nupkg
 *.user
+.build
 wrappers/swift/bindings/*
 wrappers/swift/output/*
 wrappers/csharp/nuget/dotnet/package/*

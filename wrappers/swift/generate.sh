@@ -3,8 +3,8 @@
 
 
 XCFRAMEWORK_FOLDER="./output/DevolutionsCrypto.xcframework"
-LIBNAME="uniffi_lib"
-LIBNAMEBUILD="uniffi-lib"
+LIBNAME="devolutions_crypto_uniffi"
+LIBNAMEBUILD="devolutions-crypto-uniffi"
 
 rm -rf bindings
 rm -rf output
