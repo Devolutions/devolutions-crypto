@@ -183,7 +183,7 @@ jobs:
       - run: git lfs pull
       - uses: ./.github/workflows/tests/swift
 
-##### KOTLIN TESTS #####
+##### KOTLIN BUILD #####
   tests_kotlin:
     runs-on: "ubuntu-latest"
     steps:
@@ -191,7 +191,7 @@ jobs:
         with:
           lfs: true
       - run: git lfs pull
-      - uses: ./.github/workflows/tests/kotlin
+      - uses: ./.github/workflows/kotlin
   
   #=================================================
   # Disabled for now, Android Emulator doesn't boot. - mmorrissette 2024-02-21
