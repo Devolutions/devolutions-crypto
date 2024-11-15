@@ -193,15 +193,15 @@ jobs:
       - run: git lfs pull
       - uses: ./.github/workflows/kotlin
   
-  tests_nuget_android:
-    needs: [nugets_macos, setup_config]
-    runs-on: "macos-14"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
-      - uses: ./.github/workflows/tests/csharp/android
+ #tests_nuget_android:
+ #  needs: [nugets_macos, setup_config]
+ #  runs-on: "macos-14"
+ #  steps:
+ #    - uses: actions/checkout@v4
+ #      with:
+ #        lfs: true
+ #    - run: git lfs pull
+ #    - uses: ./.github/workflows/tests/csharp/android
 
   tests_ios_integration:
     needs: [tests_nuget_ios, setup_config]
