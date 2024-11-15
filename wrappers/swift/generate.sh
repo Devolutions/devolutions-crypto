@@ -6,8 +6,8 @@ XCFRAMEWORK_FOLDER="./output/DevolutionsCrypto.xcframework"
 LIBNAME="devolutions_crypto_uniffi"
 LIBNAMEBUILD="devolutions-crypto-uniffi"
 
-rm -rf bindings
-rm -rf output
+rm -rf ./bindings
+rm -rf ./output
 
 cargo build -p "$LIBNAMEBUILD"
 
@@ -30,7 +30,7 @@ cargo build --release --target=aarch64-apple-darwin -p "$LIBNAMEBUILD"
 cargo build --release --target=x86_64-apple-darwin -p "$LIBNAMEBUILD"
 
 
-mv "./bindings/${LIBNAME}FFI.modulemap" ./bindings/module.modulemap
+mv "./bindings/devolutions_cryptoFFI.modulemap" ./bindings/module.modulemap
  
 # combine the platforms 
 
@@ -61,7 +61,7 @@ ditto -c -k --sequesterRsrc --keepParent "$XCFRAMEWORK_FOLDER" "$XCFRAMEWORK_FOL
 swift package compute-checksum "$XCFRAMEWORK_FOLDER.zip"
 
 # Move swift file to package
-cp "./bindings/$LIBNAME.swift" ./DevolutionsCryptoSwift/Sources/DevolutionsCryptoSwift/DevolutionsCryptoSwift.swift
+cp "./bindings/devolutions_crypto.swift" ./DevolutionsCryptoSwift/Sources/DevolutionsCryptoSwift/DevolutionsCryptoSwift.swift
 
 # Tests
 cd ./DevolutionsCryptoSwift
