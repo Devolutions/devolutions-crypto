@@ -10,7 +10,11 @@ runs:
     - name: Build
       working-directory: ./wrappers/kotlin
       shell: bash
-      run: make
+      run: sh build.sh
 
-    # TODO test and package into an artifact
+    - name: Kotlin Package
+      uses: actions/upload-artifact@v4
+      with:
+        name: kotlin
+        path: ./wrappers/kotlin/lib/build
 
