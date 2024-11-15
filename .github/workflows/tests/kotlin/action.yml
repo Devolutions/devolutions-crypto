@@ -15,7 +15,7 @@ runs:
     - name: Build Lib
       working-directory: ./wrappers/kotlin
       shell: bash
-      run: ./gradlew build
+      run: sh build.sh
 
     # TODO test and package into an artifact
 
