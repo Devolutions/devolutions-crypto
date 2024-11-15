@@ -1,0 +1,14 @@
+name: Test Kotlin Package
+runs:
+  using: composite
+  steps:
+    - name: Run setup
+      working-directory: ./wrappers/kotlin
+      shell: bash
+      run: sh setup.sh
+
+    - name: Run tests
+      working-directory: ./wrappers/kotlin
+      shell: bash
+      run: make
+
