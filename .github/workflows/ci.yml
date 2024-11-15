@@ -184,7 +184,7 @@ jobs:
       - uses: ./.github/workflows/tests/swift
 
 ##### KOTLIN BUILD #####
-  tests_kotlin:
+  build_kotlin:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
@@ -193,18 +193,15 @@ jobs:
       - run: git lfs pull
       - uses: ./.github/workflows/kotlin
   
-  #=================================================
-  # Disabled for now, Android Emulator doesn't boot. - mmorrissette 2024-02-21
-  #================================================= 
-  #tests_nuget_android:
-  #  needs: [nugets_macos, setup_config]
-  #  runs-on: "macos-12"
-  #  steps:
-  #    - uses: actions/checkout@v4
-  #      with:
-  #        lfs: true
-  #    - run: git lfs pull
-  #    - uses: ./.github/workflows/tests/csharp/android
+  tests_nuget_android:
+    needs: [nugets_macos, setup_config]
+    runs-on: "macos-14"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/csharp/android
 
   tests_ios_integration:
     needs: [tests_nuget_ios, setup_config]

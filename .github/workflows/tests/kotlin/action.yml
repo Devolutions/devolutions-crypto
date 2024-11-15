@@ -7,10 +7,15 @@ runs:
       shell: bash
       run: sh setup.sh
 
-    - name: Build
+    - name: Build Wrapper
       working-directory: ./wrappers/kotlin
       shell: bash
       run: make
+
+    - name: Build Lib
+      working-directory: ./wrappers/kotlin
+      shell: bash
+      run: ./gradlew build
 
     # TODO test and package into an artifact
 
