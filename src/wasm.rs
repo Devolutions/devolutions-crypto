@@ -82,7 +82,7 @@ impl Argon2Parameters {
 
     #[wasm_bindgen(getter)]
     pub fn bytes(&self) -> Vec<u8> {
-        self.clone().into()
+        self.into()
     }
 
     #[wasm_bindgen(js_name = "fromBytes")]

@@ -126,7 +126,7 @@ impl From<argon2::Error> for Error {
 #[cfg(feature = "wbindgen")]
 impl From<Error> for JsValue {
     fn from(error: Error) -> JsValue {
-        let js_error = js_sys::Error::new(&error.description());
+        let js_error = js_sys::Error::new(&error.to_string());
 
         js_error.set_name(error.into());
         js_error.into()
