@@ -4,7 +4,9 @@ use super::Result;
 
 use std::convert::TryFrom;
 
-use sharks::{Share, Sharks};
+use rand::rngs::OsRng;
+
+use blahaj::{Share, Sharks};
 use zeroize::Zeroizing;
 
 #[cfg(feature = "fuzz")]
@@ -66,7 +68,7 @@ impl ShareV1 {
 
         let secret = Zeroizing::new(crate::utils::generate_key(length));
         let sharks = Sharks(threshold);
-        let dealer = sharks.dealer(&secret);
+        let dealer = sharks.dealer_rng(&secret, &mut OsRng);
 
         Ok(dealer.take(n_shares as usize).map(move |s| ShareV1 {
             threshold,

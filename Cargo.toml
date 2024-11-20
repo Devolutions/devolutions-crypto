@@ -35,7 +35,7 @@ hmac = "0.12"
 num_enum = "0.7"
 pbkdf2 = { version = "0.12", default-features = false }
 scrypt = { version = "0.11", default-features = false }
-sharks = "0.5"
+blahaj = { version = "0.6", default-features = false }
 sha2 = "0.10"
 strum = { version = "0.26", features = ["derive"] }
 subtle = "2"
@@ -72,6 +72,6 @@ wasm-bindgen-test = "0.3"
 
 [features]
 default = []
-fuzz = ["arbitrary", "sharks/fuzzing"]
+fuzz = ["arbitrary", "blahaj/fuzzing"]
 wbindgen = ["wasm-bindgen", "serde-wasm-bindgen", "js-sys"]
 

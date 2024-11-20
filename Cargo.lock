@@ -24,10 +24,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ahash"
-version = "0.4.8"
+name = "allocator-api2"
+version = "0.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0453232ace82dee0dd0b4c87a59bd90f7b53b314f3e0f61fe2ee7c8a16482289"
+checksum = "45862d1c77f2228b9e10bc609d5bc203d86ebc9b87ad8d5d5167a6c9abf739d9"
 
 [[package]]
 name = "anstream"
@@ -134,6 +134,17 @@ name = "bitflags"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf4b9d6a944f767f8e5e0db018570623c85f3d925ac718db4e06d0187adb21c1"
+
+[[package]]
+name = "blahaj"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5106bf2680d585dc5f29711b8aa5dde353180b8e14af89b7f0424f760c84e7ce"
+dependencies = [
+ "arbitrary",
+ "hashbrown 0.15.1",
+ "rand",
+]
 
 [[package]]
 name = "blake2b_simd"
@@ -382,6 +393,7 @@ dependencies = [
  "aes",
  "arbitrary",
  "base64 0.22.1",
+ "blahaj",
  "byteorder",
  "cbc",
  "cfg-if",
@@ -398,7 +410,6 @@ dependencies = [
  "scrypt",
  "serde-wasm-bindgen",
  "sha2",
- "sharks",
  "strum",
  "subtle",
  "wasm-bindgen",
@@ -493,6 +504,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28dea519a9695b9977216879a3ebfddf92f1c08c05d984f8996aecd6ecdc811d"
 
 [[package]]
+name = "foldhash"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f81ec6369c545a7d40e4589b5597581fa1c441fe1cce96dd1de43159910a36a2"
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -517,18 +534,20 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7afe4a420e3fe79967a00898cc1f4db7c8a49a9333a29f8a4bd76a253d5cd04"
-dependencies = [
- "ahash",
-]
-
-[[package]]
-name = "hashbrown"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
+
+[[package]]
+name = "hashbrown"
+version = "0.15.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a9bfc1af68b1726ea47d3d5109de126281def866b33970e10fbab11b5dafab3"
+dependencies = [
+ "allocator-api2",
+ "equivalent",
+ "foldhash",
+]
 
 [[package]]
 name = "heck"
@@ -972,18 +991,6 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
-]
-
-[[package]]
-name = "sharks"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "902b1e955f8a2e429fb1bad49f83fb952e6195d3c360ac547ff00fb826388753"
-dependencies = [
- "arbitrary",
- "hashbrown 0.9.1",
- "rand",
- "zeroize",
 ]
 
 [[package]]
