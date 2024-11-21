@@ -5,7 +5,7 @@ runs:
     - name: Run setup
       working-directory: ./wrappers/kotlin
       shell: bash
-      run: sh setup.sh
+      run: sudo sh setup.sh
 
     - name: Build
       working-directory: ./wrappers/kotlin

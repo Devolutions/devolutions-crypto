@@ -1,5 +1,24 @@
 # run as root
+curl https://sh.rustup.rs -sSf | sh -s -- -y
+echo "${HOME}/.cargo/bin" >> "$GITHUB_PATH"
+export PATH="${HOME}/.cargo/bin:$PATH"
+echo "RUSTUP_HOME=${HOME}/.rustup" >> "$GITHUB_ENV"
+echo "CARGO_HOME=${HOME}/.cargo" >> "$GITHUB_ENV"
+
+rustup update
+
+rustup target add x86_64-unknown-linux-gnu
+rustup target add i686-unknown-linux-gnu
+rustup target add aarch64-unknown-linux-gnu
+
+rustup target add aarch64-linux-android
+rustup target add armv7-linux-androideabi
+rustup target add i686-linux-android
+rustup target add x86_64-linux-android
+
 apt install build-essential unzip openjdk-18-jre-headless
+apt install nuget gcc-multilib software-properties-common
+apt install -y gcc-aarch64-linux-gnu
 
 rm -rf /usr/local/lib/android
 mkdir -p /usr/local/lib/android/sdk
@@ -8,8 +27,8 @@ ANDROID_ROOT="/usr/local/lib/android"
 ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
 
 cd /usr/local/lib/android/sdk
-sudo wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-sudo unzip commandlinetools-linux-11076708_latest.zip 
+wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+unzip commandlinetools-linux-11076708_latest.zip 
  
 cp -r "${ANDROID_SDK_ROOT}/cmdline-tools/." "${ANDROID_SDK_ROOT}/cmdline-tools/latest/"
 
@@ -40,4 +59,4 @@ echo "[target.aarch64-linux-android]
 ln -sfn $ANDROID_SDK_ROOT/ndk/25.2.9519653 $ANDROID_NDK
 
 # install kotlin
-sudo snap install --classic kotlin
+snap install --classic kotlin
