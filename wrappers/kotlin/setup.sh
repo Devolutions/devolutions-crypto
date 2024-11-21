@@ -1,25 +1,4 @@
 # run as root
-curl https://sh.rustup.rs -sSf | sh -s -- -y
-echo "${HOME}/.cargo/bin" >> "$GITHUB_PATH"
-export PATH="${HOME}/.cargo/bin:$PATH"
-echo "RUSTUP_HOME=${HOME}/.rustup" >> "$GITHUB_ENV"
-echo "CARGO_HOME=${HOME}/.cargo" >> "$GITHUB_ENV"
-
-rustup update
-
-rustup target add x86_64-unknown-linux-gnu
-rustup target add i686-unknown-linux-gnu
-rustup target add aarch64-unknown-linux-gnu
-
-rustup target add aarch64-linux-android
-rustup target add armv7-linux-androideabi
-rustup target add i686-linux-android
-rustup target add x86_64-linux-android
-
-apt install build-essential unzip openjdk-18-jre-headless
-apt install nuget gcc-multilib software-properties-common
-apt install -y gcc-aarch64-linux-gnu
-
 rm -rf /usr/local/lib/android
 mkdir -p /usr/local/lib/android/sdk
 
