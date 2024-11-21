@@ -79,10 +79,6 @@ rust-argon2 = "1.0"
 wasm-bindgen-test = "0.3"
 
 [features]
-<<<<<<< HEAD
 default = []
 fuzz = ["arbitrary", "blahaj/fuzzing"]
-=======
-fuzz = ["arbitrary", "sharks/fuzzing"]
->>>>>>> d4b0a2d (initial commit)
 wbindgen = ["wasm-bindgen", "serde-wasm-bindgen", "js-sys"]
