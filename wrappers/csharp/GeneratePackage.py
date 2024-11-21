@@ -220,7 +220,7 @@ def build_windows(assembly_manifest, version, args):
         
         dllpath = "./" + folder + "/bin/DevolutionsCrypto-" + arch["name"] + ".dll"
 
-        shutil.copy("../../target/" + arch["value"] + "/release/devolutions_crypto.dll", dllpath)
+        shutil.copy("../../target/" + arch["value"] + "/release/devolutions_crypto_ffi.dll", dllpath)
 
         output = exec_command("./tools/rcedit-x64.exe " + dllpath + " --set-file-version " + version)
         print(output)
@@ -294,18 +294,18 @@ def build_linux(assembly_manifest, version, args):
     if not args.no_32:
         architectures.append({"name" : "i686", 
             "value" : "i686-unknown-linux-gnu", 
-            "cargo_output": "../../target/i686-unknown-linux-gnu/release/libdevolutions_crypto.so", 
+            "cargo_output": "../../target/i686-unknown-linux-gnu/release/libdevolutions_crypto_ffi.so", 
             "filename" : "libDevolutionsCrypto-x86.so"})
 
     if not args.no_64: 
         architectures.append({"name" : "x86_64",
             "value" : "x86_64-unknown-linux-gnu",
-            "cargo_output": "../../target/x86_64-unknown-linux-gnu/release/libdevolutions_crypto.so",
+            "cargo_output": "../../target/x86_64-unknown-linux-gnu/release/libdevolutions_crypto_ffi.so",
             "filename" : "libDevolutionsCrypto-x64.so"})
         
         architectures.append({"name" : "aarch64",
             "value" : "aarch64-unknown-linux-gnu",
-            "cargo_output": "../../target/aarch64-unknown-linux-gnu/release/libdevolutions_crypto.so",
+            "cargo_output": "../../target/aarch64-unknown-linux-gnu/release/libdevolutions_crypto_ffi.so",
             "filename" : "libDevolutionsCrypto-arm64.so"})
 
     target_folder = "./linux"
@@ -330,13 +330,13 @@ def build_mac_full(assembly_manifest, version, args):
         {
             "name" : "x86_64",
             "value" : "x86_64-apple-darwin",
-            "cargo_output": "../../target/x86_64-apple-darwin/release/libdevolutions_crypto.dylib",
+            "cargo_output": "../../target/x86_64-apple-darwin/release/libdevolutions_crypto_ffi.dylib",
             "filename" : "x86_64/libDevolutionsCrypto.dylib"
         },
         {
             "name" : "aarch64",
             "value" : "aarch64-apple-darwin",
-            "cargo_output": "../../target/aarch64-apple-darwin/release/libdevolutions_crypto.dylib",
+            "cargo_output": "../../target/aarch64-apple-darwin/release/libdevolutions_crypto_ffi.dylib",
             "filename" : "aarch64/libDevolutionsCrypto.dylib"
         }
     ]
@@ -381,13 +381,13 @@ def build_mac_modern(assembly_manifest, version, args):
         {   
             "name" : "x86_64",
             "value" : "x86_64-apple-darwin",
-            "cargo_output": "../../target/x86_64-apple-darwin/release/libdevolutions_crypto.dylib",
+            "cargo_output": "../../target/x86_64-apple-darwin/release/libdevolutions_crypto_ffi.dylib",
             "filename" : "x86_64/libDevolutionsCrypto.dylib"
         },
         {
             "name" : "aarch64",
             "value" : "aarch64-apple-darwin",
-            "cargo_output": "../../target/aarch64-apple-darwin/release/libdevolutions_crypto.dylib",
+            "cargo_output": "../../target/aarch64-apple-darwin/release/libdevolutions_crypto_ffi.dylib",
             "filename" : "aarch64/libDevolutionsCrypto.dylib"
         }
     ]
@@ -425,12 +425,12 @@ def build_ios(assembly_manifest, version, args):
         {"name" : "x86_64",
             "value" : "x86_64-apple-ios",
             "manifest_path" : "./Cargo.toml",
-            "cargo_output": "../../target/x86_64-apple-ios/release/libdevolutions_crypto.dylib",
+            "cargo_output": "../../target/x86_64-apple-ios/release/libdevolutions_crypto_ffi.dylib",
             "filename" : "x86_64/libDevolutionsCrypto.dylib"},
         {"name" : "aarch64",
             "value" : "aarch64-apple-ios",
             "manifest_path" : "./Cargo.toml",
-            "cargo_output": "../../target/aarch64-apple-ios/release/libdevolutions_crypto.dylib",
+            "cargo_output": "../../target/aarch64-apple-ios/release/libdevolutions_crypto_ffi.dylib",
             "filename" : "aarch64/libDevolutionsCrypto.dylib"},
         ]
 
@@ -506,19 +506,19 @@ def build_android(assembly_manifest, version, args):
     architectures = [
         {"name" : "aarch64",
             "value" : "aarch64-linux-android",
-            "cargo_output": "../../target/aarch64-linux-android/release/libdevolutions_crypto.so",
+            "cargo_output": "../../target/aarch64-linux-android/release/libdevolutions_crypto_ffi.so",
             "filename" : "aarch64/libDevolutionsCrypto.so"},
         {"name" : "armv7",
             "value" : "armv7-linux-androideabi",
-            "cargo_output": "../../target/armv7-linux-androideabi/release/libdevolutions_crypto.so",
+            "cargo_output": "../../target/armv7-linux-androideabi/release/libdevolutions_crypto_ffi.so",
             "filename" : "armv7/libDevolutionsCrypto.so"},
         {"name" : "i686",
             "value" : "i686-linux-android",
-            "cargo_output": "../../target/i686-linux-android/release/libdevolutions_crypto.so",
+            "cargo_output": "../../target/i686-linux-android/release/libdevolutions_crypto_ffi.so",
             "filename" : "i686/libDevolutionsCrypto.so"},
         {"name" : "x86_64",
             "value" : "x86_64-linux-android",
-            "cargo_output": "../../target/x86_64-linux-android/release/libdevolutions_crypto.so",
+            "cargo_output": "../../target/x86_64-linux-android/release/libdevolutions_crypto_ffi.so",
             "filename" : "x86_64/libDevolutionsCrypto.so"}
     ]
 

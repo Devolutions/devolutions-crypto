@@ -1,0 +1,76 @@
+name: Build Kotlin Package
+runs:
+  using: composite
+  steps:
+    - name:  Installing dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install nuget gcc-multilib software-properties-common
+        sudo apt-get install -y gcc-aarch64-linux-gnu
+
+    - name: Install rust
+      shell: bash
+      run: |
+        rustup update
+
+        rustup target add x86_64-unknown-linux-gnu
+        rustup target add i686-unknown-linux-gnu
+        rustup target add aarch64-unknown-linux-gnu
+
+        rustup target add aarch64-linux-android
+        rustup target add armv7-linux-androideabi
+        rustup target add i686-linux-android
+        rustup target add x86_64-linux-android
+
+    - name:  Installing Kotlin
+      shell: bash
+      run: sudo snap install --classic kotlin
+
+    - name: Configure Android NDK
+      shell: bash
+      run: |
+        # Install NDK 25
+
+        ANDROID_ROOT="/usr/local/lib/android"
+        ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
+        SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+        echo "y" | $SDKMANAGER "ndk;25.2.9519653"
+
+        export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
+
+        echo "[target.aarch64-linux-android]
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang\"
+        [target.armv7-linux-androideabi]
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi19-clang\"
+        [target.i686-linux-android]
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-ar\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android19-clang\"
+        [target.x86_64-linux-android]
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ar\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> ./.cargo/config
+
+    - name: Build
+      working-directory: ./wrappers/kotlin
+      shell: bash
+      run: |
+        export ANDROID_ROOT="/usr/local/lib/android"
+        export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
+        export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
+        ln -sfn $ANDROID_SDK_ROOT/ndk/25.2.9519653 $ANDROID_NDK
+
+        make
+        make android
+
+        chmod +x gradlew
+        ./gradlew test
+        ./gradlew build
+
+    - name: Kotlin Package
+      uses: actions/upload-artifact@v4
+      with:
+        name: kotlin
+        path: ./wrappers/kotlin/lib/build
+
