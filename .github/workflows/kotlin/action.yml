@@ -27,6 +27,10 @@ runs:
       shell: bash
       run: sudo snap install --classic kotlin
 
+    - name:  Installing ktlint
+      shell: bash
+      run: sudo snap install ktlint --edge --devmode
+
     - name: Configure Android NDK
       shell: bash
       run: |
@@ -61,8 +65,7 @@ runs:
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
         ln -sfn $ANDROID_SDK_ROOT/ndk/25.2.9519653 $ANDROID_NDK
 
-        make
-        make android
+        make release RELEASE=1
 
         chmod +x gradlew
         ./gradlew test
