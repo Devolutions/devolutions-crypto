@@ -30,7 +30,7 @@ name = "devolutions_crypto"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-aead = "0.5"
+aead = { version = "0.5", features = ["stream"] }
 aes = "0.8"
 base64 = "0.22"
 cbc = { version = "0.1.2", features = ["block-padding", "alloc"] }
@@ -58,6 +58,7 @@ x25519-dalek = { version = "2", features = [ "static_secrets" ] }
 # Version is pinned because newer version requires lifetime annotations
 #   that isn't compatible with the header trait
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
+blake3 = { version = "1.5.5", features = ["zeroize"] }
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
 rust-argon2 = { version = "1.0", default-features = false }

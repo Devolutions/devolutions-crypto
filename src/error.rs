@@ -60,6 +60,9 @@ pub enum Error {
     /// The version of the multiple data is inconsistent: -42
     #[error("The version is not the same for all the data.")]
     InconsistentVersion,
+    /// The length of the data to encrypt/decrypt during online encryption is not the same as the chunk size: -43
+    #[error("The length of the data to encrypt/decrypt during online encryption is not the same as the chunk size")]
+    InvalidChunkLength,
 }
 
 impl Error {
@@ -83,6 +86,7 @@ impl Error {
             Error::IoError(_) => -34,
             Error::NotEnoughShares => -41,
             Error::InconsistentVersion => -42,
+            Error::InvalidChunkLength => -43,
         }
     }
 }

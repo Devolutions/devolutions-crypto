@@ -212,6 +212,7 @@ mod error;
 mod header;
 
 pub mod ciphertext;
+pub mod online_ciphertext;
 pub mod key;
 pub mod password_hash;
 pub mod secret_sharing;
@@ -224,7 +225,7 @@ pub use header::{Header, HeaderType};
 
 pub use enums::{
     CiphertextVersion, DataType, KeyVersion, PasswordHashVersion, SecretSharingVersion,
-    SignatureVersion, SigningKeyVersion,
+    SignatureVersion, SigningKeyVersion, OnlineCiphertextVersion,
 };
 
 pub use argon2::Variant as Argon2Variant;
