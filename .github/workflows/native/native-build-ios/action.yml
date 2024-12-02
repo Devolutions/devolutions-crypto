@@ -9,6 +9,10 @@ runs:
         name: config.txt
         path: ./wrappers/csharp
 
+    - name: Install mono
+      shell: bash
+      run: brew install mono
+
     - name:  Install Rust
       shell: bash
       run: |

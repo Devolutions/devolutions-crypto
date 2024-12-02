@@ -348,7 +348,7 @@ def build_mac_full(assembly_manifest, version, args):
     build_native(architectures, target_folder, manifest=assembly_manifest, clean=False)
 
     print("Building Managed Library...")
-    output = exec_command("csc -out:./macos-full/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./macos-full/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:MAC_FULL src/*.cs ./macos-full/bin/AssemblyInfo.cs -optimize")
+    output = exec_command("dotnet /Users/runner/.dotnet/sdk/8.0.404/Roslyn/bincore/csc.dll  -out:./macos-full/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./macos-full/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:MAC_FULL src/*.cs ./macos-full/bin/AssemblyInfo.cs -optimize")
     print(output)
 
     if("error" in output):
@@ -493,7 +493,7 @@ def build_ios(assembly_manifest, version, args):
     ###################################
 
     print("Building Managed Library...")
-    output = exec_command("csc -out:./ios/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./ios/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:IOS src/*.cs ./ios/bin/AssemblyInfo.cs -optimize")
+    output = exec_command("dotnet /Users/runner/.dotnet/sdk/8.0.404/Roslyn/bincore/csc.dll -out:./ios/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./ios/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:IOS src/*.cs ./ios/bin/AssemblyInfo.cs -optimize")
     print(output)
 
     if("error" in output):
