@@ -18,12 +18,12 @@ const SIGNATURE: u16 = 0x0C0D;
 pub trait HeaderType {
     cfg_if! {
         if #[cfg(feature = "fuzz")] {
-            type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + Arbitrary;
-            type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + Arbitrary;
+            type Version: Into<u16> + TryFrom<u16> + Clone + Copy + Default + Zeroize + std::fmt::Debug + Arbitrary;
+            type Subtype: Into<u16> + TryFrom<u16> + Clone + Copy + Default + Zeroize + std::fmt::Debug + Arbitrary;
         }
         else {
-            type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug;
-            type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug;
+            type Version: Into<u16> + TryFrom<u16> + Clone + Copy + Default + Zeroize + std::fmt::Debug;
+            type Subtype: Into<u16> + TryFrom<u16> + Clone + Copy + Default + Zeroize + std::fmt::Debug;
         }
     }
 
@@ -50,7 +50,7 @@ impl HeaderType for () {
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-pub struct Header<M>
+pub struct  Header<M>
 where
     M: HeaderType,
 {
@@ -104,11 +104,11 @@ where
     }
 }
 
-impl<M> From<Header<M>> for Vec<u8>
+impl<M> From<&Header<M>> for Vec<u8>
 where
     M: HeaderType,
 {
-    fn from(header: Header<M>) -> Vec<u8> {
+    fn from(header: &Header<M>) -> Vec<u8> {
         let mut data = Vec::with_capacity(8);
         data.write_u16::<LittleEndian>(header.signature).unwrap();
         data.write_u16::<LittleEndian>(header.data_type.into())

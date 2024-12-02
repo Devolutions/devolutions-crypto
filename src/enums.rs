@@ -27,6 +27,8 @@ pub enum DataType {
     SigningKey = 5,
     /// A wrapped signature.
     Signature = 6,
+    /// A wrapped online ciphertextr that can be encrypted/decrypted chunk by chunk
+    OnlineCiphertext = 7,
 }
 
 impl Default for DataType {
@@ -50,6 +52,24 @@ pub enum CiphertextVersion {
 }
 
 impl Default for CiphertextVersion {
+    fn default() -> Self {
+        Self::Latest
+    }
+}
+
+/// The versions of the online encryption scheme to use.
+#[cfg_attr(feature = "wbindgen", wasm_bindgen())]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+#[repr(u16)]
+pub enum OnlineCiphertextVersion {
+    /// Uses the latest version.
+    Latest = 0,
+    /// Uses version 1: XChaCha20-Poly1305 wrapped in a STREAM construction.
+    V1 = 1,
+}
+
+impl Default for OnlineCiphertextVersion {
     fn default() -> Self {
         Self::Latest
     }
