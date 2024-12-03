@@ -13,7 +13,7 @@ runs:
       shell: bash
       run: |
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        echo "PATH=/opt/homebrew/bin/brew:$PATH" >> $GITHUB_ENV
+        echo "PATH=/opt/homebrew/bin:$PATH" >> $GITHUB_ENV
     
     - name: Verify Homebrew installation
       shell: bash
