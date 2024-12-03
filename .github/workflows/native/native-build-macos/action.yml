@@ -13,9 +13,7 @@ runs:
       shell: bash
       run: |
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $GITHUB_ENV
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-        echo "PATH=/home/linuxbrew/.linuxbrew/bin:$PATH" >> $GITHUB_ENV
+        echo "PATH=/opt/homebrew/bin/brew:$PATH" >> $GITHUB_ENV
     
     - name: Verify Homebrew installation
       shell: bash
