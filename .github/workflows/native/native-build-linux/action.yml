@@ -49,12 +49,12 @@ runs:
     - name: Configure Android NDK
       shell: bash
       run: |
-        # Install NDK 28
+        # Install NDK 27
 
         ANDROID_ROOT="/usr/local/lib/android"
         ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
-        echo "y" | $SDKMANAGER "ndk;28.0.12674087-rc1"
+        echo "y" | $SDKMANAGER "ndk;27.2.12479018"
 
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
 
@@ -78,7 +78,8 @@ runs:
         export ANDROID_ROOT="/usr/local/lib/android"
         export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
-        ln -sfn $ANDROID_SDK_ROOT/ndk/28.0.12674087-rc1 $ANDROID_NDK
+        export ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON
+        ln -sfn $ANDROID_SDK_ROOT/ndk/27.2.12479018 $ANDROID_NDK
 
         python GeneratePackage.py -p android
 
