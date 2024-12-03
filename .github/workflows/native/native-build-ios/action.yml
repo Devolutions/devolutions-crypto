@@ -9,6 +9,17 @@ runs:
         name: config.txt
         path: ./wrappers/csharp
 
+    - name: Install Homebrew
+      shell: bash
+      run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    
+    - name: Verify Homebrew installation
+      shell: bash
+      run: brew --version
+      
     - name: Install mono
       shell: bash
       run: brew install mono
