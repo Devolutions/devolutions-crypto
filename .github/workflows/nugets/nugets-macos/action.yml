@@ -28,6 +28,10 @@ runs:
       shell: bash
       run: sudo dotnet workload install macos
 
+    - name: Install android Workload
+      shell: bash
+      run: sudo dotnet workload install android
+
     # dotnet restore fails on macos-12
     # https://github.com/actions/virtual-environments/issues/5768
     - name: Nuget workaround
