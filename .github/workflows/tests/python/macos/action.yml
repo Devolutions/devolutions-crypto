@@ -23,6 +23,7 @@ runs:
       working-directory: ./wheels
       shell: bash
       run: |
+        pip debug --verbose
         ls
         pip install --no-index --find-links="./" devolutions_crypto -vvv
 
