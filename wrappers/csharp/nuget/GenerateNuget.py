@@ -151,18 +151,6 @@ def build_mac_modern(version, args):
     if("error" in output):
         exit(1)
 
-def build_mac_full(version, args):
-    print("Generating MAC FULL nuget...")
-
-    # platform windows (since the managed mac dll only supports xamarin modern, windows managed dll is compatible)
-    command= subprocess.Popen(["dotnet", "pack", "./macOS/Full/Devolutions.Crypto.Mac.Full.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Full/package"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-
-    print(output)
-
-    if("error" in output):
-        exit(1)
-
 def build_android(version, args):
     print("Generating assembly manifest for Android...")
     # Assembly manifest Android template

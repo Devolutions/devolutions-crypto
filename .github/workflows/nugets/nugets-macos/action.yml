@@ -42,11 +42,6 @@ runs:
       shell: bash
       run: python3 GenerateNuget.py -p mac-modern
 
-    - name: Generating MAC-FULL Nuget
-      working-directory: ./wrappers/csharp/nuget
-      shell: bash
-      run: python3 GenerateNuget.py -p mac
-
     - name: Generating Android Nuget
       working-directory: ./wrappers/csharp/nuget
       shell: bash

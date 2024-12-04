@@ -42,13 +42,6 @@ runs:
         source $HOME/.cargo/env
         cargo test
 
-    - name: Building Mac Full
-      working-directory: ./wrappers/csharp
-      shell: bash
-      run: |
-          source $HOME/.cargo/env
-          python3 GeneratePackage.py -p mac
-
     - name: Building Mac Modern
       working-directory: ./wrappers/csharp
       shell: bash
