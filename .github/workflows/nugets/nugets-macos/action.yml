@@ -51,7 +51,6 @@ runs:
       shell: bash
       run: |
         mv wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/package/*.nupkg .
-        mv wrappers/csharp/nuget/macOS/Full/package/*.nupkg .
         mv wrappers/csharp/nuget/macOS/Modern/Devolutions.Crypto.Mac/package/*.nupkg .
         mv wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/package/*.nupkg .
 

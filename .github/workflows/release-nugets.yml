@@ -10,10 +10,6 @@ on:
         description: "Publish Devolutions.Crypto.Android.*.nupkg"
         required: true
         type: boolean
-      publish_macos_full_nuget:
-        description: "Publish Devolutions.Crypto.Mac.Full.*.nupkg"
-        required: true
-        type: boolean
       publish_macos_modern_nuget:
         description: "Publish Devolutions.Crypto.Mac.Modern.*.nupkg"
         required: true
@@ -90,23 +86,6 @@ jobs:
       if: ${{ inputs.publish_android_nuget }}
       run: |
         COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Android.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
-
-        if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
-          echo "Dry Run : True"
-        else
-          echo "Dry Run : False"
-        fi
-
-        echo "Running : $COMMAND"
-
-        if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
-          eval "$COMMAND"
-        fi
-
-    - name: Publish Mac Full NuGet
-      if: ${{ inputs.publish_macos_full_nuget }}
-      run: |
-        COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Mac.Full.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
 
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           echo "Dry Run : True"

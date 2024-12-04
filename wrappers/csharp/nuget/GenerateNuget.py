@@ -15,7 +15,6 @@ def main():
         "all": build_all,
         "windows": build_windows,
         "linux": build_linux,
-        "mac": build_mac_full,
         "mac-modern": build_mac_modern,
         "ios": build_ios,
         "android": build_android,
