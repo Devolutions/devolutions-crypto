@@ -132,7 +132,7 @@ def build_ios(version, args):
 
     print("Generating IOS nuget...")
 
-    command= subprocess.Popen(["nuget", "pack", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS.nuspec", "-Version", version, "-OutputDirectory", "./iOS/Devolutions.Crypto.iOS/package"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["dotnet", "pack", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS.nuspec", "-Version", version, "-OutputDirectory", "./iOS/Devolutions.Crypto.iOS/package"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)

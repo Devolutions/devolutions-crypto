@@ -24,6 +24,20 @@ runs:
         rm -rf ~/.config/NuGet/NuGet.Config
         dotnet nuget list source
 
+    - name: Install Homebrew
+      shell: bash
+      run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo "PATH=/opt/homebrew/bin:$PATH" >> $GITHUB_ENV
+
+    - name: Verify Homebrew installation
+      shell: bash
+      run: brew --version
+      
+    - name: Install mono
+      shell: bash
+      run: brew install mono
+
     - name: Generating IOS Nuget
       working-directory: ./wrappers/csharp/nuget
       shell: bash
