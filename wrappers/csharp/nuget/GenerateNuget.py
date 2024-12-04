@@ -94,9 +94,6 @@ def build_linux(version, args):
         exit(1)
 
 def build_ios(version, args):
-
-
-
     print("Generating IOS nuget...")
 
     command= subprocess.Popen(["dotnet", "pack", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS.csproj", "-c", "release", "-p:PackageVersion="+version, "-p:Version=" + version], stdout=subprocess.PIPE)
