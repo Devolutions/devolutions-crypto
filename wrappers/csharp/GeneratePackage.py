@@ -480,7 +480,7 @@ def build_ios(assembly_manifest, version, args):
 
     plist_framework_data = None
 
-    with open("./nuget/iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Info.plist", "r") as file:
+    with open("./nuget/iOS/Devolutions.Crypto.iOS/Info.plist", "r") as file:
         plist_framework_data = file.read()
 
     now = datetime.datetime.now()
