@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0-ios</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>Devolutions Inc.</Company>
+    <Description>Devolutions Cryptographic Library for iOS</Description>
+    <Copyright>Copyright @ 2024</Copyright>
+    <AssemblyTitle>DevolutionsCrypto</AssemblyTitle>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <NativeReference Include="..\..\..\..\ios\bin\universal\libDevolutionsCrypto.framework">
+      <Kind>Framework</Kind>
+      <ForceLoad>True</ForceLoad>
+      <IsCxx>True</IsCxx>
+    </NativeReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\..\src\*.cs"/>
+  </ItemGroup>
+
+</Project>

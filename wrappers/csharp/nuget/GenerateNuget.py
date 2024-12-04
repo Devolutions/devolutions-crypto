@@ -94,50 +94,17 @@ def build_linux(version, args):
         exit(1)
 
 def build_ios(version, args):
-    print("Generating assembly manifest for IOS...")
-    # Assembly manifest IOS template
-    assembly_manifest_ios = """
-    using System.Reflection;
-    using System.Runtime.CompilerServices;
-
-    using Foundation;
-
-    [assembly: LinkerSafe]
-
-    [assembly: AssemblyTitle("DevolutionsCrypto")]
-    [assembly: AssemblyCompany("Devolutions Inc.")]
-    [assembly: AssemblyCopyright("Copyright ©  ||YEAR||")]
-    [assembly: AssemblyVersion("||VERSION||")]
-    """
-
-    assembly_manifest_ios = assembly_manifest_ios.replace("||YEAR||", str(datetime.datetime.now().year))
-    assembly_manifest_ios = assembly_manifest_ios.replace("||VERSION||", version)
-    
-    if not os.path.exists("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties"):
-        os.makedirs("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties")    
-
-    with open("./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Properties/AssemblyInfo.cs","wb+") as filee:
-        filee.write(assembly_manifest_ios.encode("utf-8"))
 
 
-    print("Building...")
 
-    command= subprocess.Popen(["dotnet", "msbuild", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS.sln", "/t:clean,restore,build", "/p:configuration=release"], stdout=subprocess.PIPE)
+    print("Generating IOS nuget...")
+
+    command= subprocess.Popen(["dotnet", "pack", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS.csproj", "-c", "release", "-p:PackageVersion="+version, "-p:Version=" + version], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
 
     if("FAILED" in output):
-        exit(1)
-
-    print("Generating IOS nuget...")
-
-    command= subprocess.Popen(["dotnet", "pack", "./iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS.nuspec", "-Version", version, "-OutputDirectory", "./iOS/Devolutions.Crypto.iOS/package"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-
-    print(output)
-
-    if("error" in output):
         exit(1)
 
 def build_mac_modern(version, args):
