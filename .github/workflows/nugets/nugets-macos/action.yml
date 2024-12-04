@@ -16,10 +16,6 @@ runs:
         merge-multiple: true
         path: ./wrappers/csharp
 
-    - name: Update Nuget
-      shell: bash
-      run: sudo nuget update -self
-
     # dotnet restore fails on macos-12
     # https://github.com/actions/virtual-environments/issues/5768
     - name: Nuget workaround
