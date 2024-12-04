@@ -24,7 +24,7 @@ runs:
       shell: bash
       run: |
         ls
-        pip install --no-index --find-links="./" devolutions_crypto
+        pip install --no-index --find-links="./" devolutions_crypto -vvv
 
     - name: Run tests
       working-directory: ./wrappers/python
