@@ -58,9 +58,9 @@ runs:
     - name: Place Artifacts
       shell: bash
       run: |
-        mv wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/package/*.nupkg .
-        mv wrappers/csharp/nuget/macOS/Modern/Devolutions.Crypto.Mac/package/*.nupkg .
-        mv wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/package/*.nupkg .
+        mv wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/bin/release/*.nupkg .
+        mv wrappers/csharp/nuget/macOS/Modern/Devolutions.Crypto.Mac/bin/release/*.nupkg .
+        mv wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/bin/release/*.nupkg .
 
     - uses: actions/upload-artifact@v4.3.6
       with:
