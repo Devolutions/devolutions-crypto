@@ -179,7 +179,7 @@ def build_mac_modern(version, args):
 
     print("Generating MAC MODERN nuget...")
 
-    command= subprocess.Popen(["nuget", "pack", "./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac.Modern.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Modern/Devolutions.Crypto.Mac/package"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["dotnet", "pack", "./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac.Modern.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Modern/Devolutions.Crypto.Mac/package"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
@@ -191,7 +191,7 @@ def build_mac_full(version, args):
     print("Generating MAC FULL nuget...")
 
     # platform windows (since the managed mac dll only supports xamarin modern, windows managed dll is compatible)
-    command= subprocess.Popen(["nuget", "pack", "./macOS/Full/Devolutions.Crypto.Mac.Full.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Full/package"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["dotnet", "pack", "./macOS/Full/Devolutions.Crypto.Mac.Full.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Full/package"], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
