@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-android</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>Devolutions Inc.</Company>
+    <Description>Devolutions Cryptographic Library for Android</Description>
+    <Copyright>Copyright @ 2024</Copyright>
+    <AssemblyTitle>DevolutionsCrypto</AssemblyTitle>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\src\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\drawable\" />
+    <Folder Include="libs\" />
+    <Folder Include="libs\arm64-v8a\" />
+    <Folder Include="libs\armeabi-v7a\" />
+    <Folder Include="libs\x86\" />
+    <Folder Include="libs\x86_64\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedNativeLibrary Include="..\..\..\android\bin\aarch64\libDevolutionsCrypto.so">
+      <Link>libs\arm64-v8a\libDevolutionsCrypto.so</Link>
+    </EmbeddedNativeLibrary>
+    <EmbeddedNativeLibrary Include="..\..\..\android\bin\armv7\libDevolutionsCrypto.so">
+      <Link>libs\armeabi-v7a\libDevolutionsCrypto.so</Link>
+    </EmbeddedNativeLibrary>
+    <EmbeddedNativeLibrary Include="..\..\..\android\bin\i686\libDevolutionsCrypto.so">
+      <Link>libs\x86\libDevolutionsCrypto.so</Link>
+    </EmbeddedNativeLibrary>
+    <EmbeddedNativeLibrary Include="..\..\..\android\bin\x86_64\libDevolutionsCrypto.so">
+      <Link>libs\x86_64\libDevolutionsCrypto.so</Link>
+    </EmbeddedNativeLibrary>
+  </ItemGroup>
+</Project>

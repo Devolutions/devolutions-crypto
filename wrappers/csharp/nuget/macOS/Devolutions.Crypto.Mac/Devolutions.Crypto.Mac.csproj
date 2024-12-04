@@ -14,11 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\..\src\*.cs" />
+    <Compile Include="..\..\..\src\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <NativeReference Include="..\..\..\..\macos-modern\bin\universal\libDevolutionsCrypto.dylib">
+    <NativeReference Include="..\..\..\macos-modern\bin\universal\libDevolutionsCrypto.dylib">
       <Kind>Dynamic</Kind>
       <IsCxx>True</IsCxx>
       <ForceLoad>True</ForceLoad>
