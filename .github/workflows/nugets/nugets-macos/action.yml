@@ -38,6 +38,7 @@ runs:
       shell: bash
       run: |
         brew install mono
+        ls /Library/Frameworks/Mono.framework/Versions/Current/Commands
         echo "PATH=/Library/Frameworks/Mono.framework/Versions/Current/Commands:$PATH" >> $GITHUB_ENV
 
     - name: Generating IOS Nuget
