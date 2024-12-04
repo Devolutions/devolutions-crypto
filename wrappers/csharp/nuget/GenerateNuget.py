@@ -104,45 +104,10 @@ def build_ios(version, args):
         exit(1)
 
 def build_mac_modern(version, args):
-    print("Generating assembly manifest for MAC MODERN...")
-    # Assembly manifest Mac Modern template
-    assembly_manifest_mac_modern = """
-    using System.Reflection;
-    using System.Runtime.CompilerServices;
-
-    using Foundation;
-
-    [assembly: LinkerSafe]
-
-    [assembly: AssemblyTitle("DevolutionsCrypto")]
-    [assembly: AssemblyCompany("Devolutions Inc.")]
-    [assembly: AssemblyCopyright("Copyright ©  ||YEAR||")]
-
-    [assembly: AssemblyVersion("||VERSION||")]
-    """
-
-    assembly_manifest_mac_modern = assembly_manifest_mac_modern.replace("||YEAR||", str(datetime.datetime.now().year))
-    assembly_manifest_mac_modern = assembly_manifest_mac_modern.replace("||VERSION||", version)
-
-    if not os.path.exists("./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac/Properties"):
-        os.makedirs("./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac/Properties")    
-
-    with open("./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac/Properties/AssemblyInfo.cs","wb+") as filee:
-        filee.write(assembly_manifest_mac_modern.encode("utf-8"))
-
-    print("Building...")
-
-    command= subprocess.Popen(["dotnet", "msbuild", "./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac.sln", "/t:clean,restore,build", "/p:configuration=release"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-
-    print(output)
-
-    if("FAILED" in output):
-        exit(1)
-
+    
     print("Generating MAC MODERN nuget...")
 
-    command= subprocess.Popen(["dotnet", "pack", "./macOS/Modern/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac.Modern.nuspec", "-Version", version, "-OutputDirectory", "./macOS/Modern/Devolutions.Crypto.Mac/package"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["dotnet", "pack", "./macOS/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac.csproj", "-c", "release", "-p:PackageVersion="+version, "-p:Version=" + version], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)

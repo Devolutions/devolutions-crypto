@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-macos</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>Devolutions Inc.</Company>
+    <Description>Devolutions Cryptographic Library for macOS</Description>
+    <Copyright>Copyright @ 2024</Copyright>
+    <AssemblyTitle>DevolutionsCrypto</AssemblyTitle>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\..\src\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <NativeReference Include="..\..\..\..\macos-modern\bin\universal\libDevolutionsCrypto.dylib">
+      <Kind>Dynamic</Kind>
+      <IsCxx>True</IsCxx>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+  </ItemGroup>
+</Project>
