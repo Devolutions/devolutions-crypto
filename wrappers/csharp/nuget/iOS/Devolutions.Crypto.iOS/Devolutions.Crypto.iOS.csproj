@@ -3,6 +3,7 @@
     <TargetFramework>net9.0-ios</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <PropertyGroup>
