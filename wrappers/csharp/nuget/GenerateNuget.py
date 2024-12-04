@@ -105,7 +105,7 @@ def build_ios(version, args):
 
 def build_mac_modern(version, args):
     
-    print("Generating MAC MODERN nuget...")
+    print("Generating MAC nuget...")
 
     command= subprocess.Popen(["dotnet", "pack", "./macOS/Devolutions.Crypto.Mac/Devolutions.Crypto.Mac.csproj", "-c", "release", "-p:PackageVersion="+version, "-p:Version=" + version], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
@@ -116,45 +116,9 @@ def build_mac_modern(version, args):
         exit(1)
 
 def build_android(version, args):
-    print("Generating assembly manifest for Android...")
-    # Assembly manifest Android template
-    assembly_manifest_android = """
-    using System.Reflection;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using Android.App;
+    print("Generating Android nuget...")
 
-    [assembly: AssemblyTitle("DevolutionsCrypto")]
-    [assembly: AssemblyCompany("Devolutions Inc.")]
-    [assembly: AssemblyCopyright("Copyright ©  ||YEAR||")]
-
-    [assembly: AssemblyVersion("||VERSION||")]
-    
-    [assembly: ComVisible(false)]
-    """
-
-    assembly_manifest_android = assembly_manifest_android.replace("||YEAR||", str(datetime.datetime.now().year))
-    assembly_manifest_android = assembly_manifest_android.replace("||VERSION||", version)
-
-    if not os.path.exists("./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android/Properties"):
-        os.makedirs("./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android/Properties")    
-
-    with open("./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android/Properties/AssemblyInfo.cs","wb+") as filee:
-        filee.write(assembly_manifest_android.encode("utf-8"))
-
-    print("Building...")
-
-    command= subprocess.Popen(["msbuild", "./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android.sln", "/t:clean,restore,build", "/p:configuration=release"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-
-    print(output)
-
-    if("FAILED" in output):
-        exit(1)
-
-    print("Generating ANDROID nuget...")
-
-    command= subprocess.Popen(["nuget", "pack", "./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android.nuspec", "-Version", version, "-OutputDirectory", "./Android/Devolutions.Crypto.Android/package"], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["dotnet", "pack", "./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Mac.csproj", "-c", "release", "-p:PackageVersion="+version, "-p:Version=" + version], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
