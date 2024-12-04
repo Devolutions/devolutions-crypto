@@ -21,11 +21,6 @@ runs:
       shell: bash
       run: python3 unit-tests.py -p core
 
-    - name: Unit tests XAMARIN-MAC-FULL
-      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
-      shell: bash
-      run: python3 unit-tests.py -p mac
-
 # Install latest Xamarin.Mac to fix issue with the one packaged in the runner. (mac modern only)
 # ld: Framework not found CHIP
 # https://github.com/actions/runner-images/issues/7058

@@ -124,7 +124,6 @@ def main():
         "windows": build_windows,
         "dotnet-core": build_dotnet_core,
         "linux": build_linux,
-        "mac": build_mac_full,
         "mac-modern": build_mac_modern,
         "ios": build_ios,
         "android": build_android,
@@ -323,57 +322,6 @@ def build_linux(assembly_manifest, version, args):
         exit(1)    
 
     os.remove("./linux/bin/AssemblyInfo.cs")
-
-def build_mac_full(assembly_manifest, version, args):
-    architectures = [
-        #{"name" : "i686", "value" : "i686-apple-darwin"}, # 32 bit no longer supported by mac
-        {
-            "name" : "x86_64",
-            "value" : "x86_64-apple-darwin",
-            "cargo_output": "../../target/x86_64-apple-darwin/release/libdevolutions_crypto_ffi.dylib",
-            "filename" : "x86_64/libDevolutionsCrypto.dylib"
-        },
-        {
-            "name" : "aarch64",
-            "value" : "aarch64-apple-darwin",
-            "cargo_output": "../../target/aarch64-apple-darwin/release/libdevolutions_crypto_ffi.dylib",
-            "filename" : "aarch64/libDevolutionsCrypto.dylib"
-        }
-    ]
-
-    target_folder = "./macos-full"
-    if args.output:
-        target_folder = args.output
-
-    build_native(architectures, target_folder, manifest=assembly_manifest, clean=False)
-
-    print("Building Managed Library...")
-    output = exec_command("csc -out:./macos-full/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./macos-full/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:MAC_FULL src/*.cs ./macos-full/bin/AssemblyInfo.cs -optimize")
-    print(output)
-
-    if("error" in output):
-        exit(1)    
-
-    os.remove("./macos-full/bin/AssemblyInfo.cs")
-
-    print("Making universal binary...")
-
-    os.mkdir("./macos-full/bin/universal")
-
-    libs = " "
-
-    for arch in architectures:
-        libs = libs + " ./macos-full/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib"
-    
-    args = "lipo -create"
-    args = args + libs
-    args = args + " -output ./macos-full/bin/universal/libDevolutionsCrypto.dylib"
-    
-    output = exec_command(args)
-    print(output)
-
-    if("error" in output):
-        exit(1)
 
 def build_mac_modern(assembly_manifest, version, args):
     architectures = [
