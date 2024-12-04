@@ -118,7 +118,7 @@ def build_mac_modern(version, args):
 def build_android(version, args):
     print("Generating Android nuget...")
 
-    command= subprocess.Popen(["dotnet", "pack", "./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Mac.csproj", "-c", "release", "-p:PackageVersion="+version, "-p:Version=" + version], stdout=subprocess.PIPE)
+    command= subprocess.Popen(["dotnet", "pack", "./Android/Devolutions.Crypto.Android/Devolutions.Crypto.Android.csproj", "-c", "release", "-p:PackageVersion="+version, "-p:Version=" + version], stdout=subprocess.PIPE)
     output = command.stdout.read().decode('utf-8')
 
     print(output)
