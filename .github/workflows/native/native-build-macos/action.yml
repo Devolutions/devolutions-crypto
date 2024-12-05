@@ -53,8 +53,10 @@ runs:
       working-directory: ./
       shell: bash
       run: |
-        mkdir -p wrappers/csharp/macos-modern/macos-modern
-        mv wrappers/csharp/macos-modern/* wrappers/csharp/macos-modern/macos-modern/
+        mkdir wrappers/csharp/tmp
+        mv wrappers/csharp/macos-modern/* wrappers/csharp/tmp/*
+        mkdir wrappers/csharp/macos-modern/macos-modern
+        mv wrappers/csharp/tmp/* wrappers/csharp/macos-modern/macos-modern/*
 
 
     - uses: actions/upload-artifact@v4.3.6
