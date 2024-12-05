@@ -4,6 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+    <IsBindingProject>true</IsBindingProject>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -23,6 +24,11 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\src\*.cs"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
+    <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
   </ItemGroup>
 
 </Project>
