@@ -49,6 +49,14 @@ runs:
         source $HOME/.cargo/env
         python3 GeneratePackage.py -p mac-modern
 
+    - name: Prepare folder structure
+      working-directory: ./
+      shell: bash
+      run: |
+        mkdir -p wrappers/csharp/macos-modern/macos-modern
+        mv wrappers/csharp/macos-modern/* wrappers/csharp/macos-modern/macos-modern/
+
+
     - uses: actions/upload-artifact@v4.3.6
       with:
         name: native-macos
