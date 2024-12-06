@@ -16,12 +16,6 @@ runs:
         merge-multiple: true
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
 
-    - name: Remove nuget.org source
-      shell: bash
-      run: |
-        dotnet nuget remove source nuget.org
-        dotnet nuget list source
-
     - name: Add local nuget source
       shell: bash
       run: |
