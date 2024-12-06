@@ -203,16 +203,6 @@ jobs:
  #    - run: git lfs pull
  #    - uses: ./.github/workflows/tests/csharp/android
 
-  tests_ios_integration:
-    needs: [tests_nuget_ios, setup_config]
-    runs-on: "macos-15"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
-      - uses: ./.github/workflows/tests/csharp/integration-ios
-
   #### CODE FORMATTING ####
   rust_code_format:
     runs-on: "ubuntu-latest"

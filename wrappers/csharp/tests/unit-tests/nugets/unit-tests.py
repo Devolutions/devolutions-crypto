@@ -176,7 +176,7 @@ def test_mac_modern(script_dir, version, args):
     print("==========================================================================")    
     
     # CLEAN
-    output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./xamarin-mac-modern")
+    output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./macos")
     print(output)
 
     print("Remove Local NuGet Source")
@@ -186,7 +186,7 @@ def test_mac_modern(script_dir, version, args):
 
     print("Nuget Remove Nuget.org Devolutions.Crypto Package")
     print("==========================================================================")
-    output = get_output(["dotnet", "remove", "package", "Devolutions.Crypto.Mac.Modern"], cwd="./xamarin-mac-modern")
+    output = get_output(["dotnet", "remove", "package", "Devolutions.Crypto.Mac"], cwd="./macos")
     print(output)
 
     # Restore    
@@ -204,12 +204,12 @@ def test_mac_modern(script_dir, version, args):
     print("Installing Nuget Package in Nugets Source")
     print("==========================================================================")
     
-    output = get_output(["dotnet", "nuget", "add", "./Nugets/Devolutions.Crypto.Mac.Modern." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
+    output = get_output(["dotnet", "nuget", "add", "./Nugets/Devolutions.Crypto.Mac." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
     print(output)
 
     print("Nuget Add Package Devolutions Crypto to project")
     print("==========================================================================")
-    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Mac.Modern", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./xamarin-mac-modern")
+    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Mac", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./macos")
     print(output)
 
     print("UNIT TESTING")

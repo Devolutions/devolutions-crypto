@@ -22,7 +22,7 @@ namespace Devolutions.Cryptography
         private const string LibName86 = "DevolutionsCrypto";
 #endif
 
-#if !ANDROID && !IOS && !MAC_MODERN && !WIN && !DOTNET_CORE
+#if !ANDROID && !IOS && !MACOS && !WIN && !DOTNET_CORE
         private const string LibName64 = "DevolutionsCrypto-x64";
 
         private const string LibName86 = "DevolutionsCrypto-x86";
