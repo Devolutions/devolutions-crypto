@@ -11,10 +11,12 @@ namespace Devolutions.Crypto.Tests
 
 #if MACOS || ANDROID || IOS
     using NUnit.Framework;
+    using NUnit.Framework.Legacy;
     using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
     using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;
 #else
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using ClassicAssert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 #endif
 
     [TestClass]
@@ -29,12 +31,12 @@ namespace Devolutions.Crypto.Tests
             byte[] data = Utils.DecodeFromBase64(base64Data);
             byte[] key = Utils.DecodeFromBase64("5toYYi+R4MH/ZV1W0dCQ2C8xRYtgwFrmIR2qfEQRP6k=");
 
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.Decrypt(data, key, legacyDecryptor: legacy)));
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(data, key, legacyDecryptor: legacy)));
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(base64Data, key, legacyDecryptor: legacy)));
+            ClassicAssert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.Decrypt(data, key, legacyDecryptor: legacy)));
+            ClassicAssert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(data, key, legacyDecryptor: legacy)));
+            ClassicAssert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(base64Data, key, legacyDecryptor: legacy)));
 
-            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(data, key, legacyDecryptor: legacy));
-            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(base64Data, key, legacyDecryptor: legacy));
+            ClassicAssert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(data, key, legacyDecryptor: legacy));
+            ClassicAssert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(base64Data, key, legacyDecryptor: legacy));
         }
 
         [TestMethod]
@@ -46,12 +48,12 @@ namespace Devolutions.Crypto.Tests
             byte[] data = Utils.DecodeFromBase64(base64Data);
             byte[] key = Utils.DecodeFromBase64("XCF4aJBny9LHFmUBt8zha5O2oOVttykWKrmUl4ujlVg=");
 
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.Decrypt(data, key, legacyDecryptor: legacy)));
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(data, key, legacyDecryptor: legacy)));
-            Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(base64Data, key, legacyDecryptor: legacy)));
+            ClassicAssert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.Decrypt(data, key, legacyDecryptor: legacy)));
+            ClassicAssert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(data, key, legacyDecryptor: legacy)));
+            ClassicAssert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(base64Data, key, legacyDecryptor: legacy)));
 
-            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(data, key, legacyDecryptor: legacy));
-            Assert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(base64Data, key, legacyDecryptor: legacy));
+            ClassicAssert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(data, key, legacyDecryptor: legacy));
+            ClassicAssert.AreEqual("A test Ciphertext!", Managed.DecryptWithKeyAsUtf8String(base64Data, key, legacyDecryptor: legacy));
         }
 
         [TestMethod]
@@ -62,8 +64,8 @@ namespace Devolutions.Crypto.Tests
 
             TestHasher legacy = new TestHasher(salt);
 
-            Assert.IsTrue(Managed.VerifyPassword(Encoding.UTF8.GetBytes("This is a hash!"), hash, legacy));
-            Assert.IsFalse(Managed.VerifyPassword(Encoding.UTF8.GetBytes("Wrong password!"), hash, legacy));
+            ClassicAssert.IsTrue(Managed.VerifyPassword(Encoding.UTF8.GetBytes("This is a hash!"), hash, legacy));
+            ClassicAssert.IsFalse(Managed.VerifyPassword(Encoding.UTF8.GetBytes("Wrong password!"), hash, legacy));
         }
 
         [TestMethod]
@@ -74,8 +76,8 @@ namespace Devolutions.Crypto.Tests
 
             TestHasher legacy = new TestHasher(salt);
 
-            Assert.IsTrue(Managed.VerifyPassword(Encoding.UTF8.GetBytes("This is a devolutions crypto password!"), hash, legacy));
-            Assert.IsFalse(Managed.VerifyPassword(Encoding.UTF8.GetBytes("Wrong password!"), hash, legacy));
+            ClassicAssert.IsTrue(Managed.VerifyPassword(Encoding.UTF8.GetBytes("This is a devolutions crypto password!"), hash, legacy));
+            ClassicAssert.IsFalse(Managed.VerifyPassword(Encoding.UTF8.GetBytes("Wrong password!"), hash, legacy));
         }
 
         private static bool CompareArrays(byte[] a1, byte[] a2)
