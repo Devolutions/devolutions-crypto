@@ -35,7 +35,7 @@ runs:
 
     - name: Run .NET Code Analysis
       uses: dotnet/code-analysis@v1
-      id: code analysis
+      id: code-analysis
       with:
         projects: ./wrappers/csharp/src/devolutions-crypto.csproj
         build-breaking: true
