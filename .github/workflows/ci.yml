@@ -80,7 +80,7 @@ jobs:
 
   #### NUGET BUILD ####
   nugets_linux:
-    needs: [native_build_linux , csharp_code_format, setup_config]
+    needs: [native_build_linux , setup_config]
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
@@ -90,7 +90,7 @@ jobs:
       - uses: ./.github/workflows/nugets/nugets-linux
 
   nugets_windows:
-    needs: [native_build_linux, native_build_macos, native_build_ios, native_build_windows , csharp_code_format, setup_config] # All Natives for dotnet-core
+    needs: [native_build_linux, native_build_macos, native_build_ios, native_build_windows , setup_config] # All Natives for dotnet-core
     runs-on: "windows-latest"
     steps:
       - uses: actions/checkout@v4
@@ -100,7 +100,7 @@ jobs:
       - uses: ./.github/workflows/nugets/nugets-windows
 
   nugets_macos:
-    needs: [native_build_macos, native_build_ios, native_build_linux, csharp_code_format, setup_config]
+    needs: [native_build_macos, native_build_ios, native_build_linux, setup_config]
     runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4

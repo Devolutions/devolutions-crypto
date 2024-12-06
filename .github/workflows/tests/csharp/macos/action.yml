@@ -16,7 +16,19 @@ runs:
         merge-multiple: true
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
 
-    - name: Unit tests XAMARIN-MAC-MODERN
+    - name: Remove nuget.org source
+      shell: bash
+      run: |
+        dotnet nuget remove source nuget.org
+        dotnet nuget list source
+
+    - name: Add local nuget source
+      shell: bash
+      run: |
+        dotnet nuget remove source nuget.org
+        dotnet nuget sources add ./wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
+
+    - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash
-      run: python3 unit-tests.py -p mac-modern
+      run: dotnet test ./macos/macos.csproj

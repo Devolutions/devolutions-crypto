@@ -33,7 +33,10 @@ runs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v2
 
-    - name: Code Analysis
-      working-directory: ./wrappers/csharp/tests/unit-tests/manual/dotnet-framework
-      shell: pwsh
-      run: msbuild dotnet-framework.sln /t:restore,clean,build /p:TreatWarningsAsErrors=True /p:RunCodeAnalysis=true
+    - name: Run .NET Code Analysis
+      uses: dotnet/code-analysis@v1
+      id: code analysis
+      with:
+        projects: ./wrappers/csharp/src/devolutions-crypto.csproj
+        build-breaking: true
+        all-categories: all

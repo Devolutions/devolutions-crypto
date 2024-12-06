@@ -21,7 +21,6 @@ def main():
     platforms = {
         "framework": test_dotnet_framework,
         "core": test_dotnet_core,
-        "mac-modern": test_mac_modern,
         "ios": test_ios,
         "android": test_android,
     }
@@ -171,56 +170,6 @@ def test_dotnet_core(script_dir, version, args):
     if "EXEC FAILED!" in output:
         exit(1)
 
-def test_mac_modern(script_dir, version, args):
-    print("Nuget Cache Clear")
-    print("==========================================================================")    
-    
-    # CLEAN
-    output = get_output(["dotnet", "nuget", "locals", "--clear", "all"], cwd="./macos")
-    print(output)
-
-    print("Remove Local NuGet Source")
-    print("==========================================================================")
-    output = get_output(["dotnet", "nuget", "sources", "remove", "-Name", "LOCALDEVOCRYPTO"])
-    print(output)
-
-    print("Nuget Remove Nuget.org Devolutions.Crypto Package")
-    print("==========================================================================")
-    output = get_output(["dotnet", "remove", "package", "Devolutions.Crypto.Mac"], cwd="./macos")
-    print(output)
-
-    # Restore    
-    print("Nuget Restore Global Packages")
-    print("==========================================================================")
-    output = get_output(["dotnet", "restore", "./macos", "--verbosity", "normal"])
-    print(output)
-
-    print("Add Local NuGet Source")
-    print("==========================================================================")
-    print(os.path.join(script_dir, "Nugets"))
-    output = get_output(["dotnet", "nuget", "sources", "add", "-Name", "LOCALDEVOCRYPTO", "-Source", os.path.join(script_dir, "Nugets")])
-    print(output)
-
-    print("Installing Nuget Package in Nugets Source")
-    print("==========================================================================")
-    
-    output = get_output(["dotnet", "nuget", "add", "./Nugets/Devolutions.Crypto.Mac." + version + ".nupkg", "-Source", "LOCALDEVOCRYPTO"])
-    print(output)
-
-    print("Nuget Add Package Devolutions Crypto to project")
-    print("==========================================================================")
-    output = get_output(["dotnet", "add", "package", "Devolutions.Crypto.Mac", "--source", "../LOCALDEVOCRYPTO", "--version", version], cwd="./macos")
-    print(output)
-
-    print("UNIT TESTING")
-    print("=========================================================================")
-
-    print("Running tests")
-    output = get_output(["dotnet", "test", "./macos/macos.csproj"])
-    print(output)
-
-    if "success=\"False\"" in output:
-        exit(1)
 
 def test_ios(script_dir, version, args):
     print("Nuget Cache Clear")
