@@ -25,7 +25,7 @@ runs:
     - name: Add local nuget source
       shell: bash
       run: |
-        dotnet nuget add source ./wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
+        dotnet nuget add source /Users/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
         dotnet nuget list source
 
 
