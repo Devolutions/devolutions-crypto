@@ -9,15 +9,6 @@ runs:
         name: config.txt
         path: ./wrappers/csharp
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.7"
-
-    - name:  Setting up PATH environment variable
-      shell: bash
-      run: |
-        echo "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn" >> $GITHUB_PATH
-
     - name: Run .NET format
       shell: bash
       working-directory: ./wrappers/csharp/src/
