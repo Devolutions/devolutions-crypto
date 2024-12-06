@@ -123,7 +123,7 @@ namespace Devolutions.Cryptography
             return Managed.VerifyPassword(password, hash);
         }
 
-#if !ANDROID && !IOS && !MAC_MODERN && !DOTNET_CORE
+#if !ANDROID && !IOS && !MACOS && !DOTNET_CORE
         internal static long GenerateSharedKeyNative(UIntPtr nbShares, UIntPtr threshold, UIntPtr size, IntPtr[] shares)
         {
             if (Environment.Is64BitProcess)
