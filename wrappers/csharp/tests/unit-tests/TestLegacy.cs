@@ -9,7 +9,7 @@ namespace Devolutions.Crypto.Tests
 
     using Devolutions.Cryptography;
 
-#if XAMARIN_MAC_FULL || XAMARIN_MAC_MODERN || XAMARIN_IOS || XAMARIN_ANDROID
+#if MACOS || ANDROID || IOS
     using NUnit.Framework;
     using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
     using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;
