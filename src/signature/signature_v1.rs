@@ -19,8 +19,12 @@ pub struct SignatureV1 {
 #[cfg(feature = "fuzz")]
 impl Arbitrary for SignatureV1 {
     fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
-        let signature: [u8; 32] = Arbitrary::arbitrary(u)?;
-        Ok(Self { signature })
+        let mut signature = [0u8; 64];
+        u.fill_buffer(&mut signature)?;
+
+        Ok(Self {
+            signature: Signature::from_bytes(&signature),
+        })
     }
 }
 

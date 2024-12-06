@@ -43,16 +43,18 @@
 mod online_ciphertext_v1;
 
 use super::CiphertextSubtype;
-pub use super::OnlineCiphertextVersion;
 use super::DataType;
 use super::Error;
 use super::Header;
 use super::HeaderType;
+pub use super::OnlineCiphertextVersion;
 use super::Result;
 
 use super::key::{PrivateKey, PublicKey};
 
-use online_ciphertext_v1::{OnlineCiphertextV1Engine, OnlineCiphertextV1Asymmetric, OnlineCiphertextV1Symmetric};
+use online_ciphertext_v1::{
+    OnlineCiphertextV1Asymmetric, OnlineCiphertextV1Engine, OnlineCiphertextV1Symmetric,
+};
 
 use std::convert::TryFrom;
 
