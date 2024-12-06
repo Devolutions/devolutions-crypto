@@ -22,7 +22,6 @@ runs:
         dotnet nuget add source /Users/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
         dotnet nuget list source
 
-
     - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
