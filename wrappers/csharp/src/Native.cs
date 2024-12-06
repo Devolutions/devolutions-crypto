@@ -210,7 +210,7 @@ namespace Devolutions.Cryptography
             return DeriveKeyArgon2Native86(key, keyLength, argon2Parameters, argon2ParametersLength, result, resultLength);
         }
 
-        internal static long DeriveKeyPbkdf2Native(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, System.UInt32 iterations, byte[] result, UIntPtr resultLength)
+        internal static long DeriveKeyPbkdf2Native(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, uint iterations, byte[] result, UIntPtr resultLength)
         {
             if (Environment.Is64BitProcess)
             {
@@ -670,7 +670,7 @@ namespace Devolutions.Cryptography
             UIntPtr keyLength,
             byte[] salt,
             UIntPtr saltLength,
-            System.UInt32 iterations,
+            uint iterations,
             byte[] result,
             UIntPtr resultLength);
 
@@ -680,7 +680,7 @@ namespace Devolutions.Cryptography
             UIntPtr keyLength,
             byte[] salt,
             UIntPtr saltLength,
-            System.UInt32 iterations,
+            uint iterations,
             byte[] result,
             UIntPtr resultLength);
 
