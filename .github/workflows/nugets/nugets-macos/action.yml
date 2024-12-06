@@ -16,9 +16,21 @@ runs:
         merge-multiple: true
         path: ./wrappers/csharp
 
-    - name: Update Nuget
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Install iOS Workload
       shell: bash
-      run: sudo nuget update -self
+      run: sudo dotnet workload install ios
+
+    - name: Install macOS Workload
+      shell: bash
+      run: sudo dotnet workload install macos
+
+    - name: Install android Workload
+      shell: bash
+      run: sudo dotnet workload install android
 
     # dotnet restore fails on macos-12
     # https://github.com/actions/virtual-environments/issues/5768
@@ -38,11 +50,6 @@ runs:
       shell: bash
       run: python3 GenerateNuget.py -p mac-modern
 
-    - name: Generating MAC-FULL Nuget
-      working-directory: ./wrappers/csharp/nuget
-      shell: bash
-      run: python3 GenerateNuget.py -p mac
-
     - name: Generating Android Nuget
       working-directory: ./wrappers/csharp/nuget
       shell: bash
@@ -51,10 +58,9 @@ runs:
     - name: Place Artifacts
       shell: bash
       run: |
-        mv wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/package/*.nupkg .
-        mv wrappers/csharp/nuget/macOS/Full/package/*.nupkg .
-        mv wrappers/csharp/nuget/macOS/Modern/Devolutions.Crypto.Mac/package/*.nupkg .
-        mv wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/package/*.nupkg .
+        mv wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/bin/release/*.nupkg .
+        mv wrappers/csharp/nuget/macOS/Devolutions.Crypto.Mac/bin/release/*.nupkg .
+        mv wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/bin/release/*.nupkg .
 
     - uses: actions/upload-artifact@v4.3.6
       with:

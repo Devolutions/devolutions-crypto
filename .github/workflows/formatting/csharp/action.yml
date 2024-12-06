@@ -9,31 +9,9 @@ runs:
         name: config.txt
         path: ./wrappers/csharp
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.7"
-
-    - name:  Setting up PATH environment variable
+    - name: Run .NET format
       shell: bash
+      working-directory: ./wrappers/csharp/src/
       run: |
-        echo "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn" >> $GITHUB_PATH
-
-    - name: Installing rust targets
-      shell: pwsh
-      run: |
-        rustup target add x86_64-pc-windows-msvc
-        rustup target add i686-pc-windows-msvc
-        rustup target add aarch64-pc-windows-msvc
-
-    - name: Building Windows
-      working-directory: ./wrappers/csharp
-      shell: pwsh
-      run: python GeneratePackage.py -p windows
-
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v2
-
-    - name: Code Analysis
-      working-directory: ./wrappers/csharp/tests/unit-tests/manual/dotnet-framework
-      shell: pwsh
-      run: msbuild dotnet-framework.sln /t:restore,clean,build /p:TreatWarningsAsErrors=True /p:RunCodeAnalysis=true
+        dotnet tool install -g dotnet-format
+        dotnet format devolutions-crypto.csproj --verify-no-changes

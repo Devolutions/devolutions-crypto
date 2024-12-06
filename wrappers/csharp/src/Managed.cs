@@ -554,10 +554,10 @@ namespace Devolutions.Cryptography
             }
 
             return new KeyPair()
-                {
-                    PublicKey = publicKey,
-                    PrivateKey = privateKey,
-                };
+            {
+                PublicKey = publicKey,
+                PrivateKey = privateKey,
+            };
         }
 
         /// <summary>
