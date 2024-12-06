@@ -27,6 +27,10 @@ runs:
       run: |
         dotnet nuget add source ./wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
 
+    - name: Install macOS Workload
+      shell: bash
+      run: sudo dotnet workload install macos
+
     - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash
