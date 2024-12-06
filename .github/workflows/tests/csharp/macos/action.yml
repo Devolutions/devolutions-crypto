@@ -26,6 +26,8 @@ runs:
       shell: bash
       run: |
         dotnet nuget add source ./wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
+        dotnet nuget list source
+
 
     - uses: actions/setup-dotnet@v4
       with:
