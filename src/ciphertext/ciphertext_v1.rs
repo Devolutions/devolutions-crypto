@@ -91,7 +91,7 @@ impl CiphertextV1 {
         let ciphertext = cipher.encrypt_padded_vec_mut::<Pkcs7>(data);
 
         // Append MAC data
-        let mut mac_data: Vec<u8> = (*header).clone().into();
+        let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new(header.into());
         mac_data.extend_from_slice(aad);
         mac_data.extend_from_slice(&iv);
         mac_data.extend_from_slice(&ciphertext);
@@ -116,7 +116,7 @@ impl CiphertextV1 {
         CiphertextV1::split_key(key, &mut encryption_key, &mut signature_key)?;
 
         // Verify HMAC
-        let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new((*header).clone().into());
+        let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new(header.into());
         mac_data.extend_from_slice(aad);
         mac_data.extend_from_slice(&self.iv);
         mac_data.extend_from_slice(&self.ciphertext);

@@ -52,6 +52,7 @@ use super::Result;
 
 use key_v1::{KeyV1Private, KeyV1Public};
 
+use std::borrow::Borrow;
 use std::convert::TryFrom;
 
 #[cfg(feature = "fuzz")]
@@ -231,7 +232,7 @@ fn keypair_headers(version: KeyVersion) -> (Header<PrivateKey>, Header<PublicKey
 impl From<PublicKey> for Vec<u8> {
     /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
     fn from(data: PublicKey) -> Self {
-        let mut header: Self = data.header.into();
+        let mut header: Self = data.header.borrow().into();
         let mut payload: Self = data.payload.into();
         header.append(&mut payload);
         header
@@ -265,7 +266,7 @@ impl TryFrom<&[u8]> for PublicKey {
 impl From<PrivateKey> for Vec<u8> {
     /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
     fn from(data: PrivateKey) -> Self {
-        let mut header: Self = data.header.into();
+        let mut header: Self = data.header.borrow().into();
         let mut payload: Self = data.payload.into();
         header.append(&mut payload);
         header

@@ -31,10 +31,13 @@ impl core::fmt::Debug for SigningKeyV1Pair {
 #[cfg(feature = "fuzz")]
 impl Arbitrary for SigningKeyV1Pair {
     fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
-        let keypair: [u8; 64] = Arbitrary::arbitrary(u)?;
-        Ok(Self {
-            keypair: Keypair::from(private_key),
-        })
+        let mut keypair = [0u8; 64];
+        u.fill_buffer(&mut keypair)?;
+
+        match SigningKey::from_keypair_bytes(&keypair) {
+            Ok(keypair) => Ok(Self { keypair }),
+            Err(_) => Err(arbitrary::Error::IncorrectFormat),
+        }
     }
 }
 
@@ -47,9 +50,10 @@ pub struct SigningKeyV1Public {
 impl Arbitrary for SigningKeyV1Public {
     fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
         let public_key: [u8; 32] = Arbitrary::arbitrary(u)?;
-        Ok(Self {
-            key: PublicKey::from(public_key),
-        })
+        match VerifyingKey::from_bytes(&public_key) {
+            Ok(key) => Ok(Self { key }),
+            Err(_) => Err(arbitrary::Error::IncorrectFormat),
+        }
     }
 }
 

@@ -38,6 +38,7 @@ use super::signing_key::{SigningKeyPair, SigningPublicKey};
 
 use signature_v1::SignatureV1;
 
+use std::borrow::Borrow;
 use std::convert::TryFrom;
 
 #[cfg(feature = "fuzz")]
@@ -121,7 +122,7 @@ impl Signature {
 impl From<Signature> for Vec<u8> {
     /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
     fn from(data: Signature) -> Self {
-        let mut header: Self = data.header.into();
+        let mut header: Self = data.header.borrow().into();
         let mut payload: Self = data.payload.into();
         header.append(&mut payload);
         header

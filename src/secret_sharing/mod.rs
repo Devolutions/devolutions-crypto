@@ -32,6 +32,7 @@ use super::ShareSubtype;
 
 use secret_sharing_v1::ShareV1;
 
+use std::borrow::Borrow;
 use std::convert::TryFrom;
 
 #[cfg(feature = "fuzz")]
@@ -150,7 +151,7 @@ where
 impl From<Share> for Vec<u8> {
     /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
     fn from(data: Share) -> Self {
-        let mut header: Self = data.header.into();
+        let mut header: Self = data.header.borrow().into();
         let mut payload: Self = data.payload.into();
         header.append(&mut payload);
         header

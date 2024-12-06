@@ -24,6 +24,7 @@ use super::Result;
 
 use password_hash_v1::PasswordHashV1;
 
+use std::borrow::Borrow;
 use std::convert::TryFrom;
 
 #[cfg(feature = "fuzz")]
@@ -112,7 +113,7 @@ impl PasswordHash {
 impl From<PasswordHash> for Vec<u8> {
     /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
     fn from(data: PasswordHash) -> Self {
-        let mut header: Self = data.header.into();
+        let mut header: Self = data.header.borrow().into();
         let mut payload: Self = data.payload.into();
         header.append(&mut payload);
         header

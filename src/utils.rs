@@ -119,7 +119,9 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
         }
         DataType::Share => Header::<Share>::try_from(&data[0..Header::len()]).is_ok(),
         DataType::Signature => Header::<Signature>::try_from(&data[0..Header::len()]).is_ok(),
-        DataType::OnlineCiphertext => Header::<OnlineCiphertext>::try_from(&data[0..Header::len()]).is_ok(),
+        DataType::OnlineCiphertext => {
+            Header::<OnlineCiphertext>::try_from(&data[0..Header::len()]).is_ok()
+        }
     }
 }
 

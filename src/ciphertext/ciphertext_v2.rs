@@ -96,7 +96,7 @@ impl CiphertextV2Symmetric {
         let nonce = XNonce::from_slice(&nonce_bytes);
 
         // Authenticate the header
-        let mut mac_data: Vec<u8> = (*header).clone().into();
+        let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new(header.into());
         mac_data.extend_from_slice(aad);
 
         let payload = Payload {
@@ -122,7 +122,7 @@ impl CiphertextV2Symmetric {
         let key = Zeroizing::new(CiphertextV2Symmetric::derive_key(key));
 
         // Authenticate the header
-        let mut mac_data: Vec<u8> = (*header).clone().into();
+        let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new(header.into());
         mac_data.extend_from_slice(aad);
 
         let payload = Payload {
