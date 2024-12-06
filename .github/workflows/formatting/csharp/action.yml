@@ -18,21 +18,6 @@ runs:
       run: |
         echo "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn" >> $GITHUB_PATH
 
-    - name: Installing rust targets
-      shell: pwsh
-      run: |
-        rustup target add x86_64-pc-windows-msvc
-        rustup target add i686-pc-windows-msvc
-        rustup target add aarch64-pc-windows-msvc
-
-    - name: Building Windows
-      working-directory: ./wrappers/csharp
-      shell: pwsh
-      run: python GeneratePackage.py -p windows
-
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v2
-
     - name: Run .NET format
       shell: bash
       working-directory: ./wrappers/csharp/src/
