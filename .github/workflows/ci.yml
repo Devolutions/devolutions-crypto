@@ -172,7 +172,7 @@ jobs:
       - run: git lfs pull
       - uses: ./.github/workflows/kotlin
   
-tests_nuget_android:
+  tests_nuget_android:
    needs: [nugets_macos, setup_config]
    runs-on: "macos-14"
    steps:
