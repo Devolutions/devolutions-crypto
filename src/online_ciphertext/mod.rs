@@ -201,6 +201,12 @@ macro_rules! online_ciphertext_impl {
             }
 
             impl $name {
+                pub fn get_chunk_size(&self) -> u32 {
+                    match &self.cipher {
+                        [<$name Payload>]::V1(cipher) => cipher.get_chunk_size()
+                    }
+                }
+
                 pub fn [<$func _chunk>](
                     &mut self,
                     data: &[u8],
