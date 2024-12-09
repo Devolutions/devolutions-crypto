@@ -1,3 +1,5 @@
+#pragma warning disable SA1600 // Elements should be documented
+
 namespace Devolutions.Cryptography
 {
     using System;
@@ -920,3 +922,4 @@ namespace Devolutions.Cryptography
 #endif
     }
 }
+#pragma warning restore SA1600 // Elements should be documented
