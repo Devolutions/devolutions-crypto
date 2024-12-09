@@ -60,9 +60,9 @@ runs:
     - name: Making the universal binary
       shell: bash
       run: |
-        lipo "../../target/x86_64-apple-ios/release/libDevolutionsCrypto.dylib" \
-            "../../target/aarch64-apple-ios/release/libDevolutionsCrypto.dylib" \
-            "../../target/aarch64-apple-ios-sim/release/libDevolutionsCrypto.dylib" \
+        lipo "./target/x86_64-apple-ios/release/libDevolutionsCrypto.dylib" \
+            "./target/aarch64-apple-ios/release/libDevolutionsCrypto.dylib" \
+            "./target/aarch64-apple-ios-sim/release/libDevolutionsCrypto.dylib" \
             -create -output "./ios/bin/universal/libDevolutionsCrypto.dylib"
 
     - name: Create .framework
