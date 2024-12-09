@@ -27,6 +27,7 @@ runs:
 
     - name: Read version from config file
       shell: bash
+      working-directory: ./wrappers/csharp
       run: |
           VERSION=$(grep 'version' config.txt | cut -d '=' -f2 | tr -d ' "')
 
