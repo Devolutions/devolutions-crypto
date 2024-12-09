@@ -241,7 +241,7 @@ impl OnlineCiphertextV1Decryptor {
         // Create the STREAM decryptor
         let cipher = DecryptorLE31::from_aead(cipher, &header.nonce.into());
 
-        let mut header_bytes: Vec<u8> = header.borrow().into();
+        let mut header_bytes: Vec<u8> = header.into();
         aad.append(&mut header_bytes);
 
         Self {
@@ -268,7 +268,7 @@ impl OnlineCiphertextV1Decryptor {
         // Create the STREAM decryptor
         let cipher = DecryptorLE31::from_aead(cipher, &header.nonce.into());
 
-        let mut header_bytes: Vec<u8> = header.borrow().into();
+        let mut header_bytes: Vec<u8> = header.into();
         aad.append(&mut header_bytes);
 
         Self {
