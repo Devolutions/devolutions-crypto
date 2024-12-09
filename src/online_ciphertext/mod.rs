@@ -177,16 +177,22 @@ impl OnlineCiphertextHeader {
 }
 
 macro_rules! online_ciphertext_impl {
-    ($name:ident, $v1_name:ident, $func:ident) => {
+    ($name:ident, $func:ident, $($version_name:ident),+) => {
         paste! {
-            pub enum $name {
-                V1($v1_name),
+            pub enum [<OnlineCiphertext $name>] {
+            $(
+                $version_name([<OnlineCiphertext $version_name $name>]),
+            ),+
             }
 
-            impl $name {
+            impl [<OnlineCiphertext $name>] {
                 pub fn get_chunk_size(&self) -> u32 {
                     match &self {
-                        $name::V1(cipher) => cipher.get_chunk_size()
+                    $(
+                        [<OnlineCiphertext $name>]::$version_name(cipher) => {
+                            cipher.get_chunk_size()
+                        }
+                    ),+
                     }
                 }
 
@@ -196,9 +202,11 @@ macro_rules! online_ciphertext_impl {
                     aad: &[u8],
                 ) -> Result<Vec<u8>> {
                     match self {
-                        $name::V1(cipher) => {
+                    $(
+                        [<OnlineCiphertext $name>]::$version_name(cipher) => {
                             cipher.[<$func _chunk>](data, aad)
                         }
+                    ),+
                     }
                 }
 
@@ -208,9 +216,11 @@ macro_rules! online_ciphertext_impl {
                     aad: &[u8],
                 ) -> Result<()> {
                     match self {
-                        $name::V1(cipher) => {
+                    $(
+                        [<OnlineCiphertext $name>]::$version_name(cipher) => {
                             cipher.[<$func _chunk_in_place>](data, aad)
                         }
+                    ),+
                     }
                 }
 
@@ -220,9 +230,11 @@ macro_rules! online_ciphertext_impl {
                     aad: &[u8],
                 ) -> Result<Vec<u8>> {
                     match self {
-                        $name::V1(cipher) => {
+                    $(
+                        [<OnlineCiphertext $name>]::$version_name(cipher) => {
                             cipher.[<$func _last>](data, aad)
                         }
+                    ),+
                     }
                 }
 
@@ -232,9 +244,11 @@ macro_rules! online_ciphertext_impl {
                     aad: &[u8],
                 ) -> Result<()> {
                     match self {
-                        $name::V1(cipher) => {
+                    $(
+                        [<OnlineCiphertext $name>]::$version_name(cipher) => {
                             cipher.[<$func _last_in_place>](data, aad)
                         }
+                    ),+
                     }
                 }
             }
@@ -242,16 +256,8 @@ macro_rules! online_ciphertext_impl {
     };
 }
 
-online_ciphertext_impl!(
-    OnlineCiphertextEncryptor,
-    OnlineCiphertextV1Encryptor,
-    encrypt
-);
-online_ciphertext_impl!(
-    OnlineCiphertextDecryptor,
-    OnlineCiphertextV1Decryptor,
-    decrypt
-);
+online_ciphertext_impl!(Encryptor, encrypt, V1);
+online_ciphertext_impl!(Decryptor, decrypt, V1);
 
 #[derive(Clone, Debug)]
 enum OnlineCiphertextHeaderPayload {
