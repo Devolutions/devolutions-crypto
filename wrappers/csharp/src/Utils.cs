@@ -5,7 +5,7 @@ namespace Devolutions.Cryptography
     using System.Text;
 
     /// <summary>
-    /// Useful functions from Devolutions Crypto
+    /// Useful functions from Devolutions Crypto.
     /// </summary>
     public static class Utils
     {

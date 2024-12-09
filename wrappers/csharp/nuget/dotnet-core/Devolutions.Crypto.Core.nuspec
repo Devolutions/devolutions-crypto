@@ -35,8 +35,8 @@
     <file src="../../linux/bin/libDevolutionsCrypto-arm64.so" target="runtimes/linux-arm64/native/libDevolutionsCrypto.so"/>
 
     <!-- macOS Native Libraries -->
-    <file src="../../macos-full/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto.dylib"/>
-    <file src="../../macos-full/bin/aarch64/libDevolutionsCrypto.dylib" target="runtimes/osx-arm64/native/libDevolutionsCrypto.dylib"/>
+    <file src="../../macos-modern/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto.dylib"/>
+    <file src="../../macos-modern/bin/aarch64/libDevolutionsCrypto.dylib" target="runtimes/osx-arm64/native/libDevolutionsCrypto.dylib"/>
 
     <!-- iOS Native Libraries -->
     <file src="../../ios/bin/universal/libDevolutionsCrypto.framework/Info.plist" target="runtimes/ios/native/libDevolutionsCrypto.framework/Info.plist"/>

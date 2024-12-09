@@ -20,17 +20,17 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
-        /// If not null, this describes the error that happenened on the managed side.
+        /// Gets or sets if not null, this describes the error that happenened on the managed side.
         /// </summary>
         public ManagedError? ManagedError { get; set; }
 
         /// <summary>
-        /// If an unknown exception happens this property will contain it..
+        /// Gets or sets if an unknown exception happens this property will contain it..
         /// </summary>
         public Exception ManagedException { get; set; }
 
         /// <summary>
-        /// Override to add additionnal info in the exception message.
+        /// Gets override to add additionnal info in the exception message.
         /// </summary>
         public override string Message
         {
@@ -41,12 +41,12 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
-        /// If not null, this describes the error that happenened on the native side (Rust).
+        /// Gets or sets if not null, this describes the error that happenened on the native side (Rust).
         /// </summary>
         public NativeError? NativeError { get; set; }
 
         /// <summary>
-        /// Override to add additionnal info in the exception stacktrace.
+        /// Gets override to add additionnal info in the exception stacktrace.
         /// </summary>
         public override string StackTrace
         {

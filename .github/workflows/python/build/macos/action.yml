@@ -25,6 +25,14 @@ runs:
       with:
         python-version: "3.12"
 
+    - name: Building aarch64 3.12 Wheel
+      working-directory: ./python
+      shell: bash
+      run: |
+        source $HOME/.cargo/env
+
+        maturin build --release -i python --target=aarch64-apple-darwin
+
     - name: Building x86_64 3.12 Wheel
       working-directory: ./python
       shell: bash

@@ -124,9 +124,7 @@ def main():
         "windows": build_windows,
         "dotnet-core": build_dotnet_core,
         "linux": build_linux,
-        "mac": build_mac_full,
         "mac-modern": build_mac_modern,
-        "ios": build_ios,
         "android": build_android,
     }
 
@@ -324,57 +322,6 @@ def build_linux(assembly_manifest, version, args):
 
     os.remove("./linux/bin/AssemblyInfo.cs")
 
-def build_mac_full(assembly_manifest, version, args):
-    architectures = [
-        #{"name" : "i686", "value" : "i686-apple-darwin"}, # 32 bit no longer supported by mac
-        {
-            "name" : "x86_64",
-            "value" : "x86_64-apple-darwin",
-            "cargo_output": "../../target/x86_64-apple-darwin/release/libdevolutions_crypto_ffi.dylib",
-            "filename" : "x86_64/libDevolutionsCrypto.dylib"
-        },
-        {
-            "name" : "aarch64",
-            "value" : "aarch64-apple-darwin",
-            "cargo_output": "../../target/aarch64-apple-darwin/release/libdevolutions_crypto_ffi.dylib",
-            "filename" : "aarch64/libDevolutionsCrypto.dylib"
-        }
-    ]
-
-    target_folder = "./macos-full"
-    if args.output:
-        target_folder = args.output
-
-    build_native(architectures, target_folder, manifest=assembly_manifest, clean=False)
-
-    print("Building Managed Library...")
-    output = exec_command("csc -out:./macos-full/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./macos-full/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:MAC_FULL src/*.cs ./macos-full/bin/AssemblyInfo.cs -optimize")
-    print(output)
-
-    if("error" in output):
-        exit(1)    
-
-    os.remove("./macos-full/bin/AssemblyInfo.cs")
-
-    print("Making universal binary...")
-
-    os.mkdir("./macos-full/bin/universal")
-
-    libs = " "
-
-    for arch in architectures:
-        libs = libs + " ./macos-full/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib"
-    
-    args = "lipo -create"
-    args = args + libs
-    args = args + " -output ./macos-full/bin/universal/libDevolutionsCrypto.dylib"
-    
-    output = exec_command(args)
-    print(output)
-
-    if("error" in output):
-        exit(1)
-
 def build_mac_modern(assembly_manifest, version, args):
     architectures = [
         #{"name" : "i686", "value" : "i686-apple-darwin"}, # no longer supported in stable (Tier 3)
@@ -416,91 +363,6 @@ def build_mac_modern(assembly_manifest, version, args):
 
     if("error" in output):
         exit(1)
-
-def build_ios(assembly_manifest, version, args):
-    architectures = [
-        # {"name" : "armv7", "value" : "armv7-apple-ios"}, no longer supported in stable (Tier 3)
-        # {"name" : "armv7s", "value" : "armv7s-apple-ios"}, no longer supported in stable (Tier 3)
-        # {"name" : "i386", "value" : "i386-apple-ios"}, no longer supported in stable (Tier 3)
-        {"name" : "x86_64",
-            "value" : "x86_64-apple-ios",
-            "manifest_path" : "./Cargo.toml",
-            "cargo_output": "../../target/x86_64-apple-ios/release/libdevolutions_crypto_ffi.dylib",
-            "filename" : "x86_64/libDevolutionsCrypto.dylib"},
-        {"name" : "aarch64",
-            "value" : "aarch64-apple-ios",
-            "manifest_path" : "./Cargo.toml",
-            "cargo_output": "../../target/aarch64-apple-ios/release/libdevolutions_crypto_ffi.dylib",
-            "filename" : "aarch64/libDevolutionsCrypto.dylib"},
-        ]
-
-    print("Checking minimum version variable")
-    if "IPHONEOS_DEPLOYMENT_TARGET" in os.environ:
-        print("IPHONEOS_DEPLOYMENT_TARGET = " + os.getenv("IPHONEOS_DEPLOYMENT_TARGET"))
-    else:
-        print("Variable IPHONEOS_DEPLOYMENT_TARGET not found!")
-        exit(1)
-
-    target_folder = "./ios"
-    if args.output:
-        target_folder = args.output
-
-    build_native(architectures, target_folder, assembly_manifest)
-
-    print("Making universal binary...")
-
-    os.mkdir("./ios/bin/universal")
-
-    libs = " "
-
-    for arch in architectures:
-        libs = libs + " ./ios/bin/" + arch["name"] + "/" + "libDevolutionsCrypto.dylib"
-    
-    args = "lipo -create "
-    args = args + libs
-    args = args + " -output ./ios/bin/universal/libDevolutionsCrypto.dylib"
-    
-    output = exec_command(args)
-    print(output)
-
-    if("error" in output):
-        exit(1)
-
-    print("Packaging into .framework ...") #########################
-    # Unlike .a (static lib) the .dylib needs to be packaged into a .framework package. iOS is now using a dynamic library.
-
-    universal_folder = "./ios/bin/universal/"
-    os.mkdir(universal_folder + "libDevolutionsCrypto.framework")
-    shutil.move(universal_folder + "libDevolutionsCrypto.dylib", universal_folder + "libDevolutionsCrypto.framework/libDevolutionsCrypto")
-
-    print("Fixing rpath")
-    command = subprocess.Popen(["install_name_tool", "-id", "@rpath/libDevolutionsCrypto.framework/libDevolutionsCrypto", universal_folder + "libDevolutionsCrypto.framework/libDevolutionsCrypto"], stdout=subprocess.PIPE)
-    output = command.stdout.read().decode('utf-8')
-    print(output)
-
-    plist_framework_data = None
-
-    with open("./nuget/iOS/Devolutions.Crypto.iOS/Devolutions.Crypto.iOS/Info.plist", "r") as file:
-        plist_framework_data = file.read()
-
-    now = datetime.datetime.now()
-
-    plist_framework_data = plist_framework_data.replace("||VERSION||", version + "." + str(now.hour) + str(now.minute))
-    plist_framework_data = plist_framework_data.replace("||SHORT_VERSION||", version)
-
-    with open(universal_folder + "libDevolutionsCrypto.framework/Info.plist", "w+") as file:
-        file.write(plist_framework_data)
-    ###################################
-
-    print("Building Managed Library...")
-    output = exec_command("csc -out:./ios/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./ios/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu -define:IOS src/*.cs ./ios/bin/AssemblyInfo.cs -optimize")
-    print(output)
-
-    if("error" in output):
-        exit(1)    
-
-    os.remove("./ios/bin/AssemblyInfo.cs")
-
 
 def build_android(assembly_manifest, version, args):
     architectures = [

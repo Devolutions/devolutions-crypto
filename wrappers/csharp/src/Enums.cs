@@ -41,7 +41,7 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// A wrapped signature
         /// </summary>
-        Signature = 6
+        Signature = 6,
     }
 
     /// <summary>

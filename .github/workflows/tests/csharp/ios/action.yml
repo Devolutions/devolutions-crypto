@@ -16,11 +16,17 @@ runs:
         merge-multiple: true
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
 
-    - name: Update Nuget
+    - name: Add local nuget source
       shell: bash
-      run: sudo nuget update -self
+      run: |
+        dotnet nuget add source /Users/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
+        dotnet nuget list source
 
-    - name: Unit tests XAMARIN-IOS
-      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+    - name: Install iOS Workload
       shell: bash
-      run: python3 unit-tests.py -p ios
+      run: sudo dotnet workload install ios
+
+    - name: Unit tests
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets/iOS
+      shell: bash
+      run: dotnet build -t:run
