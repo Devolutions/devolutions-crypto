@@ -29,4 +29,4 @@ runs:
     - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash
-      run: dotnet test ./dotnet-core/dotnet-core.csproj --framework net6.0-ios -p:RuntimeIdentifier=iossimulator-x64
+      run: dotnet test ./dotnet-core/dotnet-core.csproj --framework net8.0-ios -p:RuntimeIdentifier=iossimulator-x64
