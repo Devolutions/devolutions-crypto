@@ -79,16 +79,6 @@ jobs:
       - uses: ./.github/workflows/native/native-build-windows
 
   #### NUGET BUILD ####
-  nugets_linux:
-    needs: [native_build_linux , setup_config]
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
-      - uses: ./.github/workflows/nugets/nugets-linux
-
   nugets_windows:
     needs: [native_build_linux, native_build_macos, native_build_ios, native_build_windows , setup_config] # All Natives for dotnet-core
     runs-on: "windows-latest"
@@ -98,17 +88,6 @@ jobs:
           lfs: true
       - run: git lfs pull
       - uses: ./.github/workflows/nugets/nugets-windows
-
-  nugets_macos:
-    needs: [native_build_macos, native_build_ios, native_build_linux, setup_config]
-    runs-on: "macos-15"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
-      - uses: ./.github/workflows/nugets/nugets-macos
-
 
   #### WEB ASSEMBLY BUILD ####
   webassembly_build:
