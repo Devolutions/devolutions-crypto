@@ -7,7 +7,7 @@ use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
 
-use crate::online_ciphertext::OnlineCiphertext;
+use crate::online_ciphertext::OnlineCiphertextHeader;
 
 use super::Argon2Parameters;
 use super::DataType;
@@ -120,7 +120,7 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
         DataType::Share => Header::<Share>::try_from(&data[0..Header::len()]).is_ok(),
         DataType::Signature => Header::<Signature>::try_from(&data[0..Header::len()]).is_ok(),
         DataType::OnlineCiphertext => {
-            Header::<OnlineCiphertext>::try_from(&data[0..Header::len()]).is_ok()
+            Header::<OnlineCiphertextHeader>::try_from(&data[0..Header::len()]).is_ok()
         }
     }
 }

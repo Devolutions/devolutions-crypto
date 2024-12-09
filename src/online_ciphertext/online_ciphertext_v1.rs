@@ -20,9 +20,17 @@ use paste::paste;
 
 const CONTEXT: &'static str = "devolutions_crypto online_ciphertext_v1";
 
+#[derive(Clone, Debug)]
 pub struct OnlineCiphertextV1HeaderSymmetric {
-    chunk_size: u64,
+    chunk_size: u32,
     nonce: [u8; 20],
+}
+
+#[derive(Clone, Debug)]
+pub struct OnlineCiphertextV1HeaderAsymmetric {
+    chunk_size: u32,
+    nonce: [u8; 20],
+    public_key: x25519_dalek::PublicKey,
 }
 
 impl From<&OnlineCiphertextV1HeaderSymmetric> for Vec<u8> {
@@ -32,12 +40,6 @@ impl From<&OnlineCiphertextV1HeaderSymmetric> for Vec<u8> {
 
         buf
     }
-}
-
-pub struct OnlineCiphertextV1HeaderAsymmetric {
-    chunk_size: u64,
-    nonce: [u8; 20],
-    public_key: x25519_dalek::PublicKey,
 }
 
 impl From<&OnlineCiphertextV1HeaderAsymmetric> for Vec<u8> {
@@ -53,13 +55,13 @@ impl From<&OnlineCiphertextV1HeaderAsymmetric> for Vec<u8> {
 macro_rules! online_ciphertext_impl {
     ($struct_name:ident, $cipher_name:ident, $func:ident) => {
         pub struct $struct_name {
-            chunk_size: u64,
+            chunk_size: u32,
             aad: Vec<u8>,
             cipher: $cipher_name<XChaCha20Poly1305>,
         }
 
         impl $struct_name {
-            pub fn get_chunk_size(&self) -> u64 {
+            pub fn get_chunk_size(&self) -> u32 {
                 self.chunk_size
             }
 
@@ -69,7 +71,7 @@ macro_rules! online_ciphertext_impl {
                     data: &[u8],
                     aad: &[u8],
                 ) -> Result<Vec<u8>> {
-                    if (data.len() as u64) != self.chunk_size {
+                    if (data.len() as u32) != self.chunk_size {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -87,12 +89,12 @@ macro_rules! online_ciphertext_impl {
                     Ok(self.cipher.[<$func _next>](payload)?)
                 }
 
-                pub fn  [<$func _in_place>](
+                pub fn  [<$func _chunk_in_place>](
                     &mut self,
                     data: &mut Vec<u8>,
                     aad: &[u8],
                 ) -> Result<()> {
-                    if (data.len() as u64) != self.chunk_size {
+                    if (data.len() as u32) != self.chunk_size {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -107,12 +109,12 @@ macro_rules! online_ciphertext_impl {
                     Ok(())
                 }
 
-                pub fn [<$func _last_chunk>](
+                pub fn [<$func _last>](
                     self,
                     data: &[u8],
                     aad: &[u8],
                 ) -> Result<Vec<u8>> {
-                    if (data.len() as u64) != self.chunk_size {
+                    if (data.len() as u32) != self.chunk_size {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -135,7 +137,7 @@ macro_rules! online_ciphertext_impl {
                     data: &mut Vec<u8>,
                     aad: &[u8],
                 ) -> Result<()> {
-                    if (data.len() as u64) != self.chunk_size {
+                    if (data.len() as u32) != self.chunk_size {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -158,7 +160,7 @@ impl OnlineCiphertextV1Encryptor {
     pub fn new(
         key: &[u8],
         mut aad: Vec<u8>,
-        chunk_size: u64,
+        chunk_size: u32,
     ) -> (Self, OnlineCiphertextV1HeaderSymmetric) {
         // Generate a new nonce
         let mut nonce = [0u8; 20];
@@ -190,7 +192,7 @@ impl OnlineCiphertextV1Encryptor {
     pub fn new_asymmetric(
         public_key: &PublicKey,
         mut aad: Vec<u8>,
-        chunk_size: u64,
+        chunk_size: u32,
     ) -> (Self, OnlineCiphertextV1HeaderAsymmetric) {
         // Perform a ECDH exchange as per ECIES
         let public_key = x25519_dalek::PublicKey::from(public_key);
