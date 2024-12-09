@@ -31,4 +31,4 @@ runs:
       shell: bash
       run: | 
         sed -i '' 's/net8\.0/net8\.0-ios/g' ./dotnet-core/dotnet-core.csproj
-        dotnet test ./dotnet-core/dotnet-core.csproj -p:RuntimeIdentifier=iossimulator-x64 -p:ApplicationId=com.test.test
+        dotnet test ./dotnet-core/dotnet-core.csproj -p:RuntimeIdentifier=iossimulator-arm64 -p:ApplicationId=com.test.test
