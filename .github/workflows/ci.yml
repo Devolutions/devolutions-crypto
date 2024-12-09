@@ -133,7 +133,7 @@ jobs:
       - uses: ./.github/workflows/tests/csharp/macos
 
   tests_nuget_ios:
-    needs: [setup_config]
+    needs: [nugets_windows, setup_config]
     runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4
