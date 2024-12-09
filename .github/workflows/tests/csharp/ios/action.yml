@@ -27,8 +27,6 @@ runs:
       run: sudo dotnet workload install ios
 
     - name: Unit tests
-      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets/iOS
       shell: bash
-      run: | 
-        sed -i '' 's/net8\.0/net8\.0-ios/g' ./dotnet-core/dotnet-core.csproj
-        dotnet test ./dotnet-core/dotnet-core.csproj -p:RuntimeIdentifier=iossimulator-arm64 -p:ApplicationId=com.test.test
+      run: dotnet build -t:run ./dotnet-core/dotnet-core.csproj -p:RuntimeIdentifier=iossimulator-arm64 -p:ApplicationId=com.test.test
