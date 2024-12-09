@@ -95,14 +95,11 @@ pub fn new_encryptor(
         OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
             header.version = OnlineCiphertextVersion::V1;
 
-            let (encryptor, inner_header) =
+            let (cipher, inner_header) =
                 OnlineCiphertextV1Encryptor::new(key, full_aad, chunk_size);
 
             (
-                OnlineCiphertextEncryptor {
-                    header: header.clone(),
-                    cipher: OnlineCiphertextEncryptorPayload::V1(encryptor),
-                },
+                OnlineCiphertextEncryptor::V1(cipher),
                 OnlineCiphertextHeader {
                     header,
                     payload: OnlineCiphertextHeaderPayload::V1Symmetric(inner_header),
@@ -130,14 +127,11 @@ pub fn new_encryptor_asymmetric(
         OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
             header.version = OnlineCiphertextVersion::V1;
 
-            let (encryptor, inner_header) =
+            let (cipher, inner_header) =
                 OnlineCiphertextV1Encryptor::new_asymmetric(public_key, full_aad, chunk_size);
 
             (
-                OnlineCiphertextEncryptor {
-                    header: header.clone(),
-                    cipher: OnlineCiphertextEncryptorPayload::V1(encryptor),
-                },
+                OnlineCiphertextEncryptor::V1(cipher),
                 OnlineCiphertextHeader {
                     header,
                     payload: OnlineCiphertextHeaderPayload::V1Asymmetric(inner_header),
@@ -156,10 +150,7 @@ impl OnlineCiphertextHeader {
             OnlineCiphertextHeaderPayload::V1Symmetric(header) => {
                 let cipher = OnlineCiphertextV1Decryptor::new(key, full_aad, &header);
 
-                Ok(OnlineCiphertextDecryptor {
-                    header: self.header.clone(),
-                    cipher: OnlineCiphertextDecryptorPayload::V1(cipher),
-                })
+                Ok(OnlineCiphertextDecryptor::V1(cipher))
             }
             OnlineCiphertextHeaderPayload::V1Asymmetric(_) => Err(Error::InvalidDataType),
         }
@@ -179,10 +170,7 @@ impl OnlineCiphertextHeader {
                 let cipher =
                     OnlineCiphertextV1Decryptor::new_asymmetric(private_key, full_aad, &header);
 
-                Ok(OnlineCiphertextDecryptor {
-                    header: self.header.clone(),
-                    cipher: OnlineCiphertextDecryptorPayload::V1(cipher),
-                })
+                Ok(OnlineCiphertextDecryptor::V1(cipher))
             }
         }
     }
@@ -191,19 +179,14 @@ impl OnlineCiphertextHeader {
 macro_rules! online_ciphertext_impl {
     ($name:ident, $v1_name:ident, $func:ident) => {
         paste! {
-            enum [<$name Payload>] {
+            pub enum $name {
                 V1($v1_name),
-            }
-
-            pub struct $name {
-                pub(crate) header: Header<OnlineCiphertextHeader>,
-                cipher: [<$name Payload>],
             }
 
             impl $name {
                 pub fn get_chunk_size(&self) -> u32 {
-                    match &self.cipher {
-                        [<$name Payload>]::V1(cipher) => cipher.get_chunk_size()
+                    match &self {
+                        $name::V1(cipher) => cipher.get_chunk_size()
                     }
                 }
 
@@ -212,8 +195,8 @@ macro_rules! online_ciphertext_impl {
                     data: &[u8],
                     aad: &[u8],
                 ) -> Result<Vec<u8>> {
-                    match &mut self.cipher {
-                        [<$name Payload>]::V1(cipher) => {
+                    match self {
+                        $name::V1(cipher) => {
                             cipher.[<$func _chunk>](data, aad)
                         }
                     }
@@ -224,8 +207,8 @@ macro_rules! online_ciphertext_impl {
                     data: &mut Vec<u8>,
                     aad: &[u8],
                 ) -> Result<()> {
-                    match &mut self.cipher {
-                        [<$name Payload>]::V1(cipher) => {
+                    match self {
+                        $name::V1(cipher) => {
                             cipher.[<$func _chunk_in_place>](data, aad)
                         }
                     }
@@ -236,8 +219,8 @@ macro_rules! online_ciphertext_impl {
                     data: &[u8],
                     aad: &[u8],
                 ) -> Result<Vec<u8>> {
-                    match self.cipher {
-                        [<$name Payload>]::V1(cipher) => {
+                    match self {
+                        $name::V1(cipher) => {
                             cipher.[<$func _last>](data, aad)
                         }
                     }
@@ -248,8 +231,8 @@ macro_rules! online_ciphertext_impl {
                     data: &mut Vec<u8>,
                     aad: &[u8],
                 ) -> Result<()> {
-                    match self.cipher {
-                        [<$name Payload>]::V1(cipher) => {
+                    match self {
+                        $name::V1(cipher) => {
                             cipher.[<$func _last_in_place>](data, aad)
                         }
                     }
