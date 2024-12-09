@@ -2,63 +2,164 @@
 use super::{PrivateKey, PublicKey};
 
 use super::Error;
-use super::Header;
 use super::Result;
 
-use super::OnlineCiphertext;
+use std::borrow::Borrow;
 
-use std::convert::TryFrom;
-use std::ops::Sub;
-
-use aead::generic_array::GenericArray;
-use aead::stream::{NewStream, StreamLE31, StreamPrimitive};
-use aead::AeadCore;
 use chacha20poly1305::aead::{
     stream::{DecryptorLE31, EncryptorLE31},
-    Aead, Payload,
+    Payload,
 };
-use chacha20poly1305::{Key, KeyInit, XChaCha20Poly1305, XNonce};
+use chacha20poly1305::{KeyInit, XChaCha20Poly1305};
 
 use rand::{rngs::OsRng, RngCore};
 use x25519_dalek::StaticSecret;
-use zeroize::{Zeroize, Zeroizing};
+use zeroize::Zeroizing;
 
-#[cfg(feature = "fuzz")]
-use arbitrary::Arbitrary;
+use paste::paste;
 
 const CONTEXT: &'static str = "devolutions_crypto online_ciphertext_v1";
 
-pub struct OnlineCiphertextV1Encryptor {
+pub struct OnlineCiphertextV1HeaderSymmetric {
     chunk_size: u64,
-    cipher: EncryptorLE31<XChaCha20Poly1305>,
+    nonce: [u8; 20],
 }
 
-pub struct OnlineCiphertextV1Decryptor {
-    chunk_size: u64,
-    cipher: DecryptorLE31<XChaCha20Poly1305>,
-}
+impl From<&OnlineCiphertextV1HeaderSymmetric> for Vec<u8> {
+    fn from(value: &OnlineCiphertextV1HeaderSymmetric) -> Self {
+        let mut buf = value.chunk_size.to_le_bytes().to_vec();
+        buf.extend(value.nonce);
 
-trait NewOnlineCiphertextV1 {
-    type Ciphertext: NewStream<StreamLE31<XChaCha20Poly1305>>;
-
-    fn new(key: &[u8], chunk_size: u64) -> (Self, [u8; 20]) {
-        // Generate a new nonce
-        let mut nonce = [0u8; 20];
-        OsRng.fill_bytes(&mut nonce);
-
-        // Derive the key
-        let key = Zeroizing::new(blake3::derive_key(CONTEXT, key));
-        let cipher = XChaCha20Poly1305::new(key.as_ref().into());
-
-        // Create the STREAM encryptor
-        let cipher = EncryptorLE31::from_aead(cipher, &nonce.into());
-
-        (Self { chunk_size, cipher }, nonce)
+        buf
     }
+}
+
+pub struct OnlineCiphertextV1HeaderAsymmetric {
+    chunk_size: u64,
+    nonce: [u8; 20],
+    public_key: x25519_dalek::PublicKey,
+}
+
+impl From<&OnlineCiphertextV1HeaderAsymmetric> for Vec<u8> {
+    fn from(value: &OnlineCiphertextV1HeaderAsymmetric) -> Self {
+        let mut buf = value.chunk_size.to_le_bytes().to_vec();
+        buf.extend(value.nonce);
+        buf.extend_from_slice(value.public_key.as_bytes());
+
+        buf
+    }
+}
+
+macro_rules! online_ciphertext_impl {
+    ($struct_name:ident, $cipher_name:ident, $func:ident) => {
+        pub struct $struct_name {
+            chunk_size: u64,
+            aad: Vec<u8>,
+            cipher: $cipher_name<XChaCha20Poly1305>,
+        }
+
+        impl $struct_name {
+            pub fn get_chunk_size(&self) -> u64 {
+                self.chunk_size
+            }
+
+            paste! {
+                pub fn [<$func _chunk>](
+                    &mut self,
+                    data: &[u8],
+                    aad: &[u8],
+                ) -> Result<Vec<u8>> {
+                    if (data.len() as u64) != self.chunk_size {
+                        return Err(Error::InvalidChunkLength);
+                    };
+
+                    let mut full_aad = self.aad.to_vec();
+
+                    if !aad.is_empty() {
+                        full_aad.extend_from_slice(aad);
+                    };
+
+                    let payload = Payload {
+                        msg: &data,
+                        aad: &full_aad,
+                    };
+
+                    Ok(self.cipher.[<$func _next>](payload)?)
+                }
+
+                pub fn  [<$func _in_place>](
+                    &mut self,
+                    data: &mut Vec<u8>,
+                    aad: &[u8],
+                ) -> Result<()> {
+                    if (data.len() as u64) != self.chunk_size {
+                        return Err(Error::InvalidChunkLength);
+                    };
+
+                    let mut full_aad = self.aad.to_vec();
+
+                    if !aad.is_empty() {
+                        full_aad.extend_from_slice(aad);
+                    };
+
+                    self.cipher.[<$func _next_in_place>](&full_aad, data)?;
+
+                    Ok(())
+                }
+
+                pub fn [<$func _last_chunk>](
+                    self,
+                    data: &[u8],
+                    aad: &[u8],
+                ) -> Result<Vec<u8>> {
+                    if (data.len() as u64) != self.chunk_size {
+                        return Err(Error::InvalidChunkLength);
+                    };
+
+                    let mut full_aad = self.aad.to_vec();
+
+                    if !aad.is_empty() {
+                        full_aad.extend_from_slice(aad);
+                    };
+
+                    let payload = Payload {
+                        msg: &data,
+                        aad: &full_aad,
+                    };
+
+                    Ok(self.cipher.[<$func _last>](payload)?)
+                }
+
+                pub fn [<$func _last_in_place>](
+                    self,
+                    data: &mut Vec<u8>,
+                    aad: &[u8],
+                ) -> Result<()> {
+                    if (data.len() as u64) != self.chunk_size {
+                        return Err(Error::InvalidChunkLength);
+                    };
+
+                    let mut full_aad = self.aad.to_vec();
+
+                    if !aad.is_empty() {
+                        full_aad.extend_from_slice(aad);
+                    };
+
+                    self.cipher.[<$func _last_in_place>](&full_aad, data)?;
+
+                    Ok(())
+                }
+            }
+        }
+    };
 }
 
 impl OnlineCiphertextV1Encryptor {
-    pub fn new(key: &[u8], chunk_size: u64) -> (Self, [u8; 20]) {
+    pub fn new(
+        key: &[u8],
+        mut aad: Vec<u8>,
+        chunk_size: u64,
+    ) -> (Self, OnlineCiphertextV1HeaderSymmetric) {
         // Generate a new nonce
         let mut nonce = [0u8; 20];
         OsRng.fill_bytes(&mut nonce);
@@ -70,69 +171,111 @@ impl OnlineCiphertextV1Encryptor {
         // Create the STREAM encryptor
         let cipher = EncryptorLE31::from_aead(cipher, &nonce.into());
 
-        (Self { chunk_size, cipher }, nonce)
+        // Create aad
+        let header = OnlineCiphertextV1HeaderSymmetric { chunk_size, nonce };
+
+        let mut header_bytes: Vec<u8> = header.borrow().into();
+        aad.append(&mut header_bytes);
+
+        (
+            Self {
+                chunk_size,
+                aad,
+                cipher,
+            },
+            header,
+        )
     }
 
-    pub fn encrypt_chunk(
-        &mut self,
-        data: &[u8],
-        header: &Header<OnlineCiphertext>,
-    ) -> Result<Vec<u8>> {
-        let mut data = data.to_vec();
+    pub fn new_asymmetric(
+        public_key: &PublicKey,
+        mut aad: Vec<u8>,
+        chunk_size: u64,
+    ) -> (Self, OnlineCiphertextV1HeaderAsymmetric) {
+        // Perform a ECDH exchange as per ECIES
+        let public_key = x25519_dalek::PublicKey::from(public_key);
 
-        self.encrypt_in_place(&mut data, header)?;
+        let ephemeral_private_key = StaticSecret::random_from_rng(rand_core::OsRng);
+        let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
 
-        Ok(data)
-    }
+        let key = ephemeral_private_key.diffie_hellman(&public_key);
 
-    pub fn encrypt_in_place(
-        &mut self,
-        data: &mut Vec<u8>,
-        header: &Header<OnlineCiphertext>,
-    ) -> Result<()> {
-        if (data.len() as u64) != self.chunk_size {
-            return Err(Error::InvalidChunkLength);
+        // Generate a new nonce
+        let mut nonce = [0u8; 20];
+        OsRng.fill_bytes(&mut nonce);
+
+        // Derive the key
+        let key = Zeroizing::new(blake3::derive_key(CONTEXT, key.as_bytes()));
+        let cipher = XChaCha20Poly1305::new(key.as_ref().into());
+
+        // Create the STREAM encryptor
+        let cipher = EncryptorLE31::from_aead(cipher, &nonce.into());
+
+        let header = OnlineCiphertextV1HeaderAsymmetric {
+            chunk_size,
+            nonce,
+            public_key: ephemeral_public_key,
         };
 
-        let header: [u8; 8] = header.into();
+        let mut header_bytes: Vec<u8> = header.borrow().into();
+        aad.append(&mut header_bytes);
 
-        self.cipher.encrypt_next_in_place(&header, data)?;
-
-        Ok(())
-    }
-
-    pub fn encrypt_last_chunk(
-        self,
-        data: &[u8],
-        header: &Header<OnlineCiphertext>,
-    ) -> Result<Vec<u8>> {
-        if (data.len() as u64) >= self.chunk_size {
-            return Err(Error::InvalidChunkLength);
+        let encryptor = Self {
+            chunk_size,
+            cipher,
+            aad,
         };
 
-        let header: [u8; 8] = header.into();
-
-        let payload = Payload {
-            msg: data,
-            aad: header.as_slice(),
-        };
-
-        Ok(self.cipher.encrypt_last(payload)?)
-    }
-
-    pub fn encrypt_last_in_place(
-        self,
-        data: &mut Vec<u8>,
-        header: &Header<OnlineCiphertext>,
-    ) -> Result<()> {
-        if (data.len() as u64) != self.chunk_size {
-            return Err(Error::InvalidChunkLength);
-        };
-
-        let header: [u8; 8] = header.into();
-
-        self.cipher.encrypt_last_in_place(&header, data)?;
-
-        Ok(())
+        (encryptor, header)
     }
 }
+
+impl OnlineCiphertextV1Decryptor {
+    pub fn new(key: &[u8], mut aad: Vec<u8>, header: &OnlineCiphertextV1HeaderSymmetric) -> Self {
+        // Derive the key
+        let key = Zeroizing::new(blake3::derive_key(CONTEXT, key));
+        let cipher = XChaCha20Poly1305::new(key.as_ref().into());
+
+        // Create the STREAM decryptor
+        let cipher = DecryptorLE31::from_aead(cipher, &header.nonce.into());
+
+        let mut header_bytes: Vec<u8> = header.borrow().into();
+        aad.append(&mut header_bytes);
+
+        Self {
+            chunk_size: header.chunk_size,
+            aad,
+            cipher,
+        }
+    }
+
+    pub fn new_asymmetric(
+        private_key: &PrivateKey,
+        mut aad: Vec<u8>,
+        header: &OnlineCiphertextV1HeaderAsymmetric,
+    ) -> Self {
+        // Perform a ECDH exchange as per ECIES
+        let private_key = x25519_dalek::StaticSecret::from(private_key);
+
+        let key = private_key.diffie_hellman(&header.public_key);
+
+        // Derive the key
+        let key = Zeroizing::new(blake3::derive_key(CONTEXT, key.as_bytes()));
+        let cipher = XChaCha20Poly1305::new(key.as_ref().into());
+
+        // Create the STREAM decryptor
+        let cipher = DecryptorLE31::from_aead(cipher, &header.nonce.into());
+
+        let mut header_bytes: Vec<u8> = header.borrow().into();
+        aad.append(&mut header_bytes);
+
+        Self {
+            chunk_size: header.chunk_size,
+            aad,
+            cipher,
+        }
+    }
+}
+
+online_ciphertext_impl!(OnlineCiphertextV1Encryptor, EncryptorLE31, encrypt);
+online_ciphertext_impl!(OnlineCiphertextV1Decryptor, DecryptorLE31, decrypt);

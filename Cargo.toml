@@ -59,6 +59,7 @@ x25519-dalek = { version = "2", features = [ "static_secrets" ] }
 #   that isn't compatible with the header trait
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
 blake3 = { version = "1.5.5", features = ["zeroize"] }
+paste = "1.0.15"
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
 rust-argon2 = { version = "1.0", default-features = false }

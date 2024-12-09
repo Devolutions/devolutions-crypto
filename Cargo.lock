@@ -527,6 +527,7 @@ dependencies = [
  "hmac",
  "js-sys",
  "num_enum",
+ "paste",
  "pbkdf2",
  "rand",
  "rand_core",
