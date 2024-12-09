@@ -1,39 +1,21 @@
-namespace iOS;
+namespace android;
 
 using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-[Register("AppDelegate")]
-public class AppDelegate : UIApplicationDelegate
+[Activity(Label = "@string/app_name", MainLauncher = true)]
+public class MainActivity : Activity
 {
-	public override UIWindow? Window
-	{
-		get;
-		set;
-	}
+    protected override void OnCreate(Bundle? savedInstanceState)
+    {
+        base.OnCreate(savedInstanceState);
 
-	public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
-	{
-		// create a new window instance based on the screen size
-		Window = new UIWindow(UIScreen.MainScreen.Bounds);
+        // Set our view from the "main" layout resource
+        SetContentView(Resource.Layout.activity_main);
 
-		// create a UIViewController with a single UILabel
-		var vc = new UIViewController();
-		vc.View!.AddSubview(new UILabel(Window!.Frame)
-		{
-			BackgroundColor = UIColor.SystemBackground,
-			TextAlignment = UITextAlignment.Center,
-			Text = "Hello, iOS!",
-			AutoresizingMask = UIViewAutoresizing.All,
-		});
-		Window.RootViewController = vc;
-
-		// make the window visible
-		Window.MakeKeyAndVisible();
-
-		int passedTests = 0;
+        		int passedTests = 0;
         int failedTests = 0;
 
 		// Get the current assembly
@@ -88,6 +70,5 @@ public class AppDelegate : UIApplicationDelegate
 		}
 
         Environment.Exit(0);
-		return true;
-	}
+    }
 }

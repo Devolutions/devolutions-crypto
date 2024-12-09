@@ -29,4 +29,4 @@ runs:
     - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets/iOS
       shell: bash
-      run: dotnet build -t:run ./dotnet-core/dotnet-core.csproj -p:RuntimeIdentifier=iossimulator-arm64 -p:ApplicationId=com.test.test
+      run: dotnet build -t:run

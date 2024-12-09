@@ -61,7 +61,7 @@ runs:
 
         adb shell input keyevent 82
 
-    - name: Unit tests XAMARIN-ANDROID
-      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+    - name: Unit tests Android
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets/android
       shell: bash
-      run: python3 unit-tests.py -p android
+      run: dotnet build -t:run
