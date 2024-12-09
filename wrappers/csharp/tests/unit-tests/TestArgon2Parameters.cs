@@ -6,16 +6,8 @@ namespace Devolutions.Crypto.Tests
     using System.IO;
 
     using Devolutions.Cryptography.Argon2;
-
-#if MACOS || ANDROID || IOS
-    using NUnit.Framework;
-    using NUnit.Framework.Legacy;
-    using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
-    using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;
-#else
+    
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using ClassicAssert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
-#endif
 
     [TestClass]
     public class TestArgon2Parameters
@@ -24,10 +16,10 @@ namespace Devolutions.Crypto.Tests
         public void FromByteArray()
         {
             Argon2Parameters parameters = Argon2Parameters.FromByteArray(Convert.FromBase64String(TestData.Argon2DefaultParametersb64));
-            ClassicAssert.IsTrue(parameters.Iterations == 2);
-            ClassicAssert.IsTrue(parameters.Lanes == 1);
-            ClassicAssert.IsTrue(parameters.Length == 32);
-            ClassicAssert.IsTrue(parameters.Memory == 4096);
+            Assert.IsTrue(parameters.Iterations == 2);
+            Assert.IsTrue(parameters.Lanes == 1);
+            Assert.IsTrue(parameters.Length == 32);
+            Assert.IsTrue(parameters.Memory == 4096);
         }
 
         [TestMethod]
@@ -38,9 +30,9 @@ namespace Devolutions.Crypto.Tests
 
             byte[] result = parameters.ToByteArray();
 
-            ClassicAssert.IsTrue(result != null);
+            Assert.IsTrue(result != null);
 
-            ClassicAssert.IsTrue(result.Length == Argon2Parameters.NativeSize);
+            Assert.IsTrue(result.Length == Argon2Parameters.NativeSize);
 
             MemoryStream stream = new MemoryStream(result);
 
@@ -54,7 +46,7 @@ namespace Devolutions.Crypto.Tests
                 Array.Reverse(buffer);
             }
 
-            ClassicAssert.IsTrue(BitConverter.ToUInt32(buffer, 0) == 1);
+            Assert.IsTrue(BitConverter.ToUInt32(buffer, 0) == 1);
 
             // ==== Length ====
             stream.Read(buffer, 0, 4);
@@ -64,7 +56,7 @@ namespace Devolutions.Crypto.Tests
                 Array.Reverse(buffer);
             }
 
-            ClassicAssert.IsTrue(BitConverter.ToUInt32(buffer, 0) == 32);
+            Assert.IsTrue(BitConverter.ToUInt32(buffer, 0) == 32);
 
             // ==== Lanes ====
             stream.Read(buffer, 0, 4);
@@ -74,7 +66,7 @@ namespace Devolutions.Crypto.Tests
                 Array.Reverse(buffer);
             }
 
-            ClassicAssert.IsTrue(BitConverter.ToUInt32(buffer, 0) == 1);
+            Assert.IsTrue(BitConverter.ToUInt32(buffer, 0) == 1);
 
             // ==== Memory ====
             stream.Read(buffer, 0, 4);
@@ -84,7 +76,7 @@ namespace Devolutions.Crypto.Tests
                 Array.Reverse(buffer);
             }
 
-            ClassicAssert.IsTrue(BitConverter.ToUInt32(buffer, 0) == 4096);
+            Assert.IsTrue(BitConverter.ToUInt32(buffer, 0) == 4096);
 
             // ==== Iterations ====
             stream.Read(buffer, 0, 4);
@@ -94,17 +86,17 @@ namespace Devolutions.Crypto.Tests
                 Array.Reverse(buffer);
             }
 
-            ClassicAssert.IsTrue(BitConverter.ToUInt32(buffer, 0) == 2);
+            Assert.IsTrue(BitConverter.ToUInt32(buffer, 0) == 2);
 
             // ==== Variant ====
             stream.Read(buffer, 0, 1);
 
-            ClassicAssert.IsTrue((Variant)buffer[0] == Variant.Argon2id);
+            Assert.IsTrue((Variant)buffer[0] == Variant.Argon2id);
 
             // ==== Version ====
             stream.Read(buffer, 0, 1);
 
-            ClassicAssert.IsTrue((Devolutions.Cryptography.Argon2.Version)buffer[0] == Devolutions.Cryptography.Argon2.Version.Version13);
+            Assert.IsTrue((Devolutions.Cryptography.Argon2.Version)buffer[0] == Devolutions.Cryptography.Argon2.Version.Version13);
         }
     }
 }

@@ -1,15 +1,8 @@
 #pragma warning disable SA1600 // Elements should be documented
 namespace Devolutions.Crypto.Tests
 {
-#if MACOS || ANDROID || IOS
-    using NUnit.Framework;
-    using NUnit.Framework.Legacy;
-    using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
-    using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;
-#else
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using ClassicAssert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
-#endif
+
     using System;
     using System.Text;
 
@@ -24,14 +17,14 @@ namespace Devolutions.Crypto.Tests
         public void ByteArrayToString()
         {
             string conversionResult = Utils.ByteArrayToUtf8String(TestData.BytesTestData);
-            ClassicAssert.AreEqual(conversionResult, TestData.StringTestData);
+            Assert.AreEqual(conversionResult, TestData.StringTestData);
         }
 
         [TestMethod]
         public void Decode()
         {
             byte[] data = Utils.DecodeFromBase64(TestData.Base64TestData);
-            ClassicAssert.AreEqual(Convert.ToBase64String(data), Convert.ToBase64String(TestData.BytesTestData));
+            Assert.AreEqual(Convert.ToBase64String(data), Convert.ToBase64String(TestData.BytesTestData));
         }
 
         [TestMethod]
@@ -39,7 +32,7 @@ namespace Devolutions.Crypto.Tests
         {
             byte[] decryptResult = Managed.Decrypt(TestData.EncryptedData, TestData.BytesTestKey);
             string encodedByteArrayToUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
-            ClassicAssert.AreEqual(encodedByteArrayToUtf8String, TestData.Base64TestData);
+            Assert.AreEqual(encodedByteArrayToUtf8String, TestData.Base64TestData);
         }
 
         [TestMethod]
@@ -49,8 +42,8 @@ namespace Devolutions.Crypto.Tests
 
             byte[] decryptedData = Managed.DecryptAsymmetric(encryptedData, TestData.AlicePrivateKey);
 
-            ClassicAssert.IsTrue(decryptedData != null);
-            ClassicAssert.IsTrue(Encoding.UTF8.GetString(decryptedData) == "test");
+            Assert.IsTrue(decryptedData != null);
+            Assert.IsTrue(Encoding.UTF8.GetString(decryptedData) == "test");
         }
 
         [TestMethod]
@@ -58,14 +51,14 @@ namespace Devolutions.Crypto.Tests
         {
             byte[] decryptResult = Managed.DecryptWithKey(TestData.EncryptedData, TestData.BytesTestKey);
             string decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
-            ClassicAssert.AreEqual(decryptResultString, TestData.Base64TestData);
+            Assert.AreEqual(decryptResultString, TestData.Base64TestData);
         }
 
         [TestMethod]
         public void DecryptWithKeyAsString()
         {
             string decryptResultString = Managed.DecryptWithKeyAsUtf8String(TestData.EncryptedData, TestData.BytesTestKey);
-            ClassicAssert.AreEqual(decryptResultString, TestData.Base64TestData);
+            Assert.AreEqual(decryptResultString, TestData.Base64TestData);
         }
 
         [TestMethod]
@@ -75,7 +68,7 @@ namespace Devolutions.Crypto.Tests
             string password = "testPa$$";
             byte[] decryptResult = Managed.DecryptWithPassword(encrytedDataAsBase64, password);
             string decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
-            ClassicAssert.AreEqual(decryptResultString, "test Ciph3rtext");
+            Assert.AreEqual(decryptResultString, "test Ciph3rtext");
         }
 
         [TestMethod]
@@ -85,7 +78,7 @@ namespace Devolutions.Crypto.Tests
             string password = "testPa$$";
             byte[] decryptResult = Managed.DecryptWithPassword(encrytedDataAsBase64, password);
             string decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
-            ClassicAssert.AreEqual(decryptResultString, "test Ciph3rtext");
+            Assert.AreEqual(decryptResultString, "test Ciph3rtext");
         }
 
         [TestMethod]
@@ -93,21 +86,21 @@ namespace Devolutions.Crypto.Tests
         {
             string encryptedDataAsBase64 = "DQwCAAAAAgCoE9Y3m06QaPSAiL2qegthcm0+zZWt4fXbdqcefkzD6y8pnWsMzLkx/32t";
             string decryptResultString = Managed.DecryptWithPasswordAsUtf8String(encryptedDataAsBase64, TestData.TestPassword);
-            ClassicAssert.AreEqual(decryptResultString, TestData.StringTestData);
+            Assert.AreEqual(decryptResultString, TestData.StringTestData);
         }
 
         [TestMethod]
         public void DerivePassword()
         {
             byte[] derivedPassword = Managed.DerivePassword(TestData.Base64TestData, null, 100);
-            ClassicAssert.AreEqual(Convert.ToBase64String(TestData.TestDeriveBytes), Convert.ToBase64String(derivedPassword));
+            Assert.AreEqual(Convert.ToBase64String(TestData.TestDeriveBytes), Convert.ToBase64String(derivedPassword));
         }
 
         [TestMethod]
         public void Encode()
         {
             string encodedArrayToBase64String = Utils.EncodeToBase64String(TestData.BytesTestData);
-            ClassicAssert.AreEqual(encodedArrayToBase64String, TestData.Base64TestData);
+            Assert.AreEqual(encodedArrayToBase64String, TestData.Base64TestData);
         }
 
         [TestMethod]
@@ -115,11 +108,11 @@ namespace Devolutions.Crypto.Tests
         {
             byte[] base64DataAsUtf8ByteArray = Utils.StringToUtf8ByteArray(TestData.Base64TestData2);
             byte[] encryptResult = Managed.Encrypt(base64DataAsUtf8ByteArray, TestData.BytesTestKey);
-            ClassicAssert.IsTrue(Utils.ValidateHeader(encryptResult, DataType.Cipher));
+            Assert.IsTrue(Utils.ValidateHeader(encryptResult, DataType.Cipher));
 
             byte[] decryptResult = Managed.Decrypt(encryptResult, TestData.BytesTestKey);
             var decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
-            ClassicAssert.AreEqual(decryptResultAsUtf8String, TestData.Base64TestData2);
+            Assert.AreEqual(decryptResultAsUtf8String, TestData.Base64TestData2);
         }
 
         [TestMethod]
@@ -129,18 +122,18 @@ namespace Devolutions.Crypto.Tests
 
             byte[] encryptedData = Managed.EncryptAsymmetric(dataToEncrypt, TestData.AlicePublicKey);
 
-            ClassicAssert.IsTrue(encryptedData != null);
-            ClassicAssert.IsTrue(encryptedData.Length == 84);
+            Assert.IsTrue(encryptedData != null);
+            Assert.IsTrue(encryptedData.Length == 84);
         }
 
         [TestMethod]
         public void EncryptBase64WithPassword()
         {
             byte[] encryptedData = Managed.EncryptBase64WithPassword(TestData.Base64TestData, TestData.TestPassword);
-            ClassicAssert.IsTrue(Utils.ValidateHeader(encryptedData, DataType.Cipher));
+            Assert.IsTrue(Utils.ValidateHeader(encryptedData, DataType.Cipher));
             byte[] decryptResult = Managed.DecryptWithPassword(encryptedData, TestData.TestPassword);
             string decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
-            ClassicAssert.AreEqual(decryptResultString, TestData.StringTestData);
+            Assert.AreEqual(decryptResultString, TestData.StringTestData);
         }
 
         [TestMethod]
@@ -148,7 +141,7 @@ namespace Devolutions.Crypto.Tests
         {
             string encryptResultString = Managed.EncryptBase64WithPasswordAsString(TestData.Base64TestData, TestData.TestPassword);
             string decryptResultAsUtf8String = Managed.DecryptWithPasswordAsUtf8String(encryptResultString, TestData.TestPassword);
-            ClassicAssert.AreEqual(decryptResultAsUtf8String, TestData.StringTestData);
+            Assert.AreEqual(decryptResultAsUtf8String, TestData.StringTestData);
         }
 
         [TestMethod]
@@ -158,7 +151,7 @@ namespace Devolutions.Crypto.Tests
             byte[] encodedPassword = Utils.StringToUtf8ByteArray(TestData.TestPassword);
             string encryptResultAsBase64String = Managed.EncryptWithKeyAsBase64String(encodedData, encodedPassword);
             string decryptResult = Managed.DecryptWithKeyAsUtf8String(encryptResultAsBase64String, encodedPassword);
-            ClassicAssert.AreEqual(decryptResult, TestData.StringTestData);
+            Assert.AreEqual(decryptResult, TestData.StringTestData);
         }
 
         [TestMethod]
@@ -169,7 +162,7 @@ namespace Devolutions.Crypto.Tests
             byte[] encryptResultArray = Managed.EncryptWithKey(encodedData, encodedPassword);
             byte[] decryptResult = Managed.DecryptWithKey(encryptResultArray, encodedPassword);
             string decryptResultAsUtf8String = Utils.ByteArrayToUtf8String(decryptResult);
-            ClassicAssert.AreEqual(decryptResultAsUtf8String, TestData.StringTestData);
+            Assert.AreEqual(decryptResultAsUtf8String, TestData.StringTestData);
         }
 
         [TestMethod]
@@ -178,7 +171,7 @@ namespace Devolutions.Crypto.Tests
             byte[] encodedDataAsUtf8ByteArray = Utils.StringToUtf8ByteArray(TestData.StringTestData);
             string encryptResultAsBase64String = Managed.EncryptWithPasswordAsBase64String(encodedDataAsUtf8ByteArray, TestData.TestPassword);
             string decryptResultAsUtf8String = Managed.DecryptWithPasswordAsUtf8String(encryptResultAsBase64String, TestData.TestPassword);
-            ClassicAssert.AreEqual(decryptResultAsUtf8String, TestData.StringTestData);
+            Assert.AreEqual(decryptResultAsUtf8String, TestData.StringTestData);
         }
 
         [TestMethod]
@@ -188,16 +181,16 @@ namespace Devolutions.Crypto.Tests
             string password = "pwd";
             string encryptResultAsBase64String = Managed.EncryptWithPasswordAsBase64String(base64EncodedToUtf8ByteArray, password, 100);
             string decryptionResultAsUtf8String = Managed.DecryptWithPasswordAsUtf8String(encryptResultAsBase64String, password, 100);
-            ClassicAssert.AreEqual(decryptionResultAsUtf8String, TestData.Base64TestData);
+            Assert.AreEqual(decryptionResultAsUtf8String, TestData.Base64TestData);
         }
 
         [TestMethod]
         public void GenerateKey()
         {
             byte[] firstKey = Managed.GenerateKey(32);
-            ClassicAssert.AreEqual(32, firstKey.Length);
+            Assert.AreEqual(32, firstKey.Length);
             byte[] secondKey = Managed.GenerateKey(32);
-            ClassicAssert.AreNotEqual(firstKey, secondKey);
+            Assert.AreNotEqual(firstKey, secondKey);
         }
 
         [TestMethod]
@@ -207,7 +200,7 @@ namespace Devolutions.Crypto.Tests
             KeyPair alice = Managed.GenerateKeyPair();
             byte[] bobMix = Managed.MixKeyExchange(bob.PrivateKey, alice.PublicKey);
             byte[] aliceMix = Managed.MixKeyExchange(alice.PrivateKey, bob.PublicKey);
-            ClassicAssert.AreEqual(Convert.ToBase64String(bobMix), Convert.ToBase64String(aliceMix));
+            Assert.AreEqual(Convert.ToBase64String(bobMix), Convert.ToBase64String(aliceMix));
         }
 
         [TestMethod]
@@ -216,7 +209,7 @@ namespace Devolutions.Crypto.Tests
             SigningKeyPair keypair = Managed.GenerateSigningKeyPair();
             byte[] keypairRaw = keypair.ToByteArray();
 
-            ClassicAssert.AreEqual(keypairRaw.Length, 72);
+            Assert.AreEqual(keypairRaw.Length, 72);
         }
 
         [TestMethod]
@@ -227,7 +220,7 @@ namespace Devolutions.Crypto.Tests
 
             byte[] signature = Managed.Sign(data, keypair);
 
-            ClassicAssert.AreEqual(Convert.ToBase64String(signature), TestData.SignedTestingb64);
+            Assert.AreEqual(Convert.ToBase64String(signature), TestData.SignedTestingb64);
         }
 
         [TestMethod]
@@ -240,7 +233,7 @@ namespace Devolutions.Crypto.Tests
 
             bool res = Managed.VerifySignature(System.Text.Encoding.UTF8.GetBytes(TestData.SignTesting), pubkey, signature);
 
-            ClassicAssert.AreEqual(res, true);
+            Assert.AreEqual(res, true);
         }
 
         [TestMethod]
@@ -253,7 +246,7 @@ namespace Devolutions.Crypto.Tests
 
             bool res = Managed.VerifySignature(System.Text.Encoding.UTF8.GetBytes("bad data"), pubkey, signature);
 
-            ClassicAssert.AreEqual(res, false);
+            Assert.AreEqual(res, false);
         }
 
         [TestMethod]
@@ -266,7 +259,7 @@ namespace Devolutions.Crypto.Tests
 
             bool res = Managed.VerifySignature(System.Text.Encoding.UTF8.GetBytes(TestData.SignTesting), pubkey, signature);
 
-            ClassicAssert.AreEqual(res, false);
+            Assert.AreEqual(res, false);
         }
 
         [TestMethod]
@@ -279,7 +272,7 @@ namespace Devolutions.Crypto.Tests
 
             bool res = Managed.VerifySignature(System.Text.Encoding.UTF8.GetBytes(TestData.SignTesting), pubkey, signature);
 
-            ClassicAssert.AreEqual(res, false);
+            Assert.AreEqual(res, false);
         }
 
         [TestMethod]
@@ -289,14 +282,14 @@ namespace Devolutions.Crypto.Tests
             const int secretLength = 10;
             const int threshold = 3;
             var result = Managed.GenerateSharedKey(nbShares, threshold, secretLength);
-            ClassicAssert.IsTrue(result != null && result.Length == 5 && result[0].Length == 20);
+            Assert.IsTrue(result != null && result.Length == 5 && result[0].Length == 20);
         }
 
         [TestMethod]
         public void GetDecodedLength()
         {
             int bufferDecodedLength = Utils.GetDecodedBase64StringLength(TestData.Base64TestData);
-            ClassicAssert.AreEqual(bufferDecodedLength, 3);
+            Assert.AreEqual(bufferDecodedLength, 3);
         }
 
         [TestMethod]
@@ -304,15 +297,15 @@ namespace Devolutions.Crypto.Tests
         {
             Argon2Parameters defaultArgon2Parameters = Managed.GetDefaultArgon2Parameters();
 
-            ClassicAssert.IsTrue(defaultArgon2Parameters != null);
-            ClassicAssert.IsTrue(defaultArgon2Parameters.Memory == 4096);
+            Assert.IsTrue(defaultArgon2Parameters != null);
+            Assert.IsTrue(defaultArgon2Parameters.Memory == 4096);
         }
 
         [TestMethod]
         public void GetEncodedLength()
         {
             int stringEncodedLength = Utils.GetEncodedBase64StringLength(TestData.BytesTestData);
-            ClassicAssert.AreEqual(stringEncodedLength, 4);
+            Assert.AreEqual(stringEncodedLength, 4);
         }
 
         [TestMethod]
@@ -321,8 +314,8 @@ namespace Devolutions.Crypto.Tests
             byte[] firstHash = Managed.HashPassword(TestData.BytesTestKey);
             byte[] secondHash = Managed.HashPassword(TestData.BytesTestData);
 
-            ClassicAssert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, firstHash));
-            ClassicAssert.IsFalse(Managed.VerifyPassword(secondHash, firstHash));
+            Assert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, firstHash));
+            Assert.IsFalse(Managed.VerifyPassword(secondHash, firstHash));
         }
 
         [TestMethod]
@@ -331,14 +324,14 @@ namespace Devolutions.Crypto.Tests
             var shares = GetSharesKeys();
             var result = Managed.JoinShares(shares);
             var val = Utils.ByteArrayToUtf8String(result);
-            ClassicAssert.IsTrue(result != null && result.Length == 10);
+            Assert.IsTrue(result != null && result.Length == 10);
 
             var shares2 = GetSharesKeys2();
             var result2 = Managed.JoinShares(shares2);
             var val2 = Utils.ByteArrayToUtf8String(result2);
 
-            ClassicAssert.IsTrue(result2 != null && result2.Length == 10);
-            ClassicAssert.AreEqual(val, val2);
+            Assert.IsTrue(result2 != null && result2.Length == 10);
+            Assert.AreEqual(val, val2);
         }
 
         [TestMethod]
@@ -346,27 +339,27 @@ namespace Devolutions.Crypto.Tests
         {
             byte[] bobMix = Managed.MixKeyExchange(TestData.BobPrivateKey, TestData.AlicePublicKey);
             byte[] aliceMix = Managed.MixKeyExchange(TestData.AlicePrivateKey, TestData.BobPublicKey);
-            ClassicAssert.AreEqual(Convert.ToBase64String(bobMix), Convert.ToBase64String(aliceMix));
+            Assert.AreEqual(Convert.ToBase64String(bobMix), Convert.ToBase64String(aliceMix));
         }
 
         [TestMethod]
         public void StringToByteArray()
         {
             byte[] dataEncodedToUtf8ByteArray = Utils.StringToUtf8ByteArray(TestData.StringTestData);
-            ClassicAssert.AreEqual(Convert.ToBase64String(dataEncodedToUtf8ByteArray), Convert.ToBase64String(TestData.BytesTestData));
+            Assert.AreEqual(Convert.ToBase64String(dataEncodedToUtf8ByteArray), Convert.ToBase64String(TestData.BytesTestData));
         }
 
         [TestMethod]
         public void ToBase64String()
         {
             string dataEncodedToBase64String = Utils.EncodeToBase64String(TestData.BytesTestData);
-            ClassicAssert.AreEqual(dataEncodedToBase64String, TestData.Base64TestData);
+            Assert.AreEqual(dataEncodedToBase64String, TestData.Base64TestData);
         }
 
         [TestMethod]
         public void VerifyPassword()
         {
-            ClassicAssert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, TestData.TestHash));
+            Assert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, TestData.TestHash));
         }
 
         private static byte[][] GetSharesKeys()
