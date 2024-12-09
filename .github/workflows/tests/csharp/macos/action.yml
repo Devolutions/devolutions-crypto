@@ -33,4 +33,4 @@ runs:
     - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash
-      run: dotnet test ./macos/macos.csproj
+      run: dotnet test ./dotnet-core/dotnet-core.csproj
