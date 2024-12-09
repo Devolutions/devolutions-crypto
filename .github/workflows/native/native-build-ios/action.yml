@@ -39,8 +39,9 @@ runs:
       run: |
         rustup update
 
-        rustup target add x86_64-apple-ios
-        rustup target add aarch64-apple-ios
+        rustup target add x86_64-apple-ios # iOS Simulator on Intel based mac
+        rustup target add aarch64-apple-ios-sim # iOS Simulator on Arm based mac
+        rustup target add aarch64-apple-ios # iOS & iPad
 
     - name: Unit tests
       working-directory: ./
@@ -49,12 +50,31 @@ runs:
         source $HOME/.cargo/env
         cargo test
 
-    - name: Building IOS
-      working-directory: ./wrappers/csharp
+    - name: Build iOS
       shell: bash
       run: |
-        source $HOME/.cargo/env
-        python3 GeneratePackage.py -p ios
+        cargo build --release --target=x86_64-apple-ios
+        cargo build --release --target=aarch64-apple-ios-sim
+        cargo build --release --target=aarch64-apple-ios
+
+    - name: Making the universal binary
+      shell: bash
+      run: |
+        lipo "../../target/x86_64-apple-ios/release/libDevolutionsCrypto.dylib" \
+            "../../target/aarch64-apple-ios/release/libDevolutionsCrypto.dylib" \
+            "../../target/aarch64-apple-ios-sim/release/libDevolutionsCrypto.dylib" \
+            -create -output "./ios/bin/universal/libDevolutionsCrypto.dylib"
+
+    - name: Create .framework
+      shell: bash
+      run: |
+        mkdir ./ios/bin/universal/libDevolutionsCrypto.framework
+        mv ./ios/bin/universal/libDevolutionsCrypto.dylib ./ios/bin/universal/libDevolutionsCrypto.framework/libDevolutionsCrypto
+
+        # Fixing rpath
+        echo "Fixing rpath"
+        install_name_tool -id "@rpath/libDevolutionsCrypto.framework/libDevolutionsCrypto" "./ios/bin/universal/libDevolutionsCrypto.framework/libDevolutionsCrypto"
+
         mkdir output
         mv ./ios ./output/ios
 
