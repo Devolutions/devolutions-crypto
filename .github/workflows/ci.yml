@@ -173,7 +173,7 @@ jobs:
       - uses: ./.github/workflows/kotlin
   
   tests_nuget_android:
-   needs: [nugets_macos, setup_config]
+   needs: [nugets_windows, setup_config]
    runs-on: "macos-14"
    steps:
      - uses: actions/checkout@v4
