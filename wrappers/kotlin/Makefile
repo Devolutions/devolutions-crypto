@@ -21,11 +21,14 @@ ANDROID_ARCHS = android-arm64-v8a android-armeabi-v7a android-x86 android-x86-64
 KT_DEBUG_PATH = ./lib/src/main/resources/linux-x86-64/lib$(LIB_NAME).so
 KT_RELEASE_PATH = $(foreach var,$(ANDROID_ARCHS),./lib/src/main/resources/$(var)/lib$(LIB_NAME).so)
 
-.PHONY: android clean
+.PHONY: android clean publish
 
 all: $(KOTLIN_WRAPPER_FILE) $(KT_DEBUG_PATH)
 
 android: $(KOTLIN_WRAPPER_FILE) $(KT_RELEASE_PATH)
+
+publish: all
+	cd ./lib && ./gradlew clean build publish
 
 # Build the library in debug
 $(DEBUG_DLL): $(DC_UNIFFI_SOURCES)
@@ -36,7 +39,6 @@ $(ROOT)/target/%/release/lib$(LIB_NAME).so: $(DC_UNIFFI_SOURCES)
 	cargo build --release --target=$* -p "$(LIB_NAME_DASHES)"
 
 # Copy the libraries to KT directory
-# TODO: Can we loop this?
 $(KT_DEBUG_PATH): $(DEBUG_DLL)
 	mkdir -p $(@D)
 	cp $< $@
