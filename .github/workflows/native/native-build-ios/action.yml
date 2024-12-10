@@ -39,30 +39,43 @@ runs:
     - name: Build iOS
       shell: bash
       run: |
-        cargo build --release --target=x86_64-apple-ios
-        cargo build --release --target=aarch64-apple-ios-sim
-        cargo build --release --target=aarch64-apple-ios
+        cargo build -p devolutions-crypto-ffi --release --target=x86_64-apple-ios
+        cargo build -p devolutions-crypto-ffi --release --target=aarch64-apple-ios-sim
+        cargo build -p devolutions-crypto-ffi --release --target=aarch64-apple-ios
 
-    - name: Making the universal binary
+    - name: Create .framework simulator
       shell: bash
       run: |
-        lipo "./target/x86_64-apple-ios/release/libDevolutionsCrypto.dylib" \
-            "./target/aarch64-apple-ios/release/libDevolutionsCrypto.dylib" \
-            "./target/aarch64-apple-ios-sim/release/libDevolutionsCrypto.dylib" \
-            -create -output "./ios/bin/universal/libDevolutionsCrypto.dylib"
+        mkdir -p ./ios/bin/simulator
+        lipo "./target/x86_64-apple-ios/release/libdevolutions_crypto_ffi.dylib" \
+        "./target/aarch64-apple-ios-sim/release/libdevolutions_crypto_ffi.dylib" \
+        -create -output "./ios/bin/simulator/libDevolutionsCrypto.dylib"
+
+        mkdir ./ios/bin/simulator/libDevolutionsCrypto.framework
+        mv ./ios/bin/simulator/libDevolutionsCrypto.dylib ./ios/bin/simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto
+
+        # Fixing rpath
+        echo "Fixing rpath"
+        install_name_tool -id "@rpath/libDevolutionsCrypto.framework/libDevolutionsCrypto" "./ios/bin/simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto"
+
 
     - name: Create .framework
       shell: bash
       run: |
-        mkdir ./ios/bin/universal/libDevolutionsCrypto.framework
-        mv ./ios/bin/universal/libDevolutionsCrypto.dylib ./ios/bin/universal/libDevolutionsCrypto.framework/libDevolutionsCrypto
+        mkdir -p ./ios/bin/ios/libDevolutionsCrypto.framework
+        mv ./target/aarch64-apple-ios/release/libdevolutions_crypto_ffi.dylib ./ios/bin/ios/libDevolutionsCrypto.framework/libDevolutionsCrypto
 
         # Fixing rpath
         echo "Fixing rpath"
-        install_name_tool -id "@rpath/libDevolutionsCrypto.framework/libDevolutionsCrypto" "./ios/bin/universal/libDevolutionsCrypto.framework/libDevolutionsCrypto"
+        install_name_tool -id "@rpath/libDevolutionsCrypto.framework/libDevolutionsCrypto" "./ios/bin/ios/libDevolutionsCrypto.framework/libDevolutionsCrypto"
 
-        mkdir output
-        mv ./ios ./output/ios
+    - name: Combine Frameworks to XCFrameworks
+      shell: bash
+      run: |
+        xcodebuild -create-xcframework \
+        -framework "./ios/bin/ios/libDevolutionsCrypto.framework" \
+        -framework "./ios/bin/simulator/libDevolutionsCrypto.framework" \
+        -output ./output/ios/libDevolutionsCrypto.xcframework
 
     - uses: actions/upload-artifact@v4.3.6
       with:
