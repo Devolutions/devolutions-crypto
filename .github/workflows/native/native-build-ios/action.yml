@@ -78,7 +78,7 @@ runs:
         -output ./output/ios/libDevolutionsCrypto.xcframework
 
         mkdir -p ./wrappers/csharp/output/
-        cp ./output/ios/ ./wrappers/csharp/output/
+        cp ./output/ ./wrappers/csharp/output/
 
     - uses: actions/upload-artifact@v4.3.6
       with:
