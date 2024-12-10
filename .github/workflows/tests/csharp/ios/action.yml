@@ -26,6 +26,10 @@ runs:
       shell: bash
       run: sudo dotnet workload install ios
 
+    - name: List simulators
+      shell: bash
+      run: xcrun simctl list devices
+
     - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets/iOS
       shell: bash
