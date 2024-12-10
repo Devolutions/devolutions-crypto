@@ -21,8 +21,8 @@
     <file src="../../windows/bin/Devolutions.Crypto.pdb" target="lib/net45/Devolutions.Crypto.pdb" />
 
     <!-- iOS Specific Managed Library -->
-    <file src="../../ios/bin/Devolutions.Crypto.dll" target="runtimes/ios/lib/netstandard2.0/Devolutions.Crypto.dll" />
-    <file src="../../ios/bin/Devolutions.Crypto.pdb" target="runtimes/ios/lib/netstandard2.0/Devolutions.Crypto.pdb" />
+    <file src="../../ios/bin/devolutions-crypto.dll" target="runtimes/ios/lib/netstandard2.0/Devolutions.Crypto.dll" />
+    <file src="../../ios/bin/devolutions-crypto.pdb" target="runtimes/ios/lib/netstandard2.0/Devolutions.Crypto.pdb" />
 
     <!-- Windows Native Libraries -->
     <file src="../../windows/bin/DevolutionsCrypto-x64.dll" target="runtimes/win-x64/native/DevolutionsCrypto.dll"/>
