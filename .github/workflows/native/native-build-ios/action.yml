@@ -54,6 +54,8 @@ runs:
         mkdir ./ios/bin/simulator/libDevolutionsCrypto.framework
         mv ./ios/bin/simulator/libDevolutionsCrypto.dylib ./ios/bin/simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto
 
+        cp ./wrappers/csharp/nugets/iOS/Info.plist ./ios/bin/simulator/libDevolutionsCrypto.framework/Info.plist
+
         # Fixing rpath
         echo "Fixing rpath"
         install_name_tool -id "@rpath/libDevolutionsCrypto.framework/libDevolutionsCrypto" "./ios/bin/simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto"
@@ -64,6 +66,8 @@ runs:
       run: |
         mkdir -p ./ios/bin/ios/libDevolutionsCrypto.framework
         mv ./target/aarch64-apple-ios/release/libdevolutions_crypto_ffi.dylib ./ios/bin/ios/libDevolutionsCrypto.framework/libDevolutionsCrypto
+
+        cp ./wrappers/csharp/nugets/iOS/Info.plist ./ios/bin/ios/libDevolutionsCrypto.framework/Info.plist
 
         # Fixing rpath
         echo "Fixing rpath"

@@ -41,7 +41,10 @@
     <!-- iOS Native Libraries -->
     <file src="../../ios/libDevolutionsCrypto.xcframework/Info.plist" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/Info.plist"/>
     <file src="../../ios/libDevolutionsCrypto.xcframework/ios-arm64/libDevolutionsCrypto.framework/libDevolutionsCrypto" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/ios-arm64/libDevolutionsCrypto.framework/libDevolutionsCrypto"/>
+    <file src="../../ios/libDevolutionsCrypto.xcframework/ios-arm64/libDevolutionsCrypto.framework/Info.plist" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/ios-arm64/libDevolutionsCrypto.framework/Info.plist"/>
+
     <file src="../../ios/libDevolutionsCrypto.xcframework/ios-arm64_x86_64-simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/ios-arm64_x86_64-simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto"/>
+    <file src="../../ios/libDevolutionsCrypto.xcframework/ios-arm64_x86_64-simulator/libDevolutionsCrypto.framework/Info.plist" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/ios-arm64_x86_64-simulator/libDevolutionsCrypto.framework/Info.plist"/>
 
     <!-- Android Native Libraries -->
     <file src="../../android/bin/aarch64/libDevolutionsCrypto.so" target="runtimes/android-arm64/native/libDevolutionsCrypto.so"/>
