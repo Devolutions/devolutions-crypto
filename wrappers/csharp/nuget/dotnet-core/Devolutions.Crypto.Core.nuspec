@@ -39,7 +39,7 @@
     <file src="../../macos-modern/bin/aarch64/libDevolutionsCrypto.dylib" target="runtimes/osx-arm64/native/libDevolutionsCrypto.dylib"/>
 
     <!-- iOS Native Libraries -->
-    <file src="../../ios/libDevolutionsCrypto.xcframework/**" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/**"/>
+    <file src="../../ios/libDevolutionsCrypto.xcframework/**" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/"/>
     
     <!-- Android Native Libraries -->
     <file src="../../android/bin/aarch64/libDevolutionsCrypto.so" target="runtimes/android-arm64/native/libDevolutionsCrypto.so"/>
