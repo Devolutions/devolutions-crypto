@@ -20,11 +20,14 @@ runs:
         merge-multiple: true
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
 
-    - name: Install nuget
+    - name: Add local nuget source
       shell: bash
-      run: sudo apt-get install nuget
+      run: |
+        dotnet nuget add source /home/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
+        dotnet nuget list source
 
-    - name: Unit tests DOTNET CORE
+    - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash
-      run: python unit-tests.py -p core
+      run: dotnet test ./dotnet-core/dotnet-core.csproj
+

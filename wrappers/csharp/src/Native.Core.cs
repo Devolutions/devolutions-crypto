@@ -1,6 +1,6 @@
 // Xamarin and .NET Core bindings
 
-#if ANDROID || IOS || MAC_MODERN || DOTNET_CORE
+#if ANDROID || IOS || MACOS || DOTNET_CORE
 namespace Devolutions.Cryptography
 {
     using System;
@@ -12,7 +12,7 @@ namespace Devolutions.Cryptography
     public static partial class Native
     {
 #if IOS
-        private const string LibName = "libDevolutionsCrypto.framework/libDevolutionsCrypto";
+        private const string LibName = "DevolutionsCrypto";
 #else
         private const string LibName = "DevolutionsCrypto";
 #endif

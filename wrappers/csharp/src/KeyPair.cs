@@ -8,12 +8,12 @@ namespace Devolutions.Cryptography
     public class KeyPair
     {
         /// <summary>
-        /// The private key.
+        /// Gets or sets the private key.
         /// </summary>
         public byte[] PrivateKey { get; set; }
 
         /// <summary>
-        /// The private key as base 64 string.
+        /// Gets the private key as base 64 string.
         /// </summary>
         public string PrivateKeyString
         {
@@ -29,12 +29,12 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
-        /// The public key.
+        /// Gets or sets the public key.
         /// </summary>
         public byte[] PublicKey { get; set; }
 
         /// <summary>
-        /// The public key key as base 64 string.
+        /// Gets the public key key as base 64 string.
         /// </summary>
         public string PublicKeyString
         {

@@ -2,13 +2,8 @@
 
 namespace Devolutions.Crypto.Tests
 {
-#if XAMARIN_MAC_FULL || XAMARIN_MAC_MODERN || XAMARIN_IOS || XAMARIN_ANDROID
-    using NUnit.Framework;
-    using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
-    using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;
-#else
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
+
     using System;
     using System.Text;
 
