@@ -6,6 +6,9 @@ namespace Devolutions.Cryptography
     using Devolutions.Cryptography.Argon2;
     using Devolutions.Cryptography.Signature;
 
+    /// <summary>
+    /// Devolutions Crypto exposed API.
+    /// </summary>
     public static class Managed
     {
 #if RDM
@@ -1153,6 +1156,13 @@ namespace Devolutions.Cryptography
             return Utils.ByteArrayToUtf8String(result);
         }
 
+        /// <summary>
+        /// Generate shamir shared keys.
+        /// </summary>
+        /// <param name="nbShares">Number of keys.</param>
+        /// <param name="threshold">Number of keys required to recover the secret.</param>
+        /// <param name="secretLength">The secret length.</param>
+        /// <returns>An array of shared keys.</returns>
         public static byte[][] GenerateSharedKey(int nbShares, int threshold, int secretLength)
         {
             int sharesLength = (int)Native.GenerateSharedKeySizeNative((UIntPtr)secretLength);

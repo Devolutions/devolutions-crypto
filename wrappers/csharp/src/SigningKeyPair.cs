@@ -15,7 +15,7 @@ namespace Devolutions.Cryptography.Signature
         }
 
         /// <summary>
-        /// Raw key pair data.
+        /// Gets or sets the raw key pair data.
         /// </summary>
         internal byte[] Payload { get; set; }
 
