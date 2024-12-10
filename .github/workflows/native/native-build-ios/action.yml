@@ -86,8 +86,16 @@ runs:
       run: |
         dotnet build -p:DefineConstants=IOS --configuration Release --output ../ios/bin
 
+    - name: Fix dir structure
+      shell: bash
+      working-directory: ./wrappers/csharp/
+      run: |
+        mkdir tmp
+        mv ./ios ./tmp/ios
+        mkdir -p ./ios/ios
+        cp -R ./tmp/ios/. ./ios/ios
 
     - uses: actions/upload-artifact@v4.3.6
       with:
         name: native-ios
-        path: ./wrappers/csharp/output/**
+        path: ./wrappers/csharp/ios
