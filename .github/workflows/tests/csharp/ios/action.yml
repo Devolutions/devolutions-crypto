@@ -33,4 +33,4 @@ runs:
     - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets/iOS
       shell: bash
-      run: dotnet build -t:run
+      run: dotnet build -t:run -p:_DeviceName=:v2:udid=C250144A-D1CF-439A-9C45-E97F807621DB
