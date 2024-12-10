@@ -7,12 +7,24 @@ namespace Devolutions.Cryptography
     /// </summary>
     public class DevolutionsCryptoException : Exception
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DevolutionsCryptoException"/> class.
+        /// </summary>
+        /// <param name="managedError">The managed error code.</param>
+        /// <param name="message">The exception message. (Optional).</param>
+        /// <param name="exception">The managed exception. (Optional).</param>
         public DevolutionsCryptoException(ManagedError managedError, string message = null, Exception exception = null) : base(message)
         {
             this.ManagedError = managedError;
             this.ManagedException = exception;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DevolutionsCryptoException"/> class.
+        /// </summary>
+        /// <param name="nativeError">The native error code.</param>
+        /// <param name="message">The exception message. (Optional).</param>
+        /// <param name="exception">The managed exception. (Optional).</param>
         public DevolutionsCryptoException(NativeError nativeError, string message = null, Exception exception = null) : base(message)
         {
             this.NativeError = nativeError;
