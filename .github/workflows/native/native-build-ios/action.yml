@@ -77,8 +77,8 @@ runs:
         -framework "./ios/bin/simulator/libDevolutionsCrypto.framework" \
         -output ./output/ios/libDevolutionsCrypto.xcframework
 
-        mkdir -p ./wrappers/csharp/output/
-        cp ./output/ ./wrappers/csharp/output/
+        mkdir -p ./wrappers/csharp/
+        cp -R ./output/. ./wrappers/csharp/
 
     - uses: actions/upload-artifact@v4.3.6
       with:
