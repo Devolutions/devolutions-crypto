@@ -80,6 +80,13 @@ runs:
         mkdir -p ./wrappers/csharp/
         cp -R ./output/. ./wrappers/csharp/
 
+    - name: Build C#
+      shell: bash
+      working-directory: ./wrappers/csharp/src
+      run: |
+        dotnet build -p:DefineConstants=IOS --configuration Release --output ../ios/bin
+
+
     - uses: actions/upload-artifact@v4.3.6
       with:
         name: native-ios

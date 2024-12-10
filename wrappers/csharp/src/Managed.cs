@@ -88,7 +88,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="key">The key to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         [Obsolete("This method has been deprecated. Use EncryptWithKeyAsBase64String instead.")]
@@ -102,7 +102,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="key">The key to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string EncryptWithKeyAsBase64String(string data, byte[] key, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
@@ -117,7 +117,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="key">The key to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
         public static byte[] EncryptWithKey(string data, byte[] key, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
@@ -237,7 +237,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="legacyDecryptor">The fallback decryptor to use if the data is not from Devolutions Crypto.</param>
         /// <returns>Returns the decryption result in a byte array.</returns>
         public static byte[] Decrypt(byte[] data, byte[] key, byte[] aad = null, ILegacyDecryptor legacyDecryptor = null)
@@ -281,7 +281,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to decrypt.</param>
         /// <param name="privateKey">The private key to use for decryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <returns>Returns the decryption result in a byte array.</returns>
         public static byte[] DecryptAsymmetric(byte[] data, byte[] privateKey, byte[] aad = null)
         {
@@ -317,7 +317,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="key">The key to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         [Obsolete("This method has been deprecated. Use EncryptWithKeyAsBase64String instead.")]
@@ -331,7 +331,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="key">The key to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string EncryptWithKeyAsBase64String(byte[] data, byte[] key, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
@@ -346,7 +346,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="key">The key to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
         public static byte[] EncryptWithKey(byte[] data, byte[] key, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
@@ -362,7 +362,7 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         [Obsolete("This method has been deprecated. Use EncryptWithPasswordAsBase64String instead.")]
@@ -377,7 +377,7 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string EncryptWithPasswordAsBase64String(byte[] data, string password, uint iterations = 10000, byte[] aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
@@ -410,7 +410,7 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = 10000, byte[] aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
@@ -576,7 +576,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="key">The key to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as byte array.</returns>
         public static byte[] Encrypt(byte[] data, byte[] key, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
@@ -704,7 +704,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="publicKey">The public key to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as byte array.</returns>
         public static byte[] EncryptAsymmetric(byte[] data, byte[] publicKey, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
@@ -744,7 +744,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
@@ -760,7 +760,7 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string EncryptWithPasswordAsBase64String(string data, string password, uint iterations = 10000, byte[] aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
@@ -793,7 +793,7 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
         public static byte[] EncryptWithPassword(byte[] data, string password, uint iterations = 10000, byte[] aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
@@ -826,7 +826,7 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
         public static byte[] EncryptBase64WithPassword(string b64data, string password, uint iterations = 10000, byte[] aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
@@ -859,7 +859,7 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="aad">Additional authenticated data. (Optional)</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
         public static byte[] EncryptWithPassword(string data, string password, uint iterations = 10000, byte[] aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
