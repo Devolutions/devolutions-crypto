@@ -77,7 +77,9 @@ runs:
         -framework "./ios/bin/simulator/libDevolutionsCrypto.framework" \
         -output ./output/ios/libDevolutionsCrypto.xcframework
 
+        cp ./output/ios/ ./wrappers/csharp/output/
+
     - uses: actions/upload-artifact@v4.3.6
       with:
         name: native-ios
-        path: wrappers/csharp/output/**
+        path: ./wrappers/csharp/output/**
