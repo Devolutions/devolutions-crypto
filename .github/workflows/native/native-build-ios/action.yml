@@ -54,7 +54,7 @@ runs:
         mkdir ./ios/bin/simulator/libDevolutionsCrypto.framework
         mv ./ios/bin/simulator/libDevolutionsCrypto.dylib ./ios/bin/simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto
 
-        cp ./wrappers/csharp/nugets/iOS/Info.plist ./ios/bin/simulator/libDevolutionsCrypto.framework/Info.plist
+        cp ./wrappers/csharp/nuget/iOS/Info.plist ./ios/bin/simulator/libDevolutionsCrypto.framework/Info.plist
 
         # Fixing rpath
         echo "Fixing rpath"
@@ -67,7 +67,7 @@ runs:
         mkdir -p ./ios/bin/ios/libDevolutionsCrypto.framework
         mv ./target/aarch64-apple-ios/release/libdevolutions_crypto_ffi.dylib ./ios/bin/ios/libDevolutionsCrypto.framework/libDevolutionsCrypto
 
-        cp ./wrappers/csharp/nugets/iOS/Info.plist ./ios/bin/ios/libDevolutionsCrypto.framework/Info.plist
+        cp ./wrappers/csharp/nuget/iOS/Info.plist ./ios/bin/ios/libDevolutionsCrypto.framework/Info.plist
 
         # Fixing rpath
         echo "Fixing rpath"
