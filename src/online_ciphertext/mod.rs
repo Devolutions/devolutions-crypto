@@ -54,6 +54,7 @@ use super::Result;
 
 use super::key::{PrivateKey, PublicKey};
 
+use online_ciphertext_v1::OnlineCiphertextV1Header;
 use online_ciphertext_v1::{
     OnlineCiphertextV1Decryptor, OnlineCiphertextV1Encryptor, OnlineCiphertextV1HeaderAsymmetric,
     OnlineCiphertextV1HeaderSymmetric,
@@ -82,7 +83,7 @@ pub fn new_encryptor(
     aad: &[u8],
     chunk_size: u32,
     version: OnlineCiphertextVersion,
-) -> (OnlineCiphertextEncryptor, OnlineCiphertextHeader) {
+) -> OnlineCiphertextEncryptor {
     let mut header = Header {
         data_subtype: CiphertextSubtype::Symmetric,
         ..Default::default()
@@ -95,16 +96,9 @@ pub fn new_encryptor(
         OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
             header.version = OnlineCiphertextVersion::V1;
 
-            let (cipher, inner_header) =
-                OnlineCiphertextV1Encryptor::new(key, full_aad, chunk_size);
+            let cipher = OnlineCiphertextV1Encryptor::new(key, full_aad, chunk_size);
 
-            (
-                OnlineCiphertextEncryptor::V1(cipher),
-                OnlineCiphertextHeader {
-                    header,
-                    payload: OnlineCiphertextHeaderPayload::V1Symmetric(inner_header),
-                },
-            )
+            OnlineCiphertextEncryptor::V1(cipher)
         }
     }
 }
@@ -114,7 +108,7 @@ pub fn new_encryptor_asymmetric(
     aad: &[u8],
     chunk_size: u32,
     version: OnlineCiphertextVersion,
-) -> (OnlineCiphertextEncryptor, OnlineCiphertextHeader) {
+) -> OnlineCiphertextEncryptor {
     let mut header = Header {
         data_subtype: CiphertextSubtype::Asymmetric,
         ..Default::default()
@@ -127,28 +121,22 @@ pub fn new_encryptor_asymmetric(
         OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
             header.version = OnlineCiphertextVersion::V1;
 
-            let (cipher, inner_header) =
+            let cipher =
                 OnlineCiphertextV1Encryptor::new_asymmetric(public_key, full_aad, chunk_size);
 
-            (
-                OnlineCiphertextEncryptor::V1(cipher),
-                OnlineCiphertextHeader {
-                    header,
-                    payload: OnlineCiphertextHeaderPayload::V1Asymmetric(inner_header),
-                },
-            )
+            OnlineCiphertextEncryptor::V1(cipher)
         }
     }
 }
 
 impl OnlineCiphertextHeader {
-    pub fn get_decryptor(&self, key: &[u8], aad: &[u8]) -> Result<OnlineCiphertextDecryptor> {
+    pub fn into_decryptor(self, key: &[u8], aad: &[u8]) -> Result<OnlineCiphertextDecryptor> {
         let mut full_aad: Vec<u8> = self.header.borrow().into();
         full_aad.extend_from_slice(aad);
 
-        match &self.payload {
+        match self.payload {
             OnlineCiphertextHeaderPayload::V1Symmetric(header) => {
-                let cipher = OnlineCiphertextV1Decryptor::new(key, full_aad, &header);
+                let cipher = OnlineCiphertextV1Decryptor::new(key, full_aad, header);
 
                 Ok(OnlineCiphertextDecryptor::V1(cipher))
             }
@@ -157,18 +145,18 @@ impl OnlineCiphertextHeader {
     }
 
     pub fn get_decryptor_asymmetric(
-        &self,
+        self,
         private_key: &PrivateKey,
         aad: &[u8],
     ) -> Result<OnlineCiphertextDecryptor> {
         let mut full_aad: Vec<u8> = self.header.borrow().into();
         full_aad.extend_from_slice(aad);
 
-        match &self.payload {
+        match self.payload {
             OnlineCiphertextHeaderPayload::V1Symmetric(_) => Err(Error::InvalidDataType),
             OnlineCiphertextHeaderPayload::V1Asymmetric(header) => {
                 let cipher =
-                    OnlineCiphertextV1Decryptor::new_asymmetric(private_key, full_aad, &header);
+                    OnlineCiphertextV1Decryptor::new_asymmetric(private_key, full_aad, header);
 
                 Ok(OnlineCiphertextDecryptor::V1(cipher))
             }
@@ -181,7 +169,7 @@ macro_rules! online_ciphertext_impl {
         paste! {
             pub enum [<OnlineCiphertext $name>] {
             $(
-                $version_name([<OnlineCiphertext $version_name $name>]),
+                $version_name([<OnlineCiphertext $version_name $name>]<H>),
             ),+
             }
 
@@ -260,7 +248,6 @@ online_ciphertext_impl!(Encryptor, encrypt, V1);
 online_ciphertext_impl!(Decryptor, decrypt, V1);
 
 #[derive(Clone, Debug)]
-enum OnlineCiphertextHeaderPayload {
-    V1Symmetric(OnlineCiphertextV1HeaderSymmetric),
-    V1Asymmetric(OnlineCiphertextV1HeaderAsymmetric),
+enum OnlineCiphertextHeaderPayload<'a, 'b> {
+    V1(OnlineCiphertextV1Header<'a, 'b>),
 }

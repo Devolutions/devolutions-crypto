@@ -18,7 +18,17 @@ use zeroize::Zeroizing;
 
 use paste::paste;
 
+/// Context string for the Blake3 KDF function.
+/// This is used to normalize the key length and domain separation
 const CONTEXT: &'static str = "devolutions_crypto online_ciphertext_v1";
+
+pub trait OnlineCiphertextV1Header<'a, 'b>:
+    'b + Sized + Clone + std::fmt::Debug + TryFrom<&'a [u8]>
+where
+    &'b Self: Into<Vec<u8>>,
+{
+    fn get_chunk_size(&self) -> u32;
+}
 
 #[derive(Clone, Debug)]
 pub struct OnlineCiphertextV1HeaderSymmetric {
@@ -34,6 +44,7 @@ pub struct OnlineCiphertextV1HeaderAsymmetric {
 }
 
 impl From<&OnlineCiphertextV1HeaderSymmetric> for Vec<u8> {
+    /// Serialize the header into bytes
     fn from(value: &OnlineCiphertextV1HeaderSymmetric) -> Self {
         let mut buf = value.chunk_size.to_le_bytes().to_vec();
         buf.extend(value.nonce);
@@ -43,6 +54,7 @@ impl From<&OnlineCiphertextV1HeaderSymmetric> for Vec<u8> {
 }
 
 impl From<&OnlineCiphertextV1HeaderAsymmetric> for Vec<u8> {
+    /// Serialize the header into bytes
     fn from(value: &OnlineCiphertextV1HeaderAsymmetric) -> Self {
         let mut buf = value.chunk_size.to_le_bytes().to_vec();
         buf.extend(value.nonce);
@@ -52,26 +64,117 @@ impl From<&OnlineCiphertextV1HeaderAsymmetric> for Vec<u8> {
     }
 }
 
+impl TryFrom<&[u8]> for OnlineCiphertextV1HeaderSymmetric {
+    type Error = Error;
+
+    /// Parse a header from a byte array
+    fn try_from(value: &[u8]) -> Result<Self> {
+        if value.len() != 24 {
+            return Err(Error::InvalidLength);
+        }
+
+        let (chunk_size, nonce) = value.split_at(4);
+
+        let chunk_size: [u8; 4] = chunk_size
+            .try_into()
+            .expect("size is hardcoded and should always be right");
+        let chunk_size = u32::from_le_bytes(chunk_size);
+
+        let nonce = nonce
+            .try_into()
+            .expect("Length is checked at the start of the function");
+
+        Ok(Self { chunk_size, nonce })
+    }
+}
+
+impl TryFrom<&[u8]> for OnlineCiphertextV1HeaderAsymmetric {
+    type Error = Error;
+
+    /// Parse a header from a byte array
+    fn try_from(value: &[u8]) -> Result<Self> {
+        if value.len() != 24 + 32 {
+            return Err(Error::InvalidLength);
+        }
+
+        let (chunk_size, value) = value.split_at(4);
+
+        let chunk_size: [u8; 4] = chunk_size
+            .try_into()
+            .expect("size is hardcoded and should always be right");
+        let chunk_size = u32::from_le_bytes(chunk_size);
+
+        let (nonce, public_key) = value.split_at(20);
+
+        let nonce = nonce
+            .try_into()
+            .expect("size is hardcoded and should always be right");
+
+        let public_key: [u8; 32] = public_key
+            .try_into()
+            .expect("size is checked at the start of the function");
+        let public_key =
+            x25519_dalek::PublicKey::try_from(public_key).map_err(|_| Error::InvalidData)?;
+
+        Ok(Self {
+            chunk_size,
+            nonce,
+            public_key,
+        })
+    }
+}
+
+impl OnlineCiphertextV1Header<'_, '_> for OnlineCiphertextV1HeaderSymmetric {
+    fn get_chunk_size(&self) -> u32 {
+        self.chunk_size
+    }
+}
+
+impl OnlineCiphertextV1Header<'_, '_> for OnlineCiphertextV1HeaderAsymmetric {
+    fn get_chunk_size(&self) -> u32 {
+        self.chunk_size
+    }
+}
+
+/// Implements the encryptor/decryptor structure
 macro_rules! online_ciphertext_impl {
     ($struct_name:ident, $cipher_name:ident, $func:ident) => {
-        pub struct $struct_name {
-            chunk_size: u32,
+        pub struct $struct_name<H>
+        where
+            for<'a, 'b> H: OnlineCiphertextV1Header<'a, 'b>,
+        {
+            header: H,
             aad: Vec<u8>,
             cipher: $cipher_name<XChaCha20Poly1305>,
         }
 
-        impl $struct_name {
+        impl<H> $struct_name<H>
+        where
+            for<'a, 'b> H: OnlineCiphertextV1Header<'a, 'b>
+                + std::fmt::Debug
+                + Sized
+                + Clone
+                + std::fmt::Debug
+                + TryFrom<&'a [u8]>,
+            for<'b> &'b H: Into<Vec<u8>>,
+        {
+            /// Gets the number of bytes to process in each chunk
             pub fn get_chunk_size(&self) -> u32 {
-                self.chunk_size
+                self.header.get_chunk_size()
+            }
+
+            pub fn get_header(&self) -> &H {
+                &self.header
             }
 
             paste! {
+                /// Process a single chunk
                 pub fn [<$func _chunk>](
                     &mut self,
                     data: &[u8],
                     aad: &[u8],
                 ) -> Result<Vec<u8>> {
-                    if (data.len() as u32) != self.chunk_size {
+                    if (data.len() as u32) != self.get_chunk_size() {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -89,12 +192,14 @@ macro_rules! online_ciphertext_impl {
                     Ok(self.cipher.[<$func _next>](payload)?)
                 }
 
+                /// Process a single chunk in place.
+                /// Requires a Vec because it needs to be expandable to accomodate the tag.
                 pub fn  [<$func _chunk_in_place>](
                     &mut self,
                     data: &mut Vec<u8>,
                     aad: &[u8],
                 ) -> Result<()> {
-                    if (data.len() as u32) != self.chunk_size {
+                    if (data.len() as u32) != self.get_chunk_size() {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -109,12 +214,13 @@ macro_rules! online_ciphertext_impl {
                     Ok(())
                 }
 
+                /// Process the last chunk.
                 pub fn [<$func _last>](
                     self,
                     data: &[u8],
                     aad: &[u8],
                 ) -> Result<Vec<u8>> {
-                    if (data.len() as u32) != self.chunk_size {
+                    if (data.len() as u32) != self.get_chunk_size() {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -132,12 +238,14 @@ macro_rules! online_ciphertext_impl {
                     Ok(self.cipher.[<$func _last>](payload)?)
                 }
 
+                /// Process a single chunk in place.
+                /// Requires a Vec because it needs to be expandable to accomodate the tag.
                 pub fn [<$func _last_in_place>](
                     self,
                     data: &mut Vec<u8>,
                     aad: &[u8],
                 ) -> Result<()> {
-                    if (data.len() as u32) != self.chunk_size {
+                    if (data.len() as u32) != self.get_chunk_size() {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -156,12 +264,9 @@ macro_rules! online_ciphertext_impl {
     };
 }
 
-impl OnlineCiphertextV1Encryptor {
-    pub fn new(
-        key: &[u8],
-        mut aad: Vec<u8>,
-        chunk_size: u32,
-    ) -> (Self, OnlineCiphertextV1HeaderSymmetric) {
+impl OnlineCiphertextV1Encryptor<OnlineCiphertextV1HeaderSymmetric> {
+    /// Creates a new encryptor and the corresponding header
+    pub fn new(key: &[u8], mut aad: Vec<u8>, chunk_size: u32) -> Self {
         // Generate a new nonce
         let mut nonce = [0u8; 20];
         OsRng.fill_bytes(&mut nonce);
@@ -179,21 +284,16 @@ impl OnlineCiphertextV1Encryptor {
         let mut header_bytes: Vec<u8> = header.borrow().into();
         aad.append(&mut header_bytes);
 
-        (
-            Self {
-                chunk_size,
-                aad,
-                cipher,
-            },
+        Self {
             header,
-        )
+            aad,
+            cipher,
+        }
     }
+}
 
-    pub fn new_asymmetric(
-        public_key: &PublicKey,
-        mut aad: Vec<u8>,
-        chunk_size: u32,
-    ) -> (Self, OnlineCiphertextV1HeaderAsymmetric) {
+impl OnlineCiphertextV1Encryptor<OnlineCiphertextV1HeaderAsymmetric> {
+    pub fn new_asymmetric(public_key: &PublicKey, mut aad: Vec<u8>, chunk_size: u32) -> Self {
         // Perform a ECDH exchange as per ECIES
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
@@ -222,18 +322,16 @@ impl OnlineCiphertextV1Encryptor {
         let mut header_bytes: Vec<u8> = header.borrow().into();
         aad.append(&mut header_bytes);
 
-        let encryptor = Self {
-            chunk_size,
+        Self {
+            header,
             cipher,
             aad,
-        };
-
-        (encryptor, header)
+        }
     }
 }
 
-impl OnlineCiphertextV1Decryptor {
-    pub fn new(key: &[u8], mut aad: Vec<u8>, header: &OnlineCiphertextV1HeaderSymmetric) -> Self {
+impl OnlineCiphertextV1Decryptor<OnlineCiphertextV1HeaderSymmetric> {
+    pub fn new(key: &[u8], mut aad: Vec<u8>, header: OnlineCiphertextV1HeaderSymmetric) -> Self {
         // Derive the key
         let key = Zeroizing::new(blake3::derive_key(CONTEXT, key));
         let cipher = XChaCha20Poly1305::new(key.as_ref().into());
@@ -241,20 +339,22 @@ impl OnlineCiphertextV1Decryptor {
         // Create the STREAM decryptor
         let cipher = DecryptorLE31::from_aead(cipher, &header.nonce.into());
 
-        let mut header_bytes: Vec<u8> = header.into();
+        let mut header_bytes: Vec<u8> = header.borrow().into();
         aad.append(&mut header_bytes);
 
         Self {
-            chunk_size: header.chunk_size,
+            header,
             aad,
             cipher,
         }
     }
+}
 
+impl OnlineCiphertextV1Decryptor<OnlineCiphertextV1HeaderAsymmetric> {
     pub fn new_asymmetric(
         private_key: &PrivateKey,
         mut aad: Vec<u8>,
-        header: &OnlineCiphertextV1HeaderAsymmetric,
+        header: OnlineCiphertextV1HeaderAsymmetric,
     ) -> Self {
         // Perform a ECDH exchange as per ECIES
         let private_key = x25519_dalek::StaticSecret::from(private_key);
@@ -268,11 +368,11 @@ impl OnlineCiphertextV1Decryptor {
         // Create the STREAM decryptor
         let cipher = DecryptorLE31::from_aead(cipher, &header.nonce.into());
 
-        let mut header_bytes: Vec<u8> = header.into();
+        let mut header_bytes: Vec<u8> = header.borrow().into();
         aad.append(&mut header_bytes);
 
         Self {
-            chunk_size: header.chunk_size,
+            header,
             aad,
             cipher,
         }
