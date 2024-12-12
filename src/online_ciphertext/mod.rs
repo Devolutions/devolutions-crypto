@@ -55,10 +55,7 @@ use super::Result;
 use super::key::{PrivateKey, PublicKey};
 
 use online_ciphertext_v1::OnlineCiphertextV1Header;
-use online_ciphertext_v1::{
-    OnlineCiphertextV1Decryptor, OnlineCiphertextV1Encryptor, OnlineCiphertextV1HeaderAsymmetric,
-    OnlineCiphertextV1HeaderSymmetric,
-};
+use online_ciphertext_v1::{OnlineCiphertextV1Decryptor, OnlineCiphertextV1Encryptor};
 
 use paste::paste;
 
@@ -84,7 +81,7 @@ pub fn new_encryptor(
     chunk_size: u32,
     version: OnlineCiphertextVersion,
 ) -> OnlineCiphertextEncryptor {
-    let mut header = Header {
+    let mut header = Header::<OnlineCiphertextHeader> {
         data_subtype: CiphertextSubtype::Symmetric,
         ..Default::default()
     };
@@ -109,7 +106,7 @@ pub fn new_encryptor_asymmetric(
     chunk_size: u32,
     version: OnlineCiphertextVersion,
 ) -> OnlineCiphertextEncryptor {
-    let mut header = Header {
+    let mut header = Header::<OnlineCiphertextHeader> {
         data_subtype: CiphertextSubtype::Asymmetric,
         ..Default::default()
     };
@@ -135,12 +132,13 @@ impl OnlineCiphertextHeader {
         full_aad.extend_from_slice(aad);
 
         match self.payload {
-            OnlineCiphertextHeaderPayload::V1Symmetric(header) => {
-                let cipher = OnlineCiphertextV1Decryptor::new(key, full_aad, header);
+            OnlineCiphertextHeaderPayload::V1(header) => {
+                // TODO: Remove downcasting black magic
+                let header = header.downcast_symmetric()?;
+                let cipher = OnlineCiphertextV1Decryptor::new(key, full_aad, header.clone());
 
                 Ok(OnlineCiphertextDecryptor::V1(cipher))
             }
-            OnlineCiphertextHeaderPayload::V1Asymmetric(_) => Err(Error::InvalidDataType),
         }
     }
 
@@ -153,10 +151,15 @@ impl OnlineCiphertextHeader {
         full_aad.extend_from_slice(aad);
 
         match self.payload {
-            OnlineCiphertextHeaderPayload::V1Symmetric(_) => Err(Error::InvalidDataType),
-            OnlineCiphertextHeaderPayload::V1Asymmetric(header) => {
-                let cipher =
-                    OnlineCiphertextV1Decryptor::new_asymmetric(private_key, full_aad, header);
+            OnlineCiphertextHeaderPayload::V1(header) => {
+                // TODO: Remove downcasting black magic
+                let header = header.downcast_asymmetric()?;
+
+                let cipher = OnlineCiphertextV1Decryptor::new_asymmetric(
+                    private_key,
+                    full_aad,
+                    header.clone(),
+                );
 
                 Ok(OnlineCiphertextDecryptor::V1(cipher))
             }
@@ -169,7 +172,7 @@ macro_rules! online_ciphertext_impl {
         paste! {
             pub enum [<OnlineCiphertext $name>] {
             $(
-                $version_name([<OnlineCiphertext $version_name $name>]<H>),
+                $version_name([<OnlineCiphertext $version_name $name>]),
             ),+
             }
 
@@ -247,7 +250,15 @@ macro_rules! online_ciphertext_impl {
 online_ciphertext_impl!(Encryptor, encrypt, V1);
 online_ciphertext_impl!(Decryptor, decrypt, V1);
 
-#[derive(Clone, Debug)]
-enum OnlineCiphertextHeaderPayload<'a, 'b> {
-    V1(OnlineCiphertextV1Header<'a, 'b>),
+#[derive(Debug)]
+enum OnlineCiphertextHeaderPayload {
+    V1(Box<dyn OnlineCiphertextV1Header>),
+}
+
+impl Clone for OnlineCiphertextHeaderPayload {
+    fn clone(&self) -> Self {
+        match self {
+            OnlineCiphertextHeaderPayload::V1(x) => Self::V1(dyn_clone::clone_box(x.as_ref())),
+        }
+    }
 }
