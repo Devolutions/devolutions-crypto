@@ -49,12 +49,12 @@ runs:
     - name: Configure Android NDK
       shell: bash
       run: |
-        # Install NDK 25
+        # Install NDK 27
 
         ANDROID_ROOT="/usr/local/lib/android"
         ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
-        echo "y" | $SDKMANAGER "ndk;25.2.9519653"
+        echo "y" | $SDKMANAGER "ndk;27.2.12479018"
 
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
 
@@ -63,10 +63,10 @@ runs:
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang\"
         [target.armv7-linux-androideabi]
         ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar\"
-        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi19-clang\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang\"
         [target.i686-linux-android]
         ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-ar\"
-        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android19-clang\"
+        linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-clang\"
         [target.x86_64-linux-android]
         ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ar\"
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> ./.cargo/config
@@ -78,7 +78,8 @@ runs:
         export ANDROID_ROOT="/usr/local/lib/android"
         export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
-        ln -sfn $ANDROID_SDK_ROOT/ndk/25.2.9519653 $ANDROID_NDK
+        export ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON
+        ln -sfn $ANDROID_SDK_ROOT/ndk/27.2.12479018 $ANDROID_NDK
 
         python GeneratePackage.py -p android
 

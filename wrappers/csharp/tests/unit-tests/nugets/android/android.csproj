@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationId>com.companyname.android</ApplicationId>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <!--
+      Enables trim analyzers and full trimming during Release mode.
+      To learn more, see: https://learn.microsoft.com/dotnet/core/deploying/trimming/trimming-options#trimming-granularity
+    -->
+    <TrimMode>full</TrimMode>
+  </PropertyGroup>
+
+    <ItemGroup>
+    <Compile Include="..\..\Conformity.cs" Link="Conformity.cs" />
+    <Compile Include="..\..\TestArgon2Parameters.cs" Link="TestArgon2Parameters.cs" />
+    <Compile Include="..\..\TestClasses.cs" Link="TestClasses.cs" />
+    <Compile Include="..\..\TestData.cs" Link="TestData.cs" />
+    <Compile Include="..\..\TestManaged.cs" Link="TestManaged.cs" />
+    <Compile Include="..\..\TestNative.cs" Link="TestNative.cs" />
+    <Compile Include="..\..\TestUtils.cs" Link="TestUtils.cs" />
+    <Compile Include="..\..\TestLegacy.cs" Link="TestLegacy.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Devolutions.Crypto.Core" Version="*" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.0.0" />
+  </ItemGroup>
+</Project>

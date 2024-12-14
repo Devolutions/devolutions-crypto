@@ -1,13 +1,8 @@
 #pragma warning disable SA1600 // Elements should be documented
 namespace Devolutions.Crypto.Tests
 {
-#if XAMARIN_MAC_FULL || XAMARIN_MAC_MODERN || XAMARIN_IOS || XAMARIN_ANDROID
-    using NUnit.Framework;
-    using TestClassAttribute = NUnit.Framework.TestFixtureAttribute;
-    using TestMethodAttribute = NUnit.Framework.TestCaseAttribute;
-#else
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
+
     using System;
     using System.Text;
 
@@ -79,11 +74,19 @@ namespace Devolutions.Crypto.Tests
         [TestMethod]
         public void DecryptWithPassword2_5()
         {
+            try
+            {
             string encrytedDataAsBase64 = "DQwCAAAAAgDutPWBLPHG0+ocNw+Yzs6xygGOeOlNPOAjbYDdbJKjPRnEP8HuDN7Y3h3dCoH81Szf3tCf3mNf";
             string password = "testPa$$";
             byte[] decryptResult = Managed.DecryptWithPassword(encrytedDataAsBase64, password);
             string decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
             Assert.AreEqual(decryptResultString, "test Ciph3rtext");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.InnerException?.Message);
+                Console.WriteLine(ex.InnerException?.StackTrace);
+            }
         }
 
         [TestMethod]

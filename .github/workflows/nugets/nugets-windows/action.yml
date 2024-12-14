@@ -25,21 +25,23 @@ runs:
       shell: bash
       run : curl https://dist.nuget.org/win-x86-commandline/latest/nuget.exe --output nuget.exe
 
-    - name: Generating WIN Nuget
-      working-directory: ./wrappers/csharp/nuget
+    - name: Read version from config file
       shell: bash
-      run: python GenerateNuget.py -p windows
+      working-directory: ./wrappers/csharp
+      run: |
+          VERSION=$(grep 'version' config.txt | cut -d '=' -f2 | tr -d ' "')
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Using version: $VERSION"
 
     - name: Generating DOTNET Nuget
       working-directory: ./wrappers/csharp/nuget
       shell: bash
-      run: python GenerateNuget.py -p core
+      run: nuget pack ./dotnet-core/Devolutions.Crypto.Core.nuspec -Version $VERSION -OutputDirectory ./dotnet-core/package
 
     - name: Place Artifacts
       shell: bash
-      run: |
-        mv wrappers/csharp/nuget/Windows/package/*.nupkg .
-        mv wrappers/csharp/nuget/dotnet-core/package/*.nupkg .
+      run: mv wrappers/csharp/nuget/dotnet-core/package/*.nupkg .
 
     - uses: actions/upload-artifact@v4.3.6
       with:

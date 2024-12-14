@@ -50,7 +50,7 @@ jobs:
 
   native_build_macos:
     needs: [rust_code_format, setup_config]
-    runs-on: "macos-12"
+    runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -60,7 +60,7 @@ jobs:
 
   native_build_ios:
     needs: [rust_code_format, setup_config]
-    runs-on: "macos-12"
+    runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -79,18 +79,8 @@ jobs:
       - uses: ./.github/workflows/native/native-build-windows
 
   #### NUGET BUILD ####
-  nugets_linux:
-    needs: [native_build_linux , csharp_code_format, setup_config]
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
-      - uses: ./.github/workflows/nugets/nugets-linux
-
   nugets_windows:
-    needs: [native_build_linux, native_build_macos, native_build_ios, native_build_windows , csharp_code_format, setup_config] # All Natives for dotnet-core
+    needs: [native_build_linux, native_build_macos, native_build_ios, native_build_windows , setup_config] # All Natives for dotnet-core
     runs-on: "windows-latest"
     steps:
       - uses: actions/checkout@v4
@@ -98,17 +88,6 @@ jobs:
           lfs: true
       - run: git lfs pull
       - uses: ./.github/workflows/nugets/nugets-windows
-
-  nugets_macos:
-    needs: [native_build_macos, native_build_ios, native_build_linux, csharp_code_format, setup_config]
-    runs-on: "macos-12"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
-      - uses: ./.github/workflows/nugets/nugets-macos
-
 
   #### WEB ASSEMBLY BUILD ####
   webassembly_build:
@@ -124,7 +103,7 @@ jobs:
   #### WEB ASSEMBLY TEST ####
   webassembly_test:
     needs: webassembly_build
-    runs-on: "macos-12"
+    runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -144,8 +123,8 @@ jobs:
       - uses: ./.github/workflows/tests/csharp/windows
 
   tests_nuget_macos:
-    needs: [nugets_macos, nugets_windows, setup_config]
-    runs-on: "macos-12"
+    needs: [nugets_windows, setup_config]
+    runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -154,8 +133,8 @@ jobs:
       - uses: ./.github/workflows/tests/csharp/macos
 
   tests_nuget_ios:
-    needs: [nugets_macos, setup_config]
-    runs-on: "macos-12"
+    needs: [nugets_windows, setup_config]
+    runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -164,7 +143,7 @@ jobs:
       - uses: ./.github/workflows/tests/csharp/ios
 
   tests_nuget_linux:
-    needs: [nugets_linux, nugets_windows, setup_config]
+    needs: [nugets_windows, setup_config]
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
@@ -175,7 +154,7 @@ jobs:
 
 ##### SWIFT TESTS #####
   tests_swift:
-    runs-on: "macos-14"
+    runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -193,25 +172,15 @@ jobs:
       - run: git lfs pull
       - uses: ./.github/workflows/kotlin
   
- #tests_nuget_android:
- #  needs: [nugets_macos, setup_config]
- #  runs-on: "macos-14"
- #  steps:
- #    - uses: actions/checkout@v4
- #      with:
- #        lfs: true
- #    - run: git lfs pull
- #    - uses: ./.github/workflows/tests/csharp/android
-
-  tests_ios_integration:
-    needs: [tests_nuget_ios, setup_config]
-    runs-on: "macos-12"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: git lfs pull
-      - uses: ./.github/workflows/tests/csharp/integration-ios
+  tests_nuget_android:
+   needs: [nugets_windows, setup_config]
+   runs-on: "ubuntu-latest"
+   steps:
+     - uses: actions/checkout@v4
+       with:
+         lfs: true
+     - run: git lfs pull
+     - uses: ./.github/workflows/tests/csharp/android
 
   #### CODE FORMATTING ####
   rust_code_format:
@@ -241,7 +210,7 @@ jobs:
       - uses: ./.github/workflows/python/build/linux
 
   build_python_macos:
-    runs-on: "macos-12"
+    runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -268,7 +237,7 @@ jobs:
 
   test_python_macos:
     needs: build_python_macos
-    runs-on: "macos-12"
+    runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/tests/python/macos
