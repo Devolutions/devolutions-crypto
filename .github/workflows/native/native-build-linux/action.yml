@@ -78,7 +78,6 @@ runs:
         export ANDROID_ROOT="/usr/local/lib/android"
         export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
-        export ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON
         ln -sfn $ANDROID_SDK_ROOT/ndk/27.2.12479018 $ANDROID_NDK
 
         python GeneratePackage.py -p android
