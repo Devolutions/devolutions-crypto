@@ -1,3 +1,5 @@
+use crate::enums::CiphertextSubtype;
+
 ///! Online Ciphertext V1: STREAM-LE31-XChaCha20Poly1305
 use super::{PrivateKey, PublicKey};
 
@@ -12,7 +14,6 @@ use chacha20poly1305::aead::{
 };
 use chacha20poly1305::{KeyInit, XChaCha20Poly1305};
 
-use dyn_clone::DynClone;
 use rand::{rngs::OsRng, RngCore};
 use x25519_dalek::StaticSecret;
 use zeroize::Zeroizing;
@@ -23,13 +24,10 @@ use paste::paste;
 /// This is used to normalize the key length and domain separation
 const CONTEXT: &'static str = "devolutions_crypto online_ciphertext_v1";
 
-pub trait OnlineCiphertextV1Header: std::fmt::Debug + DynClone {
-    fn get_chunk_size(&self) -> u32;
-
-    // TODO: Remove downcasting black magic
-    fn downcast_symmetric(&self) -> Result<&OnlineCiphertextV1HeaderSymmetric>;
-
-    fn downcast_asymmetric(&self) -> Result<&OnlineCiphertextV1HeaderAsymmetric>;
+#[derive(Clone, Debug)]
+pub enum OnlineCiphertextV1Header {
+    Symmetric(OnlineCiphertextV1HeaderSymmetric),
+    Asymmetric(OnlineCiphertextV1HeaderAsymmetric),
 }
 
 #[derive(Clone, Debug)]
@@ -43,6 +41,22 @@ pub struct OnlineCiphertextV1HeaderAsymmetric {
     chunk_size: u32,
     nonce: [u8; 20],
     public_key: x25519_dalek::PublicKey,
+}
+
+impl OnlineCiphertextV1Header {
+    pub fn get_chunk_size(&self) -> u32 {
+        match self {
+            Self::Symmetric(x) => x.chunk_size,
+            Self::Asymmetric(x) => x.chunk_size,
+        }
+    }
+
+    pub fn get_subtype(&self) -> CiphertextSubtype {
+        match self {
+            Self::Symmetric(_) => CiphertextSubtype::Symmetric,
+            Self::Asymmetric(_) => CiphertextSubtype::Asymmetric,
+        }
+    }
 }
 
 impl From<&OnlineCiphertextV1HeaderSymmetric> for Vec<u8> {
@@ -63,6 +77,15 @@ impl From<&OnlineCiphertextV1HeaderAsymmetric> for Vec<u8> {
         buf.extend_from_slice(value.public_key.as_bytes());
 
         buf
+    }
+}
+
+impl From<&OnlineCiphertextV1Header> for Vec<u8> {
+    fn from(value: &OnlineCiphertextV1Header) -> Self {
+        match value {
+            OnlineCiphertextV1Header::Symmetric(x) => x.into(),
+            OnlineCiphertextV1Header::Asymmetric(x) => x.into(),
+        }
     }
 }
 
@@ -126,41 +149,11 @@ impl TryFrom<&[u8]> for OnlineCiphertextV1HeaderAsymmetric {
     }
 }
 
-impl OnlineCiphertextV1Header for OnlineCiphertextV1HeaderSymmetric {
-    fn get_chunk_size(&self) -> u32 {
-        self.chunk_size
-    }
-
-    // TODO: Remove downcasting black magic
-    fn downcast_symmetric(&self) -> Result<&OnlineCiphertextV1HeaderSymmetric> {
-        Ok(&self)
-    }
-
-    fn downcast_asymmetric(&self) -> Result<&OnlineCiphertextV1HeaderAsymmetric> {
-        Err(Error::InvalidDataType)
-    }
-}
-
-impl OnlineCiphertextV1Header for OnlineCiphertextV1HeaderAsymmetric {
-    fn get_chunk_size(&self) -> u32 {
-        self.chunk_size
-    }
-
-    // TODO: Remove downcasting black magic
-    fn downcast_symmetric(&self) -> Result<&OnlineCiphertextV1HeaderSymmetric> {
-        Err(Error::InvalidDataType)
-    }
-
-    fn downcast_asymmetric(&self) -> Result<&OnlineCiphertextV1HeaderAsymmetric> {
-        Ok(&self)
-    }
-}
-
 /// Implements the encryptor/decryptor structure
 macro_rules! online_ciphertext_impl {
     ($struct_name:ident, $cipher_name:ident, $func:ident) => {
         pub struct $struct_name {
-            header: Box<dyn OnlineCiphertextV1Header>,
+            header: OnlineCiphertextV1Header,
             aad: Vec<u8>,
             cipher: $cipher_name<XChaCha20Poly1305>,
         }
@@ -171,7 +164,7 @@ macro_rules! online_ciphertext_impl {
                 self.header.get_chunk_size()
             }
 
-            pub fn get_header(&self) -> &Box<dyn OnlineCiphertextV1Header> {
+            pub fn get_header(&self) -> &OnlineCiphertextV1Header {
                 &self.header
             }
 
@@ -287,14 +280,13 @@ impl OnlineCiphertextV1Encryptor {
         let cipher = EncryptorLE31::from_aead(cipher, &nonce.into());
 
         // Create aad
-        let header = Box::new(OnlineCiphertextV1HeaderSymmetric { chunk_size, nonce });
+        let header = OnlineCiphertextV1HeaderSymmetric { chunk_size, nonce };
 
-        let mut header_bytes: Vec<u8> =
-            Borrow::<OnlineCiphertextV1HeaderSymmetric>::borrow(&header).into();
+        let mut header_bytes: Vec<u8> = header.borrow().into();
         aad.append(&mut header_bytes);
 
         Self {
-            header,
+            header: OnlineCiphertextV1Header::Symmetric(header),
             aad,
             cipher,
         }
@@ -320,18 +312,17 @@ impl OnlineCiphertextV1Encryptor {
         // Create the STREAM encryptor
         let cipher = EncryptorLE31::from_aead(cipher, &nonce.into());
 
-        let header = Box::new(OnlineCiphertextV1HeaderAsymmetric {
+        let header = OnlineCiphertextV1HeaderAsymmetric {
             chunk_size,
             nonce,
             public_key: ephemeral_public_key,
-        });
+        };
 
-        let mut header_bytes: Vec<u8> =
-            Borrow::<OnlineCiphertextV1HeaderAsymmetric>::borrow(&header).into();
+        let mut header_bytes: Vec<u8> = header.borrow().into();
         aad.append(&mut header_bytes);
 
         Self {
-            header,
+            header: OnlineCiphertextV1Header::Asymmetric(header),
             cipher,
             aad,
         }
@@ -351,14 +342,12 @@ impl OnlineCiphertextV1Decryptor {
         aad.append(&mut header_bytes);
 
         Self {
-            header: Box::new(header),
+            header: OnlineCiphertextV1Header::Symmetric(header),
             aad,
             cipher,
         }
     }
-}
 
-impl OnlineCiphertextV1Decryptor {
     pub fn new_asymmetric(
         private_key: &PrivateKey,
         mut aad: Vec<u8>,
@@ -380,7 +369,7 @@ impl OnlineCiphertextV1Decryptor {
         aad.append(&mut header_bytes);
 
         Self {
-            header: Box::new(header),
+            header: OnlineCiphertextV1Header::Asymmetric(header),
             aad,
             cipher,
         }
