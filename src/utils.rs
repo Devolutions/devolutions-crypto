@@ -126,6 +126,7 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
 }
 
 /// Temporarly binded here for a specific use case, don't rely on this.
+///
 /// Copied and modified from:
 /// https://github.com/RustCrypto/password-hashing/blob/master/scrypt/src/simple.rs
 /// Because rand is outdated, I cannot use the crate directly

@@ -75,6 +75,9 @@ pub enum Error {
     /// The length of the data to encrypt/decrypt during online encryption is not the same as the chunk size: -43
     #[error("The length of the data to encrypt/decrypt during online encryption is not the same as the chunk size")]
     InvalidChunkLength,
+    /// The mutex is poisoned and cannot be locked: -44
+    #[error("The mutex is poisoned and cannot be locked")]
+    PoisonedMutex,
 }
 
 impl Error {
@@ -99,6 +102,7 @@ impl Error {
             Error::NotEnoughShares => -41,
             Error::InconsistentVersion => -42,
             Error::InvalidChunkLength => -43,
+            Error::PoisonedMutex => -44,
         }
     }
 }

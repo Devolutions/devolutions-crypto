@@ -1,7 +1,6 @@
-use crate::enums::CiphertextSubtype;
-
-///! Online Ciphertext V1: STREAM-LE31-XChaCha20Poly1305
+//! Online Ciphertext V1: STREAM-LE31-XChaCha20Poly1305
 use super::{PrivateKey, PublicKey};
+use crate::enums::CiphertextSubtype;
 
 use super::Error;
 use super::Result;
@@ -22,7 +21,7 @@ use paste::paste;
 
 /// Context string for the Blake3 KDF function.
 /// This is used to normalize the key length and domain separation
-const CONTEXT: &'static str = "devolutions_crypto online_ciphertext_v1";
+const CONTEXT: &str = "devolutions_crypto online_ciphertext_v1";
 
 #[derive(Clone, Debug)]
 pub enum OnlineCiphertextV1Header {
@@ -44,6 +43,19 @@ pub struct OnlineCiphertextV1HeaderAsymmetric {
 }
 
 impl OnlineCiphertextV1Header {
+    pub fn get_serialized_size(&self) -> usize {
+        match self {
+            Self::Symmetric(_) => {
+                // chunk_size (u32, so 4 bytes) + 20 bytes nonce
+                20 + 4
+            }
+            Self::Asymmetric(_) => {
+                // chunk_size (u32, so 4 bytes) + 20 bytes nonce + 32 bytes public key
+                20 + 4 + 32
+            }
+        }
+    }
+
     pub fn get_chunk_size(&self) -> u32 {
         match self {
             Self::Symmetric(x) => x.chunk_size,
@@ -138,8 +150,7 @@ impl TryFrom<&[u8]> for OnlineCiphertextV1HeaderAsymmetric {
         let public_key: [u8; 32] = public_key
             .try_into()
             .expect("size is checked at the start of the function");
-        let public_key =
-            x25519_dalek::PublicKey::try_from(public_key).map_err(|_| Error::InvalidData)?;
+        let public_key = x25519_dalek::PublicKey::from(public_key);
 
         Ok(Self {
             chunk_size,
@@ -164,13 +175,17 @@ macro_rules! online_ciphertext_impl {
                 self.header.get_chunk_size()
             }
 
+            pub fn get_tag_size(&self) -> usize {
+                16
+            }
+
             pub fn get_header(&self) -> &OnlineCiphertextV1Header {
                 &self.header
             }
 
             paste! {
                 /// Process a single chunk
-                pub fn [<$func _chunk>](
+                pub fn [<$func _next_chunk>](
                     &mut self,
                     data: &[u8],
                     aad: &[u8],
@@ -195,7 +210,7 @@ macro_rules! online_ciphertext_impl {
 
                 /// Process a single chunk in place.
                 /// Requires a Vec because it needs to be expandable to accomodate the tag.
-                pub fn  [<$func _chunk_in_place>](
+                pub fn  [<$func _next_chunk_in_place>](
                     &mut self,
                     data: &mut Vec<u8>,
                     aad: &[u8],
@@ -216,7 +231,7 @@ macro_rules! online_ciphertext_impl {
                 }
 
                 /// Process the last chunk.
-                pub fn [<$func _last>](
+                pub fn [<$func _last_chunk>](
                     self,
                     data: &[u8],
                     aad: &[u8],
@@ -241,7 +256,7 @@ macro_rules! online_ciphertext_impl {
 
                 /// Process a single chunk in place.
                 /// Requires a Vec because it needs to be expandable to accomodate the tag.
-                pub fn [<$func _last_in_place>](
+                pub fn [<$func _last_chunk_in_place>](
                     self,
                     data: &mut Vec<u8>,
                     aad: &[u8],

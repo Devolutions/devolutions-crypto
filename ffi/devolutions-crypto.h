@@ -64,6 +64,9 @@ int64_t DecodeUrl(const uint8_t *input,
  *  * `data_length` - Length of the data to decrypt.
  *  * `key` - Pointer to the key to use to decrypt.
  *  * `key_length` - Length of the key to use to decrypt.
+ *  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
+ *             Pass null if there is not additionnal data to authenticate.
+ *  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
  *  * `result` - Pointer to the buffer to write the plaintext to.
  *  * `result_length` - Length of the buffer to write the plaintext to.
  *                     The safest size is the same size as the ciphertext.
@@ -77,6 +80,8 @@ int64_t Decrypt(const uint8_t *data,
                 size_t data_length,
                 const uint8_t *key,
                 size_t key_length,
+                const uint8_t *aad,
+                size_t aad_length,
                 uint8_t *result,
                 size_t result_length);
 
@@ -87,6 +92,9 @@ int64_t Decrypt(const uint8_t *data,
  *  * `data_length` - Length of the data to decrypt.
  *  * `private_key` - Pointer to the private key to use to decrypt.
  *  * `private_key_length` - Length of the private key to use to decrypt.
+ *  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
+ *             Pass null if there is not additionnal data to authenticate.
+ *  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
  *  * `result` - Pointer to the buffer to write the plaintext to.
  *  * `result_length` - Length of the buffer to write the plaintext to.
  *                     The safest size is the same size as the ciphertext.
@@ -100,6 +108,8 @@ int64_t DecryptAsymmetric(const uint8_t *data,
                           size_t data_length,
                           const uint8_t *private_key,
                           size_t private_key_length,
+                          const uint8_t *aad,
+                          size_t aad_length,
                           uint8_t *result,
                           size_t result_length);
 
@@ -189,6 +199,9 @@ int64_t EncodeUrl(const uint8_t *input,
  *  * `data_length` - Length of the data to encrypt.
  *  * `key` - Pointer to the key to use to encrypt.
  *  * `key_length` - Length of the key to use to encrypt.
+ *  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
+ *             Pass null if there is not additionnal data to authenticate.
+ *  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
  *  * `result` - Pointer to the buffer to write the ciphertext to.
  *  * `result_length` - Length of the buffer to write the ciphertext to. You can get the value by
  *                         calling EncryptSize() beforehand.
@@ -203,6 +216,8 @@ int64_t Encrypt(const uint8_t *data,
                 size_t data_length,
                 const uint8_t *key,
                 size_t key_length,
+                const uint8_t *aad,
+                size_t aad_length,
                 uint8_t *result,
                 size_t result_length,
                 uint16_t version);
@@ -214,6 +229,9 @@ int64_t Encrypt(const uint8_t *data,
  *  * `data_length` - Length of the data to encrypt.
  *  * `public_key` - Pointer to the public key to use to encrypt.
  *  * `public_key_length` - Length of the public key to use to encrypt.
+ *  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
+ *             Pass null if there is not additionnal data to authenticate.
+ *  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
  *  * `result` - Pointer to the buffer to write the ciphertext to.
  *  * `result_length` - Length of the buffer to write the ciphertext to. You can get the value by
  *                         calling EncryptAsymmetricSize() beforehand.
@@ -228,6 +246,8 @@ int64_t EncryptAsymmetric(const uint8_t *data,
                           size_t data_length,
                           const uint8_t *public_key,
                           size_t public_key_length,
+                          const uint8_t *aad,
+                          size_t aad_length,
                           uint8_t *result,
                           size_t result_length,
                           uint16_t version);
@@ -250,6 +270,10 @@ int64_t EncryptAsymmetricSize(size_t data_length,
  * Returns the length of the ciphertext to input as `result_length` in `Encrypt()`.
  */
 int64_t EncryptSize(size_t data_length, uint16_t version);
+
+void FreeOnlineDecryptor(void *ptr);
+
+void FreeOnlineEncryptor(void *ptr);
 
 /**
  * Generate a key using a CSPRNG.
@@ -373,6 +397,8 @@ int64_t GetDefaultArgon2ParametersSize(void);
  *  * `public` - Pointer to the buffer to write the public key to.
  *  * `public_length` - Length of the buffer to write the public key to.
  *                         You can get the value by calling `GetSigningPublicKeySize()` beforehand.
+ * # Safety
+ * This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
  */
 int64_t GetSigningPublicKey(const uint8_t *keypair,
                             size_t keypair_length,
@@ -481,6 +507,72 @@ int64_t MixKeyExchange(const uint8_t *private_,
  * Returns the length of the keys to input as `shared_length` in `MixKeyExchange()`.
  */
 int64_t MixKeyExchangeSize(void);
+
+int64_t NewOnlineDecryptor(const uint8_t *key,
+                           size_t key_size,
+                           const uint8_t *aad,
+                           size_t aad_size,
+                           const uint8_t *header,
+                           size_t header_size,
+                           bool asymmetric,
+                           void **output);
+
+int64_t NewOnlineEncryptor(const uint8_t *key,
+                           size_t key_size,
+                           const uint8_t *aad,
+                           size_t aad_size,
+                           uint32_t chunk_size,
+                           bool asymmetric,
+                           uint16_t version,
+                           void **output);
+
+int64_t OnlineDecryptorGetChunkSize(const void *ptr);
+
+int64_t OnlineDecryptorGetHeader(const void *ptr, uint8_t *result, size_t result_size);
+
+int64_t OnlineDecryptorGetHeaderSize(const void *ptr);
+
+int64_t OnlineDecryptorGetTagSize(const void *ptr);
+
+int64_t OnlineDecryptorLastChunk(void *ptr,
+                                 const uint8_t *data,
+                                 size_t data_size,
+                                 const uint8_t *aad,
+                                 size_t aad_size,
+                                 uint8_t *result,
+                                 size_t result_size);
+
+int64_t OnlineDecryptorNextChunk(void *ptr,
+                                 const uint8_t *data,
+                                 size_t data_size,
+                                 const uint8_t *aad,
+                                 size_t aad_size,
+                                 uint8_t *result,
+                                 size_t result_size);
+
+int64_t OnlineEncryptorGetChunkSize(const void *ptr);
+
+int64_t OnlineEncryptorGetHeader(const void *ptr, uint8_t *result, size_t result_size);
+
+int64_t OnlineEncryptorGetHeaderSize(const void *ptr);
+
+int64_t OnlineEncryptorGetTagSize(const void *ptr);
+
+int64_t OnlineEncryptorLastChunk(void *ptr,
+                                 const uint8_t *data,
+                                 size_t data_size,
+                                 const uint8_t *aad,
+                                 size_t aad_size,
+                                 uint8_t *result,
+                                 size_t result_size);
+
+int64_t OnlineEncryptorNextChunk(void *ptr,
+                                 const uint8_t *data,
+                                 size_t data_size,
+                                 const uint8_t *aad,
+                                 size_t aad_size,
+                                 uint8_t *result,
+                                 size_t result_size);
 
 /**
  * This is binded here for one specific use case, do not use it if you don't know what you're doing.
