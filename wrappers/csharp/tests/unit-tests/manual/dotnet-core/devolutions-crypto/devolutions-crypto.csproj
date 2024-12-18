@@ -9,4 +9,8 @@
   <ItemGroup>
     <Compile Include="..\..\..\..\..\src\*.cs"/>
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DOTNET_CORE</DefineConstants>
+  </PropertyGroup>
 </Project>
