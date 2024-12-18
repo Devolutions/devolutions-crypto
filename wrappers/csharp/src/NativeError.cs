@@ -1,5 +1,8 @@
 namespace Devolutions.Cryptography
 {
+    /// <summary>
+    /// Enum containing the definition of native errors.
+    /// </summary>
     public enum NativeError
     {
         /// <summary>

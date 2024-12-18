@@ -16,31 +16,17 @@ runs:
         merge-multiple: true
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
 
-    - name: Update Nuget
+    - name: Add local nuget source
       shell: bash
       run: |
-        sudo nuget update -self
+        dotnet nuget add source /Users/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
+        dotnet nuget list source
 
-    - name: Unit tests DOTNET CORE
+    - name: Install macOS Workload
+      shell: bash
+      run: sudo dotnet workload install macos
+
+    - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash
-      run: python3 unit-tests.py -p core
-
-    - name: Unit tests XAMARIN-MAC-FULL
-      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
-      shell: bash
-      run: python3 unit-tests.py -p mac
-
-# Install latest Xamarin.Mac to fix issue with the one packaged in the runner. (mac modern only)
-# ld: Framework not found CHIP
-# https://github.com/actions/runner-images/issues/7058
-    - name: Install Latest Xamarin Mac
-      shell: bash
-      run : |
-        wget https://download.visualstudio.microsoft.com/download/pr/1d39655e-c5e8-4af9-93cd-4174278a0895/7976384b6c703a55a4c9d5f1c640e0b1/xamarin.mac-9.1.0.2.pkg
-        sudo installer -pkg xamarin.mac-9.1.0.2.pkg -target /
-
-    - name: Unit tests XAMARIN-MAC-MODERN
-      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
-      shell: bash
-      run: python3 unit-tests.py -p mac-modern
+      run: dotnet test ./dotnet-core/dotnet-core.csproj

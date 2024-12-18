@@ -5,7 +5,7 @@ namespace Devolutions.Cryptography
     using System.Text;
 
     /// <summary>
-    /// Useful functions from Devolutions Crypto
+    /// Useful functions from Devolutions Crypto.
     /// </summary>
     public static class Utils
     {
@@ -342,6 +342,11 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// This method is exposed for a very specific use case. Do not rely on it.
         /// </summary>
+        /// <param name="password">The password to hash.</param>
+        /// <param name="salt">The salt for the password hashing.</param>
+        /// <param name="logN">Iterations count.</param>
+        /// <param name="r">Block size.</param>
+        /// <param name="p">Parallelism factor.</param>
         /// <returns>The resulting hash.</returns>
         public static string ScryptSimple(byte[] password, byte[] salt, byte logN, uint r, uint p)
         {

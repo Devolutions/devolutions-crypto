@@ -19,7 +19,7 @@ namespace Devolutions.Cryptography.Argon2
         /// <summary>
         /// Initializes a new instance of the <see cref="Argon2Parameters"/> class.
         /// </summary>
-        /// <param name="defaultParameters">Use the standard Argon2 parameters</param>
+        /// <param name="defaultParameters">Use the standard Argon2 parameters.</param>
         internal Argon2Parameters(bool defaultParameters = true)
         {
             if (defaultParameters)

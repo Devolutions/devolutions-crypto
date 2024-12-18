@@ -3,40 +3,60 @@ description: This tests the Android nuget package.
 runs:
   using: composite
   steps:
-    - name: Download Config
-      uses: actions/download-artifact@v4
-      with:
-        name: config.txt
-        path: ./wrappers/csharp
-
     - name: Download Nugets Libs
       uses: actions/download-artifact@v4
       with:
         pattern: nugets-*
         merge-multiple: true
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
-        
 
-    - name: Update Nuget
+    - name: Add local nuget source
       shell: bash
-      run: sudo nuget update -self
+      run: |
+        dotnet nuget add source /home/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
+        dotnet nuget list source
+
+    - name: Install android Workload
+      shell: bash
+      run: sudo dotnet workload install android
+
+    - name: Enable KVM group perms
+      shell: bash
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - name: Install required android dependencies
+      shell: bash
+      working-directory: /usr/local/lib/android/sdk/cmdline-tools/latest/bin
+      run: |
+        echo "yes" | ./sdkmanager emulator
+        echo "yes" | ./sdkmanager "platform-tools"
+
+        sudo apt-get install libpulse0
+
+        echo "/usr/local/lib/android/sdk/platform-tools" >> $GITHUB_PATH
+        echo "/usr/local/lib/android/sdk/emulator" >> $GITHUB_PATH
+        echo "/usr/local/lib/android/sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
     - name: Starting ADB Server
       shell: bash
       run: adb start-server
 
-    - name: Installing SDK Android-33 x86_64
+    - name: Installing SDK Android-33 arm64-v8a
       shell: bash
-      run: echo "y" | /Users/runner/Library/Android/sdk/tools/bin/sdkmanager --install "system-images;android-33;google_apis;x86_64"
+      run: echo "y" | sdkmanager --install "system-images;android-33;google_apis;x86_64"
 
     - name: Creating Android device
       shell: bash
-      run: echo "no" | /Users/runner/Library/Android/sdk/tools/bin/avdmanager create avd -n test_emulator -k "system-images;android-33;google_apis;x86_64"
+      run: echo "no" | avdmanager create avd -n test_emulator -k "system-images;android-33;google_apis;x86_64"
 
     - name: Starting emulator
-      working-directory: /Users/runner/Library/Android/sdk/tools/
       shell: bash
-      run: emulator @test_emulator &
+      run: |
+        export QT_QPA_PLATFORM=offscreen
+        emulator @test_emulator -no-audio -no-window -no-snapshot -no-boot-anim -accel auto -gpu auto -qemu -m 2048 &
 
     - name: Waiting for emulator to boot
       shell: bash
@@ -61,7 +81,37 @@ runs:
 
         adb shell input keyevent 82
 
-    - name: Unit tests XAMARIN-ANDROID
-      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+    - name: Show adb devices
       shell: bash
-      run: python3 unit-tests.py -p android
+      run: adb devices
+
+    - name: Unit tests Android
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets/android
+      shell: bash
+      run: dotnet build -t:run --configuration Debug
+
+    - name: Pipe logcat to file
+      shell: bash
+      run: |
+        adb logcat -c
+        adb logcat > build.log &
+
+    - name: Wait for tests
+      shell: bash
+      run: |
+        while true; do
+            if grep -q "====ENDOFTESTS====" build.log; then
+                echo "Found '====ENDOFTESTS===='."
+                cat build.log
+                exit 0
+            fi
+            sleep 5
+        done
+        
+    - name: Check fail
+      shell: bash
+      run: |
+        grep "Failed: 0" build.log
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi

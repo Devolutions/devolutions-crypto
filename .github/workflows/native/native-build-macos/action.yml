@@ -9,6 +9,20 @@ runs:
         name: config.txt
         path: ./wrappers/csharp
 
+    - name: Install Homebrew
+      shell: bash
+      run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo "PATH=/opt/homebrew/bin:$PATH" >> $GITHUB_ENV
+    
+    - name: Verify Homebrew installation
+      shell: bash
+      run: brew --version
+      
+    - name: Install mono
+      shell: bash
+      run: brew install mono
+
     - name:  Install Rust
       shell: bash
       run: |
@@ -28,13 +42,6 @@ runs:
         source $HOME/.cargo/env
         cargo test
 
-    - name: Building Mac Full
-      working-directory: ./wrappers/csharp
-      shell: bash
-      run: |
-          source $HOME/.cargo/env
-          python3 GeneratePackage.py -p mac
-
     - name: Building Mac Modern
       working-directory: ./wrappers/csharp
       shell: bash
@@ -42,9 +49,16 @@ runs:
         source $HOME/.cargo/env
         python3 GeneratePackage.py -p mac-modern
 
+    - name: Prepare folder structure
+      working-directory: ./
+      shell: bash
+      run: |
+        mv wrappers/csharp/macos-modern wrappers/csharp/macos-modern-temp
+        mkdir -p wrappers/csharp/macos-modern/macos-modern
+        mv wrappers/csharp/macos-modern-temp/* wrappers/csharp/macos-modern/macos-modern/
+        rmdir wrappers/csharp/macos-modern-temp
+
     - uses: actions/upload-artifact@v4.3.6
       with:
         name: native-macos
-        path: |
-          wrappers/csharp/macos-full/**
-          wrappers/csharp/macos-modern/**
+        path: wrappers/csharp/macos-modern/

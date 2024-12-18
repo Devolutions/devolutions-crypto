@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<!--This file represents the results of running a test suite-->
-<test-results name="" total="0" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2020-04-22" time="18:27:34">
-  <environment nunit-version="1.0.0.0" clr-version="4.0.50524.0" os-version="Unix 19.4.0.0" platform="Unix" cwd="/Users/mmorrissette/Library/Developer/CoreSimulator/Devices/4C69D518-2FFA-4D9B-844C-1FCFA240173F/data/Containers/Bundle/Application/9BFC3A94-C812-4399-8BCE-E8C06A24AD67/xamarin-ios.app" machine-name="DEVOLUTIONS75" user="somebody" user-domain="DEVOLUTIONS75" />
-  <culture-info current-culture="en-US" current-uiculture="en-US" />
-  <test-suite type="TestSuite" name="" executed="True" result="Success" success="True" time="0.004" asserts="0">
-    <results />
-  </test-suite>
-</test-results>

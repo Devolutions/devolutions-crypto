@@ -1,3 +1,5 @@
+#pragma warning disable SA1600 // Elements should be documented
+
 namespace Devolutions.Cryptography
 {
     using System;
@@ -22,7 +24,7 @@ namespace Devolutions.Cryptography
         private const string LibName86 = "DevolutionsCrypto";
 #endif
 
-#if !ANDROID && !IOS && !MAC_MODERN && !WIN && !DOTNET_CORE
+#if !ANDROID && !IOS && !MACOS && !WIN && !DOTNET_CORE
         private const string LibName64 = "DevolutionsCrypto-x64";
 
         private const string LibName86 = "DevolutionsCrypto-x86";
@@ -70,7 +72,7 @@ namespace Devolutions.Cryptography
 
             if (managedVersion != assemblyVersion || NativeVersion != nativeVersion)
             {
-                throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + managedVersion + " Native: " + nativeVersion + " Supported : managed(" + ManagedVersion + ") native (" + NativeVersion + ")");
+                throw new DevolutionsCryptoException(ManagedError.IncompatibleVersion, "Non-matching versions - Managed: " + assemblyVersion + " Native: " + nativeVersion + " Supported : managed(" + ManagedVersion + ") native (" + NativeVersion + ")");
             }
 #endif
         }
@@ -123,7 +125,7 @@ namespace Devolutions.Cryptography
             return Managed.VerifyPassword(password, hash);
         }
 
-#if !ANDROID && !IOS && !MAC_MODERN && !DOTNET_CORE
+#if !ANDROID && !IOS && !MACOS && !DOTNET_CORE
         internal static long GenerateSharedKeyNative(UIntPtr nbShares, UIntPtr threshold, UIntPtr size, IntPtr[] shares)
         {
             if (Environment.Is64BitProcess)
@@ -210,7 +212,7 @@ namespace Devolutions.Cryptography
             return DeriveKeyArgon2Native86(key, keyLength, argon2Parameters, argon2ParametersLength, result, resultLength);
         }
 
-        internal static long DeriveKeyPbkdf2Native(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, System.UInt32 iterations, byte[] result, UIntPtr resultLength)
+        internal static long DeriveKeyPbkdf2Native(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, uint iterations, byte[] result, UIntPtr resultLength)
         {
             if (Environment.Is64BitProcess)
             {
@@ -670,7 +672,7 @@ namespace Devolutions.Cryptography
             UIntPtr keyLength,
             byte[] salt,
             UIntPtr saltLength,
-            System.UInt32 iterations,
+            uint iterations,
             byte[] result,
             UIntPtr resultLength);
 
@@ -680,7 +682,7 @@ namespace Devolutions.Cryptography
             UIntPtr keyLength,
             byte[] salt,
             UIntPtr saltLength,
-            System.UInt32 iterations,
+            uint iterations,
             byte[] result,
             UIntPtr resultLength);
 
@@ -920,3 +922,4 @@ namespace Devolutions.Cryptography
 #endif
     }
 }
+#pragma warning restore SA1600 // Elements should be documented

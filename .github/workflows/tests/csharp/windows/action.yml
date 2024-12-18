@@ -19,27 +19,14 @@ runs:
         pattern: nugets-*
         merge-multiple: true
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
-
-    - name: setting up PATH environment variable
+        
+    - name: Add local nuget source
       shell: bash
       run: |
-        echo "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn" >> $GITHUB_PATH
-        echo "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow" >> $GITHUB_PATH
+        dotnet nuget add source "D:\a\devolutions-crypto\devolutions-crypto\wrappers\csharp\tests\unit-tests\nugets\Nugets" -n LocalPackages
+        dotnet nuget list source
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v2
-
-    - name: Downloading nuget
+    - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets
       shell: bash
-      run: curl https://dist.nuget.org/win-x86-commandline/latest/nuget.exe --output nuget.exe
-
-    - name: Unit tests DOTNET FRAMEWORK PACKAGE CONFIG
-      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
-      shell: bash
-      run: python unit-tests.py -p framework
-
-    - name: Unit tests DOTNET CORE
-      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
-      shell: bash
-      run: python unit-tests.py -p core
+      run: dotnet test ./dotnet-core/dotnet-core.csproj

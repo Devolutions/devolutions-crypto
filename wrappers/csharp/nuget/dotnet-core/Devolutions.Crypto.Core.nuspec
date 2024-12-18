@@ -35,13 +35,17 @@
     <file src="../../linux/bin/libDevolutionsCrypto-arm64.so" target="runtimes/linux-arm64/native/libDevolutionsCrypto.so"/>
 
     <!-- macOS Native Libraries -->
-    <file src="../../macos-full/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto.dylib"/>
-    <file src="../../macos-full/bin/aarch64/libDevolutionsCrypto.dylib" target="runtimes/osx-arm64/native/libDevolutionsCrypto.dylib"/>
+    <file src="../../macos-modern/bin/x86_64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto.dylib"/>
+    <file src="../../macos-modern/bin/aarch64/libDevolutionsCrypto.dylib" target="runtimes/osx-arm64/native/libDevolutionsCrypto.dylib"/>
 
     <!-- iOS Native Libraries -->
-    <file src="../../ios/bin/universal/libDevolutionsCrypto.framework/Info.plist" target="runtimes/ios/native/libDevolutionsCrypto.framework/Info.plist"/>
-    <file src="../../ios/bin/universal/libDevolutionsCrypto.framework/libDevolutionsCrypto" target="runtimes/ios/native/libDevolutionsCrypto.framework/libDevolutionsCrypto"/>
-    
+    <file src="../../ios/libDevolutionsCrypto.xcframework/Info.plist" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/Info.plist"/>
+    <file src="../../ios/libDevolutionsCrypto.xcframework/ios-arm64/libDevolutionsCrypto.framework/libDevolutionsCrypto" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/ios-arm64/libDevolutionsCrypto.framework/libDevolutionsCrypto"/>
+    <file src="../../ios/libDevolutionsCrypto.xcframework/ios-arm64/libDevolutionsCrypto.framework/Info.plist" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/ios-arm64/libDevolutionsCrypto.framework/Info.plist"/>
+
+    <file src="../../ios/libDevolutionsCrypto.xcframework/ios-arm64_x86_64-simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/ios-arm64_x86_64-simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto"/>
+    <file src="../../ios/libDevolutionsCrypto.xcframework/ios-arm64_x86_64-simulator/libDevolutionsCrypto.framework/Info.plist" target="runtimes/ios/native/libDevolutionsCrypto.xcframework/ios-arm64_x86_64-simulator/libDevolutionsCrypto.framework/Info.plist"/>
+
     <!-- Android Native Libraries -->
     <file src="../../android/bin/aarch64/libDevolutionsCrypto.so" target="runtimes/android-arm64/native/libDevolutionsCrypto.so"/>
     <file src="../../android/bin/armv7/libDevolutionsCrypto.so" target="runtimes/android-arm/native/libDevolutionsCrypto.so"/>

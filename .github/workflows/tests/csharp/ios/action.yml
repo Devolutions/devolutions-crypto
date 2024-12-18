@@ -3,24 +3,55 @@ description: This tests the iOS nuget package.
 runs:
   using: composite
   steps:
-    - name: Download Config
-      uses: actions/download-artifact@v4
-      with:
-        name: config.txt
-        path: ./wrappers/csharp
-
-    - name: Download Native Libs
+    - name: Download Nugets Libs
       uses: actions/download-artifact@v4
       with:
         pattern: nugets-*
         merge-multiple: true
         path: ./wrappers/csharp/tests/unit-tests/nugets/Nugets
 
-    - name: Update Nuget
+    - name: Add local nuget source
       shell: bash
-      run: sudo nuget update -self
+      run: |
+        dotnet nuget add source /Users/runner/work/devolutions-crypto/devolutions-crypto/wrappers/csharp/tests/unit-tests/nugets/Nugets -n LocalPackages
+        dotnet nuget list source
 
-    - name: Unit tests XAMARIN-IOS
-      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+    - name: Install iOS Workload
       shell: bash
-      run: python3 unit-tests.py -p ios
+      run: sudo dotnet workload install ios
+
+    - name: List simulators
+      shell: bash
+      run: xcrun simctl list devices
+
+
+    - name: Extract UDID
+      shell: bash
+      run: | 
+        # Find the UDID of the iPhone 16 simulator running iOS 18.0
+        SIMULATOR_UDID=$(xcrun simctl list devices available 'iOS 18.0' | grep 'iPhone 16' | awk -F '[()]' '{print $2}' | head -n 1)
+
+        # Check if a UDID was found
+        if [ -n "$SIMULATOR_UDID" ]; then
+            # Export it as an environment variable
+            export IPHONE_16_SIM_UDID=$SIMULATOR_UDID
+            echo "IPHONE_16_SIM_UDID=$SIMULATOR_UDID" >> $GITHUB_ENV
+            echo "iPhone 16 UDID stored in environment variable IPHONE_16_SIM_UDID: $IPHONE_16_SIM_UDID"
+        else
+            echo "iPhone 16 simulator with iOS 18.0 not found."
+            exit 1
+        fi
+
+    - name: Unit tests
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets/iOS
+      shell: bash
+      run: dotnet build -t:run -p:_DeviceName=:v2:udid="$IPHONE_16_SIM_UDID" 2>&1 | tee build.log
+
+    - name: Check fail
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets/iOS
+      shell: bash
+      run: |
+        grep "Failed: 0" build.log
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi

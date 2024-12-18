@@ -25,8 +25,9 @@ runs:
       run: |
         rustup update
 
-        rustup target add x86_64-apple-ios
-        rustup target add aarch64-apple-ios
+        rustup target add x86_64-apple-ios # iOS Simulator on Intel based mac
+        rustup target add aarch64-apple-ios-sim # iOS Simulator on Arm based mac
+        rustup target add aarch64-apple-ios # iOS & iPad
 
     - name: Unit tests
       working-directory: ./
@@ -35,16 +36,86 @@ runs:
         source $HOME/.cargo/env
         cargo test
 
-    - name: Building IOS
-      working-directory: ./wrappers/csharp
+    - name: Build iOS
       shell: bash
       run: |
-        source $HOME/.cargo/env
-        python3 GeneratePackage.py -p ios
-        mkdir output
-        mv ./ios ./output/ios
+        cargo build -p devolutions-crypto-ffi --release --target=x86_64-apple-ios
+        cargo build -p devolutions-crypto-ffi --release --target=aarch64-apple-ios-sim
+        cargo build -p devolutions-crypto-ffi --release --target=aarch64-apple-ios
+
+    - name: Set Info.plist version
+      shell: bash
+      run: |
+        VERSION=$(grep 'version'  ./wrappers/csharp/config.txt | cut -d '=' -f2 | tr -d ' "')
+
+        NOW=$(date +"%H%M")
+
+        FULL_VERSION="${VERSION}.${NOW}"
+
+        sed -i "" -e "s/||VERSION||/${FULL_VERSION}/g" -e "s/||SHORT_VERSION||/${VERSION}/g" ./wrappers/csharp/nuget/iOS/Info.plist
+
+    - name: Create .framework simulator
+      shell: bash
+      run: |
+        mkdir -p ./ios/bin/simulator
+        lipo "./target/x86_64-apple-ios/release/libdevolutions_crypto_ffi.dylib" \
+        "./target/aarch64-apple-ios-sim/release/libdevolutions_crypto_ffi.dylib" \
+        -create -output "./ios/bin/simulator/libDevolutionsCrypto.dylib"
+
+        mkdir ./ios/bin/simulator/libDevolutionsCrypto.framework
+        mv ./ios/bin/simulator/libDevolutionsCrypto.dylib ./ios/bin/simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto
+
+        cp ./wrappers/csharp/nuget/iOS/Info.plist ./ios/bin/simulator/libDevolutionsCrypto.framework/Info.plist
+
+        # Fixing rpath
+        echo "Fixing rpath"
+        install_name_tool -id "@rpath/libDevolutionsCrypto.framework/libDevolutionsCrypto" "./ios/bin/simulator/libDevolutionsCrypto.framework/libDevolutionsCrypto"
+
+
+    - name: Create .framework
+      shell: bash
+      run: |
+        mkdir -p ./ios/bin/ios/libDevolutionsCrypto.framework
+        lipo -create ./target/aarch64-apple-ios/release/libdevolutions_crypto_ffi.dylib -output ./ios/bin/ios/libDevolutionsCrypto.framework/libDevolutionsCrypto
+
+        cp ./wrappers/csharp/nuget/iOS/Info.plist ./ios/bin/ios/libDevolutionsCrypto.framework/Info.plist
+
+        # Fixing rpath
+        echo "Fixing rpath"
+        install_name_tool -id "@rpath/libDevolutionsCrypto.framework/libDevolutionsCrypto" "./ios/bin/ios/libDevolutionsCrypto.framework/libDevolutionsCrypto"
+
+    - name: Combine Frameworks to XCFrameworks
+      shell: bash
+      run: |
+        xcodebuild -create-xcframework \
+        -framework "./ios/bin/ios/libDevolutionsCrypto.framework" \
+        -framework "./ios/bin/simulator/libDevolutionsCrypto.framework" \
+        -output ./output/ios/libDevolutionsCrypto.xcframework
+
+        mkdir -p ./wrappers/csharp/
+        cp -R ./output/. ./wrappers/csharp/
+
+    - name: Build C#
+      shell: bash
+      working-directory: ./wrappers/csharp/src
+      run: |
+        VERSION_MANAGED=$(grep 'version' ../config.txt | cut -d '=' -f2 | tr -d ' "')
+        VERSION_NATIVE=$(grep 'package.version = "' ../../../Cargo.toml | cut -d '"' -f2)
+
+        sed -i "" -e "s/||MANAGED_VERSION||/${VERSION_MANAGED}/g" -e "s/||NATIVE_VERSION||/${VERSION_NATIVE}/g" ./Native.cs
+
+        dotnet build -p:DefineConstants=IOS -p:Version="$VERSION_MANAGED" --configuration Release --output ../ios/bin
+
+    - name: Fix dir structure
+      shell: bash
+      working-directory: ./wrappers/csharp/
+      run: |
+        mkdir tmp
+        mv ./ios ./tmp/ios
+        mkdir -p ./ios/ios
+        cp -R ./tmp/ios/. ./ios/ios
 
     - uses: actions/upload-artifact@v4.3.6
       with:
         name: native-ios
-        path: wrappers/csharp/output/**
+        path: ./wrappers/csharp/ios
