@@ -84,5 +84,15 @@ namespace Devolutions.Cryptography
         /// The version of the multiple data is inconsistent: -42
         /// </summary>
         InconsistentVersion = -42,
+
+        /// <summary>
+        ///  The length of the data to encrypt/decrypt during online encryption is not the same as the chunk size: -43
+        /// </summary>
+        InvalidChunkLength = -43,
+
+        /// <summary>
+        /// The mutex is poisoned and cannot be locked: -44
+        /// </summary>
+        PoisonedMutex = -44,
     }
 }

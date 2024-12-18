@@ -101,6 +101,54 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "MixKeyExchangeSize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long MixKeyExchangeSizeNative();
 
+        [DllImport(LibName, EntryPoint = "NewOnlineEncryptor", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long NewOnlineEncryptor(byte[] key, UIntPtr keyLength, byte[] aad, UIntPtr aadLength, UInt32 chunkLength, bool asymmetric, UInt16 version, out UIntPtr output);
+
+        [DllImport(LibName, EntryPoint = "NewOnlineDecryptor", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long NewOnlineDecryptor(byte[] key, UIntPtr keyLength, byte[] aad, UIntPtr aadLength, byte[] header, UIntPtr headerLength, bool asymmetric, out UIntPtr output);
+
+        [DllImport(LibName, EntryPoint = "FreeOnlineEncryptor", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long FreeOnlineEncryptor(UIntPtr ptr);
+
+        [DllImport(LibName, EntryPoint = "FreeOnlineDecryptor", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long FreeOnlineDecryptor(UIntPtr ptr);
+
+        [DllImport(LibName, EntryPoint = "OnlineEncryptorGetChunkSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineEncryptorGetChunkSize(UIntPtr ptr);
+
+        [DllImport(LibName, EntryPoint = "OnlineDecryptorGetChunkSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineDecryptorGetChunkSize(UIntPtr ptr);
+
+        [DllImport(LibName, EntryPoint = "OnlineEncryptorGetHeader", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineEncryptorGetHeader(UIntPtr ptr, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName, EntryPoint = "OnlineDecryptorGetHeader", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineDecryptorGetHeader(UIntPtr ptr, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName, EntryPoint = "OnlineEncryptorGetHeaderSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineEncryptorGetHeaderSize(UIntPtr ptr);
+
+        [DllImport(LibName, EntryPoint = "OnlineDecryptorGetHeaderSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineDecryptorGetHeaderSize(UIntPtr ptr);
+
+        [DllImport(LibName, EntryPoint = "OnlineEncryptorGetTagSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineEncryptorGetTagSize(UIntPtr ptr);
+
+        [DllImport(LibName, EntryPoint = "OnlineDecryptorGetTagSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineDecryptorGetTagSize(UIntPtr ptr);
+
+        [DllImport(LibName, EntryPoint = "OnlineEncryptorNextChunk", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineEncryptorNextChunk(UIntPtr ptr, byte[] data, UIntPtr dataLength, byte[] aad, UIntPtr aadLength, byte[] result, UIntPtr resultSize);
+
+        [DllImport(LibName, EntryPoint = "OnlineDecryptorNextChunk", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineDecryptorNextChunk(UIntPtr ptr, byte[] data, UIntPtr dataLength, byte[] aad, UIntPtr aadLength, byte[] result, UIntPtr resultSize);
+
+        [DllImport(LibName, EntryPoint = "OnlineEncryptorLastChunk", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineEncryptorLastChunk(UIntPtr ptr, byte[] data, UIntPtr dataLength, byte[] aad, UIntPtr aadLength, byte[] result, UIntPtr resultSize);
+
+        [DllImport(LibName, EntryPoint = "OnlineDecryptorLastChunk", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long OnlineDecryptorLastChunk(UIntPtr ptr, byte[] data, UIntPtr dataLength, byte[] aad, UIntPtr aadLength, byte[] result, UIntPtr resultSize);
+
         [DllImport(LibName, EntryPoint = "ValidateHeader", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long ValidateHeader(byte[] data, UIntPtr dataLength, ushort dataType);
 

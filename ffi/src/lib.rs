@@ -936,7 +936,7 @@ pub unsafe extern "C" fn OnlineEncryptorGetHeader(
     result: *mut u8,
     result_size: usize,
 ) -> i64 {
-    if result.is_null() {
+    if ptr.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
 
@@ -961,7 +961,7 @@ pub unsafe extern "C" fn OnlineDecryptorGetHeader(
     result: *mut u8,
     result_size: usize,
 ) -> i64 {
-    if result.is_null() {
+    if ptr.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
 
@@ -990,7 +990,7 @@ pub unsafe extern "C" fn OnlineEncryptorNextChunk(
     result: *mut u8,
     result_size: usize,
 ) -> i64 {
-    if aad.is_null() | data.is_null() | result.is_null() {
+    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
 
@@ -1027,7 +1027,7 @@ pub unsafe extern "C" fn OnlineDecryptorNextChunk(
     result: *mut u8,
     result_size: usize,
 ) -> i64 {
-    if aad.is_null() | data.is_null() | result.is_null() {
+    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
 
@@ -1064,7 +1064,7 @@ pub unsafe extern "C" fn OnlineEncryptorLastChunk(
     result: *mut u8,
     result_size: usize,
 ) -> i64 {
-    if aad.is_null() | data.is_null() | result.is_null() {
+    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
 
@@ -1101,7 +1101,7 @@ pub unsafe extern "C" fn OnlineDecryptorLastChunk(
     result: *mut u8,
     result_size: usize,
 ) -> i64 {
-    if aad.is_null() | data.is_null() | result.is_null() {
+    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
 
@@ -1130,6 +1130,10 @@ pub unsafe extern "C" fn OnlineDecryptorLastChunk(
 
 #[no_mangle]
 pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
     let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
     let header = match encryptor.lock() {
         Ok(c) => c.get_header(),
@@ -1141,6 +1145,10 @@ pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64
 
 #[no_mangle]
 pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
     let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
     let header = match decryptor.lock() {
         Ok(c) => c.get_header(),
@@ -1152,6 +1160,10 @@ pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64
 
 #[no_mangle]
 pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
     let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
     match encryptor.lock() {
         Ok(c) => c.get_chunk_size() as i64,
@@ -1161,6 +1173,10 @@ pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 
 
 #[no_mangle]
 pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
     let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
     match decryptor.lock() {
         Ok(c) => c.get_chunk_size() as i64,
@@ -1170,6 +1186,10 @@ pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 
 
 #[no_mangle]
 pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
     let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
     match encryptor.lock() {
         Ok(c) => c.get_tag_size() as i64,
@@ -1179,6 +1199,10 @@ pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 {
 
 #[no_mangle]
 pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
     let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
     match decryptor.lock() {
         Ok(c) => c.get_tag_size() as i64,
@@ -1187,13 +1211,25 @@ pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) {
+pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
     drop(Box::from_raw(ptr as *mut Mutex<OnlineCiphertextEncryptor>));
+
+    0
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn FreeOnlineDecryptor(ptr: *mut c_void) {
+pub unsafe extern "C" fn FreeOnlineDecryptor(ptr: *mut c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
     drop(Box::from_raw(ptr as *mut Mutex<OnlineCiphertextDecryptor>));
+
+    0
 }
 
 /// The size, in bytes, of the resulting secret
