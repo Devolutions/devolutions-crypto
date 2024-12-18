@@ -164,23 +164,24 @@ jobs:
 
 ##### KOTLIN BUILD #####
   build_kotlin:
-    runs-on: "ubuntu-22.04"
+    needs: setup_config
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
       - uses: ./.github/workflows/kotlin
-  
+
   tests_nuget_android:
-   needs: [nugets, setup_config]
-   runs-on: "ubuntu-22.04"
-   steps:
-     - uses: actions/checkout@v4
-       with:
-         lfs: true
-     - run: git lfs pull
-     - uses: ./.github/workflows/tests/csharp/android
+    needs: [nugets, setup_config]
+    runs-on: "ubuntu-22.04"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/tests/csharp/android
 
   #### CODE FORMATTING ####
   rust_code_format:

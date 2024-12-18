@@ -11,6 +11,8 @@ plugins {
 
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
+
+    id("maven-publish")
 }
 
 repositories {
@@ -46,12 +48,45 @@ java {
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
-	
-	
+
+
     // Configure test logging to display results in stdout
     testLogging {
         events("passed", "skipped", "failed")
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         showStandardStreams = true
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "cloudsmith"
+            url = uri("https://maven.cloudsmith.io/devolutions/maven-public/")
+            credentials {
+                username = System.getenv("CLOUDSMITH_USERNAME") ?: "bot-devolutions"
+                password = System.getenv("CLOUDSMITH_API_KEY")
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "devolutions"
+            artifactId = "devolutions-crypto"
+            version = project.version.toString()
+            artifact(tasks["jar"])
+            pom {
+                name.set("Devolutions Crypto")
+                description.set("Devolutions Cryptographic Library")
+                url.set("https://github.com/devolutions/devolutions-crypto")
+
+                licenses {
+                    license {
+                        name.set("Apache License 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.html")
+                    }
+                }
+            }
+        }
     }
 }

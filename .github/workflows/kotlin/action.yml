@@ -2,6 +2,18 @@ name: Build Kotlin Package
 runs:
   using: composite
   steps:
+    - name: Download Version File
+      uses: actions/download-artifact@v4
+      with:
+        name: config.txt
+
+    - name: Read Version and Set Gradle Property
+      shell: bash
+      id: setup
+      run: |
+        version=$(grep "version" config.txt | sed -E 's/version = "(.*)"/\1/')
+        echo "version=$version" >> $GITHUB_OUTPUT
+
     - name:  Installing dependencies
       shell: bash
       run: |
@@ -58,8 +70,8 @@ runs:
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> ./.cargo/config.toml
 
     - name: Build
-      working-directory: ./wrappers/kotlin
       shell: bash
+      working-directory: ./wrappers/kotlin
       run: |
         export ANDROID_ROOT="/usr/local/lib/android"
         export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
@@ -71,9 +83,14 @@ runs:
         chmod +x gradlew
         ./gradlew test
         ./gradlew build
+        ./gradlew generatePomFileForMavenPublication
 
-    - name: Kotlin Package
-      uses: actions/upload-artifact@v4
+    - run: sed -i 's|<version>.*</version>|<version>${{ steps.setup.outputs.version }}</version>|' 'lib/build/publications/maven/pom-default.xml'
+      shell: bash
+      working-directory: ./wrappers/kotlin
+
+    - name: Upload Kotlin package
+      uses: actions/upload-artifact@v4.3.6
       with:
         name: kotlin
         path: ./wrappers/kotlin/lib/build
