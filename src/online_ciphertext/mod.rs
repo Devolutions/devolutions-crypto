@@ -61,57 +61,6 @@ use online_ciphertext_v1::{
 
 use paste::paste;
 
-pub fn new_encryptor(
-    key: &[u8],
-    aad: &[u8],
-    chunk_size: u32,
-    version: OnlineCiphertextVersion,
-) -> OnlineCiphertextEncryptor {
-    let mut header = Header::<OnlineCiphertextHeader> {
-        data_subtype: CiphertextSubtype::Symmetric,
-        ..Default::default()
-    };
-
-    let mut full_aad: Vec<u8> = header.borrow().into();
-    full_aad.extend_from_slice(aad);
-
-    match version {
-        OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
-            header.version = OnlineCiphertextVersion::V1;
-
-            let cipher = OnlineCiphertextV1Encryptor::new(key, full_aad, chunk_size);
-
-            OnlineCiphertextEncryptor::V1(cipher)
-        }
-    }
-}
-
-pub fn new_encryptor_asymmetric(
-    public_key: &PublicKey,
-    aad: &[u8],
-    chunk_size: u32,
-    version: OnlineCiphertextVersion,
-) -> OnlineCiphertextEncryptor {
-    let mut header = Header::<OnlineCiphertextHeader> {
-        data_subtype: CiphertextSubtype::Asymmetric,
-        ..Default::default()
-    };
-
-    let mut full_aad: Vec<u8> = header.borrow().into();
-    full_aad.extend_from_slice(aad);
-
-    match version {
-        OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
-            header.version = OnlineCiphertextVersion::V1;
-
-            let cipher =
-                OnlineCiphertextV1Encryptor::new_asymmetric(public_key, full_aad, chunk_size);
-
-            OnlineCiphertextEncryptor::V1(cipher)
-        }
-    }
-}
-
 impl OnlineCiphertextHeader {
     pub fn into_decryptor(self, key: &[u8], aad: &[u8]) -> Result<OnlineCiphertextDecryptor> {
         let mut full_aad: Vec<u8> = self.header.borrow().into();
@@ -148,6 +97,67 @@ impl OnlineCiphertextHeader {
             },
         }
     }
+
+    pub fn get_serialized_size(&self) -> usize {
+        self.payload.get_serialized_size() + 8
+    }
+
+    pub fn get_chunk_size(&self) -> u32 {
+        self.payload.get_chunk_size()
+    }
+}
+
+impl OnlineCiphertextEncryptor {
+    pub fn new(
+        key: &[u8],
+        aad: &[u8],
+        chunk_size: u32,
+        version: OnlineCiphertextVersion,
+    ) -> OnlineCiphertextEncryptor {
+        let mut header = Header::<OnlineCiphertextHeader> {
+            data_subtype: CiphertextSubtype::Symmetric,
+            ..Default::default()
+        };
+
+        let mut full_aad: Vec<u8> = header.borrow().into();
+        full_aad.extend_from_slice(aad);
+
+        match version {
+            OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
+                header.version = OnlineCiphertextVersion::V1;
+
+                let cipher = OnlineCiphertextV1Encryptor::new(key, full_aad, chunk_size);
+
+                OnlineCiphertextEncryptor::V1(cipher)
+            }
+        }
+    }
+
+    pub fn new_asymmetric(
+        public_key: &PublicKey,
+        aad: &[u8],
+        chunk_size: u32,
+        version: OnlineCiphertextVersion,
+    ) -> OnlineCiphertextEncryptor {
+        let mut header = Header::<OnlineCiphertextHeader> {
+            data_subtype: CiphertextSubtype::Asymmetric,
+            ..Default::default()
+        };
+
+        let mut full_aad: Vec<u8> = header.borrow().into();
+        full_aad.extend_from_slice(aad);
+
+        match version {
+            OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
+                header.version = OnlineCiphertextVersion::V1;
+
+                let cipher =
+                    OnlineCiphertextV1Encryptor::new_asymmetric(public_key, full_aad, chunk_size);
+
+                OnlineCiphertextEncryptor::V1(cipher)
+            }
+        }
+    }
 }
 
 macro_rules! online_ciphertext_header_impl {
@@ -174,6 +184,24 @@ macro_rules! online_ciphertext_header_impl {
                 $(
                     $version_name([<OnlineCiphertext $version_name Header>]),
                 ),+
+            }
+
+            impl OnlineCiphertextHeaderPayload {
+                pub fn get_serialized_size(&self) -> usize {
+                    match &self {
+                        $(
+                            Self::$version_name(p) => p.get_serialized_size(),
+                        ),+
+                    }
+                }
+
+                pub fn get_chunk_size(&self) -> u32 {
+                    match &self {
+                        $(
+                            Self::$version_name(p) => p.get_chunk_size(),
+                        ),+
+                    }
+                }
             }
 
             impl From<&OnlineCiphertextHeader> for Vec<u8> {
@@ -253,6 +281,16 @@ macro_rules! online_ciphertext_impl {
                     }
                 }
 
+                pub fn get_tag_size(&self) -> usize {
+                    match &self {
+                    $(
+                        [<OnlineCiphertext $name>]::$version_name(cipher) => {
+                            cipher.get_tag_size()
+                        }
+                    ),+
+                    }
+                }
+
                 pub fn get_header(&self) -> OnlineCiphertextHeader {
                     match self {
                     $(
@@ -270,7 +308,7 @@ macro_rules! online_ciphertext_impl {
                     }
                 }
 
-                pub fn [<$func _chunk>](
+                pub fn [<$func _next_chunk>](
                     &mut self,
                     data: &[u8],
                     aad: &[u8],
@@ -278,13 +316,13 @@ macro_rules! online_ciphertext_impl {
                     match self {
                     $(
                         [<OnlineCiphertext $name>]::$version_name(cipher) => {
-                            cipher.[<$func _chunk>](data, aad)
+                            cipher.[<$func _next_chunk>](data, aad)
                         }
                     ),+
                     }
                 }
 
-                pub fn [<$func _chunk_in_place>](
+                pub fn [<$func _next_chunk_in_place>](
                     &mut self,
                     data: &mut Vec<u8>,
                     aad: &[u8],
@@ -292,13 +330,13 @@ macro_rules! online_ciphertext_impl {
                     match self {
                     $(
                         [<OnlineCiphertext $name>]::$version_name(cipher) => {
-                            cipher.[<$func _chunk_in_place>](data, aad)
+                            cipher.[<$func _next_chunk_in_place>](data, aad)
                         }
                     ),+
                     }
                 }
 
-                pub fn [<$func _last>](
+                pub fn [<$func _last_chunk>](
                     self,
                     data: &[u8],
                     aad: &[u8],
@@ -306,13 +344,13 @@ macro_rules! online_ciphertext_impl {
                     match self {
                     $(
                         [<OnlineCiphertext $name>]::$version_name(cipher) => {
-                            cipher.[<$func _last>](data, aad)
+                            cipher.[<$func _last_chunk>](data, aad)
                         }
                     ),+
                     }
                 }
 
-                pub fn [<$func _last_in_place>](
+                pub fn [<$func _last_chunk_in_place>](
                     self,
                     data: &mut Vec<u8>,
                     aad: &[u8],
@@ -320,7 +358,7 @@ macro_rules! online_ciphertext_impl {
                     match self {
                     $(
                         [<OnlineCiphertext $name>]::$version_name(cipher) => {
-                            cipher.[<$func _last_in_place>](data, aad)
+                            cipher.[<$func _last_chunk_in_place>](data, aad)
                         }
                     ),+
                     }

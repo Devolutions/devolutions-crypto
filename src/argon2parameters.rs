@@ -35,6 +35,7 @@ pub mod defaults {
 }
 
 /// Parameters used to derive the password into an Argon2 hash.
+///
 /// It is used to derive a password into a keypair.
 /// You should use the default, although this may be tweakable by the user in some cases.
 /// Once serialized, you can save it along the user information as it is not sensitive data.
