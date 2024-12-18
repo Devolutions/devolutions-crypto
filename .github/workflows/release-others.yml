@@ -6,6 +6,10 @@ on:
         description: "Publish Rust Crate"
         required: true
         type: boolean
+      publish_kotlin:
+        description: "Publish Kotlin"
+        required: true
+        type: boolean
       publish_npm:
         description: "Publish NPM"
         required: true
@@ -27,7 +31,7 @@ jobs:
 
     - name: Check out for Rust release
       uses: actions/checkout@v4
-      with: 
+      with:
         path: ./rust-release/
 
     - name: Check out devolutions/actions
@@ -42,15 +46,16 @@ jobs:
       uses: ./.github/workflows/toolbox-install
       with:
         github_token: ${{ secrets.DEVOLUTIONSBOT_TOKEN }}
-  
-    - name: Download Python Artifact
+
+    - name: Download Artifact
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CI: true
-      run: | 
+      run: |
         dv github download-artifact python-wheels-linux . devolutions-crypto
         dv github download-artifact python-wheels-macos . devolutions-crypto
         dv github download-artifact python-wheels-windows . devolutions-crypto
+        dv github download-artifact kotlin . devolutions-crypto
 
     - name: Download NPM Artifact
       run: dv github download-artifact wasm . devolutions-crypto
@@ -65,6 +70,7 @@ jobs:
         7z x python-wheels-windows.zip -o./devolutions-crypto-wheels
 
         7z x wasm.zip -o./devolutions-crypto-npm
+        7z x kotlin.zip -o./devolutions-crypto-maven
 
     - name: Publish Rust Crate
       if: ${{ inputs.publish_crate_rust }}
@@ -116,3 +122,14 @@ jobs:
         else
           twine upload --verbose -u "__token__" -p ${{ secrets.PYPI_OWNER_API_KEY }} ./devolutions-crypto-wheels/*
         fi
+
+    - name: Publish Kotlin to Cloudsmith
+      if: ${{ inputs.publish_kotlin }}
+      run: |
+        pip install --upgrade cloudsmith-cli
+
+        cloudsmith push maven devolutions/maven-public devolutions-crypto-maven/libs/lib.jar \
+          --pom-file=devolutions-crypto-maven/publications/maven/pom-default.xml \
+      env:
+        CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
+
