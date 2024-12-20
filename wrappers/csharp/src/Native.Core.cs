@@ -102,10 +102,10 @@ namespace Devolutions.Cryptography
         internal static extern long MixKeyExchangeSizeNative();
 
         [DllImport(LibName, EntryPoint = "NewOnlineEncryptor", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long NewOnlineEncryptor(byte[] key, UIntPtr keyLength, byte[] aad, UIntPtr aadLength, UInt32 chunkLength, bool asymmetric, UInt16 version, out UIntPtr output);
+        internal static extern long NewOnlineEncryptor(byte[] key, UIntPtr keyLength, byte[] aad, UIntPtr aadLength, UInt32 chunkLength, bool asymmetric, UInt16 version, ref UIntPtr output);
 
         [DllImport(LibName, EntryPoint = "NewOnlineDecryptor", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long NewOnlineDecryptor(byte[] key, UIntPtr keyLength, byte[] aad, UIntPtr aadLength, byte[] header, UIntPtr headerLength, bool asymmetric, out UIntPtr output);
+        internal static extern long NewOnlineDecryptor(byte[] key, UIntPtr keyLength, byte[] aad, UIntPtr aadLength, byte[] header, UIntPtr headerLength, bool asymmetric, ref UIntPtr output);
 
         [DllImport(LibName, EntryPoint = "FreeOnlineEncryptor", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long FreeOnlineEncryptor(UIntPtr ptr);

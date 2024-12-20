@@ -18,12 +18,12 @@ const SIGNATURE: u16 = 0x0C0D;
 pub trait HeaderType {
     cfg_if! {
         if #[cfg(feature = "fuzz")] {
-            type Version: Into<u16> + TryFrom<u16> + Clone + Copy + Default + Zeroize + std::fmt::Debug + Arbitrary;
-            type Subtype: Into<u16> + TryFrom<u16> + Clone + Copy + Default + Zeroize + std::fmt::Debug + Arbitrary;
+            type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + Arbitrary;
+            type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + Arbitrary;
         }
         else {
-            type Version: Into<u16> + TryFrom<u16> + Clone + Copy + Default + Zeroize + std::fmt::Debug;
-            type Subtype: Into<u16> + TryFrom<u16> + Clone + Copy + Default + Zeroize + std::fmt::Debug;
+            type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug;
+            type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug;
         }
     }
 
@@ -118,17 +118,17 @@ where
     M: HeaderType,
 {
     fn from(header: &Header<M>) -> Self {
-        let data = [0u8; 8];
-        let mut cursor = Cursor::new(data);
+        let mut data = [0u8; 8];
+        let mut cursor = Cursor::new(data.as_mut_slice());
         cursor.write_u16::<LittleEndian>(header.signature).unwrap();
         cursor
             .write_u16::<LittleEndian>(header.data_type.into())
             .unwrap();
         cursor
-            .write_u16::<LittleEndian>(header.data_subtype.into())
+            .write_u16::<LittleEndian>(header.data_subtype.clone().into())
             .unwrap();
         cursor
-            .write_u16::<LittleEndian>(header.version.into())
+            .write_u16::<LittleEndian>(header.version.clone().into())
             .unwrap();
         data
     }

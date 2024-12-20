@@ -42,6 +42,11 @@ namespace Devolutions.Cryptography
         /// A wrapped signature
         /// </summary>
         Signature = 6,
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        OnlineCiphertext = 7
     }
 
     /// <summary>
