@@ -9,10 +9,6 @@ runs:
         name: config.txt
         path: ./wrappers/csharp
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.7"
-
     - name:  Installing dependencies
       shell: bash
       run: |
@@ -44,7 +40,19 @@ runs:
     - name: Building Linux
       working-directory: ./wrappers/csharp
       shell: bash
-      run: python GeneratePackage.py -p linux
+      run: |
+        cargo build -p devolutions-crypto-ffi --release --target=i686-unknown-linux-gnu
+        cargo build -p devolutions-crypto-ffi --release --target=x86_64-unknown-linux-gnu
+        cargo build -p devolutions-crypto-ffi --release --target=aarch64-unknown-linux-gnu
+
+    - name: Copy Linux Natives
+      shell: bash
+      run: |
+        mkdir ./wrappers/csharp/linux
+
+        cp ./target/i686-unknown-linux-gnu/release/libdevolutions_crypto_ffi.so ./wrappers/csharp/linux/libDevolutionsCrypto-x86.so
+        cp ./target/x86_64-unknown-linux-gnu/release/libdevolutions_crypto_ffi.so ./wrappers/csharp/linux/libDevolutionsCrypto-x64.so
+        cp ./target/aarch64-unknown-linux-gnu/release/libdevolutions_crypto_ffi.so ./wrappers/csharp/linux/libDevolutionsCrypto-arm64.so
 
     - name: Configure Android NDK
       shell: bash
@@ -72,7 +80,8 @@ runs:
         ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ar\"
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> ./.cargo/config.toml
 
-    - name: Build Android package
+
+    - name: Building Android
       working-directory: ./wrappers/csharp
       shell: bash
       run: |
@@ -80,8 +89,26 @@ runs:
         export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
         ln -sfn $ANDROID_SDK_ROOT/ndk/27.2.12479018 $ANDROID_NDK
+        
+        cargo build -p devolutions-crypto-ffi --release --target=aarch64-linux-android
+        cargo build -p devolutions-crypto-ffi --release --target=armv7-linux-androideabi
+        cargo build -p devolutions-crypto-ffi --release --target=i686-linux-android
+        cargo build -p devolutions-crypto-ffi --release --target=x86_64-linux-android
 
-        python GeneratePackage.py -p android
+    - name: Copy Android Natives
+      shell: bash
+      run: |
+        mkdir ./wrappers/csharp/android
+        mkdir ./wrappers/csharp/android/aarch64
+        mkdir ./wrappers/csharp/android/armv7
+        mkdir ./wrappers/csharp/android/i686
+        mkdir ./wrappers/csharp/android/x86_64
+
+        cp ./target/aarch64-linux-android/release/libdevolutions_crypto_ffi.so ./wrappers/csharp/android/aarch64/libDevolutionsCrypto.so
+        cp ./target/armv7-linux-androideabi/release/libdevolutions_crypto_ffi.so ./wrappers/csharp/android/armv7/libDevolutionsCrypto.so
+        cp ./target/i686-linux-android/release/libdevolutions_crypto_ffi.so ./wrappers/csharp/android/i686/libDevolutionsCrypto.so
+        cp ./target/x86_64-linux-android/release/libdevolutions_crypto_ffi.so ./wrappers/csharp/android/x86_64/libDevolutionsCrypto.so
+
 
     - uses: actions/upload-artifact@v4.3.6
       with:

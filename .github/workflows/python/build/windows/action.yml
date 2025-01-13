@@ -4,7 +4,7 @@ runs:
   steps:
     - uses: actions/setup-python@v5
       with:
-        python-version: "3.10"
+        python-version: "3.13"
 
     - name: Setting up PATH environment variable
       shell: bash
@@ -12,7 +12,10 @@ runs:
 
     - name: Installing rust targets
       shell: bash
-      run: rustup target add x86_64-pc-windows-msvc
+      run: |
+        rustup target add i686-pc-windows-msvc
+        rustup target add aarch64-pc-windows-msvc
+        rustup target add x86_64-pc-windows-msvc
 
     - name: Install maturin
       working-directory: ./python
@@ -21,48 +24,63 @@ runs:
 
     - uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
+        python-version: "3.13"
 
-    - name: Building x86_64 3.12
+    - name: Building 3.13 wheel
       working-directory: ./python
       shell: bash
-      run: maturin build -i python --release --target=x86_64-pc-windows-msvc
+      run: | 
+        maturin build -i python --release --target=i686-pc-windows-msvc
+        maturin build -i python --release --target=aarch64-pc-windows-msvc
+        maturin build -i python --release --target=x86_64-pc-windows-msvc
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Building 3.12 wheel
+      working-directory: ./python
+      shell: bash
+      run: | 
+        maturin build -i python --release --target=i686-pc-windows-msvc
+        maturin build -i python --release --target=aarch64-pc-windows-msvc
+        maturin build -i python --release --target=x86_64-pc-windows-msvc
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
-    - name: Building x86_64 3.11
+    - name: Building 3.11 wheel
       working-directory: ./python
       shell: bash
-      run: maturin build -i python --release --target=x86_64-pc-windows-msvc
+      run: | 
+        maturin build -i python --release --target=i686-pc-windows-msvc
+        maturin build -i python --release --target=aarch64-pc-windows-msvc
+        maturin build -i python --release --target=x86_64-pc-windows-msvc
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
-    - name: Building x86_64 3.10
+    - name: Building 3.10 wheel
       working-directory: ./python
       shell: bash
-      run: maturin build -i python --release --target=x86_64-pc-windows-msvc
+      run: | 
+        maturin build -i python --release --target=i686-pc-windows-msvc
+        maturin build -i python --release --target=aarch64-pc-windows-msvc
+        maturin build -i python --release --target=x86_64-pc-windows-msvc
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.9"
 
-    - name: Building x86_64 3.9
+    - name: Building 3.9 wheel
       working-directory: ./python
       shell: bash
-      run: maturin build -i python --release --target=x86_64-pc-windows-msvc
-
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.8"
-
-    - name: Building x86_64 3.8
-      working-directory: ./python
-      shell: bash
-      run: maturin build -i python --release --target=x86_64-pc-windows-msvc
+      run: | 
+        maturin build -i python --release --target=i686-pc-windows-msvc
+        maturin build -i python --release --target=aarch64-pc-windows-msvc
+        maturin build -i python --release --target=x86_64-pc-windows-msvc
 
     - name: Place Artifacts
       shell: bash

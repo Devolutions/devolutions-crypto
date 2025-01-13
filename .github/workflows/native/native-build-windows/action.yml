@@ -9,16 +9,6 @@ runs:
         name: config.txt
         path: ./wrappers/csharp
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.7"
-
-    - name:  Setting up PATH environment variable
-      shell: bash
-      run: |
-        ls "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn"
-        echo "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Roslyn" >> $GITHUB_PATH
-
     - name: Installing rust targets
       shell: bash
       run: |
@@ -33,17 +23,33 @@ runs:
       run: |
         cargo test
 
-    - name: Building WIN
+    - name: Build Windows Natives
       working-directory: ./wrappers/csharp
       shell: bash
       run: |
-        python GeneratePackage.py -p windows
+        cargo build -p devolutions-crypto-ffi --release --target=x86_64-pc-windows-msvc
+        cargo build -p devolutions-crypto-ffi --release --target=i686-pc-windows-msvc
+        cargo build -p devolutions-crypto-ffi --release --target=aarch64-pc-windows-msvc
+
+    - name: Copy Windows Natives
+      shell: bash
+      run: |
+        mkdir ./wrappers/csharp/windows
+
+        cp ./target/x86_64-pc-windows-msvc/release/devolutions_crypto_ffi.dll ./wrappers/csharp/windows/DevolutionsCrypto-x64.dll
+        cp ./target/i686-pc-windows-msvc/release/devolutions_crypto_ffi.dll ./wrappers/csharp/windows/DevolutionsCrypto-x86.dll
+        cp ./target/aarch64-pc-windows-msvc/release/devolutions_crypto_ffi.dll ./wrappers/csharp/windows/DevolutionsCrypto-arm64.dll
 
     - name:  Building DOTNET CORE
       working-directory: ./wrappers/csharp
       shell: bash
       run: |
-        python GeneratePackage.py -p dotnet-core
+        VERSION_MANAGED=$(grep 'version' config.txt | cut -d '=' -f2 | tr -d ' "')
+        VERSION_NATIVE=$(grep 'package.version = "' ../../Cargo.toml | cut -d '"' -f2)
+
+        sed -i -e "s/||MANAGED_VERSION||/${VERSION_MANAGED}/g" -e "s/||NATIVE_VERSION||/${VERSION_NATIVE}/g" ./src/Native.cs        
+        
+        dotnet build ./src/devolutions-crypto.csproj -p:Version="$VERSION_MANAGED" --configuration Release --output ./dotnet-core/bin
 
     - uses: actions/upload-artifact@v4.3.6
       with:
