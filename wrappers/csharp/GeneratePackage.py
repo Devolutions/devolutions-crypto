@@ -275,9 +275,7 @@ def build_dotnet_core(assembly_manifest, version, args):
 
     print("Building Managed Library...")
 
-    define = "-define:DOTNET_CORE"
-
-    output = exec_command("csc -out:./" + folder + "/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./" + folder + "/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu " + define + " src/*.cs ./" + folder + "/bin/AssemblyInfo.cs -optimize")
+    output = exec_command("csc -out:./" + folder + "/bin/Devolutions.Crypto.dll -debug:pdbonly -pdb:./" + folder + "/bin/Devolutions.Crypto.pdb -target:library -platform:anycpu " + " src/*.cs ./" + folder + "/bin/AssemblyInfo.cs -optimize")
     print(output)
 
     if("error" in output):

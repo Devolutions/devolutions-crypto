@@ -1,43 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>devolutions_crypto</RootNamespace>
-    <CodeAnalysisRuleSet>../stylecop.ruleset</CodeAnalysisRuleSet>
-    <AssemblyName>Devolutions.Crypto</AssemblyName>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="..\windows\bin\DevolutionsCrypto-x86.dll" Condition="Exists('..\windows\bin\DevolutionsCrypto-x86.dll')">
-      <Link>DevolutionsCrypto-x86.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    
-    <Content Include="..\windows\bin\DevolutionsCrypto-x64.dll" Condition="Exists('..\windows\bin\DevolutionsCrypto-x64.dll')">
-      <Link>DevolutionsCrypto-x64.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-
-    <Content Include="..\linux\bin\libDevolutionsCrypto-x86.so" Condition="Exists('..\linux\bin\libDevolutionsCrypto-x86.so')">
-      <Link>libDevolutionsCrypto-x86.so</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    
-    <Content Include="..\linux\bin\libDevolutionsCrypto-x64.so" Condition="Exists('..\linux\bin\libDevolutionsCrypto-x64.so')">
-      <Link>libDevolutionsCrypto-x64.so</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-
-    <Content Include="..\macos-modern\bin\x86_64\libDevolutionsCrypto.dylib" Condition="Exists('..\macos-modern\bin\x86_64\libDevolutionsCrypto.dylib')">
-      <Link>libDevolutionsCrypto.dylib</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>devolutions_crypto</RootNamespace>
+        <AssemblyName>Devolutions.Crypto</AssemblyName>
+    </PropertyGroup>
+    <ItemGroup>
+        <Content Include="..\..\..\target\debug\devolutions_crypto_ffi.dll"
+                 Condition="Exists('..\..\..\target\debug\devolutions_crypto_ffi.dll')">
+            <Link>DevolutionsCrypto.dll</Link>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\..\..\target\debug\libdevolutions_crypto_ffi.so"
+                 Condition="Exists('..\..\..\target\debug\libdevolutions_crypto_ffi.so')">
+            <Link>libDevolutionsCrypto.so</Link>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\..\..\target\debug\libdevolutions_crypto_ffi.dylib"
+                 Condition="Exists('..\..\..\target\debug\libdevolutions_crypto_ffi.dylib')">
+            <Link>libDevolutionsCrypto.dylib</Link>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    <ItemGroup />
 </Project>

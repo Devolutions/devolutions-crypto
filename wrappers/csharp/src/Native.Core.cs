@@ -1,6 +1,6 @@
 // Xamarin and .NET Core bindings
 
-#if ANDROID || IOS || MACOS || DOTNET_CORE
+#if ANDROID || IOS || MACOS || NETCOREAPP || NETSTANDARD
 namespace Devolutions.Cryptography
 {
     using System;

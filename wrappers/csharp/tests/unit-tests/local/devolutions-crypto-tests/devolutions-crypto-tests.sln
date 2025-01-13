@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "devolutions-crypto-tests", "devolutions-crypto-tests.csproj", "{2572533D-1305-403B-9FC5-351A86A3765A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "devolutions-crypto", "..\..\..\..\src\devolutions-crypto.csproj", "{D95FF36A-9165-4CD1-9618-F2733AD8B70D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2572533D-1305-403B-9FC5-351A86A3765A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2572533D-1305-403B-9FC5-351A86A3765A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2572533D-1305-403B-9FC5-351A86A3765A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2572533D-1305-403B-9FC5-351A86A3765A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D95FF36A-9165-4CD1-9618-F2733AD8B70D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D95FF36A-9165-4CD1-9618-F2733AD8B70D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D95FF36A-9165-4CD1-9618-F2733AD8B70D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D95FF36A-9165-4CD1-9618-F2733AD8B70D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
