@@ -114,7 +114,7 @@ namespace Devolutions.Cryptography
         internal static extern long VersionSizeNative();
 
         [DllImport(LibName, EntryPoint = "ScryptSimple", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long ScryptSimple(byte[] password, UIntPtr passwordLength, byte[] salt, UIntPtr saltLength, byte logN,  uint r, uint p, byte[] output, UIntPtr outputLength);
+        internal static extern long ScryptSimple(byte[] password, UIntPtr passwordLength, byte[] salt, UIntPtr saltLength, byte logN, uint r, uint p, byte[] output, UIntPtr outputLength);
 
         [DllImport(LibName, EntryPoint = "ScryptSimpleSize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long ScryptSimpleSize();

@@ -76,13 +76,13 @@ namespace Devolutions.Crypto.Tests
         {
             try
             {
-            string encrytedDataAsBase64 = "DQwCAAAAAgDutPWBLPHG0+ocNw+Yzs6xygGOeOlNPOAjbYDdbJKjPRnEP8HuDN7Y3h3dCoH81Szf3tCf3mNf";
-            string password = "testPa$$";
-            byte[] decryptResult = Managed.DecryptWithPassword(encrytedDataAsBase64, password);
-            string decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
-            Assert.AreEqual(decryptResultString, "test Ciph3rtext");
+                string encrytedDataAsBase64 = "DQwCAAAAAgDutPWBLPHG0+ocNw+Yzs6xygGOeOlNPOAjbYDdbJKjPRnEP8HuDN7Y3h3dCoH81Szf3tCf3mNf";
+                string password = "testPa$$";
+                byte[] decryptResult = Managed.DecryptWithPassword(encrytedDataAsBase64, password);
+                string decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
+                Assert.AreEqual(decryptResultString, "test Ciph3rtext");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.InnerException?.Message);
                 Console.WriteLine(ex.InnerException?.StackTrace);
