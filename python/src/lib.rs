@@ -42,7 +42,7 @@ type Result<T> = std::result::Result<T, DevolutionsCryptoError>;
 
 #[pymodule]
 #[pyo3(name = "devolutions_crypto")]
-fn devolutions_crypto_module(py: Python, m: &PyModule) -> PyResult<()> {
+fn devolutions_crypto_module(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     #[pyfn(m)]
     #[pyo3(name = "encrypt")]
     #[pyo3(signature = (data, key, aad=None, version=0))]
@@ -125,7 +125,9 @@ fn devolutions_crypto_module(py: Python, m: &PyModule) -> PyResult<()> {
     fn verify_password(py: Python, password: &[u8], hash: &[u8]) -> Result<Py<PyBool>> {
         let res = devolutions_crypto::password_hash::PasswordHash::try_from(hash)?;
 
-        Ok(PyBool::new(py, res.verify_password(password)).into())
+        Ok(PyBool::new(py, res.verify_password(password))
+            .to_owned()
+            .into())
     }
 
     #[pyfn(m)]
@@ -214,7 +216,9 @@ fn devolutions_crypto_module(py: Python, m: &PyModule) -> PyResult<()> {
         let public_key = SigningPublicKey::try_from(public_key)?;
         let signature = Signature::try_from(signature)?;
 
-        Ok(PyBool::new(py, signature.verify(data, &public_key)).into())
+        Ok(PyBool::new(py, signature.verify(data, &public_key))
+            .to_owned()
+            .into())
     }
 
     #[pyfn(m)]

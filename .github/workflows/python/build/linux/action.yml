@@ -4,19 +4,22 @@ runs:
   steps:
     - uses: actions/setup-python@v5
       with:
-        python-version: "3.10"
+        python-version: "3.13"
 
     - name: Installing dependencies
       shell: bash
       run: |
         sudo apt-get update
         sudo apt-get install nuget gcc-multilib software-properties-common
+        sudo apt-get install -y gcc-aarch64-linux-gnu
 
     - name: Install rust
       shell: bash
       run: |
         rustup update
         rustup target add x86_64-unknown-linux-gnu
+        rustup target add i686-unknown-linux-gnu
+        rustup target add aarch64-unknown-linux-gnu
 
     - name: Install Maturin
       working-directory: ./python
@@ -28,50 +31,61 @@ runs:
       working-directory: "./python"
       shell: bash
 
+    - name: Building 3.13 wheel
+      working-directory: ./python
+      shell: bash
+      run: |
+        maturin build -i 3.13 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.13 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.13 --release --target=aarch64-unknown-linux-gnu
+
     - uses: actions/setup-python@v5
       with:
         python-version: "3.12"
 
-    - name: Building x86_64 3.12 Wheel
+    - name: Building 3.12 wheel
       working-directory: ./python
       shell: bash
-      run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
+      run: |
+        maturin build -i 3.12 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.12 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.12 --release --target=aarch64-unknown-linux-gnu
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
-    - name: Building x86_64 3.11 Wheel
+    - name: Building 3.11 Wheel
       working-directory: ./python
       shell: bash
-      run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
+      run: |
+        maturin build -i 3.11 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.11 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.11 --release --target=aarch64-unknown-linux-gnu
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
-    - name: Building x86_64 3.10 Wheel
+    - name: Building 3.10 Wheel
       working-directory: ./python
       shell: bash
-      run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
+      run: |
+        maturin build -i 3.10 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.10 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.10 --release --target=aarch64-unknown-linux-gnu
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.9"
 
-    - name: Building x86_64 3.9 Wheel
+    - name: Building 3.9 Wheel
       working-directory: ./python
       shell: bash
-      run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
-
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.8"
-
-    - name: Building x86_64 3.8 Wheel
-      working-directory: ./python
-      shell: bash
-      run: maturin build -i python --release --target=x86_64-unknown-linux-gnu
+      run: |
+        maturin build -i 3.9 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.9 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.9 --release --target=aarch64-unknown-linux-gnu
 
     - name: Place Artifacts
       shell: bash

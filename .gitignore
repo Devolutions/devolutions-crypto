@@ -11,13 +11,13 @@ wrappers/csharp/nuget/dotnet/package/*
 wrappers/csharp/nuget/Android/Devolutions.Crypto.Android/package/*
 wrappers/csharp/nuget/iOS/Devolutions.Crypto.iOS/package/*
 wrappers/csharp/nuget/macOS/Devolutions.Crypto.Mac/package/*
-wrappers/csharp/windows/bin
-wrappers/csharp/ios/bin
-wrappers/csharp/android/bin
-wrappers/csharp/linux/bin
-wrappers/csharp/macos-full/bin
-wrappers/csharp/macos-modern/bin
-wrappers/csharp/dotnet-core/bin
+wrappers/csharp/windows/
+wrappers/csharp/ios/
+wrappers/csharp/android/
+wrappers/csharp/linux/
+wrappers/csharp/macos-full/
+wrappers/csharp/macos/
+wrappers/csharp/dotnet-core/
 wrappers/csharp/tests/unit-tests/manual/dotnet-framework/bin/
 wrappers/csharp/tests/unit-tests/manual/dotnet-core/bin/
 target/
@@ -30,3 +30,4 @@ node_modules
 __pycache__
 config.txt
 .github/hooks
+TestResults

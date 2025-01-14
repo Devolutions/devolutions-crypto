@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <EnableMicrosoftTestingExtensionsCrashDump>true</EnableMicrosoftTestingExtensionsCrashDump>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="..\..\*.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk"
+                          Version="17.12.0" />
+        <PackageReference Include="MSTest.TestAdapter"
+                          Version="3.7.1" />
+        <PackageReference Include="MSTest.TestFramework"
+                          Version="3.7.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\..\src\devolutions-crypto.csproj" />
+    </ItemGroup>
+</Project>

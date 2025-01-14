@@ -4,7 +4,7 @@ runs:
   steps:
     - uses: actions/setup-python@v5
       with:
-        python-version: "3.10"
+        python-version: "3.13"
 
     - name: Install rust
       shell: bash
@@ -15,79 +15,73 @@ runs:
         source $HOME/.cargo/env
 
         rustup target add x86_64-apple-darwin
+        rustup target add aarch64-apple-darwin
 
     - name: Install maturin
       working-directory: ./python
       shell: bash
-      run: pip install maturin
+      run: pip install maturin --disable-pip-version-check
+
+    - name: Building 3.13 Wheel
+      working-directory: ./python
+      shell: bash
+      run: |
+        source $HOME/.cargo/env
+
+        maturin build --release -i 3.13 --target=x86_64-apple-darwin
+        maturin build --release -i 3.13 --target=aarch64-apple-darwin
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.12"
 
-    - name: Building aarch64 3.12 Wheel
+    - name: Building 3.12 Wheel
       working-directory: ./python
       shell: bash
       run: |
         source $HOME/.cargo/env
 
-        maturin build --release -i python --target=aarch64-apple-darwin
-
-    - name: Building x86_64 3.12 Wheel
-      working-directory: ./python
-      shell: bash
-      run: |
-        source $HOME/.cargo/env
-
-        maturin build --release -i python --target=x86_64-apple-darwin
+        maturin build --release -i 3.12 --target=x86_64-apple-darwin
+        maturin build --release -i 3.12 --target=aarch64-apple-darwin
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
-    - name: Building x86_64 3.11 Wheel
+    - name: Building 3.11 Wheel
       working-directory: ./python
       shell: bash
       run: |
         source $HOME/.cargo/env
 
-        maturin build --release -i python --target=x86_64-apple-darwin
+        maturin build --release -i 3.11 --target=x86_64-apple-darwin
+        maturin build --release -i 3.11 --target=aarch64-apple-darwin
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
-    - name: Building x86_64 3.10 Wheel
+    - name: Building 3.10 Wheel
       working-directory: ./python
       shell: bash
-      run:
+      run: |
         source $HOME/.cargo/env
 
-        maturin build --release -i python --target=x86_64-apple-darwin
+        maturin build --release -i 3.10 --target=x86_64-apple-darwin
+        maturin build --release -i 3.10 --target=aarch64-apple-darwin
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.9"
 
-    - name: Building x86_64 3.9 Wheel
+    - name: Building 3.9 Wheel
       working-directory: ./python
       shell: bash
       run: |
         source $HOME/.cargo/env
 
-        maturin build --release -i python --target=x86_64-apple-darwin
-
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.8"
-
-    - name: Building x86_64 3.8 Wheel
-      working-directory: ./python
-      shell: bash
-      run: |
-        source $HOME/.cargo/env
-
-        maturin build --release -i python --target=x86_64-apple-darwin
+        maturin build --release -i 3.9 --target=x86_64-apple-darwin
+        maturin build --release -i 3.9 --target=aarch64-apple-darwin
 
     - name: Place Artifacts
       shell: bash

@@ -42,23 +42,33 @@ runs:
         source $HOME/.cargo/env
         cargo test
 
-    - name: Building Mac Modern
+    - name: Build macOS Natives
       working-directory: ./wrappers/csharp
       shell: bash
       run: |
-        source $HOME/.cargo/env
-        python3 GeneratePackage.py -p mac-modern
+        cargo build -p devolutions-crypto-ffi --release --target=x86_64-apple-darwin
+        cargo build -p devolutions-crypto-ffi --release --target=aarch64-apple-darwin
+
+    - name: Copy macOS Natives
+      shell: bash
+      run: |
+        mkdir ./wrappers/csharp/macos
+        mkdir ./wrappers/csharp/macos/x86_64
+        mkdir ./wrappers/csharp/macos/aarch64
+
+        cp ./target/x86_64-apple-darwin/release/libdevolutions_crypto_ffi.dylib ./wrappers/csharp/macos/x86_64/libDevolutionsCrypto.dylib
+        cp ./target/aarch64-apple-darwin/release/libdevolutions_crypto_ffi.dylib ./wrappers/csharp/macos/aarch64/libDevolutionsCrypto.dylib
 
     - name: Prepare folder structure
       working-directory: ./
       shell: bash
       run: |
-        mv wrappers/csharp/macos-modern wrappers/csharp/macos-modern-temp
-        mkdir -p wrappers/csharp/macos-modern/macos-modern
-        mv wrappers/csharp/macos-modern-temp/* wrappers/csharp/macos-modern/macos-modern/
-        rmdir wrappers/csharp/macos-modern-temp
+        mv wrappers/csharp/macos wrappers/csharp/macos-temp
+        mkdir -p wrappers/csharp/macos/macos
+        mv wrappers/csharp/macos-temp/* wrappers/csharp/macos/macos/
+        rmdir wrappers/csharp/macos-temp
 
     - uses: actions/upload-artifact@v4.3.6
       with:
         name: native-macos
-        path: wrappers/csharp/macos-modern/
+        path: wrappers/csharp/macos/

@@ -6,7 +6,7 @@ namespace Devolutions.Crypto.Tests
     using System.IO;
 
     using Devolutions.Cryptography.Argon2;
-    
+
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
