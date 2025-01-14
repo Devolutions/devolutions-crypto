@@ -1069,7 +1069,6 @@ pub unsafe extern "C" fn OnlineEncryptorLastChunk(
         return Error::NullPointer.error_code();
     };
 
-    // TODO: This conversion seems to cause a memory corruption
     let encryptor = Box::from_raw(ptr as *mut Mutex<OnlineCiphertextEncryptor>);
     
     let encryptor = match encryptor.into_inner() {
@@ -1108,7 +1107,6 @@ pub unsafe extern "C" fn OnlineDecryptorLastChunk(
         return Error::NullPointer.error_code();
     };
 
-    // TODO: This conversion seems to cause a memory corruption
     let decryptor = Box::from_raw(ptr as *mut Mutex<OnlineCiphertextDecryptor>);
     let decryptor = match decryptor.into_inner() {
         Ok(c) => c,
