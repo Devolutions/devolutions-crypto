@@ -31,7 +31,8 @@ namespace Devolutions.Cryptography
         public DecryptionStream(byte[] key, byte[] aad, byte[] header, bool asymmetric, Stream outputStream)
             : this(key, aad, header, asymmetric, outputStream, false) { }
 
-        public DecryptionStream(byte[] key, byte[] aad, byte[] header, bool asymmetric, Stream outputStream, bool leaveOpen) {
+        public DecryptionStream(byte[] key, byte[] aad, byte[] header, bool asymmetric, Stream outputStream, bool leaveOpen)
+        {
             _outputStream = outputStream;
             _leaveOpen = leaveOpen;
 
@@ -56,7 +57,7 @@ namespace Devolutions.Cryptography
                 Utils.HandleError(chunkLength);
             }
 
-            _tagLength = (int) tagSize;
+            _tagLength = (int)tagSize;
             _chunkLength = (int)chunkLength + _tagLength;
 
             _inputBuffer = new byte[_chunkLength];
@@ -95,7 +96,7 @@ namespace Devolutions.Cryptography
 
         public void FlushFinalBlock()
         {
-            if(HasFlushedFinalBlock)
+            if (HasFlushedFinalBlock)
             {
                 throw new NotSupportedException();
             }
@@ -134,7 +135,7 @@ namespace Devolutions.Cryptography
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if(HasFlushedFinalBlock)
+            if (HasFlushedFinalBlock)
             {
                 // Cannot write as stream is already closed
                 return;
@@ -157,7 +158,8 @@ namespace Devolutions.Cryptography
                 _inputBufferOffset = 0;
             }
 
-            if (count > 0) {
+            if (count > 0)
+            {
                 Buffer.BlockCopy(buffer, offset, _inputBuffer, _inputBufferOffset, count);
 
                 _inputBufferOffset += count;
@@ -169,9 +171,10 @@ namespace Devolutions.Cryptography
             byte[] aad = new byte[0];
             byte[] outputBuffer = new byte[ChunkLength - TagLength];
 
-            long result = Native.OnlineDecryptorNextChunk(_native_ptr, _inputBuffer, (UIntPtr) ChunkLength, aad, UIntPtr.Zero, outputBuffer, (UIntPtr) outputBuffer.Length);
+            long result = Native.OnlineDecryptorNextChunk(_native_ptr, _inputBuffer, (UIntPtr)ChunkLength, aad, UIntPtr.Zero, outputBuffer, (UIntPtr)outputBuffer.Length);
 
-            if (result < 0) {
+            if (result < 0)
+            {
                 Utils.HandleError(result);
             }
 
@@ -183,7 +186,7 @@ namespace Devolutions.Cryptography
             byte[] aad = new byte[0];
             byte[] outputBuffer = new byte[_inputBufferOffset - TagLength];
 
-            long result = Native.OnlineDecryptorLastChunk(_native_ptr, _inputBuffer, (UIntPtr) _inputBufferOffset, aad, UIntPtr.Zero, outputBuffer, (UIntPtr)outputBuffer.Length);
+            long result = Native.OnlineDecryptorLastChunk(_native_ptr, _inputBuffer, (UIntPtr)_inputBufferOffset, aad, UIntPtr.Zero, outputBuffer, (UIntPtr)outputBuffer.Length);
 
             if (result < 0)
             {
@@ -210,12 +213,12 @@ namespace Devolutions.Cryptography
             {
                 if (disposing)
                 {
-                    if(!HasFlushedFinalBlock)
+                    if (!HasFlushedFinalBlock)
                     {
                         FlushFinalBlock();
                     };
 
-                    if(!_leaveOpen)
+                    if (!_leaveOpen)
                     {
                         _outputStream.Close();
                     }
