@@ -1070,7 +1070,7 @@ pub unsafe extern "C" fn OnlineEncryptorLastChunk(
     };
 
     let encryptor = Box::from_raw(ptr as *mut Mutex<OnlineCiphertextEncryptor>);
-    
+
     let encryptor = match encryptor.into_inner() {
         Ok(c) => c,
         Err(_) => return Error::PoisonedMutex.error_code(),
@@ -1080,8 +1080,8 @@ pub unsafe extern "C" fn OnlineEncryptorLastChunk(
     let aad = slice::from_raw_parts(aad, aad_size);
 
     let encrypted = match encryptor.encrypt_last_chunk(data, aad) {
-       Ok(e) => e,
-       Err(e) => return e.error_code(),
+        Ok(e) => e,
+        Err(e) => return e.error_code(),
     };
 
     if result_size < encrypted.len() {
