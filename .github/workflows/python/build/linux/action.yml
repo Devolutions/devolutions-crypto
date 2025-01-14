@@ -11,6 +11,7 @@ runs:
       run: |
         sudo apt-get update
         sudo apt-get install nuget gcc-multilib software-properties-common
+        sudo apt-get install -y gcc-aarch64-linux-gnu
 
     - name: Install rust
       shell: bash
@@ -34,9 +35,9 @@ runs:
       working-directory: ./python
       shell: bash
       run: |
-        maturin build -i python --release --target=x86_64-unknown-linux-gnu
-        maturin build -i python --release --target=i686-unknown-linux-gnu
-        maturin build -i python --release --target=aarch64-unknown-linux-gnu
+        maturin build -i 3.13 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.13 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.13 --release --target=aarch64-unknown-linux-gnu
 
     - uses: actions/setup-python@v5
       with:
@@ -46,9 +47,9 @@ runs:
       working-directory: ./python
       shell: bash
       run: |
-        maturin build -i python --release --target=x86_64-unknown-linux-gnu
-        maturin build -i python --release --target=i686-unknown-linux-gnu
-        maturin build -i python --release --target=aarch64-unknown-linux-gnu
+        maturin build -i 3.12 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.12 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.12 --release --target=aarch64-unknown-linux-gnu
 
     - uses: actions/setup-python@v5
       with:
@@ -58,9 +59,9 @@ runs:
       working-directory: ./python
       shell: bash
       run: |
-        maturin build -i python --release --target=x86_64-unknown-linux-gnu
-        maturin build -i python --release --target=i686-unknown-linux-gnu
-        maturin build -i python --release --target=aarch64-unknown-linux-gnu
+        maturin build -i 3.11 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.11 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.11 --release --target=aarch64-unknown-linux-gnu
 
     - uses: actions/setup-python@v5
       with:
@@ -70,9 +71,9 @@ runs:
       working-directory: ./python
       shell: bash
       run: |
-        maturin build -i python --release --target=x86_64-unknown-linux-gnu
-        maturin build -i python --release --target=i686-unknown-linux-gnu
-        maturin build -i python --release --target=aarch64-unknown-linux-gnu
+        maturin build -i 3.10 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.10 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.10 --release --target=aarch64-unknown-linux-gnu
 
     - uses: actions/setup-python@v5
       with:
@@ -82,9 +83,9 @@ runs:
       working-directory: ./python
       shell: bash
       run: |
-        maturin build -i python --release --target=x86_64-unknown-linux-gnu
-        maturin build -i python --release --target=i686-unknown-linux-gnu
-        maturin build -i python --release --target=aarch64-unknown-linux-gnu
+        maturin build -i 3.9 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.9 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.9 --release --target=aarch64-unknown-linux-gnu
 
     - name: Place Artifacts
       shell: bash

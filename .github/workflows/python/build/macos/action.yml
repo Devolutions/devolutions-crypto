@@ -28,8 +28,8 @@ runs:
       run: |
         source $HOME/.cargo/env
 
-        maturin build --release -i python --target=x86_64-apple-darwin
-        maturin build --release -i python --target=aarch64-apple-darwin
+        maturin build --release -i 3.13 --target=x86_64-apple-darwin
+        maturin build --release -i 3.13 --target=aarch64-apple-darwin
 
     - uses: actions/setup-python@v5
       with:
@@ -41,8 +41,8 @@ runs:
       run: |
         source $HOME/.cargo/env
 
-        maturin build --release -i python --target=x86_64-apple-darwin
-        maturin build --release -i python --target=aarch64-apple-darwin
+        maturin build --release -i 3.12 --target=x86_64-apple-darwin
+        maturin build --release -i 3.12 --target=aarch64-apple-darwin
 
     - uses: actions/setup-python@v5
       with:
@@ -54,8 +54,8 @@ runs:
       run: |
         source $HOME/.cargo/env
 
-        maturin build --release -i python --target=x86_64-apple-darwin
-        maturin build --release -i python --target=aarch64-apple-darwin
+        maturin build --release -i 3.11 --target=x86_64-apple-darwin
+        maturin build --release -i 3.11 --target=aarch64-apple-darwin
 
     - uses: actions/setup-python@v5
       with:
@@ -67,8 +67,8 @@ runs:
       run: |
         source $HOME/.cargo/env
 
-        maturin build --release -i python --target=x86_64-apple-darwin
-        maturin build --release -i python --target=aarch64-apple-darwin
+        maturin build --release -i 3.10 --target=x86_64-apple-darwin
+        maturin build --release -i 3.10 --target=aarch64-apple-darwin
 
     - uses: actions/setup-python@v5
       with:
@@ -80,8 +80,8 @@ runs:
       run: |
         source $HOME/.cargo/env
 
-        maturin build --release -i python --target=x86_64-apple-darwin
-        maturin build --release -i python --target=aarch64-apple-darwin
+        maturin build --release -i 3.9 --target=x86_64-apple-darwin
+        maturin build --release -i 3.9 --target=aarch64-apple-darwin
 
     - name: Place Artifacts
       shell: bash

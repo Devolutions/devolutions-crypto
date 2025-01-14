@@ -13,4 +13,4 @@ crate-type = ["cdylib"]
 devolutions-crypto = { path = "../" }
 zeroize = "1"
 base64 = "0.21"
-pyo3 = { version = "0.23", features = ["extension-module"] }
+pyo3 = { version = "0.23", features = ["extension-module", "generate-import-lib"] }
