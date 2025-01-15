@@ -25,7 +25,7 @@ echo "y" | $SDKMANAGER "ndk;27.2.12479018"
 
 export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
 
-
+mkdir /home/$SUDO_USER/.cargo/
 rm /home/$SUDO_USER/.cargo/config
 
 echo "[target.aarch64-linux-android]
