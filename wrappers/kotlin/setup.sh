@@ -1,7 +1,7 @@
 # run as root
 apt update
-apt install unzip
-apt install openjdk-17-jre-headless
+apt install unzip -y
+apt install openjdk-17-jre-headless -y
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
