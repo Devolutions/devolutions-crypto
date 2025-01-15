@@ -1,5 +1,9 @@
 # run as root
+apt update
 apt install unzip
+apt install openjdk-17-jre-headless
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 rm -rf /usr/local/lib/android
 mkdir -p /usr/local/lib/android/sdk
