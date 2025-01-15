@@ -32,7 +32,7 @@ sudo cp -r "${ANDROID_SDK_ROOT}/cmdline-tools/." "${ANDROID_SDK_ROOT}/cmdline-to
 
 
 SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
-sudo echo "y" | $SDKMANAGER "ndk;27.2.12479018"
+echo "y" | sudo $SDKMANAGER "ndk;27.2.12479018"
 
 export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
 EXPORT_LINE='export ANDROID_NDK="$ANDROID_SDK_ROOT/ndk-bundle"'
