@@ -1,26 +1,25 @@
-# run as root
-apt update
-apt install unzip openjdk-17-jre-headless make -y
+sudo apt update
+sudo apt install unzip openjdk-17-jre-headless make -y
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 . "$HOME/.cargo/env"
 
-rm -rf /usr/local/lib/android
-mkdir -p /usr/local/lib/android/sdk
+sudo rm -rf /usr/local/lib/android
+sudo mkdir -p /usr/local/lib/android/sdk
 
 ANDROID_ROOT="/usr/local/lib/android"
 ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
 
 cd /usr/local/lib/android/sdk
-wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-unzip commandlinetools-linux-11076708_latest.zip 
+sudo wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+sudo unzip commandlinetools-linux-11076708_latest.zip 
  
-cp -r "${ANDROID_SDK_ROOT}/cmdline-tools/." "${ANDROID_SDK_ROOT}/cmdline-tools/latest/"
+sudo cp -r "${ANDROID_SDK_ROOT}/cmdline-tools/." "${ANDROID_SDK_ROOT}/cmdline-tools/latest/"
 
 
 SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
-echo "y" | $SDKMANAGER "ndk;27.2.12479018"
+sudo echo "y" | $SDKMANAGER "ndk;27.2.12479018"
 
 
 
@@ -44,4 +43,4 @@ echo "[target.aarch64-linux-android]
 ln -sfn $ANDROID_SDK_ROOT/ndk/27.2.12479018 $ANDROID_NDK
 
 # install kotlin
-snap install --classic kotlin
+sudo snap install --classic kotlin
