@@ -1,3 +1,4 @@
+# Setup a wsl ubuntu 24.04 to compile devolutions crypto kotlin
 sudo apt update
 sudo apt install unzip openjdk-17-jre-headless make -y
 
