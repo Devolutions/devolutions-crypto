@@ -104,18 +104,31 @@ where
     }
 }
 
-impl<M> From<Header<M>> for Vec<u8>
+impl<M> From<&Header<M>> for Vec<u8>
 where
     M: HeaderType,
 {
-    fn from(header: Header<M>) -> Vec<u8> {
-        let mut data = Vec::with_capacity(8);
-        data.write_u16::<LittleEndian>(header.signature).unwrap();
-        data.write_u16::<LittleEndian>(header.data_type.into())
+    fn from(header: &Header<M>) -> Self {
+        <&Header<M> as Into<[u8; 8]>>::into(header).to_vec()
+    }
+}
+
+impl<M> From<&Header<M>> for [u8; 8]
+where
+    M: HeaderType,
+{
+    fn from(header: &Header<M>) -> Self {
+        let mut data = [0u8; 8];
+        let mut cursor = Cursor::new(data.as_mut_slice());
+        cursor.write_u16::<LittleEndian>(header.signature).unwrap();
+        cursor
+            .write_u16::<LittleEndian>(header.data_type.into())
             .unwrap();
-        data.write_u16::<LittleEndian>(header.data_subtype.into())
+        cursor
+            .write_u16::<LittleEndian>(header.data_subtype.clone().into())
             .unwrap();
-        data.write_u16::<LittleEndian>(header.version.into())
+        cursor
+            .write_u16::<LittleEndian>(header.version.clone().into())
             .unwrap();
         data
     }

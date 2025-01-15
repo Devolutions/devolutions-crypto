@@ -3,7 +3,7 @@ use std::{
     io::{Cursor, Read, Write},
 };
 
-use argon2::{Config, ThreadMode, Variant, Version};
+use argon2::{Config, Variant, Version};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use rand_core::{OsRng, RngCore};
 use typed_builder::TypedBuilder;
@@ -35,6 +35,7 @@ pub mod defaults {
 }
 
 /// Parameters used to derive the password into an Argon2 hash.
+///
 /// It is used to derive a password into a keypair.
 /// You should use the default, although this may be tweakable by the user in some cases.
 /// Once serialized, you can save it along the user information as it is not sensitive data.
@@ -206,12 +207,6 @@ impl Argon2Parameters {
             time_cost: self.iterations,
             variant: self.variant,
             version: self.version,
-
-            #[cfg(target_arch = "wasm32")]
-            thread_mode: ThreadMode::Sequential,
-
-            #[cfg(not(target_arch = "wasm32"))]
-            thread_mode: ThreadMode::Parallel,
         };
 
         Ok(argon2::hash_raw(password, &self.salt, &config)?)

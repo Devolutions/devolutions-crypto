@@ -56,6 +56,7 @@ use super::key::{PrivateKey, PublicKey};
 use ciphertext_v1::CiphertextV1;
 use ciphertext_v2::{CiphertextV2Asymmetric, CiphertextV2Symmetric};
 
+use std::borrow::Borrow;
 use std::convert::TryFrom;
 
 #[cfg(feature = "fuzz")]
@@ -324,7 +325,7 @@ impl Ciphertext {
 impl From<Ciphertext> for Vec<u8> {
     /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
     fn from(data: Ciphertext) -> Self {
-        let mut header: Self = data.header.into();
+        let mut header: Self = data.header.borrow().into();
         let mut payload: Self = data.payload.into();
         header.append(&mut payload);
         header

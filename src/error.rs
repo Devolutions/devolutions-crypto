@@ -1,5 +1,4 @@
 //! Possible errors in the library.
-
 use cbc::cipher::block_padding::UnpadError;
 
 #[cfg(feature = "wbindgen")]
@@ -8,6 +7,19 @@ use wasm_bindgen::JsValue;
 use strum::IntoStaticStr;
 
 use hmac::digest::MacError;
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+// Doesn't work because Result is a type alias, keeping the commented code just in case we revisit someday
+// impl<T, E> From<std::result::Result<T, E>> for Result<T>
+// where E: Into<Error> {
+//    fn from(value: std::result::Result<T, E>) -> Self {
+//         match value {
+//             Ok(t) => Ok(t),
+//             Err(e) => Err(e.into()),
+//         }
+//     }
+// }
 
 /// This crate's error type.
 #[derive(Debug, IntoStaticStr, thiserror::Error)]
@@ -60,6 +72,12 @@ pub enum Error {
     /// The version of the multiple data is inconsistent: -42
     #[error("The version is not the same for all the data.")]
     InconsistentVersion,
+    /// The length of the data to encrypt/decrypt during online encryption is not the same as the chunk size: -43
+    #[error("The length of the data to encrypt/decrypt during online encryption is not the same as the chunk size")]
+    InvalidChunkLength,
+    /// The mutex is poisoned and cannot be locked: -44
+    #[error("The mutex is poisoned and cannot be locked")]
+    PoisonedMutex,
 }
 
 impl Error {
@@ -83,6 +101,8 @@ impl Error {
             Error::IoError(_) => -34,
             Error::NotEnoughShares => -41,
             Error::InconsistentVersion => -42,
+            Error::InvalidChunkLength => -43,
+            Error::PoisonedMutex => -44,
         }
     }
 }

@@ -213,6 +213,7 @@ mod header;
 
 pub mod ciphertext;
 pub mod key;
+pub mod online_ciphertext;
 pub mod password_hash;
 pub mod secret_sharing;
 pub mod signature;
@@ -223,8 +224,8 @@ use enums::{CiphertextSubtype, KeySubtype, PasswordHashSubtype, ShareSubtype, Si
 pub use header::{Header, HeaderType};
 
 pub use enums::{
-    CiphertextVersion, DataType, KeyVersion, PasswordHashVersion, SecretSharingVersion,
-    SignatureVersion, SigningKeyVersion,
+    CiphertextVersion, DataType, KeyVersion, OnlineCiphertextVersion, PasswordHashVersion,
+    SecretSharingVersion, SignatureVersion, SigningKeyVersion,
 };
 
 pub use argon2::Variant as Argon2Variant;
@@ -232,9 +233,7 @@ pub use argon2::Version as Argon2Version;
 pub use argon2parameters::defaults as argon2parameters_defaults;
 pub use argon2parameters::Argon2Parameters;
 pub use argon2parameters::Argon2ParametersBuilder;
-pub use error::Error;
-
-pub type Result<T> = std::result::Result<T, error::Error>;
+pub use error::{Error, Result};
 
 pub const DEFAULT_KEY_SIZE: usize = 32;
 pub const DEFAULT_PBKDF2_ITERATIONS: u32 = 10000;

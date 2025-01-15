@@ -8,6 +8,9 @@
 //! The Size functions must be called to get the required length of the returned array before
 //!     calling it.
 
+use devolutions_crypto::online_ciphertext::OnlineCiphertextDecryptor;
+use devolutions_crypto::online_ciphertext::OnlineCiphertextEncryptor;
+use devolutions_crypto::online_ciphertext::OnlineCiphertextHeader;
 use devolutions_crypto::utils;
 use devolutions_crypto::Argon2Parameters;
 use devolutions_crypto::DataType;
@@ -25,6 +28,7 @@ use devolutions_crypto::password_hash::{hash_password, PasswordHash, PasswordHas
 use devolutions_crypto::secret_sharing::{
     generate_shared_key, join_shares, SecretSharingVersion, Share,
 };
+use devolutions_crypto::OnlineCiphertextVersion;
 use devolutions_crypto::{
     signature,
     signature::{Signature, SignatureVersion},
@@ -37,7 +41,11 @@ use devolutions_crypto::{
 
 use devolutions_crypto::Result;
 
+use std::borrow::Borrow;
+use std::ffi::c_void;
+use std::mem::MaybeUninit;
 use std::slice;
+use std::sync::Mutex;
 
 use zeroize::Zeroizing;
 
@@ -833,6 +841,397 @@ pub unsafe extern "C" fn JoinShares(
         },
         Err(e) => e.error_code(),
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn NewOnlineEncryptor(
+    key: *const u8,
+    key_size: usize,
+    aad: *const u8,
+    aad_size: usize,
+    chunk_size: u32,
+    asymmetric: bool,
+    version: u16,
+    output: *mut *mut c_void,
+) -> i64 {
+    if key.is_null() || aad.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let key = slice::from_raw_parts(key, key_size);
+    let aad = slice::from_raw_parts(aad, aad_size);
+
+    let version = match OnlineCiphertextVersion::try_from(version) {
+        Ok(v) => v,
+        Err(_) => return Error::UnknownVersion.error_code(),
+    };
+
+    let encryptor = if asymmetric {
+        let public_key = match PublicKey::try_from(key) {
+            Ok(pk) => pk,
+            Err(e) => return e.error_code(),
+        };
+
+        OnlineCiphertextEncryptor::new_asymmetric(&public_key, aad, chunk_size, version)
+    } else {
+        OnlineCiphertextEncryptor::new(key, aad, chunk_size, version)
+    };
+
+    let encryptor = Box::new(Mutex::new(encryptor));
+
+    *output = Box::into_raw(encryptor) as *mut c_void;
+
+    0
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn NewOnlineDecryptor(
+    key: *const u8,
+    key_size: usize,
+    aad: *const u8,
+    aad_size: usize,
+    header: *const u8,
+    header_size: usize,
+    asymmetric: bool,
+    output: *mut *mut c_void,
+) -> i64 {
+    if key.is_null() | aad.is_null() | header.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let key = slice::from_raw_parts(key, key_size);
+    let aad = slice::from_raw_parts(aad, aad_size);
+    let header = slice::from_raw_parts(header, header_size);
+
+    let header = match OnlineCiphertextHeader::try_from(header) {
+        Ok(h) => h,
+        Err(e) => return e.error_code(),
+    };
+
+    let decryptor = if asymmetric {
+        let private_key = match PrivateKey::try_from(key) {
+            Ok(pk) => pk,
+            Err(e) => return e.error_code(),
+        };
+
+        header.into_decryptor_asymmetric(&private_key, aad)
+    } else {
+        header.into_decryptor(key, aad)
+    };
+
+    let decryptor = match decryptor {
+        Ok(d) => d,
+        Err(e) => return e.error_code(),
+    };
+
+    let decryptor = Box::new(Mutex::new(decryptor));
+
+    *output = Box::into_raw(decryptor) as *mut c_void;
+
+    0
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineEncryptorGetHeader(
+    ptr: *const c_void,
+    result: *mut u8,
+    result_size: usize,
+) -> i64 {
+    if ptr.is_null() | result.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
+    let header: Vec<u8> = match encryptor.lock() {
+        Ok(c) => c.get_header().borrow().into(),
+        Err(_) => return Error::PoisonedMutex.error_code(),
+    };
+
+    if header.len() != result_size {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    result.copy_from(header.as_slice().as_ptr() as *const u8, result_size);
+
+    result_size as i64
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineDecryptorGetHeader(
+    ptr: *const c_void,
+    result: *mut u8,
+    result_size: usize,
+) -> i64 {
+    if ptr.is_null() | result.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
+    let header: Vec<u8> = match decryptor.lock() {
+        Ok(c) => c.get_header().borrow().into(),
+        Err(_) => return Error::PoisonedMutex.error_code(),
+    };
+
+    if header.len() != result_size {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    result.copy_from(header.as_slice().as_ptr() as *const u8, result_size);
+
+    result_size as i64
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineEncryptorNextChunk(
+    ptr: *mut c_void,
+    data: *const u8,
+    data_size: usize,
+    aad: *const u8,
+    aad_size: usize,
+    result: *mut u8,
+    result_size: usize,
+) -> i64 {
+    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let encryptor = &mut *(ptr as *mut Mutex<OnlineCiphertextEncryptor>);
+    let mut encryptor = match encryptor.lock() {
+        Ok(c) => c,
+        Err(_) => return Error::PoisonedMutex.error_code(),
+    };
+
+    let data = slice::from_raw_parts(data, data_size);
+    let aad = slice::from_raw_parts(aad, aad_size);
+
+    let encrypted = match encryptor.encrypt_next_chunk(data, aad) {
+        Ok(e) => e,
+        Err(e) => return e.error_code(),
+    };
+
+    if encrypted.len() != result_size {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    result.copy_from(encrypted.as_slice().as_ptr() as *const u8, result_size);
+
+    result_size as i64
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineDecryptorNextChunk(
+    ptr: *mut c_void,
+    data: *const u8,
+    data_size: usize,
+    aad: *const u8,
+    aad_size: usize,
+    result: *mut u8,
+    result_size: usize,
+) -> i64 {
+    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let decryptor = &mut *(ptr as *mut Mutex<OnlineCiphertextDecryptor>);
+    let mut decryptor = match decryptor.lock() {
+        Ok(c) => c,
+        Err(_) => return Error::PoisonedMutex.error_code(),
+    };
+
+    let data = slice::from_raw_parts(data, data_size);
+    let aad = slice::from_raw_parts(aad, aad_size);
+
+    let decrypted = match decryptor.decrypt_next_chunk(data, aad) {
+        Ok(e) => e,
+        Err(e) => return e.error_code(),
+    };
+
+    if decrypted.len() != result_size {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    result.copy_from(decrypted.as_slice().as_ptr() as *const u8, result_size);
+
+    result_size as i64
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineEncryptorLastChunk(
+    ptr: *mut c_void,
+    data: *const u8,
+    data_size: usize,
+    aad: *const u8,
+    aad_size: usize,
+    result: *mut u8,
+    result_size: usize,
+) -> i64 {
+    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let encryptor = Box::from_raw(ptr as *mut Mutex<OnlineCiphertextEncryptor>);
+
+    let encryptor = match encryptor.into_inner() {
+        Ok(c) => c,
+        Err(_) => return Error::PoisonedMutex.error_code(),
+    };
+
+    let data = slice::from_raw_parts(data, data_size);
+    let aad = slice::from_raw_parts(aad, aad_size);
+
+    let encrypted = match encryptor.encrypt_last_chunk(data, aad) {
+        Ok(e) => e,
+        Err(e) => return e.error_code(),
+    };
+
+    if result_size < encrypted.len() {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    result.copy_from(encrypted.as_slice().as_ptr() as *const u8, encrypted.len());
+
+    encrypted.len() as i64
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineDecryptorLastChunk(
+    ptr: *mut c_void,
+    data: *const u8,
+    data_size: usize,
+    aad: *const u8,
+    aad_size: usize,
+    result: *mut u8,
+    result_size: usize,
+) -> i64 {
+    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let decryptor = Box::from_raw(ptr as *mut Mutex<OnlineCiphertextDecryptor>);
+    let decryptor = match decryptor.into_inner() {
+        Ok(c) => c,
+        Err(_) => return Error::PoisonedMutex.error_code(),
+    };
+
+    let data = slice::from_raw_parts(data, data_size);
+    let aad = slice::from_raw_parts(aad, aad_size);
+
+    let decrypted = match decryptor.decrypt_last_chunk(data, aad) {
+        Ok(e) => e,
+        Err(e) => return e.error_code(),
+    };
+
+    if result_size < decrypted.len() {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    result.copy_from(decrypted.as_slice().as_ptr() as *const u8, decrypted.len());
+
+    decrypted.len() as i64
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
+    let header = match encryptor.lock() {
+        Ok(c) => c.get_header(),
+        Err(_) => return Error::PoisonedMutex.error_code(),
+    };
+
+    header.get_serialized_size() as i64
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
+    let header = match decryptor.lock() {
+        Ok(c) => c.get_header(),
+        Err(_) => return Error::PoisonedMutex.error_code(),
+    };
+
+    header.get_serialized_size() as i64
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
+    match encryptor.lock() {
+        Ok(c) => c.get_chunk_size() as i64,
+        Err(_) => Error::PoisonedMutex.error_code(),
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
+    match decryptor.lock() {
+        Ok(c) => c.get_chunk_size() as i64,
+        Err(_) => Error::PoisonedMutex.error_code(),
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
+    match encryptor.lock() {
+        Ok(c) => c.get_tag_size() as i64,
+        Err(_) => return Error::PoisonedMutex.error_code(),
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
+    match decryptor.lock() {
+        Ok(c) => c.get_tag_size() as i64,
+        Err(_) => return Error::PoisonedMutex.error_code(),
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    drop(Box::from_raw(ptr as *mut Mutex<OnlineCiphertextEncryptor>));
+
+    0
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn FreeOnlineDecryptor(ptr: *mut c_void) -> i64 {
+    if ptr.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    drop(Box::from_raw(ptr as *mut Mutex<OnlineCiphertextDecryptor>));
+
+    0
 }
 
 /// The size, in bytes, of the resulting secret

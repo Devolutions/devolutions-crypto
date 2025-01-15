@@ -68,16 +68,16 @@ runs:
 
         echo "
         [target.aarch64-linux-android]
-        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar\"
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar\"
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang\"
         [target.armv7-linux-androideabi]
-        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar\"
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar\"
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang\"
         [target.i686-linux-android]
-        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-ar\"
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar\"
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-clang\"
         [target.x86_64-linux-android]
-        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-ar\"
+        ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar\"
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> ./.cargo/config.toml
 
 
@@ -89,7 +89,20 @@ runs:
         export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
         ln -sfn $ANDROID_SDK_ROOT/ndk/27.2.12479018 $ANDROID_NDK
+
+        ls $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/
+        cat ../../.cargo/config.toml
         
+        # Set environment variables for blake3 custom build script
+        export CC_aarch64_linux_android="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"
+        export AR_aarch64_linux_android="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
+        export CC_armv7_linux_androideabi="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang"
+        export AR_armv7_linux_androideabi="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
+        export CC_i686_linux_android="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-clang"
+        export AR_i686_linux_android="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
+        export CC_x86_64_linux_android="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang"
+        export AR_x86_64_linux_android="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
+
         cargo build -p devolutions-crypto-ffi --release --target=aarch64-linux-android
         cargo build -p devolutions-crypto-ffi --release --target=armv7-linux-androideabi
         cargo build -p devolutions-crypto-ffi --release --target=i686-linux-android

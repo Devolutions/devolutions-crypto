@@ -33,6 +33,7 @@ pub use super::SigningKeyVersion;
 
 use signing_key_v1::{SigningKeyV1Pair, SigningKeyV1Public};
 
+use std::borrow::Borrow;
 use std::convert::TryFrom;
 
 #[cfg(feature = "fuzz")]
@@ -153,7 +154,7 @@ impl SigningKeyPair {
 impl From<SigningPublicKey> for Vec<u8> {
     /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
     fn from(data: SigningPublicKey) -> Self {
-        let mut header: Self = data.header.into();
+        let mut header: Self = data.header.borrow().into();
         let mut payload: Self = data.payload.into();
         header.append(&mut payload);
         header
@@ -189,7 +190,7 @@ impl TryFrom<&[u8]> for SigningPublicKey {
 impl From<SigningKeyPair> for Vec<u8> {
     /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
     fn from(data: SigningKeyPair) -> Self {
-        let mut header: Self = data.header.into();
+        let mut header: Self = data.header.borrow().into();
         let mut payload: Self = data.payload.into();
         header.append(&mut payload);
         header

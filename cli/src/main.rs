@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use std::convert::TryFrom;
+use std::{borrow::Borrow, convert::TryFrom};
 
 /// Gives a CLI interface to Devolutions Crypto Library
 #[derive(Debug, Parser)]
@@ -243,7 +243,7 @@ fn generate_argon2parameters(
         parameters.length = length;
     };
 
-    let parameters: Vec<u8> = parameters.into();
+    let parameters: Vec<u8> = parameters.borrow().into();
     println!("{}", base64::encode(&parameters));
 }
 

@@ -6,6 +6,7 @@ enum DataType {
     "Share",
     "SigningKey",
     "Signature",
+    "OnlineCiphertext",
 };
 
 enum CiphertextVersion {
@@ -68,6 +69,8 @@ enum DevolutionsCryptoError {
     "IoError",
     "NotEnoughShares",
     "InconsistentVersion",
+    "InvalidChunkLength",
+    "PoisonedMutex",
 };
 
 interface Argon2ParametersBuilder {
