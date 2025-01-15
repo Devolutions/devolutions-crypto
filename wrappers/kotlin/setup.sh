@@ -12,6 +12,15 @@ cargo --version
 EXPORT_LINE='export PATH="$HOME/.cargo/bin:$PATH"'
 echo "$EXPORT_LINE" >> "$HOME/.bashrc"
 
+rustup target add x86_64-unknown-linux-gnu
+rustup target add i686-unknown-linux-gnu
+rustup target add aarch64-unknown-linux-gnu
+
+rustup target add aarch64-linux-android
+rustup target add armv7-linux-androideabi
+rustup target add i686-linux-android
+rustup target add x86_64-linux-android
+
 sudo rm -rf /usr/local/lib/android
 sudo mkdir -p /usr/local/lib/android/sdk
 
