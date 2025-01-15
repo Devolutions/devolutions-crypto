@@ -40,7 +40,7 @@ echo "[target.aarch64-linux-android]
         ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar\"
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> "/home/$USER/.cargo/config"
 
-ln -sfn $ANDROID_SDK_ROOT/ndk/27.2.12479018 $ANDROID_NDK
+sudo ln -sfn $ANDROID_SDK_ROOT/ndk/27.2.12479018 $ANDROID_NDK
 
 # install kotlin
 sudo snap install --classic kotlin
