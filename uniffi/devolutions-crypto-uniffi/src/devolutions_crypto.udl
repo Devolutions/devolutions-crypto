@@ -68,6 +68,8 @@ enum DevolutionsCryptoError {
     "IoError",
     "NotEnoughShares",
     "InconsistentVersion",
+    "InvalidChunkLength",
+    "PoisonedMutex",
 };
 
 interface Argon2ParametersBuilder {
