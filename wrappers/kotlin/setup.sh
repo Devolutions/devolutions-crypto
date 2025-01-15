@@ -1,4 +1,6 @@
 # run as root
+apt install unzip
+
 rm -rf /usr/local/lib/android
 mkdir -p /usr/local/lib/android/sdk
 
