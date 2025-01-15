@@ -9,6 +9,9 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 cargo --version
 
+EXPORT_LINE='export PATH="$HOME/.cargo/bin:$PATH"'
+echo "$EXPORT_LINE" >> "$HOME/.bashrc"
+
 sudo rm -rf /usr/local/lib/android
 sudo mkdir -p /usr/local/lib/android/sdk
 
