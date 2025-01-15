@@ -18,6 +18,12 @@ sudo mkdir -p /usr/local/lib/android/sdk
 ANDROID_ROOT="/usr/local/lib/android"
 ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
 
+EXPORT_LINE='export ANDROID_ROOT="/usr/local/lib/android"'
+echo "$EXPORT_LINE" >> "$HOME/.bashrc"
+EXPORT_LINE='export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"'
+echo "$EXPORT_LINE" >> "$HOME/.bashrc"
+
+
 cd /usr/local/lib/android/sdk
 sudo wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
 sudo unzip commandlinetools-linux-11076708_latest.zip 
@@ -28,9 +34,9 @@ sudo cp -r "${ANDROID_SDK_ROOT}/cmdline-tools/." "${ANDROID_SDK_ROOT}/cmdline-to
 SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
 sudo echo "y" | $SDKMANAGER "ndk;27.2.12479018"
 
-
-
 export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
+EXPORT_LINE='export ANDROID_NDK="$ANDROID_SDK_ROOT/ndk-bundle"'
+echo "$EXPORT_LINE" >> "$HOME/.bashrc"
 
 rm /home/$USER/.cargo/config
 
@@ -51,3 +57,6 @@ sudo ln -sfn $ANDROID_SDK_ROOT/ndk/27.2.12479018 $ANDROID_NDK
 
 # install kotlin
 sudo snap install --classic kotlin
+
+# install ktlint
+sudo snap install ktlint --edge --devmode
