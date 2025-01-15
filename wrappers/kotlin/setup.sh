@@ -4,7 +4,7 @@ apt install unzip openjdk-17-jre-headless make -y
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
-source "$HOME/.cargo/env"
+. "$HOME/.cargo/env"
 
 rm -rf /usr/local/lib/android
 mkdir -p /usr/local/lib/android/sdk
