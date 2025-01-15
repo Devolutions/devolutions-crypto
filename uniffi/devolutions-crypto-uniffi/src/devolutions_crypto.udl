@@ -6,6 +6,7 @@ enum DataType {
     "Share",
     "SigningKey",
     "Signature",
+    "OnlineCiphertext",
 };
 
 enum CiphertextVersion {
