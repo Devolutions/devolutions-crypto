@@ -1,9 +1,10 @@
 # run as root
 apt update
-apt install unzip -y
-apt install openjdk-17-jre-headless -y
+apt install unzip openjdk-17-jre-headless make -y
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+source "$HOME/.cargo/env"
 
 rm -rf /usr/local/lib/android
 mkdir -p /usr/local/lib/android/sdk
@@ -25,7 +26,6 @@ echo "y" | $SDKMANAGER "ndk;27.2.12479018"
 
 export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
 
-mkdir /home/$SUDO_USER/.cargo/
 rm /home/$SUDO_USER/.cargo/config
 
 echo "[target.aarch64-linux-android]
