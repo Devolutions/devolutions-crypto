@@ -5,6 +5,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 . "$HOME/.cargo/env"
 
+cargo --version
+
 sudo rm -rf /usr/local/lib/android
 sudo mkdir -p /usr/local/lib/android/sdk
 
