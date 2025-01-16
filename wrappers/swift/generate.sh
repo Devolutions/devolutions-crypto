@@ -47,12 +47,19 @@ lipo ../../target/x86_64-apple-darwin/release/lib$LIBNAME.a \
 
 # no need to combine ios
 
+# Move headers
+mkdir headers
+cp ./bindings/devolutions_crypto.swift ./headers
+cp ./bindings/devolutions_cryptoFFI.h ./headers
+cp ./bindings/module.modulemap ./headers
+
 # create the XCFramework
 xcodebuild -create-xcframework \
-            -library "./bindings/ios-simulator/lib$LIBNAME.a" -headers ./bindings \
-            -library "./bindings/mac/lib$LIBNAME.a" -headers ./bindings \
-            -library "../../target/aarch64-apple-ios/release/lib$LIBNAME.a" -headers ./bindings \
+            -library "./bindings/ios-simulator/lib$LIBNAME.a" -headers ./headers \
+            -library "./bindings/mac/lib$LIBNAME.a" -headers ./headers \
+            -library "../../target/aarch64-apple-ios/release/lib$LIBNAME.a" -headers ./headers \
             -output "$XCFRAMEWORK_FOLDER"
+
 
 # Compress XCFramework
 ditto -c -k --sequesterRsrc --keepParent "$XCFRAMEWORK_FOLDER" "$XCFRAMEWORK_FOLDER.zip"
