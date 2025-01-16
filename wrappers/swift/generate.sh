@@ -35,14 +35,14 @@ mv "./bindings/devolutions_cryptoFFI.modulemap" ./bindings/module.modulemap
 # combine the platforms 
 
 # ios simulator
-lipo "../../target/x86_64-apple-ios/release/lib$LIBNAME.a" \
-    "../../target/aarch64-apple-ios-sim/release/lib$LIBNAME.a" \
-    -create -output "./bindings/ios-simulator/lib$LIBNAME.a"
+lipo "../../target/x86_64-apple-ios/release/lib$LIBNAME.dylib" \
+    "../../target/aarch64-apple-ios-sim/release/lib$LIBNAME.dylib" \
+    -create -output "./bindings/ios-simulator/lib$LIBNAME.dylib"
 
 # mac
-lipo ../../target/x86_64-apple-darwin/release/lib$LIBNAME.a \
-    ../../target/aarch64-apple-darwin/release/lib$LIBNAME.a \
-    -create -output ./bindings/mac/lib$LIBNAME.a
+lipo ../../target/x86_64-apple-darwin/release/lib$LIBNAME.dylib \
+    ../../target/aarch64-apple-darwin/release/lib$LIBNAME.dylib \
+    -create -output ./bindings/mac/lib$LIBNAME.dylib
 
 
 # no need to combine ios
@@ -55,9 +55,9 @@ cp ./bindings/module.modulemap ./headers
 
 # create the XCFramework
 xcodebuild -create-xcframework \
-            -library "./bindings/ios-simulator/lib$LIBNAME.a" -headers ./headers \
-            -library "./bindings/mac/lib$LIBNAME.a" -headers ./headers \
-            -library "../../target/aarch64-apple-ios/release/lib$LIBNAME.a" -headers ./headers \
+            -library "./bindings/ios-simulator/lib$LIBNAME.dylib" -headers ./headers \
+            -library "./bindings/mac/lib$LIBNAME.dylib" -headers ./headers \
+            -library "../../target/aarch64-apple-ios/release/lib$LIBNAME.dylib" -headers ./headers \
             -output "$XCFRAMEWORK_FOLDER"
 
 
