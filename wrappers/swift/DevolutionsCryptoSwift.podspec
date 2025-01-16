@@ -8,8 +8,7 @@ Pod::Spec.new do |s|
     s.author           = { 'Devolutions Security' => 'security@devolutions.net' }
     s.source           = { 
         :git => 'https://github.com/Devolutions/devolutions-crypto.git', 
-        :tag => s.version.to_s,
-        :branch => "release/cocoapods-v${version}" 
+        :tag => s.version.to_s
     }
 
     s.swift_version = '5.0'
