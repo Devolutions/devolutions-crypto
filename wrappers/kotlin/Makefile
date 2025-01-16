@@ -25,7 +25,7 @@ DC_UNIFFI_SOURCES = $(wildcard $(ROOT)/src/*) $(ROOT)/Cargo.toml $(wildcard $(DC
 UNIFFI_BINDGEN_EXE = $(LINUX_DEBUG_DIR)/uniffi-bindgen
 
 RUST_ARCHS = aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
-ANDROID_ARCHS = android-arm64-v8a android-armeabi-v7a android-x86 android-x86-64
+ANDROID_ARCHS = android-aarch64 android-armv7 android-x86 android-x86-64
 
 KT_LINUX_PATH = ./lib/src/main/resources/linux-x86-64/lib$(LIB_NAME).so
 KT_ANDROID_PATH = $(foreach var,$(ANDROID_ARCHS),./lib/src/main/resources/$(var)/lib$(LIB_NAME).so)
@@ -54,11 +54,11 @@ define compile_android
 	cp $(ROOT)/target/$(ARCH)/$(BUILD_PROFILE)/lib$(LIB_NAME).so $@
 endef
 
-./lib/src/main/resources/android-arm64-v8a/lib$(LIB_NAME).so: $(DC_UNIFFI_SOURCES)
+./lib/src/main/resources/android-aarch64/lib$(LIB_NAME).so: $(DC_UNIFFI_SOURCES)
 	$(eval ARCH=aarch64-linux-android)
 	@$(call compile_android)
 
-./lib/src/main/resources/android-armeabi-v7a/lib$(LIB_NAME).so: $(DC_UNIFFI_SOURCES)
+./lib/src/main/resources/android-armv7/lib$(LIB_NAME).so: $(DC_UNIFFI_SOURCES)
 	$(eval ARCH=armv7-linux-androideabi)
 	@$(call compile_android)
 
