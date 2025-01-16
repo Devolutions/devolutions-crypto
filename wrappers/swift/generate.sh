@@ -68,4 +68,15 @@ cd ./DevolutionsCryptoSwift
 
 swift test
 
+cd ../
+
+mkdir package
+
+cp -R ./output/DevolutionsCrypto.xcframework ./package
+cp -R ./DevolutionsCryptoSwift/Sources ./package
+cp -R ./DevolutionsCryptoSwift/Tests ./package
+cp ./DevolutionsCryptoSwift/Package.swift ./package
+
+sed -i '' 's|\.\./output/DevolutionsCrypto\.xcframework|./DevolutionsCrypto\.xcframework|g' ./package/Package.swift
+
 
