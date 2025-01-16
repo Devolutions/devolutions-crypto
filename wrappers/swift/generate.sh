@@ -35,24 +35,31 @@ mv "./bindings/devolutions_cryptoFFI.modulemap" ./bindings/module.modulemap
 # combine the platforms 
 
 # ios simulator
-lipo "../../target/x86_64-apple-ios/release/lib$LIBNAME.a" \
-    "../../target/aarch64-apple-ios-sim/release/lib$LIBNAME.a" \
-    -create -output "./bindings/ios-simulator/lib$LIBNAME.a"
+lipo "../../target/x86_64-apple-ios/release/lib$LIBNAME.dylib" \
+    "../../target/aarch64-apple-ios-sim/release/lib$LIBNAME.dylib" \
+    -create -output "./bindings/ios-simulator/lib$LIBNAME.dylib"
 
 # mac
-lipo ../../target/x86_64-apple-darwin/release/lib$LIBNAME.a \
-    ../../target/aarch64-apple-darwin/release/lib$LIBNAME.a \
-    -create -output ./bindings/mac/lib$LIBNAME.a
+lipo ../../target/x86_64-apple-darwin/release/lib$LIBNAME.dylib \
+    ../../target/aarch64-apple-darwin/release/lib$LIBNAME.dylib \
+    -create -output ./bindings/mac/lib$LIBNAME.dylib
 
 
 # no need to combine ios
 
+# Move headers
+mkdir headers
+cp ./bindings/devolutions_crypto.swift ./headers
+cp ./bindings/devolutions_cryptoFFI.h ./headers
+cp ./bindings/module.modulemap ./headers
+
 # create the XCFramework
 xcodebuild -create-xcframework \
-            -library "./bindings/ios-simulator/lib$LIBNAME.a" -headers ./bindings \
-            -library "./bindings/mac/lib$LIBNAME.a" -headers ./bindings \
-            -library "../../target/aarch64-apple-ios/release/lib$LIBNAME.a" -headers ./bindings \
+            -library "./bindings/ios-simulator/lib$LIBNAME.dylib" -headers ./headers \
+            -library "./bindings/mac/lib$LIBNAME.dylib" -headers ./headers \
+            -library "../../target/aarch64-apple-ios/release/lib$LIBNAME.dylib" -headers ./headers \
             -output "$XCFRAMEWORK_FOLDER"
+
 
 # Compress XCFramework
 ditto -c -k --sequesterRsrc --keepParent "$XCFRAMEWORK_FOLDER" "$XCFRAMEWORK_FOLDER.zip"
@@ -67,5 +74,17 @@ cp "./bindings/devolutions_crypto.swift" ./DevolutionsCryptoSwift/Sources/Devolu
 cd ./DevolutionsCryptoSwift
 
 swift test
+
+cd ../
+
+mkdir package
+
+cp -R ./output/DevolutionsCrypto.xcframework ./package
+cp -R ./DevolutionsCryptoSwift/Sources ./package
+cp -R ./DevolutionsCryptoSwift/Tests ./package
+cp ./DevolutionsCryptoSwift/Package.swift ./package
+cp ./DevolutionsCryptoSwift.podspec ./package
+
+sed -i '' 's|\.\./output/DevolutionsCrypto\.xcframework|./DevolutionsCrypto\.xcframework|g' ./package/Package.swift
 
 
