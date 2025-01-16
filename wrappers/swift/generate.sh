@@ -83,6 +83,7 @@ cp -R ./output/DevolutionsCrypto.xcframework ./package
 cp -R ./DevolutionsCryptoSwift/Sources ./package
 cp -R ./DevolutionsCryptoSwift/Tests ./package
 cp ./DevolutionsCryptoSwift/Package.swift ./package
+cp ./DevolutionsCryptoSwift.podspec ./package
 
 sed -i '' 's|\.\./output/DevolutionsCrypto\.xcframework|./DevolutionsCrypto\.xcframework|g' ./package/Package.swift
 
