@@ -14,6 +14,13 @@ runs:
         version=$(grep "version" config.txt | sed -E 's/version = "(.*)"/\1/')
         echo "version=$version" >> $GITHUB_OUTPUT
 
+    - name: Download Native Libs
+      uses: actions/download-artifact@v4
+      with:
+        pattern: kotlin-*
+        merge-multiple: true
+        path: ./wrappers/kotlin/lib/src/main/resources/
+
     - name:  Installing dependencies
       shell: bash
       run: |
@@ -88,7 +95,8 @@ runs:
         export CC_x86_64_linux_android="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang"
         export AR_x86_64_linux_android="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
 
-        make release RELEASE=1
+        make android
+        make linux
 
         chmod +x gradlew
         ./gradlew test

@@ -163,15 +163,35 @@ jobs:
       - uses: ./.github/workflows/tests/swift
 
 ##### KOTLIN BUILD #####
+  kotlin_windows:
+    needs: [setup_config]
+    runs-on: "windows-2022"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/kotlin/kotlin-windows
+
+  kotlin_macos:
+    needs: [setup_config]
+    runs-on: "macos-15"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/workflows/kotlin/kotlin-macos
+
   build_kotlin:
-    needs: setup_config
+    needs: [setup_config, kotlin_macos, kotlin_windows ]
     runs-on: "ubuntu-22.04"
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
-      - uses: ./.github/workflows/kotlin
+      - uses: ./.github/workflows/kotlin/kotlin-linux
 
   tests_nuget_android:
     needs: [nugets, setup_config]
