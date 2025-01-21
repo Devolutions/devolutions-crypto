@@ -1,0 +1,33 @@
+name: Build windows natives for kotlin
+runs:
+  using: composite
+  steps:
+    - name: Download Version File
+      uses: actions/download-artifact@v4
+      with:
+        name: config.txt
+
+    - name:  Install Rust
+      shell: bash
+      run: rustup target add x86_64-pc-windows-gnu
+
+    - name: Build
+      shell: bash
+      working-directory: ./wrappers/kotlin
+      run: make windows
+
+    - name: Test
+      shell: bash
+      working-directory: ./wrappers/kotlin
+      run: |
+        chmod +x gradlew
+        ./gradlew test
+        ./gradlew build
+        ./gradlew generatePomFileForMavenPublication
+
+
+    - name: Upload Kotlin package
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: kotlin-windows
+        path: ./wrappers/kotlin/lib/src/main/resources/
