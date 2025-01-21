@@ -95,7 +95,8 @@ runs:
         ./gradlew build
         ./gradlew generatePomFileForMavenPublication
 
-    - run: sed -i 's|<version>.*</version>|<version>${{ steps.setup.outputs.version }}</version>|' 'lib/build/publications/maven/pom-default.xml'
+    - name: Set version in pom file
+      run: sed -i '0,/<version>.*<\/version>/ s//<version>'"${{ steps.setup.outputs.version }}"'<\/version>/' 'lib/build/publications/maven/pom-default.xml'
       shell: bash
       working-directory: ./wrappers/kotlin
 

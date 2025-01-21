@@ -74,7 +74,8 @@ publishing {
             groupId = "devolutions"
             artifactId = "devolutions-crypto"
             version = project.version.toString()
-            artifact(tasks["jar"])
+            from(components["java"])
+
             pom {
                 name.set("Devolutions Crypto")
                 description.set("Devolutions Cryptographic Library")
