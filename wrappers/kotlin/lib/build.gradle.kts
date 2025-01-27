@@ -34,11 +34,7 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation(libs.guava)
-    implementation("net.java.dev.jna:jna:5.16.0")
-    implementation("net.java.dev.jna:jna:5.16.0@aar")
-    {
-        exclude("net.java.dev.jna", "jna")
-    }
+    implementation(libs.jna)
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
