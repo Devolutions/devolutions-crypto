@@ -152,15 +152,16 @@ jobs:
       - run: git lfs pull
       - uses: ./.github/workflows/tests/csharp/linux
 
-##### SWIFT TESTS #####
+##### SWIFT BUILD #####
   tests_swift:
+    needs: setup_config
     runs-on: "macos-15"
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
       - run: git lfs pull
-      - uses: ./.github/workflows/tests/swift
+      - uses: ./.github/workflows/swift
 
 ##### KOTLIN BUILD #####
   kotlin_windows:

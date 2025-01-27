@@ -1,0 +1,30 @@
+name: Test Swift Package
+runs:
+  using: composite
+  steps:
+    - name: Download Version File
+      uses: actions/download-artifact@v4
+      with:
+        name: config.txt
+
+    - name: Generate package
+      working-directory: ./wrappers/swift
+      shell: bash
+      run: sh generate.sh
+
+    - name: Read Version
+      shell: bash
+      id: version
+      run: |
+        version=$(grep "version" config.txt | sed -E 's/version = "(.*)"/\1/')
+        echo "version=$version" >> $GITHUB_OUTPUT
+
+    - name: Update version in Podspec
+      run: sed -i '' -E "s|^(.*s\.version.*=).*|\1 '${{ steps.version.outputs.version }}'|g" ./wrappers/swift/package/DevolutionsCryptoSwift.podspec
+      shell: bash
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: swift
+        path: ./wrappers/swift/package
