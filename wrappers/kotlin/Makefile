@@ -49,17 +49,17 @@ android:
 
 	wget https://github.com/java-native-access/jna/raw/refs/heads/master/dist/jna.aar
 
-	unzip -q jna.aar
-
-	cp ./jni/arm64-v8a/libjnidispatch.so ./lib/src/main/resources/jni/arm64-v8a/libjnidispatch.so
-	cp ./jni/armeabi-v7a/libjnidispatch.so ./lib/src/main/resources/jni/armeabi-v7a/libjnidispatch.so
-	cp ./jni/x86/libjnidispatch.so ./lib/src/main/resources/jni/x86/libjnidispatch.so
-	cp ./jni/x86_64/libjnidispatch.so ./lib/src/main/resources/jni/x86_64/libjnidispatch.so
+	unzip -q jna.aar -d extracted_aar
 
 	mkdir -p ./lib/src/main/resources/jni/arm64-v8a/
 	mkdir -p ./lib/src/main/resources/jni/armeabi-v7a/
 	mkdir -p ./lib/src/main/resources/jni/x86/
 	mkdir -p ./lib/src/main/resources/jni/x86_64/
+
+	cp ./extracted_aar/jni/arm64-v8a/libjnidispatch.so ./lib/src/main/resources/jni/arm64-v8a/libjnidispatch.so
+	cp ./extracted_aar/jni/armeabi-v7a/libjnidispatch.so ./lib/src/main/resources/jni/armeabi-v7a/libjnidispatch.so
+	cp ./extracted_aar/jni/x86/libjnidispatch.so ./lib/src/main/resources/jni/x86/libjnidispatch.so
+	cp ./extracted_aar/jni/x86_64/libjnidispatch.so ./lib/src/main/resources/jni/x86_64/libjnidispatch.so
 
 	cp ../../target/aarch64-linux-android/release/libdevolutions_crypto_uniffi.so ./lib/src/main/resources/jni/arm64-v8a/libdevolutions_crypto_uniffi.so 
 	cp ../../target/armv7-linux-androideabi/release/libdevolutions_crypto_uniffi.so ./lib/src/main/resources/jni/armeabi-v7a/libdevolutions_crypto_uniffi.so 
@@ -89,6 +89,8 @@ clean-android:
 	rm -rf ./lib/src/main/resources/android-armv7/
 	rm -rf ./lib/src/main/resources/android-x86/
 	rm -rf ./lib/src/main/resources/android-x86-64/
+
+	rm -rf ./extracted_aar
 
 
 # Help target
