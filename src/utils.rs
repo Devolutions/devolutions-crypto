@@ -1,6 +1,10 @@
 //! Module for utils that does not use any of the Devolutions custom data types.
 
-use base64::{engine::general_purpose, Engine as _};
+use base64::{
+    alphabet,
+    engine::{DecodePaddingMode, GeneralPurpose, GeneralPurposeConfig},
+    Engine as _,
+};
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
 use rand::{rngs::OsRng, RngCore};
@@ -132,7 +136,6 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
 /// Because rand is outdated, I cannot use the crate directly
 pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) -> String {
     use byteorder::{ByteOrder, LittleEndian};
-    use general_purpose::STANDARD;
 
     let params = scrypt::Params::new(log_n, r, p, 32).expect("params should be valid");
 
@@ -151,41 +154,41 @@ pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) ->
         tmp[0] = log_n;
         tmp[1] = r as u8;
         tmp[2] = p as u8;
-        result.push_str(&STANDARD.encode(tmp));
+        result.push_str(&DEVO_BASE64.encode(tmp));
     } else {
         result.push_str("1$");
         let mut tmp = [0u8; 9];
         tmp[0] = log_n;
         LittleEndian::write_u32(&mut tmp[1..5], r);
         LittleEndian::write_u32(&mut tmp[5..9], p);
-        result.push_str(&STANDARD.encode(tmp));
+        result.push_str(&DEVO_BASE64.encode(tmp));
     }
     result.push('$');
-    result.push_str(&STANDARD.encode(salt));
+    result.push_str(&DEVO_BASE64.encode(salt));
     result.push('$');
-    result.push_str(&STANDARD.encode(dk));
+    result.push_str(&DEVO_BASE64.encode(dk));
     result.push('$');
 
     result
 }
 
 pub fn base64_encode(data: &[u8]) -> String {
-    general_purpose::STANDARD.encode(data)
+    DEVO_BASE64.encode(data)
 }
 
 pub fn base64_encode_url(data: &[u8]) -> String {
-    general_purpose::URL_SAFE_NO_PAD.encode(data)
+    DEVO_BASE64_URLSAFE_NOPAD.encode(data)
 }
 
 pub fn base64_decode(data: &str) -> Result<Vec<u8>> {
-    match general_purpose::STANDARD.decode(data) {
+    match DEVO_BASE64.decode(data) {
         Ok(d) => Ok(d),
         _ => Err(Error::InvalidData),
     }
 }
 
 pub fn base64_decode_url(data: &str) -> Result<Vec<u8>> {
-    match general_purpose::URL_SAFE_NO_PAD.decode(data) {
+    match DEVO_BASE64_URLSAFE_NOPAD.decode(data) {
         Ok(d) => Ok(d),
         _ => Err(Error::InvalidData),
     }
@@ -194,6 +197,19 @@ pub fn base64_decode_url(data: &str) -> Result<Vec<u8>> {
 pub fn constant_time_equals(x: &[u8], y: &[u8]) -> bool {
     x.ct_eq(y).into()
 }
+
+const BASE64_CONFIG: GeneralPurposeConfig = GeneralPurposeConfig::new()
+    .with_encode_padding(true)
+    .with_decode_padding_mode(DecodePaddingMode::Indifferent)
+    .with_decode_allow_trailing_bits(true);
+
+const BASE64_CONFIG_NO_PAD: GeneralPurposeConfig = GeneralPurposeConfig::new()
+    .with_encode_padding(false)
+    .with_decode_padding_mode(DecodePaddingMode::Indifferent)
+    .with_decode_allow_trailing_bits(true);
+
+const DEVO_BASE64: GeneralPurpose = GeneralPurpose::new(&alphabet::STANDARD, BASE64_CONFIG);
+const DEVO_BASE64_URLSAFE_NOPAD: GeneralPurpose = GeneralPurpose::new(&alphabet::URL_SAFE, BASE64_CONFIG_NO_PAD);
 
 #[test]
 fn test_constant_time_equals() {
@@ -236,7 +252,7 @@ fn test_derive_key_pbkdf2() {
 
 #[test]
 fn test_validate_header() {
-    use general_purpose::STANDARD;
+    use base64::engine::general_purpose::STANDARD;
 
     let valid_ciphertext = STANDARD.decode("DQwCAAAAAQA=").unwrap();
     let valid_password_hash = STANDARD.decode("DQwDAAAAAQA=").unwrap();
