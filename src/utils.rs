@@ -209,7 +209,8 @@ const BASE64_CONFIG_NO_PAD: GeneralPurposeConfig = GeneralPurposeConfig::new()
     .with_decode_allow_trailing_bits(true);
 
 const DEVO_BASE64: GeneralPurpose = GeneralPurpose::new(&alphabet::STANDARD, BASE64_CONFIG);
-const DEVO_BASE64_URLSAFE_NOPAD: GeneralPurpose = GeneralPurpose::new(&alphabet::URL_SAFE, BASE64_CONFIG_NO_PAD);
+const DEVO_BASE64_URLSAFE_NOPAD: GeneralPurpose =
+    GeneralPurpose::new(&alphabet::URL_SAFE, BASE64_CONFIG_NO_PAD);
 
 #[test]
 fn test_constant_time_equals() {
