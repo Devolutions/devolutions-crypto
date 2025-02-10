@@ -40,20 +40,6 @@ android {
     defaultConfig {
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-    }
-
-    buildFeatures {
-        viewBinding = true
     }
 }
 
