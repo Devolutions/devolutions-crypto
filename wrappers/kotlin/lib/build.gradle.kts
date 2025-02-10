@@ -8,7 +8,7 @@ repositories {
 
 plugins {
     kotlin("multiplatform") version "2.1.10"
-    id("com.android.library") // Required for AAR builds
+    id("com.android.library") version "8.8.0"
     id("maven-publish")
 }
 
