@@ -7,13 +7,10 @@
 
  pluginManagement {
     repositories {
-        google()
-        jcenter()
-        mavenCentral()
-        gradlePluginPortal()
+        gradlePluginPortal() // Default plugin repository
+        mavenCentral() // Add Maven Central if needed
     }
 }
-
 
 plugins {
     // Apply the foojay-resolver plugin to allow automatic download of JDKs
