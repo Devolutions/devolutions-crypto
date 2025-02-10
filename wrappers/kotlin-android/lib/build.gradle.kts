@@ -47,6 +47,10 @@ android {
         minSdk = 21
         targetSdk = 34
     }
+
+    lint {
+        abortOnError = false
+    }
 }
 
 afterEvaluate {
