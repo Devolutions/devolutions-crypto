@@ -7,6 +7,12 @@ runs:
       with:
         name: config.txt
 
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
     - name: Read Version and Set Gradle Property
       shell: bash
       id: setup
