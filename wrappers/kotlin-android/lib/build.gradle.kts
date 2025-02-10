@@ -7,7 +7,7 @@
 
 plugins {
     id("com.android.library") version "8.8.0"
-    kotlin("android")
+    kotlin("android") version "2.1.10"
 
     id("maven-publish")
 }
