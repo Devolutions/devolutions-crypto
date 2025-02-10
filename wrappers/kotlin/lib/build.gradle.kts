@@ -44,6 +44,28 @@ java {
     }
 }
 
+tasks.jar {
+    manifest {
+        attributes(
+            "Bundle-NativeCode" to """
+                org/devolutions/crypto/win32-x86-64/devolutions_crypto_uniffi.dll;osname=win32;processor=x86-64,
+                org/devolutions/crypto/linux-x86-64/libdevolutions_crypto_uniffi.so;osname=linux;processor=x86-64,
+                org/devolutions/crypto/linux-aarch64/libdevolutions_crypto_uniffi.so;osname=linux;processor=aarch64,
+                org/devolutions/crypto/darwin-x86-64/libdevolutions_crypto_uniffi.dylib;osname=darwin;processor=x86-64,
+                org/devolutions/crypto/darwin-aarch64/libdevolutions_crypto_uniffi.dylib;osname=darwin;processor=aarch64,
+                org/devolutions/crypto/android-x86-64/libdevolutions_crypto_uniffi.so;osname=android;processor=x86-64,
+                org/devolutions/crypto/android-armv7/libdevolutions_crypto_uniffi.so;osname=android;processor=armv7,
+                org/devolutions/crypto/android-aarch64/libdevolutions_crypto_uniffi.so;osname=android;processor=aarch64,
+                org/devolutions/crypto/android-x86/libdevolutions_crypto_uniffi.so;osname=android;processor=x86,
+                com/sun/jna/android-aarch64/libjnidispatch.so;osname=android;processor=aarch64,
+                com/sun/jna/android-armv7/libjnidispatch.so;osname=android;processor=armv7,
+                com/sun/jna/android-x86/libjnidispatch.so;osname=android;processor=x86,
+                com/sun/jna/android-x86-64/libjnidispatch.so;osname=android;processor=x86-64,
+            """.trimIndent()
+        )
+    }
+}
+
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
