@@ -7,8 +7,8 @@
 
  pluginManagement {
     repositories {
-        gradlePluginPortal() // Default plugin repository
-        mavenCentral() // Add Maven Central if needed
+        gradlePluginPortal()
+        mavenCentral()
     }
 }
 
