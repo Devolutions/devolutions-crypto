@@ -25,7 +25,7 @@ runs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install nuget gcc-multilib software-properties-common
+        sudo apt-get install unzip openjdk-17-jdk-headless make gcc-multilib software-properties-common
         sudo apt-get install -y gcc-aarch64-linux-gnu
 
     - name: Install rust
@@ -58,7 +58,7 @@ runs:
         ANDROID_ROOT="/usr/local/lib/android"
         ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
         SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
-        echo "y" | $SDKMANAGER "ndk;27.2.12479018"
+        echo "y" | sudo $SDKMANAGER "ndk;27.2.12479018" "build-tools;35.0.0" "platforms;android-34" "platform-tools"
 
         export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
 
@@ -76,9 +76,20 @@ runs:
         ar = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar\"
         linker = \"$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang\"" >> ./.cargo/config.toml
 
-    - name: Build
+    - name: Build Linux
       shell: bash
       working-directory: ./wrappers/kotlin
+      run: |
+        make linux
+
+        chmod +x gradlew
+        ./gradlew test
+        ./gradlew build
+        ./gradlew generatePomFileForMavenPublication
+
+    - name: Build Android
+      shell: bash
+      working-directory: ./wrappers/kotlin-android
       run: |
         export ANDROID_ROOT="/usr/local/lib/android"
         export ANDROID_SDK_ROOT="${ANDROID_ROOT}/sdk"
@@ -96,7 +107,6 @@ runs:
         export AR_x86_64_linux_android="$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
 
         make android
-        make linux
 
         chmod +x gradlew
         ./gradlew test
@@ -104,13 +114,22 @@ runs:
         ./gradlew generatePomFileForMavenPublication
 
     - name: Set version in pom file
-      run: sed -i '0,/<version>.*<\/version>/ s//<version>'"${{ steps.setup.outputs.version }}"'<\/version>/' 'lib/build/publications/maven/pom-default.xml'
       shell: bash
-      working-directory: ./wrappers/kotlin
+      working-directory: ./wrappers/
+      run: |
+        sed -i '0,/<version>.*<\/version>/ s//<version>'"${{ steps.setup.outputs.version }}"'<\/version>/' 'kotlin/lib/build/publications/maven/pom-default.xml'
+        sed -i '0,/<version>.*<\/version>/ s//<version>'"${{ steps.setup.outputs.version }}"'<\/version>/' 'kotlin-android/lib/build/publications/mavenAndroid/pom-default.xml'
 
-    - name: Upload Kotlin package
+
+    - name: Upload Kotlin JVM package
       uses: actions/upload-artifact@v4.3.6
       with:
-        name: kotlin
+        name: kotlin-jvm
         path: ./wrappers/kotlin/lib/build
+
+    - name: Upload Kotlin Android package
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: kotlin-android
+        path: ./wrappers/kotlin-android/lib/build
 

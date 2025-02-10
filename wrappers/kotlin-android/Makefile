@@ -14,19 +14,10 @@ android:
 	cargo build --release -p uniffi-bindgen
 	cargo run --release -p uniffi-bindgen -- generate --library ../../target/aarch64-linux-android/release/libdevolutions_crypto_uniffi.so --language kotlin -o ./lib/src/main/kotlin/
 
-	wget https://github.com/java-native-access/jna/raw/refs/heads/master/dist/jna.aar
-
-	unzip -q jna.aar -d extracted_aar
-
 	mkdir -p ./lib/src/main/resources/jni/arm64-v8a/
 	mkdir -p ./lib/src/main/resources/jni/armeabi-v7a/
 	mkdir -p ./lib/src/main/resources/jni/x86/
 	mkdir -p ./lib/src/main/resources/jni/x86_64/
-
-	cp ./extracted_aar/jni/arm64-v8a/libjnidispatch.so ./lib/src/main/resources/jni/arm64-v8a/libjnidispatch.so
-	cp ./extracted_aar/jni/armeabi-v7a/libjnidispatch.so ./lib/src/main/resources/jni/armeabi-v7a/libjnidispatch.so
-	cp ./extracted_aar/jni/x86/libjnidispatch.so ./lib/src/main/resources/jni/x86/libjnidispatch.so
-	cp ./extracted_aar/jni/x86_64/libjnidispatch.so ./lib/src/main/resources/jni/x86_64/libjnidispatch.so
 
 	cp ../../target/aarch64-linux-android/release/libdevolutions_crypto_uniffi.so ./lib/src/main/resources/jni/arm64-v8a/libdevolutions_crypto_uniffi.so 
 	cp ../../target/armv7-linux-androideabi/release/libdevolutions_crypto_uniffi.so ./lib/src/main/resources/jni/armeabi-v7a/libdevolutions_crypto_uniffi.so 

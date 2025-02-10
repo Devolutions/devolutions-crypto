@@ -15,11 +15,12 @@
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    google()
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17)) // Match your installed JDK
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 

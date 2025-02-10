@@ -76,7 +76,8 @@ jobs:
         7z x python-wheels-windows.zip -o./devolutions-crypto-wheels
 
         7z x wasm.zip -o./devolutions-crypto-npm
-        7z x kotlin.zip -o./devolutions-crypto-maven
+        7z x kotlin-jvm.zip -o./devolutions-crypto-maven-jvm
+        7z x kotlin-android.zip -o./devolutions-crypto-maven-android
         7z x swift.zip -o./devolutions-crypto-swift
         7z x config.txt.zip
 
@@ -142,8 +143,11 @@ jobs:
       run: |
         pip install --upgrade cloudsmith-cli
 
-        cloudsmith push maven devolutions/maven-public devolutions-crypto-maven/libs/lib.jar \
+        cloudsmith push maven devolutions/maven-public devolutions-crypto-maven-jvm/libs/lib.jar \
           --pom-file=devolutions-crypto-maven/publications/maven/pom-default.xml \
+
+        cloudsmith push maven devolutions/maven-public devolutions-crypto-maven-android/outputs/aar/lib-release.aar \
+        --pom-file=devolutions-crypto-maven-android/publications/mavenAndroid/pom-default.xml \
       env:
         CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
 
