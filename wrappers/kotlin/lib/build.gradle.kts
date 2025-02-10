@@ -75,7 +75,9 @@ java {
     }
 }
 
-tasks.jar {
+tasks.named<Jar>("jar") {
+    dependsOn(tasks.named("compileKotlinJvm"))
+    mustRunAfter(tasks.named("compileKotlinJvm"))
     manifest {
         attributes(
             "Bundle-NativeCode" to """
