@@ -13,9 +13,10 @@ Pod::Spec.new do |s|
 
     s.swift_version = '5.0'
     s.ios.deployment_target = '16.0'
+    s.macos.deployment_target = '10.15'
 
-    s.vendored_frameworks = 'devolutions-crypto-swift/DevolutionsCrypto.xcframework'
-    s.source_files           = 'devolutions-crypto-swift/Sources/DevolutionsCryptoSwift/**/*.swift'
+    s.vendored_frameworks = 'DevolutionsCrypto.xcframework'
+    s.source_files           = 'Sources/DevolutionsCryptoSwift/**/*.swift'
 
     s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
     s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }

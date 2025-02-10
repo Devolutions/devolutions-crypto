@@ -127,7 +127,7 @@ jobs:
         GH_TOKEN: ${{ secrets.DEVOLUTIONSBOT_WRITE_TOKEN }}
 
     - name: Publish Python
-      if: ${{ inputs.publish_python }}
+      if: ${{ inputs.publish_python && !inputs.publish_dry_run }}
       run: |
         pip install twine
 
@@ -164,9 +164,17 @@ jobs:
 
         git rm -r --cached .
 
-        git add devolutions-crypto-swift/** LICENSE-MIT
-        git commit -m "Set up CocoaPods release branch with Swift artifact"
+        cd devolutions-crypto-swift
+        files=(*)
+        cd ..
+        mv devolutions-crypto-swift/* .
 
+        for file in "${files[@]}"; do
+            git add "$file"
+        done
+        git add LICENSE-MIT
+
+        git commit -m "Set up CocoaPods release branch with Swift artifact"
         git push origin "release/cocoapods-v${{ steps.version.outputs.version }}"
 
         git tag "${{ steps.version.outputs.version }}"
@@ -174,7 +182,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
-    - run: |
+    - name: Install Ruby and CocoaPods
+      run: |
         sudo apt-get update
         sudo apt-get install ruby-full
         sudo gem install cocoapods
