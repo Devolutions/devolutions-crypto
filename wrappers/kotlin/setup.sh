@@ -1,6 +1,6 @@
 # Setup a wsl ubuntu 24.04 to compile devolutions crypto kotlin
 sudo apt update
-sudo apt install unzip openjdk-17-jre-headless make gcc-multilib software-properties-common -y
+sudo apt install unzip openjdk-17-jre-headless make gcc-multilib software-properties-common python-is-python3 -y
 sudo apt install gcc-aarch64-linux-gnu -y
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
