@@ -41,8 +41,14 @@ android {
         minSdk = 21
         targetSdk = 34
     }
+
+    publishing {
+        singleVariant("release") {
+        }
+    }
 }
 
+afterEvaluate {
 publishing {
     repositories {
         maven {
@@ -54,6 +60,7 @@ publishing {
             }
         }
     }
+
     publications {
         create<MavenPublication>("mavenAndroid") {
             groupId = "devolutions"
@@ -75,4 +82,5 @@ publishing {
             }
         }
     }
+}
 }
