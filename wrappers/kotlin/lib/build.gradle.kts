@@ -1,4 +1,11 @@
 
+
+repositories {
+    gradlePluginPortal()
+    google()
+    mavenCentral()
+}
+
 plugins {
     kotlin("multiplatform")
     id("com.android.library") // Required for AAR builds
@@ -43,11 +50,6 @@ android {
  */
 
 
-repositories {
-    gradlePluginPortal()
-    google()
-    mavenCentral()
-}
 
 dependencies {
     // Use the Kotlin JUnit 5 integration.
