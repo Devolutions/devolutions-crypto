@@ -1,6 +1,6 @@
 # Setup a wsl ubuntu 24.04 to compile devolutions crypto kotlin
 sudo apt update
-sudo apt install unzip openjdk-17-jre-headless make gcc-multilib software-properties-common -y
+sudo apt install unzip openjdk-17-jdk-headless make gcc-multilib software-properties-common -y
 sudo apt install gcc-aarch64-linux-gnu -y
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -41,7 +41,7 @@ sudo cp -r "${ANDROID_SDK_ROOT}/cmdline-tools/." "${ANDROID_SDK_ROOT}/cmdline-to
 
 
 SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
-echo "y" | sudo $SDKMANAGER "ndk;27.2.12479018"
+echo "y" | sudo $SDKMANAGER "ndk;27.2.12479018" "build-tools;35.0.0" "platforms;android-34" "platform-tools"
 
 export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk-bundle
 EXPORT_LINE='export ANDROID_NDK="$ANDROID_SDK_ROOT/ndk-bundle"'

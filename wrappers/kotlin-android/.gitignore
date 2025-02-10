@@ -5,3 +5,5 @@
 build
 
 lib/src/main/resources/*
+extracted_aar
+jna.aar

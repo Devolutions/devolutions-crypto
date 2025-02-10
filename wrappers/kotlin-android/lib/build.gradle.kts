@@ -5,7 +5,7 @@
  * For more details on building Java & JVM projects, please refer to https://docs.gradle.org/8.10.2/userguide/building_java_projects.html in the Gradle documentation.
  */
 
-plugins {
+ plugins {
     id("com.android.library") version "8.8.0"
     kotlin("android") version "2.1.10"
 
@@ -17,15 +17,20 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17)) // Match your installed JDK
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+
 dependencies {
-    // Use the Kotlin JUnit 5 integration.
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-
-    // Use the JUnit 5 integration.
-    testImplementation(libs.junit.jupiter.engine)
-
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api(libs.commons.math3)
 
@@ -35,52 +40,40 @@ dependencies {
 }
 
 android {
+    namespace = "org.devolutions.crypto"
     compileSdk = 34
 
     defaultConfig {
         minSdk = 21
         targetSdk = 34
     }
-
-    publishing {
-        singleVariant("release") {
-        }
-    }
 }
 
 afterEvaluate {
-publishing {
-    repositories {
-        maven {
-            name = "cloudsmith"
-            url = uri("https://maven.cloudsmith.io/devolutions/maven-public/")
-            credentials {
-                username = System.getenv("CLOUDSMITH_USERNAME") ?: "bot-devolutions"
-                password = System.getenv("CLOUDSMITH_API_KEY")
-            }
-        }
-    }
+    publishing {
+        publications {
+            create<MavenPublication>("mavenAndroid") {
+                groupId = "devolutions"
+                artifactId = "devolutions-crypto-android"
+                version = project.version.toString()
 
-    publications {
-        create<MavenPublication>("mavenAndroid") {
-            groupId = "devolutions"
-            artifactId = "devolutions-crypto-android"
-            version = project.version.toString()
-            from(components["release"])
+                // Use the Android component explicitly
+                from(components["release"])
 
-            pom {
-                name.set("Devolutions Crypto (Android)")
-                description.set("Devolutions Cryptographic Library for Android")
-                url.set("https://github.com/devolutions/devolutions-crypto")
+                pom {
+                    name.set("Devolutions Crypto (Android)")
+                    description.set("Devolutions Cryptographic Library for Android")
+                    url.set("https://github.com/devolutions/devolutions-crypto")
 
-                licenses {
-                    license {
-                        name.set("Apache License 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.html")
+                    licenses {
+                        license {
+                            name.set("Apache License 2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0.html")
+                        }
                     }
                 }
             }
         }
     }
 }
-}
+
