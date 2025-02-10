@@ -44,7 +44,8 @@ android {
 
 
 repositories {
-    // Use Maven Central for resolving dependencies.
+    gradlePluginPortal()
+    google()
     mavenCentral()
 }
 
