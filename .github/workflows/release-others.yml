@@ -59,7 +59,8 @@ jobs:
         dv github download-artifact python-wheels-linux . devolutions-crypto
         dv github download-artifact python-wheels-macos . devolutions-crypto
         dv github download-artifact python-wheels-windows . devolutions-crypto
-        dv github download-artifact kotlin . devolutions-crypto
+        dv github download-artifact kotlin-jvm . devolutions-crypto
+        dv github download-artifact kotlin-android . devolutions-crypto
         dv github download-artifact swift . devolutions-crypto
         dv github download-artifact config.txt . devolutions-crypto
 
