@@ -194,7 +194,7 @@ jobs:
 
     - name: Publish to CocoaPods
       if: ${{ inputs.publish_swift && !inputs.publish_dry_run }}
-      run: pod trunk push ./devolutions-crypto-swift/DevolutionsCryptoSwift.podspec --skip-import-validation --use-libraries --allow-warnings
+      run: pod trunk push ./DevolutionsCryptoSwift.podspec --skip-import-validation --use-libraries --allow-warnings
       env:
         COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
 
