@@ -1,0 +1,4 @@
+module devolutions_cryptoFFI {
+    header "devolutions_cryptoFFI.h"
+    export *
+}
