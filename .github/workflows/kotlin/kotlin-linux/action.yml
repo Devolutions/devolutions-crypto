@@ -119,6 +119,8 @@ runs:
         ./gradlew build
         ./gradlew generatePomFileForMavenPublication
 
+        mv ./lib/build/outputs/aar/lib-release.aar ./lib/build/outputs/aar/lib.aar
+
     - name: Set version in pom file
       shell: bash
       working-directory: ./wrappers/
