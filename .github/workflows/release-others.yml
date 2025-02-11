@@ -147,7 +147,7 @@ jobs:
         cloudsmith push maven devolutions/maven-public devolutions-crypto-maven-jvm/libs/lib.jar \
           --pom-file=devolutions-crypto-maven-jvm/publications/maven/pom-default.xml \
 
-        cloudsmith push maven devolutions/maven-public devolutions-crypto-maven-android/outputs/aar/lib-release.aar \
+        cloudsmith push maven devolutions/maven-public devolutions-crypto-maven-android/outputs/aar/lib.aar \
         --pom-file=devolutions-crypto-maven-android/publications/mavenAndroid/pom-default.xml \
       env:
         CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
