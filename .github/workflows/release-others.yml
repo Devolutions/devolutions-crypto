@@ -152,12 +152,6 @@ jobs:
       env:
         CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
 
-    - name: Setup CocoaPods Trunk Token
-      if: ${{ inputs.publish_swift && !inputs.publish_dry_run }}
-      run: |
-        echo -e "machine trunk.cocoapods.org\n login bot@devolutions.net\n password ${{ secrets.COCOAPODS_TRUNK_TOKEN }}" > ~/.netrc
-        chmod 0600 ~/.netrc
-
     - name: Publish Swift Artifact to a new orphan branch
       if: ${{ inputs.publish_swift && !inputs.publish_dry_run }}
       run: |
@@ -165,7 +159,7 @@ jobs:
         git config user.email "bot@devolutions.net"
         git fetch --all
 
-        git checkout --orphan "release/cocoapods-v${{ steps.version.outputs.version }}"
+        git checkout --orphan "release/swift-v${{ steps.version.outputs.version }}"
 
         git rm -r --cached .
 
@@ -179,25 +173,13 @@ jobs:
         done
         git add LICENSE-MIT
 
-        git commit -m "Set up CocoaPods release branch with Swift artifact"
-        git push origin "release/cocoapods-v${{ steps.version.outputs.version }}"
+        git commit -m "Set up release branch with Swift artifact"
+        git push origin "release/swift-v${{ steps.version.outputs.version }}"
 
         git tag "${{ steps.version.outputs.version }}"
         git push origin "${{ steps.version.outputs.version }}"
       env:
         GITHUB_TOKEN: ${{ github.token }}
-
-    - name: Install Ruby and CocoaPods
-      run: |
-        sudo apt-get update
-        sudo apt-get install ruby-full
-        sudo gem install cocoapods
-
-    - name: Publish to CocoaPods
-      if: ${{ inputs.publish_swift && !inputs.publish_dry_run }}
-      run: pod trunk push ./DevolutionsCryptoSwift.podspec --skip-import-validation --use-libraries --allow-warnings
-      env:
-        COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
 
     - name: Delete branch
       if: ${{ inputs.publish_swift && !inputs.publish_dry_run }}
@@ -206,4 +188,4 @@ jobs:
         git reset --hard HEAD
         git clean -fdx
         git switch master
-        git push origin --delete release/cocoapods-v${{ steps.version.outputs.version }}
+        git push origin --delete release/swift-v${{ steps.version.outputs.version }}
