@@ -8,6 +8,7 @@ namespace Devolutions.Crypto.Tests
     using System.IO;
 
     using Devolutions.Cryptography;
+    using System.Text;
 
     [TestClass]
     public class TestUtils
@@ -50,6 +51,15 @@ namespace Devolutions.Crypto.Tests
         {
             byte[] decodedData = Utils.DecodeFromBase64(TestData.Base64TestData);
             Assert.AreEqual(Convert.ToBase64String(decodedData), Convert.ToBase64String(TestData.BytesTestData));
+
+            byte[] decodeDataNoPad = Utils.DecodeFromBase64(TestData.Base64TestDataNoPad);
+            Assert.AreEqual(Encoding.UTF8.GetString(decodeDataNoPad), TestData.StringTestDataNoPad);
+
+            byte[] decodeDataInvalid = Utils.DecodeFromBase64("====");
+            Assert.IsNull(decodeDataInvalid);
+
+            byte[] decodeDataInvalid2 = Utils.DecodeFromBase64("=");
+            Assert.IsNull(decodeDataInvalid2);
         }
 
         [TestMethod]
@@ -85,7 +95,8 @@ namespace Devolutions.Crypto.Tests
         public void GetDecodedLength()
         {
             Assert.IsTrue(this.GetDotNetBase64Length(TestData.StringTestData) <= Utils.GetDecodedBase64StringLength(TestData.StringTestData)); // Invalid data
-            Assert.IsTrue(Utils.GetDecodedBase64StringLength("====") >= this.GetDotNetBase64Length("===="));
+            Assert.IsTrue(Utils.GetDecodedBase64StringLength(TestData.Base64TestDataNoPad) >= this.GetDotNetBase64Length(TestData.Base64TestDataNoPad));
+            Assert.IsTrue(Utils.GetDecodedBase64StringLength("====") == this.GetDotNetBase64Length("===="));
             Assert.IsTrue(Utils.GetDecodedBase64StringLength("=") == this.GetDotNetBase64Length("="));
             Assert.IsTrue(Utils.GetDecodedBase64StringLength("YWxsbw==") == this.GetDotNetBase64Length("YWxsbw=="));
             Assert.IsTrue(Utils.GetDecodedBase64StringLength(null) == this.GetDotNetBase64Length(null));

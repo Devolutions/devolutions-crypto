@@ -88,6 +88,15 @@ jobs:
         version=$(grep "version" config.txt | sed -E 's/version = "(.*)"/\1/')
         echo "version=$version" >> $GITHUB_OUTPUT
 
+        version_native=$(cargo pkgid | cut -d "#" -f2)
+        echo "version_native=$version_native" >> $GITHUB_OUTPUT
+
+    - name: Setup git
+      run: |
+        git config user.name "devolutionsbot"
+        git config user.email "bot@devolutions.net"
+        git fetch --all
+
     - name: Publish Rust Crate
       if: ${{ inputs.publish_crate_rust }}
       working-directory: ./rust-release
@@ -96,6 +105,11 @@ jobs:
           cargo publish --dry-run
         else
           cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
+
+          git checkout "release/rust-v${{ steps.version.outputs.version_native }}"
+          git push origin "release/rust-v${{ steps.version.outputs.version_native }}"
+          git tag "rust-v${{ steps.version.outputs.version_native }}"
+          git push origin "rust-v${{ steps.version.outputs.version_native }}"
         fi
 
     - name: Publish NPM Bundler
@@ -108,6 +122,11 @@ jobs:
           npm publish --access=public --dry-run
         else
           npm publish --access=public
+
+          git checkout "release/npm-bundler-v${{ steps.version.outputs.version_native }}"
+          git push origin "release/npm-bundler-v${{ steps.version.outputs.version_native }}"
+          git tag "npm-bundler-v${{ steps.version.outputs.version_native }}"
+          git push origin "npm-bundler-v${{ steps.version.outputs.version_native }}"
         fi
 
     - name: Publish NPM Web
@@ -120,6 +139,11 @@ jobs:
           npm publish --access=public --dry-run
         else
           npm publish --access=public
+
+          git checkout "release/npm-web-v${{ steps.version.outputs.version_native }}"
+          git push origin "release/npm-web-v${{ steps.version.outputs.version_native }}"
+          git tag "npm-web-v${{ steps.version.outputs.version_native }}"
+          git push origin "npm-web-v${{ steps.version.outputs.version_native }}"
         fi
 
     - name: Update Artifactory Cache
@@ -137,6 +161,11 @@ jobs:
           twine upload --verbose  --repository testpypi -u "__token__" -p ${{ secrets.TESTPYPI_OWNER_API_KEY  }} ./devolutions-crypto-wheels/*
         else
           twine upload --verbose -u "__token__" -p ${{ secrets.PYPI_OWNER_API_KEY }} ./devolutions-crypto-wheels/*
+
+          git checkout "release/python-v${{ steps.version.outputs.version_native }}"
+          git push origin "release/python-v${{ steps.version.outputs.version_native }}"
+          git tag "python-v${{ steps.version.outputs.version_native }}"
+          git push origin "python-v${{ steps.version.outputs.version_native }}"
         fi
 
     - name: Publish Kotlin to Cloudsmith
@@ -145,18 +174,21 @@ jobs:
         pip install --upgrade cloudsmith-cli
 
         cloudsmith push maven devolutions/maven-public devolutions-crypto-maven-jvm/libs/lib.jar \
-          --pom-file=devolutions-crypto-maven-jvm/publications/maven/pom-default.xml \
+          --pom-file=devolutions-crypto-maven-jvm/publications/maven/pom-default.xml
 
         cloudsmith push maven devolutions/maven-public devolutions-crypto-maven-android/outputs/aar/lib.aar \
-        --pom-file=devolutions-crypto-maven-android/publications/mavenAndroid/pom-default.xml \
+        --pom-file=devolutions-crypto-maven-android/publications/mavenAndroid/pom-default.xml
+
+        git checkout "release/kotlin-v${{ steps.version.outputs.version }}"
+        git push origin "release/kotlin-v${{ steps.version.outputs.version }}"
+        git tag "kotlin-v${{ steps.version.outputs.version }}"
+        git push origin "kotlin-v${{ steps.version.outputs.version }}"
       env:
         CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
 
     - name: Publish Swift Artifact to a new orphan branch
       if: ${{ inputs.publish_swift && !inputs.publish_dry_run }}
       run: |
-        git config user.name "devolutionsbot"
-        git config user.email "bot@devolutions.net"
         git fetch --all
 
         git checkout --orphan "release/swift-v${{ steps.version.outputs.version }}"
@@ -176,12 +208,12 @@ jobs:
         git commit -m "Set up release branch with Swift artifact"
         git push origin "release/swift-v${{ steps.version.outputs.version }}"
 
-        git tag "${{ steps.version.outputs.version }}"
-        git push origin "${{ steps.version.outputs.version }}"
+        git tag "swift-v${{ steps.version.outputs.version }}"
+        git push origin "swift-v${{ steps.version.outputs.version }}"
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
-    - name: Delete branch
+    - name: Delete Swift branch
       if: ${{ inputs.publish_swift && !inputs.publish_dry_run }}
       run: |
         git fetch
@@ -189,3 +221,40 @@ jobs:
         git clean -fdx
         git switch master
         git push origin --delete release/swift-v${{ steps.version.outputs.version }}
+
+    - name: Delete Kotlin branch
+      if: ${{ inputs.publish_kotlin && !inputs.publish_dry_run }}
+      run: |
+        git fetch
+        git reset --hard HEAD
+        git clean -fdx
+        git switch master
+        git push origin --delete release/kotlin-v${{ steps.version.outputs.version }}
+
+    - name: Delete Python branch
+      if: ${{ inputs.publish_python && !inputs.publish_dry_run }}
+      run: |
+        git fetch
+        git reset --hard HEAD
+        git clean -fdx
+        git switch master
+        git push origin --delete release/python-v${{ steps.version.outputs.version_native }}
+
+    - name: Delete Rust branch
+      if: ${{ inputs.publish_python && !inputs.publish_dry_run }}
+      run: |
+        git fetch
+        git reset --hard HEAD
+        git clean -fdx
+        git switch master
+        git push origin --delete release/rust-v${{ steps.version.outputs.version_native }}
+
+    - name: Delete NPM branches
+      if: ${{ inputs.publish_npm && !inputs.publish_dry_run }}
+      run: |
+        git fetch
+        git reset --hard HEAD
+        git clean -fdx
+        git switch master
+        git push origin --delete release/npm-bundler-v${{ steps.version.outputs.version_native }}
+        git push origin --delete release/npm-web-v${{ steps.version.outputs.version_native }}

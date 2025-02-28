@@ -14,6 +14,23 @@
         <PackageReference Include="MSTest.TestFramework"
                           Version="3.7.1" />
     </ItemGroup>
+        <ItemGroup>
+        <Content Include="..\..\..\..\..\..\target\debug\devolutions_crypto_ffi.dll"
+                 Condition="Exists('..\..\..\..\..\..\target\debug\devolutions_crypto_ffi.dll')">
+            <Link>DevolutionsCrypto.dll</Link>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\..\..\..\..\..\target\debug\libdevolutions_crypto_ffi.so"
+                 Condition="Exists('..\..\..\..\..\..\target\debug\libdevolutions_crypto_ffi.so')">
+            <Link>libDevolutionsCrypto.so</Link>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\..\..\..\..\..\target\debug\libdevolutions_crypto_ffi.dylib"
+                 Condition="Exists('..\..\..\..\..\..\target\debug\libdevolutions_crypto_ffi.dylib')">
+            <Link>libDevolutionsCrypto.dylib</Link>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\..\..\src\devolutions-crypto.csproj" />
     </ItemGroup>
