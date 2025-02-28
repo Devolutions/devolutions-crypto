@@ -6,6 +6,10 @@ on:
         description: "Publish Rust Crate"
         required: true
         type: boolean
+      publish_sbom_rust:
+        description: "Publish Rust SBOM"
+        required: true
+        type: boolean
       publish_kotlin:
         description: "Publish Kotlin"
         required: true
@@ -106,8 +110,6 @@ jobs:
         else
           cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
 
-          git checkout "release/rust-v${{ steps.version.outputs.version_native }}"
-          git push origin "release/rust-v${{ steps.version.outputs.version_native }}"
           git tag "rust-v${{ steps.version.outputs.version_native }}"
           git push origin "rust-v${{ steps.version.outputs.version_native }}"
         fi
@@ -123,8 +125,6 @@ jobs:
         else
           npm publish --access=public
 
-          git checkout "release/npm-bundler-v${{ steps.version.outputs.version_native }}"
-          git push origin "release/npm-bundler-v${{ steps.version.outputs.version_native }}"
           git tag "npm-bundler-v${{ steps.version.outputs.version_native }}"
           git push origin "npm-bundler-v${{ steps.version.outputs.version_native }}"
         fi
@@ -140,8 +140,6 @@ jobs:
         else
           npm publish --access=public
 
-          git checkout "release/npm-web-v${{ steps.version.outputs.version_native }}"
-          git push origin "release/npm-web-v${{ steps.version.outputs.version_native }}"
           git tag "npm-web-v${{ steps.version.outputs.version_native }}"
           git push origin "npm-web-v${{ steps.version.outputs.version_native }}"
         fi
@@ -162,8 +160,6 @@ jobs:
         else
           twine upload --verbose -u "__token__" -p ${{ secrets.PYPI_OWNER_API_KEY }} ./devolutions-crypto-wheels/*
 
-          git checkout "release/python-v${{ steps.version.outputs.version_native }}"
-          git push origin "release/python-v${{ steps.version.outputs.version_native }}"
           git tag "python-v${{ steps.version.outputs.version_native }}"
           git push origin "python-v${{ steps.version.outputs.version_native }}"
         fi
@@ -179,8 +175,6 @@ jobs:
         cloudsmith push maven devolutions/maven-public devolutions-crypto-maven-android/outputs/aar/lib.aar \
         --pom-file=devolutions-crypto-maven-android/publications/mavenAndroid/pom-default.xml
 
-        git checkout "release/kotlin-v${{ steps.version.outputs.version }}"
-        git push origin "release/kotlin-v${{ steps.version.outputs.version }}"
         git tag "kotlin-v${{ steps.version.outputs.version }}"
         git push origin "kotlin-v${{ steps.version.outputs.version }}"
       env:
@@ -222,39 +216,26 @@ jobs:
         git switch master
         git push origin --delete release/swift-v${{ steps.version.outputs.version }}
 
-    - name: Delete Kotlin branch
-      if: ${{ inputs.publish_kotlin && !inputs.publish_dry_run }}
-      run: |
-        git fetch
-        git reset --hard HEAD
-        git clean -fdx
-        git switch master
-        git push origin --delete release/kotlin-v${{ steps.version.outputs.version }}
+    - name: Generate Rust SBOM
+      if: ${{ inputs.publish_sbom_rust }}
+      uses:  ./.github/workflows/cyclonedx-rust-generate
+      with:
+        path: .
 
-    - name: Delete Python branch
-      if: ${{ inputs.publish_python && !inputs.publish_dry_run }}
-      run: |
-        git fetch
-        git reset --hard HEAD
-        git clean -fdx
-        git switch master
-        git push origin --delete release/python-v${{ steps.version.outputs.version_native }}
+    - name: Save BOM
+      if: ${{ inputs.publish_sbom_rust }}
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: bom_devolutions_crypto_rust.xml
+        path: ./bom.xml
 
-    - name: Delete Rust branch
-      if: ${{ inputs.publish_python && !inputs.publish_dry_run }}
-      run: |
-        git fetch
-        git reset --hard HEAD
-        git clean -fdx
-        git switch master
-        git push origin --delete release/rust-v${{ steps.version.outputs.version_native }}
-
-    - name: Delete NPM branches
-      if: ${{ inputs.publish_npm && !inputs.publish_dry_run }}
-      run: |
-        git fetch
-        git reset --hard HEAD
-        git clean -fdx
-        git switch master
-        git push origin --delete release/npm-bundler-v${{ steps.version.outputs.version_native }}
-        git push origin --delete release/npm-web-v${{ steps.version.outputs.version_native }}
+    - name: Upload SBOM
+      if: ${{ inputs.publish_sbom_rust }}
+      uses:  ./.github/workflows/dtrack-upload-sbom
+      with:
+        api_key: ${{ secrets.DTRACK_AUTOMATION_API_KEY }}
+        autocreate: 'true'
+        bom_filename: devolutions-crypto/bom.xml
+        project_name: 'devolutions-crypto'
+        project_version: ${{ github.event.inputs.version }}
+        server_hostname: 'dtrack-api.devolutions.com'

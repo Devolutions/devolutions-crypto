@@ -43,7 +43,7 @@ jobs:
   #### NATIVE BUILD ####
   native_build_linux:
     needs: [rust_code_format, setup_config]
-    runs-on: "ubuntu-20.04" # Ensure we build with the minimum supported sysroot
+    runs-on: "ubuntu-22.04" # Ensure we build with the minimum supported sysroot
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/native/native-build-linux
@@ -280,38 +280,3 @@ jobs:
           lfs: true
       - run: git lfs pull
       - uses: ./.github/workflows/other/source-publish
-
-  publish_sbom:
-    runs-on: "ubuntu-22.04"
-    if: ${{ github.event.inputs.generate_release == 'true' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check out devolutions/actions
-        uses: actions/checkout@v4
-        with:
-          path: ./.github/workflows
-          ref: v1
-          repository: Devolutions/actions
-          token: ${{ secrets.DEVOLUTIONSBOT_TOKEN }}
-
-      - name: Generate Rust SBOM
-        uses:  ./.github/workflows/cyclonedx-rust-generate
-        with:
-          path: .
-
-      - name: Save BOM
-        uses: actions/upload-artifact@v4.3.6
-        with:
-          name: bom_devolutions_crypto_rust.xml
-          path: ./bom.xml
-
-      - name: Upload SBOM
-        uses:  ./.github/workflows/dtrack-upload-sbom
-        with:
-          api_key: ${{ secrets.DTRACK_AUTOMATION_API_KEY }}
-          autocreate: 'true'
-          bom_filename: devolutions-crypto/bom.xml
-          project_name: 'devolutions-crypto'
-          project_version: ${{ github.event.inputs.version }}
-          server_hostname: 'dtrack-api.devolutions.com'

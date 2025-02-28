@@ -36,21 +36,25 @@ jobs:
         git config user.email "bot@devolutions.net"
         git fetch --all
 
+    - name: Download Nugets Artifact
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CI: true
+      run: |
+        dv github download-artifact nugets-windows . devolutions-crypto
+        dv github download-artifact config.txt . devolutions-crypto
+
+    - name: Extract Artifacts
+      run: |
+        7z x nugets-windows.zip -o./devolutions-crypto-nugets
+        7z x config.txt.zip
+
     - name: Read Version
       id: version
       run: |
         version=$(grep "version" config.txt | sed -E 's/version = "(.*)"/\1/')
         echo "version=$version" >> $GITHUB_OUTPUT
 
-    - name: Download Nugets Artifact
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CI: true
-      run: dv github download-artifact nugets-windows . devolutions-crypto
-
-    - name: Extract Artifacts
-      run: 7z x nugets-windows.zip -o./devolutions-crypto-nugets
-  
     - name: Publish Core NuGet
       if: ${{ inputs.publish_core_nuget }}
       run: |
@@ -67,17 +71,6 @@ jobs:
         if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
           eval "$COMMAND"
 
-          git checkout "release/nuget-v${{ steps.version.outputs.version }}"
-          git push origin "release/nuget-v${{ steps.version.outputs.version }}"
           git tag "nuget-v${{ steps.version.outputs.version }}"
           git push origin "nuget-v${{ steps.version.outputs.version }}"
         fi
-
-    - name: Delete Nuget branch
-      if: ${{ inputs.publish_core_nuget && !inputs.publish_dry_run }}
-      run: |
-        git fetch
-        git reset --hard HEAD
-        git clean -fdx
-        git switch master
-        git push origin --delete release/nuget-v${{ steps.version.outputs.version }}
