@@ -106,7 +106,7 @@ jobs:
         else
           cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
 
-          git checkout "release/rust-v${{ steps.version.outputs.version_native }}"
+          git checkout -b "release/rust-v${{ steps.version.outputs.version_native }}"
           git push origin "release/rust-v${{ steps.version.outputs.version_native }}"
           git tag "rust-v${{ steps.version.outputs.version_native }}"
           git push origin "rust-v${{ steps.version.outputs.version_native }}"
@@ -123,7 +123,7 @@ jobs:
         else
           npm publish --access=public
 
-          git checkout "release/npm-bundler-v${{ steps.version.outputs.version_native }}"
+          git checkout -b "release/npm-bundler-v${{ steps.version.outputs.version_native }}"
           git push origin "release/npm-bundler-v${{ steps.version.outputs.version_native }}"
           git tag "npm-bundler-v${{ steps.version.outputs.version_native }}"
           git push origin "npm-bundler-v${{ steps.version.outputs.version_native }}"
@@ -140,7 +140,7 @@ jobs:
         else
           npm publish --access=public
 
-          git checkout "release/npm-web-v${{ steps.version.outputs.version_native }}"
+          git checkout -b "release/npm-web-v${{ steps.version.outputs.version_native }}"
           git push origin "release/npm-web-v${{ steps.version.outputs.version_native }}"
           git tag "npm-web-v${{ steps.version.outputs.version_native }}"
           git push origin "npm-web-v${{ steps.version.outputs.version_native }}"
@@ -162,7 +162,7 @@ jobs:
         else
           twine upload --verbose -u "__token__" -p ${{ secrets.PYPI_OWNER_API_KEY }} ./devolutions-crypto-wheels/*
 
-          git checkout "release/python-v${{ steps.version.outputs.version_native }}"
+          git checkout -b "release/python-v${{ steps.version.outputs.version_native }}"
           git push origin "release/python-v${{ steps.version.outputs.version_native }}"
           git tag "python-v${{ steps.version.outputs.version_native }}"
           git push origin "python-v${{ steps.version.outputs.version_native }}"
@@ -179,7 +179,7 @@ jobs:
         cloudsmith push maven devolutions/maven-public devolutions-crypto-maven-android/outputs/aar/lib.aar \
         --pom-file=devolutions-crypto-maven-android/publications/mavenAndroid/pom-default.xml
 
-        git checkout "release/kotlin-v${{ steps.version.outputs.version }}"
+        git checkout -b "release/kotlin-v${{ steps.version.outputs.version }}"
         git push origin "release/kotlin-v${{ steps.version.outputs.version }}"
         git tag "kotlin-v${{ steps.version.outputs.version }}"
         git push origin "kotlin-v${{ steps.version.outputs.version }}"
