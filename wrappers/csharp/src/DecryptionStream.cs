@@ -139,7 +139,7 @@ namespace Devolutions.Cryptography
             {
                 // Cannot write as stream is already closed
                 return;
-            };
+            }
 
             while (count > ChunkLength - _inputBufferOffset)
             {
@@ -216,7 +216,7 @@ namespace Devolutions.Cryptography
                     if (!HasFlushedFinalBlock)
                     {
                         FlushFinalBlock();
-                    };
+                    }
 
                     if (!_leaveOpen)
                     {

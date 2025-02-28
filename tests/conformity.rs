@@ -198,7 +198,7 @@ fn test_signature_v1() {
 }
 
 #[test]
-fn test_base64_url() {
+fn test_utils_base64_url() {
     use devolutions_crypto::utils::{base64_decode_url, base64_encode_url};
 
     assert_eq!(base64_encode_url(b"Ab6/"), "QWI2Lw");
@@ -211,4 +211,19 @@ fn test_base64_url() {
         base64_decode_url("___-_w").unwrap(),
         &[0xff, 0xff, 0xfe, 0xff]
     );
+}
+
+#[test]
+fn test_utils_base64() {
+    use devolutions_crypto::utils::{base64_decode, base64_encode};
+
+    let data = b"Base64Test";
+
+    let base64_data = "QmFzZTY0VGVzdA==";
+    let base64_data_no_pad = "QmFzZTY0VGVzdA";
+
+    assert_eq!(base64_decode(base64_data).unwrap(), data);
+    assert_eq!(base64_decode(base64_data_no_pad).unwrap(), data);
+
+    assert_eq!(base64_encode(data), "QmFzZTY0VGVzdA==");
 }

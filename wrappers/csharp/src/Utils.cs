@@ -283,22 +283,33 @@ namespace Devolutions.Cryptography
         /// <returns>The original buffer length.</returns>
         public static int GetDecodedBase64StringLength(string base64)
         {
-            if (string.IsNullOrEmpty(base64) || base64.Length % 4 != 0)
+            if (string.IsNullOrEmpty(base64))
             {
                 return 0;
             }
 
+            int missingPadding = (4 - (base64.Length % 4)) % 4;
+
             int padCount = 0;
 
-            for (int i = base64.Length - 1; i >= base64.Length - 2; i--)
+            for (int i = base64.Length - 1; i >= 0; i--)
             {
                 if (base64[i] == '=')
                 {
                     padCount++;
                 }
+                else
+                {
+                    break;
+                }
             }
 
-            return (3 * (base64.Length / 4)) - padCount;
+            if (missingPadding > 2 || padCount + missingPadding > 2)
+            {
+                return 0;
+            }
+
+            return 3 * ((base64.Length + missingPadding) / 4) - (padCount + missingPadding);
         }
 
         /// <summary>

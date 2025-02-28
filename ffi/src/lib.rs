@@ -43,7 +43,6 @@ use devolutions_crypto::Result;
 
 use std::borrow::Borrow;
 use std::ffi::c_void;
-use std::mem::MaybeUninit;
 use std::slice;
 use std::sync::Mutex;
 
@@ -1195,7 +1194,7 @@ pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 {
     let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
     match encryptor.lock() {
         Ok(c) => c.get_tag_size() as i64,
-        Err(_) => return Error::PoisonedMutex.error_code(),
+        Err(_) => Error::PoisonedMutex.error_code(),
     }
 }
 
@@ -1208,7 +1207,7 @@ pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 {
     let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
     match decryptor.lock() {
         Ok(c) => c.get_tag_size() as i64,
-        Err(_) => return Error::PoisonedMutex.error_code(),
+        Err(_) => Error::PoisonedMutex.error_code(),
     }
 }
 
@@ -1491,9 +1490,12 @@ pub unsafe extern "C" fn Decode(
     let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
     let output = slice::from_raw_parts_mut(output, output_length);
 
-    match general_purpose::STANDARD.decode_slice_unchecked(input, output) {
-        Ok(res) => res as i64,
-        Err(_e) => -1,
+    match devolutions_crypto::utils::base64_decode(input) {
+        Ok(res) => {
+            output.copy_from_slice(&res);
+            res.len() as i64
+        }
+        Err(_err) => -1,
     }
 }
 
@@ -1521,10 +1523,11 @@ pub unsafe extern "C" fn Encode(
     let input = slice::from_raw_parts(input, input_length);
     let output = slice::from_raw_parts_mut(output, output_length);
 
-    match general_purpose::STANDARD.encode_slice(input, output) {
-        Ok(res) => res as i64,
-        Err(_err) => -1,
-    }
+    let encode_res = devolutions_crypto::utils::base64_encode(input).into_bytes();
+
+    output.copy_from_slice(&encode_res);
+
+    encode_res.len() as i64
 }
 
 /// Decode a base64 string to bytes using base64url.
