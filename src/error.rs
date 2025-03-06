@@ -131,12 +131,6 @@ impl From<aead::Error> for Error {
     }
 }
 
-impl From<rand::Error> for Error {
-    fn from(_error: rand::Error) -> Error {
-        Error::RandomError
-    }
-}
-
 impl From<argon2::Error> for Error {
     fn from(_error: argon2::Error) -> Self {
         Error::CryptoError

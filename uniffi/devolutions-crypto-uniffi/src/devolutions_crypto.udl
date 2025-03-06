@@ -135,6 +135,7 @@ namespace devolutions_crypto {
     KeyPair generate_keypair(optional KeyVersion version = "Latest");
 
     // Password Hash
+    [Throws=DevolutionsCryptoError]
     bytes hash_password([ByRef] bytes password, optional u32 iterations = 10000, optional PasswordHashVersion version = "Latest");
 
     // Secret Sharing

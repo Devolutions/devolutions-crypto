@@ -43,12 +43,12 @@ pbkdf2 = { version = "0.12", default-features = false }
 scrypt = { version = "0.11", default-features = false }
 blahaj = { version = "0.6", default-features = false }
 sha2 = "0.10"
-strum = { version = "0.26", features = ["derive"] }
+strum = { version = "0.27", features = ["derive"] }
 subtle = "2"
 zeroize = { version = "1.8" }
-rand = "0.8"
-rand_core = { version = "0.6" }
-thiserror = "2.0.11"
+rand = "0.9"
+rand_core_06 = { package = "rand_core", version = "0.6" }
+thiserror = "2.0.12"
 typed-builder = "0.20.0"
 rust-argon2 = { version = "2.1", default-features = false }
 
@@ -59,21 +59,15 @@ x25519-dalek = { version = "2", features = [ "static_secrets" ] }
 # Version is pinned because newer version requires lifetime annotations
 #   that isn't compatible with the header trait
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
-blake3 = { version = "1.5.5", features = ["zeroize"] }
+blake3 = { version = "1.6", features = ["zeroize"] }
 paste = "1.0.15"
-dyn-clone = "1.0.17"
+dyn-clone = "1.0"
 
 [target.'cfg(target_arch="wasm32")'.dependencies]
-wasm-bindgen = { version = "0.2.92", optional = true }
+wasm-bindgen = { version = "0.2.100", optional = true }
 serde-wasm-bindgen = { version = "0.6.5", optional = true }
-js-sys = { version = "0.3.69", optional = true }
-
-# FIXME: https://docs.rs/getrandom/0.2.2/getrandom/#webassembly-support
-# let `getrandom` know that JavaScript is available for our targets
-# `getrandom` is not used directly, but by adding the right feature here
-# it will be compiled with it in our dependencies as well (since union of
-# all the features selected is used when building a Cargo project)
-getrandom = { version = "0.2", features = ["js", "wasm-bindgen"] }
+js-sys = { version = "0.3.77", optional = true }
+getrandom = { version = "0.3", features = ["wasm_js"] }
 
 [target.'cfg(target_arch="wasm32")'.dev-dependencies]
 wasm-bindgen-test = "0.3"
@@ -82,3 +76,8 @@ wasm-bindgen-test = "0.3"
 default = []
 fuzz = ["arbitrary", "blahaj/fuzzing"]
 wbindgen = ["wasm-bindgen", "serde-wasm-bindgen", "js-sys"]
+
+[dependencies.getrandom_v02]
+package = "getrandom"
+version = "0.2"
+features = ["js", "wasm-bindgen"]
