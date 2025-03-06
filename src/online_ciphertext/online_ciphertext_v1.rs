@@ -13,9 +13,10 @@ use chacha20poly1305::aead::{
 };
 use chacha20poly1305::{KeyInit, XChaCha20Poly1305};
 
-use rand::{rngs::OsRng, RngCore};
 use x25519_dalek::StaticSecret;
 use zeroize::Zeroizing;
+
+use rand::TryRngCore;
 
 use paste::paste;
 
@@ -282,10 +283,12 @@ macro_rules! online_ciphertext_impl {
 
 impl OnlineCiphertextV1Encryptor {
     /// Creates a new encryptor and the corresponding header
-    pub fn new(key: &[u8], mut aad: Vec<u8>, chunk_size: u32) -> Self {
+    pub fn new(key: &[u8], mut aad: Vec<u8>, chunk_size: u32) -> Result<Self> {
         // Generate a new nonce
         let mut nonce = [0u8; 20];
-        OsRng.fill_bytes(&mut nonce);
+        rand::rngs::OsRng
+            .try_fill_bytes(&mut nonce)
+            .map_err(|_| Error::RandomError)?;
 
         // Derive the key
         let key = Zeroizing::new(blake3::derive_key(CONTEXT, key));
@@ -300,25 +303,31 @@ impl OnlineCiphertextV1Encryptor {
         let mut header_bytes: Vec<u8> = header.borrow().into();
         aad.append(&mut header_bytes);
 
-        Self {
+        Ok(Self {
             header: OnlineCiphertextV1Header::Symmetric(header),
             aad,
             cipher,
-        }
+        })
     }
 
-    pub fn new_asymmetric(public_key: &PublicKey, mut aad: Vec<u8>, chunk_size: u32) -> Self {
+    pub fn new_asymmetric(
+        public_key: &PublicKey,
+        mut aad: Vec<u8>,
+        chunk_size: u32,
+    ) -> Result<Self> {
         // Perform a ECDH exchange as per ECIES
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
-        let ephemeral_private_key = StaticSecret::random_from_rng(rand_core::OsRng);
+        let ephemeral_private_key = StaticSecret::random_from_rng(rand_core_06::OsRng);
         let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
 
         let key = ephemeral_private_key.diffie_hellman(&public_key);
 
         // Generate a new nonce
         let mut nonce = [0u8; 20];
-        OsRng.fill_bytes(&mut nonce);
+        rand::rngs::OsRng
+            .try_fill_bytes(&mut nonce)
+            .map_err(|_| Error::RandomError)?;
 
         // Derive the key
         let key = Zeroizing::new(blake3::derive_key(CONTEXT, key.as_bytes()));
@@ -336,11 +345,11 @@ impl OnlineCiphertextV1Encryptor {
         let mut header_bytes: Vec<u8> = header.borrow().into();
         aad.append(&mut header_bytes);
 
-        Self {
+        Ok(Self {
             header: OnlineCiphertextV1Header::Asymmetric(header),
             cipher,
             aad,
-        }
+        })
     }
 }
 

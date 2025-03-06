@@ -9,7 +9,7 @@
 //! use devolutions_crypto::utils::generate_key;
 //! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
 //!
-//! let key: Vec<u8> = generate_key(32);
+//! let key: Vec<u8> = generate_key(32).expect("generate key shoudln't fail");
 //!
 //! let data = b"somesecretdata";
 //!
@@ -113,7 +113,7 @@ impl OnlineCiphertextEncryptor {
         aad: &[u8],
         chunk_size: u32,
         version: OnlineCiphertextVersion,
-    ) -> OnlineCiphertextEncryptor {
+    ) -> Result<OnlineCiphertextEncryptor> {
         let mut header = Header::<OnlineCiphertextHeader> {
             data_subtype: CiphertextSubtype::Symmetric,
             ..Default::default()
@@ -126,9 +126,9 @@ impl OnlineCiphertextEncryptor {
             OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
                 header.version = OnlineCiphertextVersion::V1;
 
-                let cipher = OnlineCiphertextV1Encryptor::new(key, full_aad, chunk_size);
+                let cipher = OnlineCiphertextV1Encryptor::new(key, full_aad, chunk_size)?;
 
-                OnlineCiphertextEncryptor::V1(cipher)
+                Ok(OnlineCiphertextEncryptor::V1(cipher))
             }
         }
     }
@@ -138,7 +138,7 @@ impl OnlineCiphertextEncryptor {
         aad: &[u8],
         chunk_size: u32,
         version: OnlineCiphertextVersion,
-    ) -> OnlineCiphertextEncryptor {
+    ) -> Result<OnlineCiphertextEncryptor> {
         let mut header = Header::<OnlineCiphertextHeader> {
             data_subtype: CiphertextSubtype::Asymmetric,
             ..Default::default()
@@ -152,9 +152,9 @@ impl OnlineCiphertextEncryptor {
                 header.version = OnlineCiphertextVersion::V1;
 
                 let cipher =
-                    OnlineCiphertextV1Encryptor::new_asymmetric(public_key, full_aad, chunk_size);
+                    OnlineCiphertextV1Encryptor::new_asymmetric(public_key, full_aad, chunk_size)?;
 
-                OnlineCiphertextEncryptor::V1(cipher)
+                Ok(OnlineCiphertextEncryptor::V1(cipher))
             }
         }
     }

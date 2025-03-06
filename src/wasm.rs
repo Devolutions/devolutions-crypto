@@ -201,13 +201,13 @@ pub fn hash_password(
     password: &[u8],
     iterations: Option<u32>,
     version: Option<PasswordHashVersion>,
-) -> Vec<u8> {
-    password_hash::hash_password(
+) -> Result<Vec<u8>, JsValue> {
+    Ok(password_hash::hash_password(
         &password,
         iterations.unwrap_or(10000),
         version.unwrap_or(PasswordHashVersion::Latest),
-    )
-    .into()
+    )?
+    .into())
 }
 
 #[wasm_bindgen(js_name = "verifyPassword")]
@@ -312,8 +312,8 @@ pub fn join_shares(shares: Array) -> Result<Vec<u8>, JsValue> {
 }
 
 #[wasm_bindgen(js_name = "generateKey")]
-pub fn generate_key(length: Option<usize>) -> Vec<u8> {
-    utils::generate_key(length.unwrap_or(32))
+pub fn generate_key(length: Option<usize>) -> Result<Vec<u8>, JsValue> {
+    Ok(utils::generate_key(length.unwrap_or(32))?)
 }
 
 #[wasm_bindgen(js_name = "deriveKeyPbkdf2")]

@@ -3,7 +3,6 @@ use super::Error;
 use super::Result;
 
 use ed25519_dalek::{SigningKey, VerifyingKey};
-use rand::rngs::OsRng;
 
 use std::convert::TryFrom;
 
@@ -100,7 +99,7 @@ impl TryFrom<&[u8]> for SigningKeyV1Public {
 }
 
 pub fn generate_signing_keypair() -> SigningKeyV1Pair {
-    let mut csprng = OsRng;
+    let mut csprng = rand_core_06::OsRng;
 
     let keypair = SigningKey::generate(&mut csprng);
 

@@ -23,7 +23,7 @@ cfg_if! {
         fn test_hash_password() {
             let password = "ThisIsAGoodPassword123".as_bytes();
 
-            let hash = wasm::hash_password(password, Some(123), None);
+            let hash = wasm::hash_password(password, Some(123), None).unwrap();
             assert!(wasm::verify_password(password, &hash).unwrap());
 
             let bad_password = "thisisabadpassword1234".as_bytes();
@@ -44,7 +44,7 @@ cfg_if! {
 
         #[wasm_bindgen_test]
         fn test_generate_key() {
-            let key = wasm::generate_key(Some(10));
+            let key = wasm::generate_key(Some(10)).unwrap();
 
             assert_eq!(key.len(), 10);
             assert_ne!(&key, &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
@@ -58,6 +58,10 @@ cfg_if! {
 
             let decoded = wasm::base64decode(&encoded).unwrap();
             assert_eq!(decoded.as_slice(), plain.as_bytes());
+
+            let encoded_no_pad = "VGhJczFzYVRlc1Q";
+            let decoded_no_pad = wasm::base64decode(&encoded_no_pad).unwrap();
+            assert_eq!(decoded_no_pad.as_slice(), plain.as_bytes());
         }
 
         #[wasm_bindgen_test]

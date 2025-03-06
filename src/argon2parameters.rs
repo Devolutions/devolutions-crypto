@@ -5,7 +5,7 @@ use std::{
 
 use argon2::{Config, Variant, Version};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use rand_core::{OsRng, RngCore};
+use rand::TryRngCore;
 use typed_builder::TypedBuilder;
 
 #[cfg(feature = "wbindgen")]
@@ -15,9 +15,11 @@ use super::Error;
 use super::Result;
 
 pub mod defaults {
+    use super::Error;
+    use super::Result;
     use argon2::Variant;
     use argon2::Version;
-    use rand_core::{OsRng, RngCore};
+    use rand::TryRngCore;
 
     pub const LENGTH: u32 = 32;
     pub const LANES: u32 = 1;
@@ -27,10 +29,12 @@ pub mod defaults {
     pub const VERSION: Version = Version::Version13;
     pub const DC_VERSION: u32 = 1;
 
-    pub fn salt() -> Vec<u8> {
+    pub fn salt() -> Result<Vec<u8>> {
         let mut salt = vec![0u8; 16];
-        OsRng.fill_bytes(salt.as_mut_slice());
-        salt
+        rand::rngs::OsRng
+            .try_fill_bytes(salt.as_mut_slice())
+            .map_err(|_| Error::RandomError)?;
+        Ok(salt)
     }
 }
 
@@ -75,7 +79,7 @@ pub struct Argon2Parameters {
     #[builder(default)]
     secret_key: Vec<u8>,
     /// A 16-bytes salt to use that is generated automatically. Should not be accessed directly.
-    #[builder(default = defaults::salt())]
+    #[builder(default = defaults::salt().unwrap())]
     salt: Vec<u8>,
 }
 
@@ -93,7 +97,10 @@ impl Argon2Parameters {
 impl Default for Argon2Parameters {
     fn default() -> Self {
         let mut salt = vec![0u8; 16];
-        OsRng.fill_bytes(salt.as_mut_slice());
+
+        rand::rngs::OsRng
+            .try_fill_bytes(salt.as_mut_slice())
+            .unwrap();
 
         Argon2Parameters {
             associated_data: Vec::new(),

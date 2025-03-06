@@ -9,6 +9,10 @@ runs:
         rustup update
         cargo install wasm-pack
 
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
     - name: Platform tests
       working-directory: ./
       shell: bash
