@@ -32,10 +32,9 @@ use super::Result;
 /// ```
 pub fn generate_key(length: usize) -> Result<Vec<u8>> {
     let mut key = vec![0u8; length];
-    rand::rngs::OsRng.try_fill_bytes(&mut key).map_err(|err| {
-        println!("Error generating random key: {}", err);
-        Error::RandomError
-    })?;
+    rand::rngs::OsRng
+        .try_fill_bytes(&mut key)
+        .map_err(|_| Error::RandomError)?;
     Ok(key)
 }
 
