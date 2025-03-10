@@ -20,7 +20,7 @@ pub struct Argon2ParametersBuilder {
     #[builder_default = Default::default()]
     secret_key: Vec<u8>,
 
-    #[builder_default = devolutions_crypto::argon2parameters_defaults::salt()]
+    #[builder_default = devolutions_crypto::argon2parameters_defaults::salt().unwrap()]
     salt: Vec<u8>,
 }
 

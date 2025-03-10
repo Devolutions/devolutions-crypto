@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{Argon2Parameters, DataType, Result};
 
 #[uniffi::export(default(length = 32))]
-pub fn generate_key(length: u32) -> Vec<u8> {
+pub fn generate_key(length: u32) -> Result<Vec<u8>> {
     devolutions_crypto::utils::generate_key(length as usize)
 }
 

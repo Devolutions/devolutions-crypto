@@ -215,7 +215,7 @@ fn main() {
 fn generate_key(length: Option<usize>) {
     let length = length.unwrap_or(32);
 
-    let key = base64::encode(&devolutions_crypto::utils::generate_key(length));
+    let key = base64::encode(&devolutions_crypto::utils::generate_key(length).unwrap());
     println!("{}", key);
 }
 
@@ -318,6 +318,7 @@ fn hash_password(password: String, iterations: Option<u32>) {
         iterations,
         Default::default(),
     )
+    .unwrap()
     .into();
     println!("{}", base64::encode(&hash));
 }

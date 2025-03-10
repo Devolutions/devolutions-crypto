@@ -9,7 +9,7 @@
 //! use devolutions_crypto::utils::generate_key;
 //! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
 //!
-//! let key: Vec<u8> = generate_key(32);
+//! let key: Vec<u8> = generate_key(32).expect("generate key shoudln't fail");
 //!
 //! let data = b"somesecretdata";
 //!

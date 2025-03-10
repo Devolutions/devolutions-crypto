@@ -28,7 +28,7 @@
 //! use devolutions_crypto::utils::generate_key;
 //! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
 //!
-//! let key: Vec<u8> = generate_key(32);
+//! let key: Vec<u8> = generate_key(32).expect("generate key shoudln't fail");;
 //!
 //! let data = b"somesecretdata";
 //!
@@ -59,7 +59,7 @@
 //! use devolutions_crypto::utils::generate_key;
 //! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
 //!
-//! let key: Vec<u8> = generate_key(32);
+//! let key: Vec<u8> = generate_key(32).expect("generate key shoudln't fail");;
 //!
 //! let data = b"somesecretdata";
 //!
@@ -124,9 +124,9 @@
 //! let bob_keypair: KeyPair = generate_keypair(KeyVersion::Latest);
 //! let alice_keypair: KeyPair = generate_keypair(KeyVersion::Latest);
 //!
-//! let bob_shared = mix_key_exchange(&bob_keypair.private_key, &alice_keypair.public_key).expect("key exchange should not fail");
+//! let bob_shared = mix_key_exchange(&bob_keypair.private_key, &alice_keypair.public_key).expect("key exchange shouldn't fail");
 //!
-//! let alice_shared = mix_key_exchange(&alice_keypair.private_key, &bob_keypair.public_key).expect("key exchange should not fail");
+//! let alice_shared = mix_key_exchange(&alice_keypair.private_key, &bob_keypair.public_key).expect("key exchange shouldn't fail");
 //!
 //! // They now have a shared secret!
 //! assert_eq!(bob_shared, alice_shared);
@@ -139,7 +139,7 @@
 //!
 //! let password = b"somesuperstrongpa$$w0rd!";
 //!
-//! let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest);
+//! let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest).expect("hash password shoudln't fail");;
 //!
 //! assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!"));
 //! assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));
@@ -176,7 +176,7 @@
 //! ```rust
 //! use devolutions_crypto::utils::generate_key;
 //!
-//! let key = generate_key(32);
+//! let key = generate_key(32).expect("generate key shoudln't fail");;
 //! assert_eq!(32, key.len());
 //! ```
 //!
@@ -187,7 +187,7 @@
 //! ```rust
 //! use devolutions_crypto::utils::{generate_key, derive_key_pbkdf2};
 //! let key = b"this is a secret password";
-//! let salt = generate_key(16);
+//! let salt = generate_key(16).expect("generate key shoudln't fail");;
 //! let iterations = 10000;
 //! let length = 32;
 //!

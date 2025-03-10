@@ -11,9 +11,10 @@ use aes::Aes256;
 use cbc::cipher::{block_padding::Pkcs7, BlockDecryptMut, BlockEncryptMut, KeyIvInit};
 use hmac::{Hmac, Mac};
 use pbkdf2::pbkdf2;
-use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 use zeroize::{Zeroize, Zeroizing};
+
+use rand::TryRngCore;
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -84,7 +85,9 @@ impl CiphertextV1 {
 
         // Generate IV
         let mut iv = [0u8; 16];
-        OsRng.fill_bytes(&mut iv);
+        rand::rngs::OsRng
+            .try_fill_bytes(&mut iv)
+            .map_err(|_| Error::RandomError)?;
 
         // Create cipher object
         let cipher = cbc::Encryptor::<Aes256>::new_from_slices(&encryption_key, &iv)?;

@@ -8,10 +8,11 @@ use std::io::Cursor;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
-use rand::{rngs::OsRng, RngCore};
 use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
 use zeroize::{Zeroize, Zeroizing};
+
+use rand::TryRngCore;
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -75,20 +76,22 @@ impl TryFrom<&[u8]> for PasswordHashV1 {
 }
 
 impl PasswordHashV1 {
-    pub fn hash_password(pass: &[u8], iterations: u32) -> PasswordHashV1 {
+    pub fn hash_password(pass: &[u8], iterations: u32) -> Result<PasswordHashV1> {
         // Generate salt
         let mut salt = [0u8; 32];
-        OsRng.fill_bytes(&mut salt);
+        rand::rngs::OsRng
+            .try_fill_bytes(&mut salt)
+            .map_err(|_| Error::RandomError)?;
 
         // Generate hash
         let mut hash = [0u8; 32];
         let _ = pbkdf2::<Hmac<Sha256>>(pass, &salt, iterations, &mut hash);
 
-        PasswordHashV1 {
+        Ok(PasswordHashV1 {
             iterations,
             salt,
             hash,
-        }
+        })
     }
 
     pub fn verify_password(&self, pass: &[u8]) -> bool {
