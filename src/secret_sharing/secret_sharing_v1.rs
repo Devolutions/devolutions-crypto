@@ -4,8 +4,6 @@ use super::Result;
 
 use std::convert::TryFrom;
 
-use rand::rngs::OsRng;
-
 use blahaj::{Share, Sharks};
 use zeroize::Zeroizing;
 
@@ -66,9 +64,9 @@ impl ShareV1 {
             return Err(Error::NotEnoughShares);
         }
 
-        let secret = Zeroizing::new(crate::utils::generate_key(length));
+        let secret = Zeroizing::new(crate::utils::generate_key(length)?);
         let sharks = Sharks(threshold);
-        let dealer = sharks.dealer_rng(&secret, &mut OsRng);
+        let dealer = sharks.dealer_rng(&secret, &mut rand_core_06::OsRng);
 
         Ok(dealer.take(n_shares as usize).map(move |s| ShareV1 {
             threshold,

@@ -1,13 +1,20 @@
 [![Build Status](https://github.com/Devolutions/devolutions-crypto/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Devolutions/devolutions-crypto/actions/workflows/ci.yml)
+
 [![crates.io](https://img.shields.io/crates/v/devolutions-crypto.svg)](https://crates.io/crates/devolutions-crypto) 
-[![npm version](https://img.shields.io/npm/v/devolutions-crypto.svg?style=flat)](https://npmjs.org/package/devolutions-crypto "View this project on npm")
+[![npmjs](https://img.shields.io/npm/v/%40devolutions%2Fdevolutions-crypto)](https://www.npmjs.com/package/@devolutions/devolutions-crypto)
+[![pypi](https://img.shields.io/pypi/v/devolutions-crypto)](https://pypi.org/project/devolutions-crypto/)
+[![kotlin](https://img.shields.io/badge/kotlin-2025.2.12-orange)](https://cloudsmith.io/~devolutions/repos/maven-public/packages/detail/maven/devolutions-crypto/2025.2.12/a=noarch;xg=devolutions/)
+[![swift](https://img.shields.io/badge/swift-2025.2.12-orange)](https://github.com/Devolutions/devolutions-crypto/tree/2601b67f8347bdcf2ae4f2505e9a34940d85a3f9)
+
+
+
 
 # DevolutionsCrypto
 This repo contains the library used for cryptography of products used by Devolutions. 
 It also includes wrappers for it in different languages.  
-Currently, the supported languages are: [Rust](devolutions-crypto/), [C#](wrappers/csharp/) and [Javascript/Typescript](wrappers/wasm/).
+Currently, the supported languages are: [Rust](src/), [C#](wrappers/csharp/) and [Javascript/Typescript](wrappers/wasm/), [Kotlin](wrappers/kotlin), [Swift](wrappers/swift/)
 
-Python bindings are also available as a beta, but it is not production ready yet. You can install it with `pip3 install devolutions-crypto`, but this might not work depending on the platform. If it doesn't, you can try building it manually.
+Python bindings are also available. You can install it with `pip3 install devolutions-crypto`, but this might not work depending on the platform. If it doesn't, you can try building it manually.
 
 Note that the Javascript version of the library is compiled using WebAssembly, so it can run in a browser.
 
@@ -19,6 +26,7 @@ As of the current version:
  * Key exchange uses x25519, or ECDH over Curve25519
  * Password Hashing uses PBKDF2-HMAC-SHA2-256
  * Secret Sharing uses Shamir Secret sharing over GF256
+ * Online Ciphertext uses XChaCha20-Poly1305
 
 # License
 
@@ -61,15 +69,16 @@ A Curve25519 private key from Devolutions Crypto
   - The fourth two bytes (pos: 7, 8) represents the version.
 
 ## Data Type
-| Data Types    | Value  |  Description                                                 |
-|---------------|--------|--------------------------------------------------------------|
-|  None         |  0x00  | No data type. Only used as a default value.                  |
-|  Key          |  0x10  | A wrapped key.                                               |
-|  Ciphertext   |  0x20  | A wrapped ciphertext. Can be either symmetric or asymmetric. |
-|  PasswordHash |  0x30  | A wrapped password hash. Used to verify a password.          |
-|  Share        |  0x40  | A wrapped share. Used for secret sharing scheme.             |
-|  SigningKey   |  0x50  | A wrapped key used to sign data.                             |
-|  Signature    |  0x60  | A wrapped signature.                                         |
+| Data Types          | Value  |  Description                                                                 |
+|---------------------|--------|------------------------------------------------------------------------------|
+|  None               |  0x00  | No data type. Only used as a default value.                                  |
+|  Key                |  0x10  | A wrapped key.                                                               |
+|  Ciphertext         |  0x20  | A wrapped ciphertext. Can be either symmetric or asymmetric.                 |
+|  PasswordHash       |  0x30  | A wrapped password hash. Used to verify a password.                          |
+|  Share              |  0x40  | A wrapped share. Used for secret sharing scheme.                             |
+|  SigningKey         |  0x50  | A wrapped key used to sign data.                                             |
+|  Signature          |  0x60  | A wrapped signature.                                                         |
+|  OnlineCiphertext   |  0x70  | A wrapped online ciphertext that can be encrypted/decrypted chunk by chunk  |
 
 
 
@@ -91,7 +100,6 @@ A Curve25519 private key from Devolutions Crypto
 | PasswordHash Sub Types | Value  |
 |------------------------|--------|
 |  None                  |  0x00  |
-
 
 | Share Sub Types | Value  |
 |-----------------|--------|
@@ -133,5 +141,10 @@ A Curve25519 private key from Devolutions Crypto
 |-------------------|--------|--------------------------|
 |  Latest           |  0x00  | Uses the latest version. |
 |  V1               |  0x10  | Uses version 1: ed25519. |
+
+| Online Ciphertext Version | Value  | Description                                                          |
+|---------------------------|--------|----------------------------------------------------------------------|
+|  Latest                   |  0x00  | Uses the latest version.                                             |
+|  V1                       |  0x10  | Uses version 1: XChaCha20-Poly1305 wrapped in a STREAM construction. |
 
 

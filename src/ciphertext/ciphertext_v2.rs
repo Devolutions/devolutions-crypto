@@ -12,10 +12,11 @@ use std::convert::TryFrom;
 use chacha20poly1305::aead::{Aead, Payload};
 use chacha20poly1305::{Key, KeyInit, XChaCha20Poly1305, XNonce};
 
-use rand::{rngs::OsRng, RngCore};
 use sha2::{Digest, Sha256};
 use x25519_dalek::StaticSecret;
 use zeroize::{Zeroize, Zeroizing};
+
+use rand::TryRngCore;
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -91,7 +92,10 @@ impl CiphertextV2Symmetric {
 
         // Generate nonce
         let mut nonce_bytes = [0u8; 24];
-        OsRng.fill_bytes(&mut nonce_bytes);
+
+        rand::rngs::OsRng
+            .try_fill_bytes(&mut nonce_bytes)
+            .map_err(|_| Error::RandomError)?;
 
         let nonce = XNonce::from_slice(&nonce_bytes);
 
@@ -182,7 +186,7 @@ impl CiphertextV2Asymmetric {
     ) -> Result<Self> {
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
-        let ephemeral_private_key = StaticSecret::random_from_rng(rand_core::OsRng);
+        let ephemeral_private_key = StaticSecret::random_from_rng(rand_core_06::OsRng);
         let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
 
         let key = ephemeral_private_key.diffie_hellman(&public_key);

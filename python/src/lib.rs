@@ -116,7 +116,7 @@ fn devolutions_crypto_module(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()
             };
 
         let hash: Vec<u8> =
-            devolutions_crypto::password_hash::hash_password(password, iterations, version).into();
+            devolutions_crypto::password_hash::hash_password(password, iterations, version)?.into();
         Ok(PyBytes::new(py, &hash).into())
     }
 

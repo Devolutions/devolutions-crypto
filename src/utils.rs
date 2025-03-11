@@ -7,7 +7,7 @@ use base64::{
 };
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
-use rand::{rngs::OsRng, RngCore};
+use rand::TryRngCore;
 use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
 
@@ -27,13 +27,15 @@ use super::Result;
 /// ```
 /// use devolutions_crypto::utils::generate_key;
 ///
-/// let key = generate_key(32);
+/// let key = generate_key(32).expect("generate key shoudln't fail");;
 /// assert_eq!(32, key.len());
 /// ```
-pub fn generate_key(length: usize) -> Vec<u8> {
+pub fn generate_key(length: usize) -> Result<Vec<u8>> {
     let mut key = vec![0u8; length];
-    OsRng.fill_bytes(&mut key);
-    key
+    rand::rngs::OsRng
+        .try_fill_bytes(&mut key)
+        .map_err(|_| Error::RandomError)?;
+    Ok(key)
 }
 
 /// Derives a password or key into a new one using PBKDF2.
@@ -47,7 +49,7 @@ pub fn generate_key(length: usize) -> Vec<u8> {
 /// ```
 /// use devolutions_crypto::utils::{derive_key_pbkdf2, generate_key};
 /// let key = b"this is a secret password";
-/// let salt = generate_key(16);
+/// let salt = generate_key(16).expect("generate key shoudln't fail");;
 /// let iterations = 10000;
 /// let length = 32;
 ///
@@ -232,7 +234,7 @@ fn test_constant_time_equals() {
 #[test]
 fn test_generate_key() {
     let size = 32;
-    let key = generate_key(size);
+    let key = generate_key(size).unwrap();
 
     assert_eq!(size, key.len());
     assert_ne!(vec![0u8; size], key);

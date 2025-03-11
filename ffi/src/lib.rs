@@ -486,7 +486,11 @@ pub unsafe extern "C" fn HashPassword(
     let result = slice::from_raw_parts_mut(result, result_length);
 
     let res: Zeroizing<Vec<u8>> =
-        Zeroizing::new(hash_password(password, iterations, PasswordHashVersion::Latest).into());
+        match hash_password(password, iterations, PasswordHashVersion::Latest) {
+            Ok(x) => Zeroizing::new(x.into()),
+            Err(e) => return e.error_code(),
+        };
+
     let length = res.len();
     result[0..length].copy_from_slice(&res);
     length as i64
@@ -1260,7 +1264,11 @@ pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
 
     let key = slice::from_raw_parts_mut(key, key_length);
 
-    let k = Zeroizing::new(utils::generate_key(key_length));
+    let k = match utils::generate_key(key_length) {
+        Ok(x) => Zeroizing::new(x),
+        Err(e) => return e.error_code(),
+    };
+
     key.copy_from_slice(&k);
     0
 }
@@ -1700,9 +1708,13 @@ fn test_hash_password_length() {
      longer than the length of the actual hash. It also contains we1rd pa$$w0rd///s.\\";
 
     let small_password_hash: Vec<u8> =
-        hash_password(small_password, 100, PasswordHashVersion::Latest).into();
+        hash_password(small_password, 100, PasswordHashVersion::Latest)
+            .unwrap()
+            .into();
     let long_password_hash: Vec<u8> =
-        hash_password(long_password, 2642, PasswordHashVersion::Latest).into();
+        hash_password(long_password, 2642, PasswordHashVersion::Latest)
+            .unwrap()
+            .into();
 
     assert_eq!(HashPasswordLength() as usize, small_password_hash.len());
     assert_eq!(HashPasswordLength() as usize, long_password_hash.len());

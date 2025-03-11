@@ -6,7 +6,7 @@
 //!
 //! let password = b"somesuperstrongpa$$w0rd!";
 //!
-//! let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest);
+//! let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest).expect("hash password shoudln't fail");;
 //!
 //! assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!"));
 //! assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));
@@ -74,17 +74,17 @@ pub fn hash_password(
     password: &[u8],
     iterations: u32,
     version: PasswordHashVersion,
-) -> PasswordHash {
+) -> Result<PasswordHash> {
     let mut header = Header::default();
 
     let payload = match version {
         PasswordHashVersion::V1 | PasswordHashVersion::Latest => {
             header.version = PasswordHashVersion::V1;
-            PasswordHashPayload::V1(PasswordHashV1::hash_password(password, iterations))
+            PasswordHashPayload::V1(PasswordHashV1::hash_password(password, iterations)?)
         }
     };
 
-    PasswordHash { header, payload }
+    Ok(PasswordHash { header, payload })
 }
 
 impl PasswordHash {
@@ -99,7 +99,7 @@ impl PasswordHash {
     ///
     /// let password = b"somesuperstrongpa$$w0rd!";
     ///
-    /// let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest);
+    /// let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest).expect("hash password shoudln't fail");;
     /// assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!"));
     /// assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));
     /// ```
@@ -155,7 +155,7 @@ fn password_test() {
     let pass = "thisisaveryveryverystrongPa$$w0rd , //".as_bytes();
     let iterations = 10u32;
 
-    let hash = hash_password(pass, iterations, PasswordHashVersion::Latest);
+    let hash = hash_password(pass, iterations, PasswordHashVersion::Latest).unwrap();
 
     assert!(hash.verify_password(pass));
     assert!(!hash.verify_password("averybadpassword".as_bytes()))
