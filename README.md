@@ -1,6 +1,7 @@
 [![Build Status](https://github.com/Devolutions/devolutions-crypto/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Devolutions/devolutions-crypto/actions/workflows/ci.yml)
 
 [![crates.io](https://img.shields.io/crates/v/devolutions-crypto.svg)](https://crates.io/crates/devolutions-crypto) 
+[![nuget](https://img.shields.io/nuget/v/Devolutions.Crypto.Core?style=flat&color=orange)](https://www.nuget.org/packages/Devolutions.Crypto.Core) 
 [![npmjs](https://img.shields.io/npm/v/%40devolutions%2Fdevolutions-crypto)](https://www.npmjs.com/package/@devolutions/devolutions-crypto)
 [![pypi](https://img.shields.io/pypi/v/devolutions-crypto)](https://pypi.org/project/devolutions-crypto/)
 [![kotlin](https://img.shields.io/badge/kotlin-2025.2.12-orange)](https://cloudsmith.io/~devolutions/repos/maven-public/packages/detail/maven/devolutions-crypto/2025.2.12/a=noarch;xg=devolutions/)
