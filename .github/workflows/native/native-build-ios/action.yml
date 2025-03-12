@@ -104,7 +104,7 @@ runs:
 
         sed -i "" -e "s/||MANAGED_VERSION||/${VERSION_MANAGED}/g" -e "s/||NATIVE_VERSION||/${VERSION_NATIVE}/g" ./Native.cs
 
-        dotnet build -p:DefineConstants=IOS -p:Version="$VERSION_MANAGED" --configuration Release --output ../ios/bin
+        dotnet build --framework netstandard2.0 -p:DefineConstants=IOS -p:Version="$VERSION_MANAGED" --configuration Release --output ../ios/bin
 
     - name: Fix dir structure
       shell: bash

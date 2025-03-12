@@ -16,6 +16,10 @@
     <file src="../../dotnet-core/bin/Devolutions.Crypto.dll" target="lib/netstandard2.0/Devolutions.Crypto.dll" />
     <file src="../../dotnet-core/bin/Devolutions.Crypto.pdb" target="lib/netstandard2.0/Devolutions.Crypto.pdb" />
 
+    <!-- .Net Framework Library-->
+    <file src="../../dotnet-framework/bin/Devolutions.Crypto.dll" target="lib/net48/Devolutions.Crypto.dll" />
+    <file src="../../dotnet-framework/bin/Devolutions.Crypto.pdb" target="lib/net48/Devolutions.Crypto.pdb" />
+
     <!-- iOS Specific Managed Library -->
     <file src="../../ios/bin/Devolutions.Crypto.dll" target="runtimes/ios/lib/netstandard2.0/Devolutions.Crypto.dll" />
     <file src="../../ios/bin/Devolutions.Crypto.pdb" target="runtimes/ios/lib/netstandard2.0/Devolutions.Crypto.pdb" />

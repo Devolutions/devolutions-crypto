@@ -24,7 +24,6 @@ runs:
       shell: bash
       run: xcrun simctl list devices
 
-
     - name: Extract UDID
       shell: bash
       run: | 
