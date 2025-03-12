@@ -53,9 +53,9 @@
     <file src="../../android/x86_64/libDevolutionsCrypto.so" target="runtimes/android-x64/native/libDevolutionsCrypto.so"/>
 
     <!-- Required for iOS and Android -->
-    <file src="Devolutions.Crypto.Core.props" target="build/Devolutions.Crypto.Core.props"/>
+    <file src="Devolutions.Crypto.Core.props" target="build/netstandard2.0/Devolutions.Crypto.Core.props"/>
 
     <!-- Required for Windows (.Net Framework) -->
-    <file src="Devolutions.Crypto.Core.targets" target="build/Devolutions.Crypto.Core.targets"/>
+    <file src="Devolutions.Crypto.Core.targets" target="build/net48/Devolutions.Crypto.Core.targets"/>
 </files>
 </package>
