@@ -47,7 +47,7 @@ strum = { version = "0.27", features = ["derive"] }
 subtle = "2"
 zeroize = { version = "1.8" }
 rand = "0.9"
-rand_core_06 = { package = "rand_core", version = "0.6" }
+rand_08 = { package = "rand", version = "0.8" }
 thiserror = "2.0.12"
 typed-builder = "0.20.0"
 rust-argon2 = { version = "2.1", default-features = false }
