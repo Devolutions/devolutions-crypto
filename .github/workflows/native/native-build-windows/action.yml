@@ -49,7 +49,8 @@ runs:
 
         sed -i -e "s/||MANAGED_VERSION||/${VERSION_MANAGED}/g" -e "s/||NATIVE_VERSION||/${VERSION_NATIVE}/g" ./src/Native.cs        
         
-        dotnet build ./src/devolutions-crypto.csproj -p:Version="$VERSION_MANAGED" --configuration Release --output ./dotnet-core/bin
+        dotnet build ./src/devolutions-crypto.csproj --framework netstandard2.0 -p:Version="$VERSION_MANAGED" --configuration Release --output ./dotnet-core/bin
+        dotnet build ./src/devolutions-crypto.csproj --framework net48 -p:Version="$VERSION_MANAGED" --configuration Release --output ./dotnet-framework/bin
 
     - uses: actions/upload-artifact@v4.3.6
       with:
@@ -57,3 +58,5 @@ runs:
         path: |
           wrappers/csharp/windows/**
           wrappers/csharp/dotnet-core/**
+          wrappers/csharp/dotnet-framework/**
+
