@@ -66,7 +66,7 @@ impl ShareV1 {
 
         let secret = Zeroizing::new(crate::utils::generate_key(length)?);
         let sharks = Sharks(threshold);
-        let dealer = sharks.dealer_rng(&secret, &mut rand_core_06::OsRng);
+        let dealer = sharks.dealer_rng(&secret, &mut rand_08::rngs::OsRng);
 
         Ok(dealer.take(n_shares as usize).map(move |s| ShareV1 {
             threshold,

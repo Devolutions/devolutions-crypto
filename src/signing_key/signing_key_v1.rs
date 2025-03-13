@@ -99,7 +99,7 @@ impl TryFrom<&[u8]> for SigningKeyV1Public {
 }
 
 pub fn generate_signing_keypair() -> SigningKeyV1Pair {
-    let mut csprng = rand_core_06::OsRng;
+    let mut csprng = rand_08::rngs::OsRng;
 
     let keypair = SigningKey::generate(&mut csprng);
 

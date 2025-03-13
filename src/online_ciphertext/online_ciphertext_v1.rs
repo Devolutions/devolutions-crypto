@@ -318,7 +318,7 @@ impl OnlineCiphertextV1Encryptor {
         // Perform a ECDH exchange as per ECIES
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
-        let ephemeral_private_key = StaticSecret::random_from_rng(rand_core_06::OsRng);
+        let ephemeral_private_key = StaticSecret::random_from_rng(rand_08::rngs::OsRng);
         let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
 
         let key = ephemeral_private_key.diffie_hellman(&public_key);
