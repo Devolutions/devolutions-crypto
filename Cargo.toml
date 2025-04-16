@@ -11,7 +11,7 @@ members = [
   ]
 
 [workspace.dependencies]
-uniffi = "0.28"
+uniffi = "0.29.1"
 
 [package]
 name = "devolutions-crypto"
@@ -49,7 +49,7 @@ zeroize = { version = "1.8" }
 rand = "0.9"
 rand_08 = { package = "rand", version = "0.8" }
 thiserror = "2.0.12"
-typed-builder = "0.20.0"
+typed-builder = "0.21.0"
 rust-argon2 = { version = "2.1", default-features = false }
 
 ed25519-dalek = { version = "2", features = [ "rand_core" ] }
