@@ -57,8 +57,8 @@ enum PasswordHashPayload {
 /// # Arguments
 ///  * `password` - The password to hash.
 ///  * `iterations` - The number of iterations of the password hash.
-///                     A higher number is slower but harder to brute-force.
-///                     The recommended is 10000, but the number can be set by the user.
+///    A higher number is slower but harder to brute-force.
+///    The recommended is 10000, but the number can be set by the user.
 ///  * `version` - Version of the library to hash the password with. Use `PasswordHashVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns the `PasswordHash` containing the password verifier.

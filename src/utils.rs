@@ -43,7 +43,7 @@ pub fn generate_key(length: usize) -> Result<Vec<u8>> {
 ///  * `key` - The key or password to derive.
 ///  * `salt` - The cryptographic salt to be used to add randomness. Can be empty. Recommended size is 16 bytes.
 ///  * `iterations` - The number of time the key will be derived. A higher number is slower but harder to brute-force.
-///                   10 000 iterations are recommended for a password.
+///    10 000 iterations are recommended for a password.
 ///  * `length` - Length of the desired key.
 /// # Example
 /// ```

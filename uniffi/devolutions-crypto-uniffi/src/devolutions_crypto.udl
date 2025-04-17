@@ -1,3 +1,4 @@
+[Remote]
 enum DataType {
     "None",
     "Key",
@@ -9,49 +10,57 @@ enum DataType {
     "OnlineCiphertext",
 };
 
+[Remote]
 enum CiphertextVersion {
     "Latest",
     "V1",
     "V2",
 };
 
+[Remote]
 enum PasswordHashVersion {
     "Latest",
     "V1",
 };
 
+[Remote]
 enum KeyVersion {
     "Latest",
     "V1",
 };
 
+[Remote]
 enum SigningKeyVersion {
     "Latest",
     "V1",
 };
 
+[Remote]
 enum SecretSharingVersion {
     "Latest",
     "V1",
 };
 
+[Remote]
 enum SignatureVersion {
     "Latest",
     "V1",
 };
 
+[Remote]
 enum Argon2Version {
     "Version10",
     "Version13",
 };
 
+[Remote]
 enum Argon2Variant {
     "Argon2d",
     "Argon2i",
     "Argon2id",
 };
 
-[Error]
+[Error, Remote]
 enum DevolutionsCryptoError {
     "InvalidLength",
     "InvalidKeyLength",
