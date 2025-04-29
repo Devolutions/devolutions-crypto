@@ -1,0 +1,6 @@
+framework module devolutions_cryptoFFI {
+    umbrella header "devolutions_cryptoFFI.h"
+
+    export *
+    module * { export * }
+}

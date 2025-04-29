@@ -2,6 +2,12 @@ name: Test Swift Package
 runs:
   using: composite
   steps:
+    - name: Download Config
+      uses: actions/download-artifact@v4
+      with:
+        name: config.txt
+        path: ./wrappers/csharp
+
     - name: Generate package
       working-directory: ./wrappers/swift
       shell: bash

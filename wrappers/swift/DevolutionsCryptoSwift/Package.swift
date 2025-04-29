@@ -4,25 +4,40 @@
 import PackageDescription
 
 let package = Package(
-  name: "DevolutionsCryptoSwift",
-  products: [
-    // Products define the executables and libraries a package produces, making them visible to other packages.
-    .library(
-      name: "DevolutionsCryptoSwift",
-      targets: ["DevolutionsCryptoSwift"])
-  ],
-  targets: [
-    // Targets are the basic building blocks of a package, defining a module or a test suite.
-    // Targets can depend on other targets in this package and products from dependencies.
-    .target(
-      name: "DevolutionsCryptoSwift",
-      dependencies: ["DevolutionsCryptoFramework"]),
-    .testTarget(
-      name: "DevolutionsCryptoSwiftTests",
-      dependencies: ["DevolutionsCryptoSwift"]),
-    .binaryTarget(
-      name: "DevolutionsCryptoFramework",
-      path: "../output/DevolutionsCrypto.xcframework"
-    ),
-  ]
+    name: "DevolutionsCryptoSwift",
+    platforms: [
+        .iOS(.v14),
+        .macOS(.v11)
+    ],
+    products: [
+        .library(
+            name: "DevolutionsCryptoSwift",
+            targets: ["DevolutionsCryptoSwift"]
+        )
+    ],
+    targets: [
+        .systemLibrary(
+            name: "devolutions_cryptoFFI",
+            path: "Sources/devolutions_cryptoFFI"
+        ),
+        .binaryTarget(
+            name: "libDevolutionsCrypto",
+            path: "../output/libDevolutionsCrypto.xcframework"
+        ),
+        .target(
+            name: "DevolutionsCryptoSwift",
+            dependencies: [
+                "devolutions_cryptoFFI",
+                "libDevolutionsCrypto"
+            ],
+            path: "Sources/DevolutionsCryptoSwift"
+        ),
+        .testTarget(
+            name: "DevolutionsCryptoSwiftTests",
+            dependencies: [
+                "DevolutionsCryptoSwift"
+            ],
+            path: "Tests/DevolutionsCryptoSwiftTests"
+        )
+    ]
 )
