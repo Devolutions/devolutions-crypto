@@ -2,21 +2,21 @@ import DevolutionsCryptoSwift
 import XCTest
 
 class UtilsTests: XCTestCase {
-  func testGenerateKeyDefault() {
-    let key = generateKey()
+  func testGenerateKeyDefault() throws {
+    let key = try generateKey()
     XCTAssertEqual(key.count, 32)
     XCTAssertNotEqual(key, Data(repeating: UInt8(0), count: 32))
   }
 
-  func testGenerateKeyLonger() {
-    let key = generateKey(length: 41)
+  func testGenerateKeyLonger() throws {
+    let key = try generateKey(length: 41)
     XCTAssertEqual(key.count, 41)
     XCTAssertNotEqual(key, Data(repeating: UInt8(0), count: 41))
   }
 
-  func testGenerateKeyActuallyRandom() {
-    let key1 = generateKey()
-    let key2 = generateKey()
+  func testGenerateKeyActuallyRandom() throws {
+    let key1 = try generateKey()
+    let key2 = try generateKey()
     XCTAssertNotEqual(key1, key2)
   }
 
