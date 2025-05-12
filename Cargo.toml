@@ -59,7 +59,7 @@ x25519-dalek = { version = "2", features = [ "static_secrets" ] }
 # Version is pinned because newer version requires lifetime annotations
 #   that isn't compatible with the header trait
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
-blake3 = { version = "1.6", features = ["zeroize"] }
+blake3 = { version = "1.8", features = ["zeroize"] }
 paste = "1.0.15"
 dyn-clone = "1.0"
 
