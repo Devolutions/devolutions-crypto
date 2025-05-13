@@ -1,5 +1,5 @@
 [package]
-name = "devolutions-crypto-uniffi"
+name = "devolutions-crypto-uniffi-dart"
 edition = "2021"
 version.workspace = true
 
@@ -9,7 +9,7 @@ crate-type = ["cdylib", "staticlib"]
 [dependencies]
 devolutions-crypto = { path = "../../" }
 uniffi-builder-macro = { path = "../uniffi-builder-macro" }
-uniffi = { workspace = true }
+uniffi = { git = "https://github.com/NiallBunting/uniffi-rs-dart.git" }
 
 [build-dependencies]
-uniffi = { workspace = true, features = ["build"] }
+uniffi = { git = "https://github.com/NiallBunting/uniffi-rs-dart.git",  features = ["build"] }

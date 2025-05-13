@@ -6,8 +6,10 @@ members = [
   "fuzz",
   "python",
   "uniffi/uniffi-bindgen",
+  "uniffi/uniffi-dart-bindgen",
+  "uniffi/devolutions-crypto-uniffi-dart",
   "uniffi/devolutions-crypto-uniffi",
-  "uniffi/devolutions-crypto-uniffi/uniffi-builder-macro",
+  "uniffi/uniffi-builder-macro",
   ]
 
 [workspace.dependencies]

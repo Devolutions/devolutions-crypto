@@ -1,0 +1,12 @@
+[package]
+name = "uniffi-dart-bindgen"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "uniffi-dart-bindgen"
+path = "src/uniffi-bindgen.rs"
+
+[dependencies]
+uniffi = { git = "https://github.com/NiallBunting/uniffi-rs-dart.git",  features = ["cli"] }

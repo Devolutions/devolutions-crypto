@@ -1,0 +1,2 @@
+cargo build -p devolutions-crypto-uniffi-dart
+cargo run -p uniffi-dart-bindgen generate ..\..\uniffi\devolutions-crypto-uniffi-dart\src\devolutions_crypto.udl --lib-file ..\..\target\debug\devolutions_crypto_uniffi_dart.dll --language dart --out-dir bindings --no-format
