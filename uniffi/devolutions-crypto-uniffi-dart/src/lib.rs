@@ -29,4 +29,4 @@ pub use devolutions_crypto::SigningKeyVersion;
 
 pub use devolutions_crypto::Result;
 
-uniffi::include_scaffolding!("devolutions_crypto");
+uniffi_dart::include_scaffolding!("devolutions_crypto");

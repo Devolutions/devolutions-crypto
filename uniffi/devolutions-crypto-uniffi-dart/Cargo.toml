@@ -9,7 +9,7 @@ crate-type = ["cdylib", "staticlib"]
 [dependencies]
 devolutions-crypto = { path = "../../" }
 uniffi-builder-macro = { path = "../uniffi-builder-macro" }
-uniffi = { git = "https://github.com/NiallBunting/uniffi-rs-dart.git" }
+uniffi-dart = { git = "https://github.com/acterglobal/uniffi-dart.git" }
 
 [build-dependencies]
-uniffi = { git = "https://github.com/NiallBunting/uniffi-rs-dart.git",  features = ["build"] }
+uniffi-dart = { git = "https://github.com/acterglobal/uniffi-dart.git",  features = ["build"] }
