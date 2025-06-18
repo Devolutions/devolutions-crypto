@@ -156,9 +156,9 @@ jobs:
         pip install twine
 
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
-          twine upload --verbose  --repository testpypi -u "__token__" -p ${{ secrets.TESTPYPI_OWNER_API_KEY  }} ./devolutions-crypto-wheels/*
+          twine upload --verbose  --repository testpypi -u "__token__" -p ${{ secrets.PYPI_TEST_API_KEY }} ./devolutions-crypto-wheels/*
         else
-          twine upload --verbose -u "__token__" -p ${{ secrets.PYPI_OWNER_API_KEY }} ./devolutions-crypto-wheels/*
+          twine upload --verbose -u "__token__" -p ${{ secrets.PYPI_API_KEY }} ./devolutions-crypto-wheels/*
 
           git tag "python-v${{ steps.version.outputs.version_native }}"
           git push origin "python-v${{ steps.version.outputs.version_native }}"
