@@ -1,6 +1,6 @@
 // Xamarin and .NET Core bindings
 
-#if ANDROID || IOS || MACOS || NETCOREAPP || NETSTANDARD || NETFRAMEWORK
+#if ANDROID || IOS || MACOS || NETCOREAPP || NETSTANDARD || NETFRAMEWORK || BROWSER
 namespace Devolutions.Cryptography
 {
     using System;
@@ -13,6 +13,8 @@ namespace Devolutions.Cryptography
     {
 #if IOS
         private const string LibName = "libDevolutionsCrypto.framework/libDevolutionsCrypto";
+#elif BROWSER
+        private const string LibName = "libDevolutionsCrypto";
 #else
         private const string LibName = "DevolutionsCrypto";
 #endif
@@ -45,12 +47,6 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName, EntryPoint = "DeriveKeyPbkdf2", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long DeriveKeyPbkdf2Native(byte[] key, UIntPtr keyLength, byte[] salt, UIntPtr saltLength, System.UInt32 iterations, byte[] result, UIntPtr resultLength);
-
-        [DllImport(LibName, EntryPoint = "DeriveKeyPair", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long DeriveKeyPairNative(byte[] password, UIntPtr passwordLength, byte[] parameters, UIntPtr parametersLength, byte[] privateKey, UIntPtr privateKeyLength, byte[] publicKey, UIntPtr publicKeyLength);
-
-        [DllImport(LibName, EntryPoint = "DeriveKeyPairSize", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long DeriveKeyPairSizeNative();
 
         [DllImport(LibName, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);

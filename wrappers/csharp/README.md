@@ -62,7 +62,7 @@ byte[] decrypted_data = Managed.DecryptAsymmetric(data, keypair.PrivateKey);
 
 ### Generation/Derivation
 
-You have two ways to generate a `KeyPair`: Using `GenerateKeyPair` will generate a random one, using `DeriveKeyPair` will derive one from another password or key along with derivation parameters(including salt). Except in specific circumstances, you should use `GenerateKeyPair`.  
+Using `GenerateKeyPair` will generate a random key pair.
 
 Asymmetric keys have two uses. They can be used to [encrypt and decrypt data](##asymmetric) and to perform a [key exchange](#key-exchange).
 
@@ -73,14 +73,6 @@ using Devolutions.Cryptography;
 KeyPair keypair = Managed.GenerateKeyPair();
 ```
 
-#### `DeriveKeyPair`
-```C#
-using Devolutions.Cryptography;
-
-Argon2Parameters parameters = Managed.GetDefaultArgon2Parameters();
-
-KeyPair keypair = Managed.DeriveKeyPair(Utils.StringToUtf8ByteArray("thisisapassword"), parameters);
-```
 
 ### Key Exchange
 
