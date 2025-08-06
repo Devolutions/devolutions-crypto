@@ -7,5 +7,10 @@ linker = "aarch64-linux-gnu-gcc"
 [target.'cfg(target_os="android")']
 rustflags = ["-C", "link-args=-Wl,-z,max-page-size=16384"]
 
-[target.'cfg(target_arch="wasm32")']
+[target.wasm32-unknown-unknown]
 rustflags = ['--cfg', 'getrandom_backend="wasm_js"']
+
+[target.wasm32-unknown-emscripten]
+rustflags = [
+  "-C", "link-arg=--no-entry"
+]
