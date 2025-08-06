@@ -214,6 +214,7 @@ impl Argon2Parameters {
             time_cost: self.iterations,
             variant: self.variant,
             version: self.version,
+            thread_mode: argon2::ThreadMode::Sequential,
         };
 
         Ok(argon2::hash_raw(password, &self.salt, &config)?)

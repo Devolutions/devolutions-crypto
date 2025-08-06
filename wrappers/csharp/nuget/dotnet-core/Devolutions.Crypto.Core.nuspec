@@ -24,6 +24,10 @@
     <file src="../../ios/bin/Devolutions.Crypto.dll" target="runtimes/ios/lib/netstandard2.0/Devolutions.Crypto.dll" />
     <file src="../../ios/bin/Devolutions.Crypto.pdb" target="runtimes/ios/lib/netstandard2.0/Devolutions.Crypto.pdb" />
 
+    <!-- Browser Specific Managed Library -->
+    <file src="../../browser-wasm/bin/Devolutions.Crypto.dll" target="runtimes/browser-wasm/lib/netstandard2.0/Devolutions.Crypto.dll" />
+    <file src="../../browser-wasm/bin/Devolutions.Crypto.pdb" target="runtimes/browser-wasm/lib/netstandard2.0/Devolutions.Crypto.pdb" />
+
     <!-- Windows Native Libraries -->
     <file src="../../windows/DevolutionsCrypto-x64.dll" target="runtimes/win-x64/native/DevolutionsCrypto.dll"/>
     <file src="../../windows/DevolutionsCrypto-x86.dll" target="runtimes/win-x86/native/DevolutionsCrypto.dll"/>
@@ -51,6 +55,9 @@
     <file src="../../android/armv7/libDevolutionsCrypto.so" target="runtimes/android-arm/native/libDevolutionsCrypto.so"/>
     <file src="../../android/i686/libDevolutionsCrypto.so" target="runtimes/android-x86/native/libDevolutionsCrypto.so"/>
     <file src="../../android/x86_64/libDevolutionsCrypto.so" target="runtimes/android-x64/native/libDevolutionsCrypto.so"/>
+
+    <!-- Browser Wasm -->
+    <file src="../../browser-wasm/libDevolutionsCrypto.a" target="runtimes/browser-wasm/native/libDevolutionsCrypto.a"/>
 
     <!-- Required for iOS and Android -->
     <file src="Devolutions.Crypto.Core.props" target="build/netstandard2.0/Devolutions.Crypto.Core.props"/>

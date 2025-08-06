@@ -32,4 +32,9 @@
             <Abi>x86_64</Abi>
         </AndroidNativeLibrary>
     </ItemGroup> 
+
+    <!-- Browser Wasm -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'browser-wasm'">
+        <NativeFileReference Include="$(MSBuildThisFileDirectory)..\..\runtimes\browser-wasm\native\libDevolutionsCrypto.a" />
+    </ItemGroup>
 </Project>

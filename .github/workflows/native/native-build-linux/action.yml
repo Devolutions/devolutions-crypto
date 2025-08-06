@@ -30,6 +30,8 @@ runs:
         rustup target add i686-linux-android
         rustup target add x86_64-linux-android
 
+        rustup target add wasm32-unknown-emscripten
+
     - name: Unit tests
       working-directory: ./
       shell: bash
@@ -122,6 +124,37 @@ runs:
         cp ./target/i686-linux-android/release/libdevolutions_crypto_ffi.so ./wrappers/csharp/android/i686/libDevolutionsCrypto.so
         cp ./target/x86_64-linux-android/release/libdevolutions_crypto_ffi.so ./wrappers/csharp/android/x86_64/libDevolutionsCrypto.so
 
+    - name: Configure Emscripten SDK
+      shell: bash
+      run: |
+        git clone https://github.com/emscripten-core/emsdk.git
+        cd emsdk
+        ./emsdk install latest
+        ./emsdk activate latest
+
+    - name: Building Browser-Wasm
+      shell: bash
+      run: |
+        source ./emsdk/emsdk_env.sh
+        cargo build -p devolutions-crypto-ffi --release --target=wasm32-unknown-emscripten
+
+    - name: Copy Browser-Wasm natives
+      shell: bash
+      run: |
+        mkdir ./wrappers/csharp/browser-wasm
+
+        cp ./target/wasm32-unknown-emscripten/release/libdevolutions_crypto_ffi.a ./wrappers/csharp/browser-wasm/libDevolutionsCrypto.a
+
+    - name: Build C# Browser Wasm
+      working-directory: ./wrappers/csharp
+      shell: bash
+      run: |
+        VERSION_MANAGED=$(grep 'version' config.txt | cut -d '=' -f2 | tr -d ' "')
+        VERSION_NATIVE=$(grep 'package.version = "' ../../Cargo.toml | cut -d '"' -f2)
+
+        sed -i -e "s/||MANAGED_VERSION||/${VERSION_MANAGED}/g" -e "s/||NATIVE_VERSION||/${VERSION_NATIVE}/g" ./src/Native.cs        
+        
+        dotnet build ./src/devolutions-crypto.csproj --framework netstandard2.0  -p:DefineConstants=BROWSER -p:Version="$VERSION_MANAGED" --configuration Release --output ./browser-wasm/bin
 
     - uses: actions/upload-artifact@v4.3.6
       with:
@@ -129,3 +162,4 @@ runs:
         path: |
           wrappers/csharp/android/**
           wrappers/csharp/linux/**
+          wrappers/csharp/browser-wasm/**

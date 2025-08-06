@@ -50,7 +50,7 @@ rand = "0.9"
 rand_08 = { package = "rand", version = "0.8" }
 thiserror = "2.0.12"
 typed-builder = "0.21.0"
-rust-argon2 = { version = "2.1", default-features = false }
+rust-argon2 = { version = "3.0", default-features = false }
 
 ed25519-dalek = { version = "2", features = [ "rand_core" ] }
 x25519-dalek = { version = "2", features = [ "static_secrets" ] }
@@ -59,17 +59,17 @@ x25519-dalek = { version = "2", features = [ "static_secrets" ] }
 # Version is pinned because newer version requires lifetime annotations
 #   that isn't compatible with the header trait
 arbitrary = { version = "0.4.7", features = ["derive"], optional = true }
-blake3 = { version = "1.6", features = ["zeroize"] }
+blake3 = { version = "1.8", features = ["zeroize"] }
 paste = "1.0.15"
 dyn-clone = "1.0"
 
-[target.'cfg(target_arch="wasm32")'.dependencies]
+[target.wasm32-unknown-unknown.dependencies]
 wasm-bindgen = { version = "0.2.100", optional = true }
 serde-wasm-bindgen = { version = "0.6.5", optional = true }
 js-sys = { version = "0.3.77", optional = true }
 getrandom = { version = "0.3", features = ["wasm_js"] }
 
-[target.'cfg(target_arch="wasm32")'.dev-dependencies]
+[target.wasm32-unknown-unknown.dev-dependencies]
 wasm-bindgen-test = "0.3"
 
 [features]
