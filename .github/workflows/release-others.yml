@@ -30,10 +30,15 @@ on:
         description: "Dry Run Mode"
         required: true
         type: boolean
+
 jobs:
   deploy:
-    runs-on: ubuntu-22.04
     environment: publish
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - uses: actions/checkout@v4
 
@@ -118,8 +123,6 @@ jobs:
       if: ${{ inputs.publish_npm }}
       working-directory: ./devolutions-crypto-npm/bundler
       run: |
-        npm set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
-
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           npm publish --access=public --dry-run
         else
@@ -133,8 +136,6 @@ jobs:
       if: ${{ inputs.publish_npm }}
       working-directory: ./devolutions-crypto-npm/web
       run: |
-        npm set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
-
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           npm publish --access=public --dry-run
         else
