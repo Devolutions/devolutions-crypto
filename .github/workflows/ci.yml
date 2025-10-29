@@ -12,12 +12,14 @@ on:
         required: true
         type: boolean
       version:
+        description: Version
         required: false
         type: string
 
 jobs:
   setup_config:
     runs-on: ubuntu-22.04
+
     steps:
       - name: Setup config artifact
         run: |
@@ -44,6 +46,7 @@ jobs:
   native_build_linux:
     needs: [rust_code_format, setup_config]
     runs-on: "ubuntu-22.04" # Ensure we build with the minimum supported sysroot
+
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/native/native-build-linux
@@ -51,6 +54,7 @@ jobs:
   native_build_macos:
     needs: [rust_code_format, setup_config]
     runs-on: "macos-15"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -61,6 +65,7 @@ jobs:
   native_build_ios:
     needs: [rust_code_format, setup_config]
     runs-on: "macos-15"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -71,6 +76,7 @@ jobs:
   native_build_windows:
     needs: [rust_code_format, setup_config]
     runs-on: "windows-2022"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -82,6 +88,7 @@ jobs:
   nugets:
     needs: [native_build_linux, native_build_macos, native_build_ios, native_build_windows , setup_config] # All Natives for dotnet-core
     runs-on: "windows-2022"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -93,6 +100,7 @@ jobs:
   webassembly_build:
     needs: rust_code_format
     runs-on: "ubuntu-22.04"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -104,6 +112,7 @@ jobs:
   webassembly_test:
     needs: webassembly_build
     runs-on: "macos-15"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -115,6 +124,7 @@ jobs:
   tests_nuget_windows:
     needs: [nugets, setup_config]
     runs-on: "windows-2022"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -125,6 +135,7 @@ jobs:
   tests_nuget_macos:
     needs: [nugets, setup_config]
     runs-on: "macos-15"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -135,6 +146,7 @@ jobs:
   tests_nuget_ios:
     needs: [nugets, setup_config]
     runs-on: "macos-15"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -145,6 +157,7 @@ jobs:
   tests_nuget_linux:
     needs: [nugets, setup_config]
     runs-on: "ubuntu-22.04"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -156,6 +169,7 @@ jobs:
   tests_swift:
     needs: setup_config
     runs-on: "macos-15"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -167,6 +181,7 @@ jobs:
   kotlin_windows:
     needs: [setup_config]
     runs-on: "windows-2022"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -177,6 +192,7 @@ jobs:
   kotlin_macos:
     needs: [setup_config]
     runs-on: "macos-15"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -187,6 +203,7 @@ jobs:
   build_kotlin:
     needs: [setup_config, kotlin_macos, kotlin_windows ]
     runs-on: "ubuntu-22.04"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -197,6 +214,7 @@ jobs:
   tests_nuget_android:
     needs: [nugets, setup_config]
     runs-on: "ubuntu-22.04"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -207,6 +225,7 @@ jobs:
   #### CODE FORMATTING ####
   rust_code_format:
     runs-on: "ubuntu-22.04"
+
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/formatting/rust
@@ -214,6 +233,7 @@ jobs:
   csharp_code_format:
     needs: setup_config
     runs-on: "windows-2022"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -224,6 +244,7 @@ jobs:
   #### PYTHON BUILD ####
   build_python_linux:
     runs-on: "ubuntu-22.04"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -233,6 +254,7 @@ jobs:
 
   build_python_macos:
     runs-on: "macos-15"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -242,6 +264,7 @@ jobs:
 
   build_python_windows:
     runs-on: "windows-2022"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -253,6 +276,7 @@ jobs:
   test_python_linux:
     needs: build_python_linux
     runs-on: "ubuntu-22.04"
+
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/tests/python/linux
@@ -260,6 +284,7 @@ jobs:
   test_python_macos:
     needs: build_python_macos
     runs-on: "macos-15"
+
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/tests/python/macos
@@ -267,6 +292,7 @@ jobs:
   test_python_windows:
     needs: build_python_windows
     runs-on: "windows-2022"
+
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/tests/python/windows
@@ -274,6 +300,7 @@ jobs:
   #### PUBLISH SOURCE ####
   source_publish:
     runs-on: "ubuntu-22.04"
+
     steps:
       - uses: actions/checkout@v4
         with:

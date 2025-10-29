@@ -10,10 +10,12 @@ on:
         description: "Dry Run Mode"
         required: true
         type: boolean
+
 jobs:
   deploy:
-    runs-on: ubuntu-22.04
     environment: publish
+    runs-on: ubuntu-22.04
+
     steps:
     - uses: actions/checkout@v4
 
