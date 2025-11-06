@@ -1,0 +1,65 @@
+name: Extended Fuzzing
+
+on:
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: 'Duration per target in seconds'
+        required: false
+        default: '300'
+        type: string
+
+jobs:
+  extended_fuzz:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 300 # 5 hours max
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust nightly
+        run: |
+          rustup toolchain install nightly
+          rustup default nightly
+
+      - name: Install cargo-fuzz
+        run: cargo install cargo-fuzz
+
+      - name: Restore corpus cache
+        uses: actions/cache@v4
+        with:
+          path: fuzz/corpus
+          key: fuzz-corpus-${{ github.sha }}
+          restore-keys: |
+            fuzz-corpus-
+
+      - name: Run extended fuzz tests
+        working-directory: ./fuzz
+        run: |
+          DURATION=${{ inputs.duration || '300' }}
+          ./run_all_fuzz_tests.sh $DURATION
+
+      - name: Save corpus cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: fuzz/corpus
+          key: fuzz-corpus-${{ github.sha }}
+
+      - name: Upload crash artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: fuzz-crash-artifacts-extended-${{ github.run_id }}
+          path: fuzz/artifacts/
+          if-no-files-found: ignore
+
+      - name: Upload corpus on failure
+        if: failure()
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: fuzz-corpus-${{ github.run_id }}
+          path: fuzz/corpus/
+          if-no-files-found: ignore

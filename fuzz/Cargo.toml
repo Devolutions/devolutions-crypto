@@ -62,6 +62,10 @@ name = "argon2parameters_deserialization"
 path = "fuzz_targets/key/argon2parameters_deserialization.rs"
 
 [[bin]]
+name = "mix_key_exchange"
+path = "fuzz_targets/key/mix_key_exchange.rs"
+
+[[bin]]
 name = "share_deserialization"
 path = "fuzz_targets/secret_sharing/share_deserialization.rs"
 
@@ -100,3 +104,75 @@ path = "fuzz_targets/utils/base64_decode.rs"
 [[bin]]
 name = "base64_decode_url"
 path = "fuzz_targets/utils/base64_decode_url.rs"
+
+[[bin]]
+name = "derive_key_argon2"
+path = "fuzz_targets/utils/derive_key_argon2.rs"
+
+[[bin]]
+name = "scrypt_simple"
+path = "fuzz_targets/utils/scrypt_simple.rs"
+
+[[bin]]
+name = "signature_deserialization"
+path = "fuzz_targets/signature/signature_deserialization.rs"
+
+[[bin]]
+name = "sign"
+path = "fuzz_targets/signature/sign.rs"
+
+[[bin]]
+name = "verify"
+path = "fuzz_targets/signature/verify.rs"
+
+[[bin]]
+name = "signing_keypair_deserialization"
+path = "fuzz_targets/signing_key/signing_keypair_deserialization.rs"
+
+[[bin]]
+name = "signing_public_key_deserialization"
+path = "fuzz_targets/signing_key/signing_public_key_deserialization.rs"
+
+[[bin]]
+name = "online_ciphertext_header_deserialization"
+path = "fuzz_targets/online_ciphertext/header_deserialization.rs"
+
+[[bin]]
+name = "online_encrypt_symmetric"
+path = "fuzz_targets/online_ciphertext/encrypt_symmetric.rs"
+
+[[bin]]
+name = "online_encrypt_asymmetric"
+path = "fuzz_targets/online_ciphertext/encrypt_asymmetric.rs"
+
+[[bin]]
+name = "online_decrypt_symmetric"
+path = "fuzz_targets/online_ciphertext/decrypt_symmetric.rs"
+
+[[bin]]
+name = "online_decrypt_asymmetric"
+path = "fuzz_targets/online_ciphertext/decrypt_asymmetric.rs"
+
+[[bin]]
+name = "encrypt_with_aad"
+path = "fuzz_targets/ciphertext/encrypt_with_aad.rs"
+
+[[bin]]
+name = "decrypt_with_aad"
+path = "fuzz_targets/ciphertext/decrypt_with_aad.rs"
+
+[[bin]]
+name = "encrypt_asymmetric_with_aad"
+path = "fuzz_targets/ciphertext/encrypt_asymmetric_with_aad.rs"
+
+[[bin]]
+name = "decrypt_asymmetric_with_aad"
+path = "fuzz_targets/ciphertext/decrypt_asymmetric_with_aad.rs"
+
+[[bin]]
+name = "generate_keypair"
+path = "fuzz_targets/key/generate_keypair.rs"
+
+[[bin]]
+name = "constant_time_equals"
+path = "fuzz_targets/utils/constant_time_equals.rs"

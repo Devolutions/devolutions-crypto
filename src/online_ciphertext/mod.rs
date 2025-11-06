@@ -114,7 +114,7 @@ impl OnlineCiphertextEncryptor {
         chunk_size: u32,
         version: OnlineCiphertextVersion,
     ) -> Result<OnlineCiphertextEncryptor> {
-        let mut header = Header::<OnlineCiphertextHeader> {
+        let header = Header::<OnlineCiphertextHeader> {
             data_subtype: CiphertextSubtype::Symmetric,
             ..Default::default()
         };
@@ -124,8 +124,6 @@ impl OnlineCiphertextEncryptor {
 
         match version {
             OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
-                header.version = OnlineCiphertextVersion::V1;
-
                 let cipher = OnlineCiphertextV1Encryptor::new(key, full_aad, chunk_size)?;
 
                 Ok(OnlineCiphertextEncryptor::V1(cipher))
@@ -139,7 +137,7 @@ impl OnlineCiphertextEncryptor {
         chunk_size: u32,
         version: OnlineCiphertextVersion,
     ) -> Result<OnlineCiphertextEncryptor> {
-        let mut header = Header::<OnlineCiphertextHeader> {
+        let header = Header::<OnlineCiphertextHeader> {
             data_subtype: CiphertextSubtype::Asymmetric,
             ..Default::default()
         };
@@ -149,8 +147,6 @@ impl OnlineCiphertextEncryptor {
 
         match version {
             OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
-                header.version = OnlineCiphertextVersion::V1;
-
                 let cipher =
                     OnlineCiphertextV1Encryptor::new_asymmetric(public_key, full_aad, chunk_size)?;
 

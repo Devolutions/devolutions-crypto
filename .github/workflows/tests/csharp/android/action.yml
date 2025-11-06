@@ -48,9 +48,32 @@ runs:
       shell: bash
       run: echo "y" | sdkmanager --install "system-images;android-33;google_apis;x86_64"
 
+    - name: Clean up AVD cache
+      shell: bash
+      run: |
+        rm -rf ~/.android/avd/
+        rm -rf ~/.android/cache
+
+    - name: Free up disk space
+      shell: bash
+      run: |
+        echo "Disk space before cleanup:"
+        df -h
+
+        # Remove large unused packages
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+        # Clean docker
+        sudo docker image prune --all --force
+
+        echo "Disk space after cleanup:"
+        df -h
+
     - name: Creating Android device
       shell: bash
-      run: echo "no" | avdmanager create avd -n test_emulator -k "system-images;android-33;google_apis;x86_64"
+      run: echo "no" | avdmanager create avd -n test_emulator -k "system-images;android-33;google_apis;x86_64" -c 2048M
 
     - name: Starting emulator
       shell: bash

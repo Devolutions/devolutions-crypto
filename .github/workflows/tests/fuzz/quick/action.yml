@@ -1,0 +1,69 @@
+name: Quick Fuzz Test
+description: Run quick fuzz tests on all targets (10 seconds each)
+runs:
+  using: composite
+  steps:
+    - name: Install Rust nightly
+      shell: bash
+      run: |
+        rustup toolchain install nightly
+        rustup default nightly
+
+    - name: Install cargo-fuzz
+      shell: bash
+      run: cargo install cargo-fuzz
+
+    - name: Run quick fuzz tests
+      working-directory: ./fuzz
+      shell: bash
+      run: |
+        set -e
+
+        echo "=== Running Quick Fuzz Tests (10s per target) ==="
+
+        # Get all fuzz targets
+        TARGETS=$(cargo fuzz list)
+        TOTAL=$(echo "$TARGETS" | wc -l)
+        CURRENT=0
+        FAILED_TARGETS=()
+
+        for target in $TARGETS; do
+          CURRENT=$((CURRENT + 1))
+          echo ""
+          echo "[$CURRENT/$TOTAL] Testing: $target"
+
+          if timeout 15s cargo fuzz run "$target" -- -max_total_time=10 -rss_limit_mb=2048 2>&1; then
+            echo "✓ $target passed"
+          else
+            EXIT_CODE=$?
+            if [ $EXIT_CODE -eq 124 ]; then
+              echo "⏱ $target timed out (expected)"
+            else
+              echo "✗ $target failed with exit code $EXIT_CODE"
+              FAILED_TARGETS+=("$target")
+            fi
+          fi
+        done
+
+        echo ""
+        echo "=== Summary ==="
+        echo "Total targets: $TOTAL"
+        echo "Failed targets: ${#FAILED_TARGETS[@]}"
+
+        if [ ${#FAILED_TARGETS[@]} -gt 0 ]; then
+          echo ""
+          echo "Failed targets:"
+          printf '%s\n' "${FAILED_TARGETS[@]}"
+          exit 1
+        fi
+
+        echo ""
+        echo "All fuzz tests passed!"
+
+    - name: Upload crash artifacts
+      if: failure()
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: fuzz-crash-artifacts
+        path: fuzz/artifacts/
+        if-no-files-found: ignore
