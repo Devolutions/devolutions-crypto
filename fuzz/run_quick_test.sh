@@ -4,6 +4,15 @@
 
 set -e
 
+# Handle Ctrl+C gracefully
+cleanup() {
+    echo -e "\n\n${YELLOW}Interrupted by user. Cleaning up...${NC}"
+    pkill -P $$ cargo 2>/dev/null || true
+    exit 130
+}
+
+trap cleanup SIGINT SIGTERM
+
 CYAN='\033[0;36m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
@@ -29,7 +38,7 @@ NEW_TARGETS=(
 
 for target in "${NEW_TARGETS[@]}"; do
     echo -e "${YELLOW}Testing: ${target}${NC}"
-    timeout 10s cargo fuzz run "${target}" -- -max_total_time=10 || true
+    timeout 10s cargo +nightly fuzz run "${target}" -- -max_total_time=10 || true
     echo ""
 done
 

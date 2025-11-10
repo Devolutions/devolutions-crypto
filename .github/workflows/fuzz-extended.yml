@@ -15,7 +15,7 @@ on:
 jobs:
   extended_fuzz:
     runs-on: ubuntu-22.04
-    timeout-minutes: 300 # 5 hours max
+    timeout-minutes: 60 # 1 hour max
     steps:
       - uses: actions/checkout@v4
 

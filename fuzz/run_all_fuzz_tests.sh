@@ -5,6 +5,16 @@
 
 set -e
 
+# Handle Ctrl+C gracefully
+cleanup() {
+    echo -e "\n\n${YELLOW}Interrupted by user. Cleaning up...${NC}"
+    # Kill any running cargo fuzz processes
+    pkill -P $$ cargo 2>/dev/null || true
+    exit 130
+}
+
+trap cleanup SIGINT SIGTERM
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -41,13 +51,12 @@ fi
 # Check if nightly toolchain is available
 if ! rustup toolchain list | grep -q nightly; then
     echo -e "${YELLOW}Warning: Nightly toolchain not found. Installing...${NC}"
-    rustup install nightly
-    rustup default nightly
+    rustup toolchain install nightly
 fi
 
 # Get list of all fuzz targets
 echo -e "${BLUE}Discovering fuzz targets...${NC}"
-TARGETS=($(cargo fuzz list 2>/dev/null | grep -v "^warning:"))
+TARGETS=($(cargo +nightly fuzz list 2>/dev/null | grep -v "^warning:"))
 TOTAL_TARGETS=${#TARGETS[@]}
 
 echo -e "Found ${GREEN}${TOTAL_TARGETS}${NC} fuzz targets\n"
@@ -77,7 +86,7 @@ run_fuzz_test() {
     local log_file="fuzz_${target}_$(date +%Y%m%d_%H%M%S).log"
 
     # Run the fuzzer
-    if timeout ${DURATION}s cargo fuzz run "${target}" -- \
+    if timeout ${DURATION}s cargo +nightly fuzz run "${target}" -- \
         -max_total_time=${DURATION} \
         -print_final_stats=1 \
         -rss_limit_mb=2048 \
