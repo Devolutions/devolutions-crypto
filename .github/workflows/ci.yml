@@ -145,8 +145,7 @@ jobs:
 
   tests_nuget_ios:
     needs: [nugets, setup_config]
-    runs-on: "macos-15"
-
+    runs-on: "macos-26"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -229,6 +228,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/formatting/rust
+
+  #### FUZZ TESTING ####
+  quick_fuzz:
+    runs-on: "ubuntu-22.04"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/workflows/tests/fuzz/quick
 
   csharp_code_format:
     needs: setup_config

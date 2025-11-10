@@ -12,8 +12,10 @@ use wasm_bindgen::prelude::*;
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
+#[derive(Default)]
 pub enum DataType {
     /// No data type. Only used as a default value.
+    #[default]
     None = 0,
     /// A wrapped key.
     Key = 1,
@@ -31,19 +33,15 @@ pub enum DataType {
     OnlineCiphertext = 7,
 }
 
-impl Default for DataType {
-    fn default() -> Self {
-        Self::None
-    }
-}
-
 /// The versions of the encryption scheme to use.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
+#[derive(Default)]
 pub enum CiphertextVersion {
     /// Uses the latest version.
+    #[default]
     Latest = 0,
     /// Uses version 1: AES256-CBC-HMAC-SHA2-256.
     V1 = 1,
@@ -51,28 +49,18 @@ pub enum CiphertextVersion {
     V2 = 2,
 }
 
-impl Default for CiphertextVersion {
-    fn default() -> Self {
-        Self::Latest
-    }
-}
-
 /// The versions of the online encryption scheme to use.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
+#[derive(Default)]
 pub enum OnlineCiphertextVersion {
     /// Uses the latest version.
+    #[default]
     Latest = 0,
     /// Uses version 1: XChaCha20-Poly1305 wrapped in a STREAM construction.
     V1 = 1,
-}
-
-impl Default for OnlineCiphertextVersion {
-    fn default() -> Self {
-        Self::Latest
-    }
 }
 
 /// The versions of the password hashing scheme to use.
@@ -80,17 +68,13 @@ impl Default for OnlineCiphertextVersion {
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
+#[derive(Default)]
 pub enum PasswordHashVersion {
     /// Uses the latest version.
+    #[default]
     Latest = 0,
     /// Uses version 1: PBKDF2-HMAC-SHA2-256.
     V1 = 1,
-}
-
-impl Default for PasswordHashVersion {
-    fn default() -> Self {
-        Self::Latest
-    }
 }
 
 /// The versions of the key scheme to use.
@@ -98,138 +82,102 @@ impl Default for PasswordHashVersion {
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
+#[derive(Default)]
 pub enum KeyVersion {
     /// Uses the latest version.
+    #[default]
     Latest = 0,
     /// Uses version 1: Curve25519 keys and x25519 key exchange.
     V1 = 1,
 }
 
-impl Default for KeyVersion {
-    fn default() -> Self {
-        Self::Latest
-    }
-}
-
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
+#[derive(Default)]
 pub enum SigningKeyVersion {
     /// Uses the latest version.
+    #[default]
     Latest = 0,
     /// Uses version 1: Ed25519.
     V1 = 1,
 }
 
-impl Default for SigningKeyVersion {
-    fn default() -> Self {
-        Self::Latest
-    }
-}
-
 /// The versions of the secret sharing scheme to use.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
+#[derive(Default)]
 pub enum SecretSharingVersion {
     /// Uses the latest version.
+    #[default]
     Latest = 0,
     /// Uses version 1: Shamir Secret Sharing over GF256.
     V1 = 1,
 }
 
-impl Default for SecretSharingVersion {
-    fn default() -> Self {
-        Self::Latest
-    }
-}
-
 /// The versions of the secret sharing scheme to use.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
+#[derive(Default)]
 pub enum SignatureVersion {
     /// Uses the latest version.
+    #[default]
     Latest = 0,
     /// Uses version 1: ed25519
     V1 = 1,
 }
 
-impl Default for SignatureVersion {
-    fn default() -> Self {
-        Self::Latest
-    }
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[repr(u16)]
+#[derive(Default)]
 pub enum CiphertextSubtype {
+    #[default]
     None = 0,
     Symmetric = 1,
     Asymmetric = 2,
 }
 
-impl Default for CiphertextSubtype {
-    fn default() -> Self {
-        Self::None
-    }
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[repr(u16)]
+#[derive(Default)]
 pub enum KeySubtype {
+    #[default]
     None = 0,
     Private = 1,
     Public = 2,
     Pair = 3,
 }
 
-impl Default for KeySubtype {
-    fn default() -> Self {
-        Self::None
-    }
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[repr(u16)]
+#[derive(Default)]
 pub enum PasswordHashSubtype {
+    #[default]
     None = 0,
-}
-
-impl Default for PasswordHashSubtype {
-    fn default() -> Self {
-        Self::None
-    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[repr(u16)]
+#[derive(Default)]
 pub enum ShareSubtype {
+    #[default]
     None = 0,
-}
-
-impl Default for ShareSubtype {
-    fn default() -> Self {
-        Self::None
-    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[repr(u16)]
+#[derive(Default)]
 pub enum SignatureSubtype {
+    #[default]
     None = 0,
-}
-
-impl Default for SignatureSubtype {
-    fn default() -> Self {
-        Self::None
-    }
 }

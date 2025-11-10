@@ -27,8 +27,8 @@ runs:
     - name: Extract UDID
       shell: bash
       run: | 
-        # Find the UDID of the iPhone 16 simulator running iOS 18.0
-        SIMULATOR_UDID=$(xcrun simctl list devices available 'iOS 18.0' | grep 'iPhone 16' | awk -F '[()]' '{print $2}' | head -n 1)
+        # Find the UDID of the iPhone 16 simulator running iOS 18
+        SIMULATOR_UDID=$(xcrun simctl list devices available 'iOS 18' | grep 'iPhone 16' | awk -F '[()]' '{print $2}' | head -n 1)
 
         # Check if a UDID was found
         if [ -n "$SIMULATOR_UDID" ]; then
@@ -37,7 +37,7 @@ runs:
             echo "IPHONE_16_SIM_UDID=$SIMULATOR_UDID" >> $GITHUB_ENV
             echo "iPhone 16 UDID stored in environment variable IPHONE_16_SIM_UDID: $IPHONE_16_SIM_UDID"
         else
-            echo "iPhone 16 simulator with iOS 18.0 not found."
+            echo "iPhone 16 simulator with iOS 18 not found."
             exit 1
         fi
 
