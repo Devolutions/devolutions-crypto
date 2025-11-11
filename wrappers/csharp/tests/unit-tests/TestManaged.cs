@@ -55,7 +55,7 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
-        public void DecryptWithKeyAsString()
+        public void DecryptWithKeyAsUtf8String()
         {
             string decryptResultString = Managed.DecryptWithKeyAsUtf8String(TestData.EncryptedData, TestData.BytesTestKey);
             Assert.AreEqual(decryptResultString, TestData.Base64TestData);
@@ -90,7 +90,7 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
-        public void DecryptWithPasswordAsString()
+        public void DecryptWithPasswordAsUtf8String()
         {
             string encryptedDataAsBase64 = "DQwCAAAAAgCoE9Y3m06QaPSAiL2qegthcm0+zZWt4fXbdqcefkzD6y8pnWsMzLkx/32t";
             string decryptResultString = Managed.DecryptWithPasswordAsUtf8String(encryptedDataAsBase64, TestData.TestPassword);
@@ -153,7 +153,7 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
-        public void EncryptWithKeyAsStringDecryptWithKeyAsString()
+        public void EncryptDecryptWithKeyAsBase64String()
         {
             byte[] encodedData = Utils.StringToUtf8ByteArray(TestData.StringTestData);
             byte[] encodedPassword = Utils.StringToUtf8ByteArray(TestData.TestPassword);
@@ -174,7 +174,7 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
-        public void EncryptWithPasswordAsString()
+        public void EncryptWithPasswordAsBase64String()
         {
             byte[] encodedDataAsUtf8ByteArray = Utils.StringToUtf8ByteArray(TestData.StringTestData);
             string encryptResultAsBase64String = Managed.EncryptWithPasswordAsBase64String(encodedDataAsUtf8ByteArray, TestData.TestPassword);
@@ -183,7 +183,7 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
-        public void EncryptWithPasswordAsStringAndDecryptWithPasswordAsString()
+        public void EncryptDecryptWithPasswordAsBase64String()
         {
             byte[] base64EncodedToUtf8ByteArray = Utils.StringToUtf8ByteArray(TestData.Base64TestData);
             string password = "pwd";

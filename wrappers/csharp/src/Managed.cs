@@ -94,20 +94,6 @@ namespace Devolutions.Cryptography
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        [Obsolete("This method has been deprecated. Use EncryptWithKeyAsBase64String instead.")]
-        public static string EncryptWithKeyAsString(string data, byte[] key, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
-        {
-            return EncryptWithKeyAsBase64String(data, key, aad, version);
-        }
-
-        /// <summary>
-        /// Encrypts the data (which will be encoded into a UTF8 byte array) with the provided key.
-        /// </summary>
-        /// <param name="data">The data to encrypt.</param>
-        /// <param name="key">The key to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional).</param>
-        /// <param name="version">The cipher version to use. (Latest is recommended).</param>
-        /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string EncryptWithKeyAsBase64String(string data, byte[] key, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             byte[] cipher = Encrypt(Utils.StringToUtf8ByteArray(data), key, aad, version);
@@ -323,20 +309,6 @@ namespace Devolutions.Cryptography
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="version">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        [Obsolete("This method has been deprecated. Use EncryptWithKeyAsBase64String instead.")]
-        public static string EncryptWithKeyAsString(byte[] data, byte[] key, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
-        {
-            return EncryptWithKeyAsBase64String(data, key, aad, version);
-        }
-
-        /// <summary>
-        /// Encrypts the data with the provided key.
-        /// </summary>
-        /// <param name="data">The data to encrypt.</param>
-        /// <param name="key">The key to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional).</param>
-        /// <param name="version">The cipher version to use. (Latest is recommended).</param>
-        /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string EncryptWithKeyAsBase64String(byte[] data, byte[] key, byte[] aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
         {
             byte[] cipher = Encrypt(data, key, aad, version);
@@ -357,21 +329,6 @@ namespace Devolutions.Cryptography
             byte[] cipher = Encrypt(data, key, aad, version);
 
             return cipher;
-        }
-
-        /// <summary>
-        /// Encrypts the data with the provided password (which will be encoded into a UTF8 byte array and derived).
-        /// </summary>
-        /// <param name="data">The data to encrypt.</param>
-        /// <param name="password">The password to use for encryption.</param>
-        /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="aad">Additional authenticated data. (Optional).</param>
-        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
-        /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        [Obsolete("This method has been deprecated. Use EncryptWithPasswordAsBase64String instead.")]
-        public static string EncryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000, byte[] aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
-        {
-            return EncryptWithPasswordAsBase64String(data, password, iterations, aad, cipherTextVersion);
         }
 
         /// <summary>
@@ -748,21 +705,6 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional).</param>
-        /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
-        /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
-        /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        [Obsolete("This method has been deprecated. Use EncryptWithPasswordAsBase64String instead.")]
-        public static string EncryptWithPasswordAsString(string data, string password, byte[] aad = null, uint iterations = 10000, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
-        {
-            return EncryptWithPasswordAsBase64String(data, password, iterations, aad, cipherTextVersion);
-        }
-
-        /// <summary>
-        /// Encrypts the data (which will be encoded into a UTF8 byte array) with the provided password (which will be encoded into a UTF8 byte array and derived).
-        /// </summary>
-        /// <param name="data">The data to encrypt.</param>
-        /// <param name="password">The password to use for encryption.</param>
         /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
@@ -896,19 +838,6 @@ namespace Devolutions.Cryptography
         /// <param name="b64data">The base 64 string to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
-        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
-        [Obsolete("This method has been deprecated. Use DecryptWithKeyAsUtf8String instead.")]
-        public static string DecryptWithKeyAsString(string b64data, byte[] key, byte[] aad = null)
-        {
-            return DecryptWithKeyAsUtf8String(b64data, key, aad);
-        }
-
-        /// <summary>
-        /// Decrypts the base64 string with the provided key.
-        /// </summary>
-        /// <param name="b64data">The base 64 string to decrypt.</param>
-        /// <param name="key">The key to use for decryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="legacyDecryptor">The fallback decryptor to use if the data is not from Devolutions Crypto.</param>
         /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
         public static string DecryptWithKeyAsUtf8String(string b64data, byte[] key, byte[] aad = null, ILegacyDecryptor legacyDecryptor = null)
@@ -939,19 +868,6 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to decrypt.</param>
         /// <param name="key">The key to use for decryption.</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
-        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
-        [Obsolete("This method has been deprecated. Use DecryptWithKeyAsUtf8String instead.")]
-        public static string DecryptWithKeyAsString(byte[] data, byte[] key, byte[] aad = null)
-        {
-            return DecryptWithKeyAsUtf8String(data, key, aad);
-        }
-
-        /// <summary>
-        /// Decrypts the data with the provided key.
-        /// </summary>
-        /// <param name="data">The data to decrypt.</param>
-        /// <param name="key">The key to use for decryption.</param>
-        /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="legacyDecryptor">The fallback decryptor to use if the data is not from Devolutions Crypto.</param>
         /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
         public static string DecryptWithKeyAsUtf8String(byte[] data, byte[] key, byte[] aad = null, ILegacyDecryptor legacyDecryptor = null)
@@ -974,20 +890,6 @@ namespace Devolutions.Cryptography
             byte[] result = Decrypt(data, key, aad, legacyDecryptor);
 
             return result;
-        }
-
-        /// <summary>
-        /// Decrypts the data with the provided password (which will be encoded into a UTF8 byte array and derived).
-        /// </summary>
-        /// <param name="data">The data to decrypt.</param>
-        /// <param name="password">The password to use for decryption.</param>
-        /// <param name="iterations">The number of iterations used to derive the password.</param>
-        /// <param name="aad">Additional authenticated data. (Optional).</param>
-        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
-        [Obsolete("This method has been deprecated. Use DecryptWithPasswordAsUtf8String instead.")]
-        public static string DecryptWithPasswordAsString(byte[] data, string password, uint iterations = 10000, byte[] aad = null)
-        {
-            return DecryptWithPasswordAsUtf8String(data, password, iterations, aad);
         }
 
         /// <summary>
@@ -1038,20 +940,6 @@ namespace Devolutions.Cryptography
             }
 
             return Utils.ByteArrayToUtf8String(result);
-        }
-
-        /// <summary>
-        /// Decrypts the base 64 data (which will be decoded to the original data) with the provided password (which will be encoded into a UTF8 byte array and derived).
-        /// </summary>
-        /// <param name="b64data">The data to decrypt.</param>
-        /// <param name="password">The password to use for decryption.</param>
-        /// <param name="iterations">The number of iterations used to derive the password.</param>
-        /// <param name="aad">Additional authenticated data. (Optional).</param>
-        /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
-        [Obsolete("This method has been deprecated. Use DecryptWithPasswordAsUtf8String instead.")]
-        public static string DecryptWithPasswordAsString(string b64data, string password, uint iterations = 10000, byte[] aad = null)
-        {
-            return DecryptWithPasswordAsUtf8String(b64data, password, iterations, aad);
         }
 
         /// <summary>
@@ -1299,23 +1187,6 @@ namespace Devolutions.Cryptography
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Generates an API key.
-        /// </summary>
-        /// <returns>An API key formated as a Guid.</returns>
-        [Obsolete("This method has been deprecated. Use Managed.GenerateKey instead.")]
-        public static Guid GenerateAPIKey()
-        {
-            byte[] apiKey = GenerateKey(16);
-
-            if (apiKey == null)
-            {
-                return Guid.Empty;
-            }
-
-            return new Guid(apiKey);
         }
 
         /// <summary>
