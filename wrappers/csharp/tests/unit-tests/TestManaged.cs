@@ -158,7 +158,7 @@ namespace Devolutions.Crypto.Tests
             byte[] encodedPassword = Utils.StringToUtf8ByteArray(TestData.TestPassword);
             string? encryptResultAsBase64String = Managed.EncryptWithKeyAsBase64String(encodedData, encodedPassword);
             Assert.IsNotNull(encryptResultAsBase64String);
-            
+
             string? decryptResult = Managed.DecryptWithKeyAsUtf8String(encryptResultAsBase64String, encodedPassword);
             Assert.AreEqual(decryptResult, TestData.StringTestData);
         }

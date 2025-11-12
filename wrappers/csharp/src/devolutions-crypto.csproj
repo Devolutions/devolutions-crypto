@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;net48</TargetFrameworks>
         <RootNamespace>devolutions_crypto</RootNamespace>
         <AssemblyName>Devolutions.Crypto</AssemblyName>
         <LangVersion>13.0</LangVersion>

@@ -84,7 +84,7 @@ namespace Devolutions.Cryptography
             }
 
             Argon2Parameters? parameters = Argon2Parameters.FromByteArray(rawParameters);
-            
+
             if (parameters == null)
             {
                 // This should never happen, we should always be able to deserialize the default parameters.
@@ -928,7 +928,7 @@ namespace Devolutions.Cryptography
                 result = Decrypt(data, key, aad);
                 return Utils.ByteArrayToUtf8String(result);
             }
-            
+
             if (exception != null)
             {
                 throw exception;
