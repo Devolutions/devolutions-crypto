@@ -14,7 +14,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to convert.</param>
         /// <returns>A byte array.</returns>
-        public static byte[] Base64StringToByteArray(string data)
+        public static byte[]? Base64StringToByteArray(string data)
         {
             if (string.IsNullOrEmpty(data))
             {
@@ -30,7 +30,7 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to convert.</param>
         /// <returns>A UTF8 encoded string.</returns>
         [Obsolete("This method has been deprecated. Use ByteArrayToUtf8String instead.")]
-        public static string ByteArrayToString(byte[] data)
+        public static string? ByteArrayToString(byte[] data)
         {
             return ByteArrayToUtf8String(data);
         }
@@ -40,7 +40,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to convert.</param>
         /// <returns>A UTF8 encoded string.</returns>
-        public static string ByteArrayToUtf8String(byte[] data)
+        public static string? ByteArrayToUtf8String(byte[]? data)
         {
             if (data == null || data.Length == 0)
             {
@@ -90,17 +90,10 @@ namespace Devolutions.Cryptography
         /// <param name="y">The second value to compare.</param>
         /// <returns>Returns false if the values are not equal is invalid or true if the values are equal. If there is an error,
         ///     it will trigger a DevolutionsCryptoException.</returns>
-        public static bool ConstantTimeEquals(string x, string y)
+        public static bool ConstantTimeEquals(string? x, string? y)
         {
-            if (x == null)
-            {
-                x = string.Empty;
-            }
-
-            if (y == null)
-            {
-                y = string.Empty;
-            }
+            x ??= string.Empty;
+            y ??= string.Empty;
 
             byte[] xBytes = Encoding.UTF8.GetBytes(x);
             byte[] yBytes = Encoding.UTF8.GetBytes(y);
@@ -130,7 +123,7 @@ namespace Devolutions.Cryptography
         /// <param name="y">The second value to compare.</param>
         /// <returns>Returns false if the values are not equal is invalid or true if the values are equal. If there is an error,
         ///     it will trigger a DevolutionsCryptoException.</returns>
-        public static bool ConstantTimeEquals(byte[] x, byte[] y)
+        public static bool ConstantTimeEquals(byte[]? x, byte[]? y)
         {
             if (x == null || y == null)
             {
@@ -153,7 +146,7 @@ namespace Devolutions.Cryptography
         /// <param name="data">The data to convert.</param>
         /// <returns>A byte array.</returns>
         [Obsolete("This method has been deprecated. Use DecodeFromBase64 instead.")]
-        public static byte[] Decode(string data)
+        public static byte[]? Decode(string data)
         {
             return DecodeFromBase64(data);
         }
@@ -163,7 +156,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="base64">The data to convert.</param>
         /// <returns>A byte array.</returns>
-        public static byte[] DecodeFromBase64(string base64)
+        public static byte[]? DecodeFromBase64(string base64)
         {
             if (string.IsNullOrEmpty(base64))
             {
@@ -179,9 +172,9 @@ namespace Devolutions.Cryptography
 
             byte[] buffer = new byte[length];
 
-            long decode_res = Native.DecodeNative(base64, (UIntPtr)base64.Length, buffer, (UIntPtr)buffer.Length);
+            long decodeResult = Native.DecodeNative(base64, (UIntPtr)base64.Length, buffer, (UIntPtr)buffer.Length);
 
-            if (decode_res == -1)
+            if (decodeResult == -1)
             {
                 return null;
             }
@@ -192,25 +185,27 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// Converts a base 64 url string to a byte array.
         /// </summary>
-        /// <param name="base64url">The data to convert.</param>
+        /// <param name="base64Url">The data to convert.</param>
         /// <returns>A byte array.</returns>
-        public static byte[] DecodeFromBase64Url(string base64url)
+        public static byte[]? DecodeFromBase64Url(string? base64Url)
         {
-            if (string.IsNullOrEmpty(base64url))
+            // sduquette 2025-11-12: Explicitly comparing base64Url to null because the NotNullWhen directive used by string.IsNullOrEmpty
+            // is not available in netstandard2.0.
+            if (base64Url == null || string.IsNullOrEmpty(base64Url))
             {
                 return null;
             }
 
-            byte[] buffer = new byte[base64url.Length];
+            byte[] buffer = new byte[base64Url.Length];
 
-            long decode_res = Native.DecodeUrlNative(base64url, (UIntPtr)base64url.Length, buffer, (UIntPtr)buffer.Length);
+            long decodeResult = Native.DecodeUrlNative(base64Url, (UIntPtr)base64Url.Length, buffer, (UIntPtr)buffer.Length);
 
-            if (decode_res == -1)
+            if (decodeResult == -1)
             {
                 return null;
             }
 
-            Array.Resize(ref buffer, (int)decode_res);
+            Array.Resize(ref buffer, (int)decodeResult);
 
             return buffer;
         }
@@ -220,18 +215,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to convert.</param>
         /// <returns>A base 64 string.</returns>
-        [Obsolete("This method has been deprecated. Use EncodeToBase64 instead.")]
-        public static string Encode(byte[] data)
-        {
-            return EncodeToBase64String(data);
-        }
-
-        /// <summary>
-        /// Converts a byte array to a base 64 encoded string.
-        /// </summary>
-        /// <param name="data">The data to convert.</param>
-        /// <returns>A base 64 string.</returns>
-        public static string EncodeToBase64String(byte[] data)
+        public static string? EncodeToBase64String(byte[]? data)
         {
             if (data == null || data.Length == 0)
             {
@@ -247,7 +231,7 @@ namespace Devolutions.Cryptography
 
             byte[] buffer = new byte[length];
 
-            long encode_res = Native.EncodeNative(data, (UIntPtr)data.Length, buffer, (UIntPtr)buffer.Length);
+            long encodeResult = Native.EncodeNative(data, (UIntPtr)data.Length, buffer, (UIntPtr)buffer.Length);
 
             return ByteArrayToUtf8String(buffer);
         }
@@ -257,7 +241,7 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to convert.</param>
         /// <returns>A base 64 url string.</returns>
-        public static string EncodeToBase64UrlString(byte[] data)
+        public static string? EncodeToBase64UrlString(byte[]? data)
         {
             if (data == null || data.Length == 0)
             {
@@ -268,9 +252,9 @@ namespace Devolutions.Cryptography
 
             byte[] buffer = new byte[length];
 
-            long encode_res = Native.EncodeUrlNative(data, (UIntPtr)data.Length, buffer, (UIntPtr)buffer.Length);
+            long encodeResult = Native.EncodeUrlNative(data, (UIntPtr)data.Length, buffer, (UIntPtr)buffer.Length);
 
-            Array.Resize(ref buffer, (int)encode_res);
+            Array.Resize(ref buffer, (int)encodeResult);
 
             return ByteArrayToUtf8String(buffer);
         }
@@ -281,9 +265,11 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="base64">The base 64 string to calculate the resulting length.</param>
         /// <returns>The original buffer length.</returns>
-        public static int GetDecodedBase64StringLength(string base64)
+        public static int GetDecodedBase64StringLength(string? base64)
         {
-            if (string.IsNullOrEmpty(base64))
+            // sduquette 2025-11-12: Explicitly comparing base64 to null because the NotNullWhen directive used by string.IsNullOrEmpty
+            // is not available in netstandard2.0.
+            if (base64 == null || string.IsNullOrEmpty(base64))
             {
                 return 0;
             }
@@ -331,11 +317,6 @@ namespace Devolutions.Cryptography
         /// <returns>The resulting base 64 buffer lentgh.</returns>
         public static int GetEncodedBase64StringLength(byte[] buffer)
         {
-            if (buffer == null)
-            {
-                return 0;
-            }
-
             return ((4 * buffer.Length / 3) + 3) & ~3;
         }
 
@@ -359,7 +340,7 @@ namespace Devolutions.Cryptography
         /// <param name="r">Block size.</param>
         /// <param name="p">Parallelism factor.</param>
         /// <returns>The resulting hash.</returns>
-        public static string ScryptSimple(byte[] password, byte[] salt, byte logN, uint r, uint p)
+        public static string? ScryptSimple(byte[] password, byte[] salt, byte logN, uint r, uint p)
         {
             if (password == null || salt == null)
             {
@@ -398,30 +379,14 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The string to convert.</param>
         /// <returns>A UTF8 string in a byte array.</returns>
-        public static byte[] StringToUtf8ByteArray(string data)
+        public static byte[] StringToUtf8ByteArray(string? data)
         {
             if (data == null)
             {
-                return null;
+                return [];
             }
 
             return Encoding.UTF8.GetBytes(data);
-        }
-
-        /// <summary>
-        /// Converts a byte array to a base 64 encoded string.
-        /// </summary>
-        /// <param name="bytes">The data to convert.</param>
-        /// <returns>A base 64 string.</returns>
-        [Obsolete("This method has been deprecated. Use EncodeToBase64 instead.")]
-        public static string ToBase64String(byte[] bytes)
-        {
-            if (bytes == null || bytes.Length == 0)
-            {
-                return null;
-            }
-
-            return Encode(bytes);
         }
 
         /// <summary>
@@ -430,7 +395,7 @@ namespace Devolutions.Cryptography
         /// <param name="data">The buffer to validate.</param>
         /// <param name="type">The data type to validate.</param>
         /// <returns>Returns true if the buffer received matches the data type.</returns>
-        public static bool ValidateHeader(byte[] data, DataType type)
+        public static bool ValidateHeader(byte[]? data, DataType type)
         {
             if (data == null)
             {
@@ -456,7 +421,7 @@ namespace Devolutions.Cryptography
         /// <returns>Returns true if the base 64 string received matches the data type.</returns>
         public static bool ValidateHeaderFromBase64(string base64, DataType type)
         {
-            byte[] data = DecodeFromBase64(base64);
+            byte[]? data = DecodeFromBase64(base64);
 
             return ValidateHeader(data, type);
         }
@@ -469,7 +434,7 @@ namespace Devolutions.Cryptography
         /// <param name="stream">The stream to validate.</param>
         /// <param name="type">The data type to validate.</param>
         /// <returns>Returns true if the stream data received matches the data type.</returns>
-        public static bool ValidateHeaderFromStream(Stream stream, DataType type)
+        public static bool ValidateHeaderFromStream(Stream? stream, DataType type)
         {
             if (stream == null)
             {

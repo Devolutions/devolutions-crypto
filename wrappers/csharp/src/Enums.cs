@@ -110,7 +110,7 @@ namespace Devolutions.Cryptography
 
         /// <summary>
         /// Error when the native library cannot be loaded
-        /// </summery>
+        /// </summary>
         NativeLibraryLoad,
 
         /// <summary>

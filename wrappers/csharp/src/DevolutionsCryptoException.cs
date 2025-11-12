@@ -13,7 +13,7 @@ namespace Devolutions.Cryptography
         /// <param name="managedError">The managed error code.</param>
         /// <param name="message">The exception message. (Optional).</param>
         /// <param name="exception">The managed exception. (Optional).</param>
-        public DevolutionsCryptoException(ManagedError managedError, string message = null, Exception exception = null) : base(message)
+        public DevolutionsCryptoException(ManagedError managedError, string? message = null, Exception? exception = null) : base(message)
         {
             this.ManagedError = managedError;
             this.ManagedException = exception;
@@ -25,7 +25,7 @@ namespace Devolutions.Cryptography
         /// <param name="nativeError">The native error code.</param>
         /// <param name="message">The exception message. (Optional).</param>
         /// <param name="exception">The managed exception. (Optional).</param>
-        public DevolutionsCryptoException(NativeError nativeError, string message = null, Exception exception = null) : base(message)
+        public DevolutionsCryptoException(NativeError nativeError, string? message = null, Exception? exception = null) : base(message)
         {
             this.NativeError = nativeError;
             this.ManagedException = exception;
@@ -39,7 +39,7 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// Gets or sets if an unknown exception happens this property will contain it..
         /// </summary>
-        public Exception ManagedException { get; set; }
+        public Exception? ManagedException { get; set; }
 
         /// <summary>
         /// Gets override to add additionnal info in the exception message.
@@ -81,10 +81,7 @@ namespace Devolutions.Cryptography
                 result = "NativeError :\r\n";
                 result = result + this.NativeError.Value.ToString() + "\r\n";
 
-                if (this.Data != null)
-                {
-                    this.Data["NativeError"] = this.NativeError.Value.ToString();
-                }
+                this.Data["NativeError"] = this.NativeError.Value.ToString();
             }
 
             if (this.ManagedError != null)
@@ -92,10 +89,7 @@ namespace Devolutions.Cryptography
                 result = "ManagedError : \r\n";
                 result = result + this.ManagedError.Value.ToString() + "\r\n";
 
-                if (this.Data != null)
-                {
-                    this.Data["ManagedError"] = this.ManagedError.Value.ToString();
-                }
+                this.Data["ManagedError"] = this.ManagedError.Value.ToString();
 
                 if (this.ManagedException != null)
                 {
