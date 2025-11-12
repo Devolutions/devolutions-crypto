@@ -8,8 +8,9 @@ namespace Devolutions.Cryptography.Signature
         /// <summary>
         /// Initializes a new instance of the <see cref="SigningPublicKey"/> class.
         /// </summary>
-        public SigningPublicKey()
+        public SigningPublicKey(byte[] payload)
         {
+            this.Payload = payload;
         }
 
         /// <summary>
@@ -24,9 +25,7 @@ namespace Devolutions.Cryptography.Signature
         /// <returns>Returns the deserialized parameters.</returns>
         public static SigningPublicKey FromByteArray(byte[] data)
         {
-            SigningPublicKey publicKey = new SigningPublicKey();
-            publicKey.Payload = data;
-
+            SigningPublicKey publicKey = new(data);
             return publicKey;
         }
 

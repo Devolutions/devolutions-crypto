@@ -16,7 +16,8 @@ namespace Devolutions.Crypto.Tests
         [TestMethod]
         public void Base64StringToByteArray()
         {
-            byte[] data = Utils.Base64StringToByteArray(TestData.Base64TestData);
+            byte[]? data = Utils.Base64StringToByteArray(TestData.Base64TestData);
+            Assert.IsNotNull(data);
             Assert.AreEqual(Convert.ToBase64String(data), Convert.ToBase64String(TestData.BytesTestData));
         }
 
@@ -24,50 +25,55 @@ namespace Devolutions.Crypto.Tests
         public void ByteArrayToString()
         {
             byte[] data = new byte[] { 0x51, 0x55, 0x4a, 0x44 };
-            string dataToUtf8String = Utils.ByteArrayToUtf8String(data);
+            string? dataToUtf8String = Utils.ByteArrayToUtf8String(data);
             Assert.AreEqual(dataToUtf8String, TestData.Base64TestData);
         }
 
         [TestMethod]
         public void ConstantTimeEqual()
         {
-            byte[] x = { 0, 1, 2 };
-            byte[] y = { 4, 5, 6 };
-            byte[] z = { 0, 1, 2, 3 };
+            byte[] x = [0, 1, 2];
+            byte[] y = [4, 5, 6];
+            byte[] z = [0, 1, 2, 3];
 
             Assert.IsTrue(Utils.ConstantTimeEquals(x, x));
-            Assert.IsTrue(!Utils.ConstantTimeEquals(x, y));
-            Assert.IsTrue(!Utils.ConstantTimeEquals(x, z));
-            Assert.IsTrue(!Utils.ConstantTimeEquals(y, x));
+            Assert.IsFalse(Utils.ConstantTimeEquals(x, y));
+            Assert.IsFalse(Utils.ConstantTimeEquals(x, z));
+            Assert.IsFalse(Utils.ConstantTimeEquals(y, x));
             Assert.IsTrue(Utils.ConstantTimeEquals(y, y));
-            Assert.IsTrue(!Utils.ConstantTimeEquals(y, z));
-            Assert.IsTrue(!Utils.ConstantTimeEquals(z, x));
-            Assert.IsTrue(!Utils.ConstantTimeEquals(z, y));
+            Assert.IsFalse(Utils.ConstantTimeEquals(y, z));
+            Assert.IsFalse(Utils.ConstantTimeEquals(z, x));
+            Assert.IsFalse(Utils.ConstantTimeEquals(z, y));
             Assert.IsTrue(Utils.ConstantTimeEquals(z, z));
         }
 
         [TestMethod]
         public void Decode()
         {
-            byte[] decodedData = Utils.DecodeFromBase64(TestData.Base64TestData);
+            byte[]? decodedData = Utils.DecodeFromBase64(TestData.Base64TestData);
+            Assert.IsNotNull(decodedData);
             Assert.AreEqual(Convert.ToBase64String(decodedData), Convert.ToBase64String(TestData.BytesTestData));
 
-            byte[] decodeDataNoPad = Utils.DecodeFromBase64(TestData.Base64TestDataNoPad);
+            byte[]? decodeDataNoPad = Utils.DecodeFromBase64(TestData.Base64TestDataNoPad);
+            Assert.IsNotNull(decodeDataNoPad);
             Assert.AreEqual(Encoding.UTF8.GetString(decodeDataNoPad), TestData.StringTestDataNoPad);
 
-            byte[] decodeDataInvalid = Utils.DecodeFromBase64("====");
+            byte[]? decodeDataInvalid = Utils.DecodeFromBase64("====");
             Assert.IsNull(decodeDataInvalid);
 
-            byte[] decodeDataInvalid2 = Utils.DecodeFromBase64("=");
+            byte[]? decodeDataInvalid2 = Utils.DecodeFromBase64("=");
             Assert.IsNull(decodeDataInvalid2);
         }
 
         [TestMethod]
         public void DecodeUrl()
         {
-            byte[] d1 = Utils.DecodeFromBase64Url(TestData.Base64Url1);
-            byte[] d2 = Utils.DecodeFromBase64Url(TestData.Base64Url2);
-            byte[] d3 = Utils.DecodeFromBase64Url(TestData.Base64Url3);
+            byte[]? d1 = Utils.DecodeFromBase64Url(TestData.Base64Url1);
+            byte[]? d2 = Utils.DecodeFromBase64Url(TestData.Base64Url2);
+            byte[]? d3 = Utils.DecodeFromBase64Url(TestData.Base64Url3);
+            Assert.IsNotNull(d1);
+            Assert.IsNotNull(d2);
+            Assert.IsNotNull(d3);
             Assert.AreEqual(Convert.ToBase64String(d1), Convert.ToBase64String(TestData.Base64UrlBytes1));
             Assert.AreEqual(Convert.ToBase64String(d2), Convert.ToBase64String(TestData.Base64UrlBytes2));
             Assert.AreEqual(Convert.ToBase64String(d3), Convert.ToBase64String(TestData.Base64UrlBytes3));
@@ -76,16 +82,16 @@ namespace Devolutions.Crypto.Tests
         [TestMethod]
         public void Encode()
         {
-            string y = Utils.EncodeToBase64String(TestData.BytesTestData);
+            string? y = Utils.EncodeToBase64String(TestData.BytesTestData);
             Assert.AreEqual(y, TestData.Base64TestData);
         }
 
         [TestMethod]
         public void EncodeUrl()
         {
-            string e1 = Utils.EncodeToBase64UrlString(TestData.Base64UrlBytes1);
-            string e2 = Utils.EncodeToBase64UrlString(TestData.Base64UrlBytes2);
-            string e3 = Utils.EncodeToBase64UrlString(TestData.Base64UrlBytes3);
+            string? e1 = Utils.EncodeToBase64UrlString(TestData.Base64UrlBytes1);
+            string? e2 = Utils.EncodeToBase64UrlString(TestData.Base64UrlBytes2);
+            string? e3 = Utils.EncodeToBase64UrlString(TestData.Base64UrlBytes3);
             Assert.AreEqual(e1, TestData.Base64Url1);
             Assert.AreEqual(e2, TestData.Base64Url2);
             Assert.AreEqual(e3, TestData.Base64Url3);
@@ -102,8 +108,13 @@ namespace Devolutions.Crypto.Tests
             Assert.IsTrue(Utils.GetDecodedBase64StringLength(null) == this.GetDotNetBase64Length(null));
         }
 
-        public int GetDotNetBase64Length(string base64)
+        public int GetDotNetBase64Length(string? base64)
         {
+            if (base64 == null)
+            {
+                return 0;
+            }
+
             try
             {
                 byte[] test = Convert.FromBase64String(base64);
@@ -129,7 +140,7 @@ namespace Devolutions.Crypto.Tests
             byte[] password = Utils.StringToUtf8ByteArray(TestData.TestPassword);
             byte[] salt = TestData.Salt;
 
-            string hash = Utils.ScryptSimple(password, salt, 10, 8, 1);
+            string? hash = Utils.ScryptSimple(password, salt, 10, 8, 1);
 
             Assert.AreEqual(TestData.ScryptHash, hash);
         }
@@ -153,7 +164,7 @@ namespace Devolutions.Crypto.Tests
             byte[] dataToEncrypt = Utils.StringToUtf8ByteArray(TestData.Base64TestData);
             byte[] password = Utils.StringToUtf8ByteArray(TestData.TestPassword);
 
-            byte[] encryptResult = Managed.Encrypt(dataToEncrypt, password);
+            byte[]? encryptResult = Managed.Encrypt(dataToEncrypt, password);
 
             Assert.IsFalse(Utils.ValidateHeader(dataToEncrypt, DataType.Cipher));
             Assert.IsTrue(Utils.ValidateHeader(encryptResult, DataType.Cipher));
@@ -176,7 +187,7 @@ namespace Devolutions.Crypto.Tests
 
             stream.Close();
 
-            DevolutionsCryptoException exception = null;
+            DevolutionsCryptoException? exception = null;
 
             try
             {
@@ -186,6 +197,9 @@ namespace Devolutions.Crypto.Tests
             {
                 exception = ex;
             }
+
+            Assert.IsNotNull(exception);
+            Assert.IsNotNull(exception.ManagedException);
 
             // Xamarin has a space between Cannot (Can not)
             bool validException = exception.ManagedException.Message.Contains("Cannot access a closed Stream.")
@@ -212,7 +226,7 @@ namespace Devolutions.Crypto.Tests
         {
             Stream stream = new UnReadableStream(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
 
-            DevolutionsCryptoException exception = null;
+            DevolutionsCryptoException? exception = null;
 
             try
             {
@@ -223,6 +237,7 @@ namespace Devolutions.Crypto.Tests
                 exception = ex;
             }
 
+            Assert.IsNotNull(exception);
             Assert.AreEqual(exception.ManagedError, ManagedError.CanNotReadStream);
         }
 
@@ -231,7 +246,7 @@ namespace Devolutions.Crypto.Tests
         {
             Stream stream = new UnSeekableStream(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
 
-            DevolutionsCryptoException exception = null;
+            DevolutionsCryptoException? exception = null;
 
             try
             {
@@ -242,6 +257,7 @@ namespace Devolutions.Crypto.Tests
                 exception = ex;
             }
 
+            Assert.IsNotNull(exception);
             Assert.AreEqual(exception.ManagedError, ManagedError.CanNotSeekStream);
         }
 

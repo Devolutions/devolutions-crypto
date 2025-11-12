@@ -3,7 +3,6 @@
 namespace Devolutions.Crypto.Tests
 {
     using System;
-    using System.IO;
     using System.Security.Cryptography;
     using System.Text;
 
@@ -17,11 +16,11 @@ namespace Devolutions.Crypto.Tests
         [TestMethod]
         public void TestLegacyDecryptor()
         {
-            TestDecryptor legacy = new TestDecryptor(Utils.DecodeFromBase64("TErOq+UuM6AjF8SAUVmOWg=="));
+            TestDecryptor legacy = new TestDecryptor(Utils.DecodeFromBase64("TErOq+UuM6AjF8SAUVmOWg==")!);
 
             string base64Data = "TuOx/rB+iwGrxpdbhaRyc3kphNIb4feEWLzHZZF0+21OE7hnTcLf1JiuUxLoRR1+";
-            byte[] data = Utils.DecodeFromBase64(base64Data);
-            byte[] key = Utils.DecodeFromBase64("5toYYi+R4MH/ZV1W0dCQ2C8xRYtgwFrmIR2qfEQRP6k=");
+            byte[] data = Utils.DecodeFromBase64(base64Data)!;
+            byte[] key = Utils.DecodeFromBase64("5toYYi+R4MH/ZV1W0dCQ2C8xRYtgwFrmIR2qfEQRP6k=")!;
 
             Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.Decrypt(data, key, legacyDecryptor: legacy)));
             Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(data, key, legacyDecryptor: legacy)));
@@ -34,11 +33,11 @@ namespace Devolutions.Crypto.Tests
         [TestMethod]
         public void TestDecryptionWithLegacyDecryptor()
         {
-            TestDecryptor legacy = new TestDecryptor(Utils.DecodeFromBase64("TErOq+UuM6AjF8SAUVmOWg=="));
+            TestDecryptor legacy = new TestDecryptor(Utils.DecodeFromBase64("TErOq+UuM6AjF8SAUVmOWg==")!);
 
             string base64Data = "DQwCAAEAAgDiTIrZApcji3I3pDfBADJ6sMa+iXfpdxRwIf7RHot0XNqOCLv5BlMi5RzezdHl+5NYBwvm//SDomwk";
-            byte[] data = Utils.DecodeFromBase64(base64Data);
-            byte[] key = Utils.DecodeFromBase64("XCF4aJBny9LHFmUBt8zha5O2oOVttykWKrmUl4ujlVg=");
+            byte[] data = Utils.DecodeFromBase64(base64Data)!;
+            byte[] key = Utils.DecodeFromBase64("XCF4aJBny9LHFmUBt8zha5O2oOVttykWKrmUl4ujlVg=")!;
 
             Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.Decrypt(data, key, legacyDecryptor: legacy)));
             Assert.IsTrue(CompareArrays(Encoding.UTF8.GetBytes("A test Ciphertext!"), Managed.DecryptWithKey(data, key, legacyDecryptor: legacy)));
@@ -51,8 +50,8 @@ namespace Devolutions.Crypto.Tests
         [TestMethod]
         public void TestLegacyHasher()
         {
-            byte[] hash = Utils.DecodeFromBase64("fjpYZE/4RowWaTEIwZ7VODtsmMfMvCtqWUSVq7N6NFPsT/dbl3sjhnBmUELhiNfdfX3CZNLbg8NwiWy3cWgLeQ==");
-            byte[] salt = Utils.DecodeFromBase64("JOF9bCSdcNWf6mBZbZ0Vulw7+huwUXVC1rulPMT4XQy/riMI6UbHSDJR11LWokHoctPueavXQfRlD1Xfn0sdwQ==");
+            byte[] hash = Utils.DecodeFromBase64("fjpYZE/4RowWaTEIwZ7VODtsmMfMvCtqWUSVq7N6NFPsT/dbl3sjhnBmUELhiNfdfX3CZNLbg8NwiWy3cWgLeQ==")!;
+            byte[] salt = Utils.DecodeFromBase64("JOF9bCSdcNWf6mBZbZ0Vulw7+huwUXVC1rulPMT4XQy/riMI6UbHSDJR11LWokHoctPueavXQfRlD1Xfn0sdwQ==")!;
 
             TestHasher legacy = new TestHasher(salt);
 
@@ -63,8 +62,8 @@ namespace Devolutions.Crypto.Tests
         [TestMethod]
         public void TestVerifyPasswordWithLegacyHasher()
         {
-            byte[] hash = Utils.DecodeFromBase64("DQwDAAAAAQAQJwAAhCyuG8U5NLG7Ik6jj1CiiiRXapGS6wBpbGXNJYrQQIVEqBRYhJbOj2MPB90LX1GKuYU4jWQkbof1nErbmcRGag==");
-            byte[] salt = Utils.DecodeFromBase64("JOF9bCSdcNWf6mBZbZ0Vulw7+huwUXVC1rulPMT4XQy/riMI6UbHSDJR11LWokHoctPueavXQfRlD1Xfn0sdwQ==");
+            byte[] hash = Utils.DecodeFromBase64("DQwDAAAAAQAQJwAAhCyuG8U5NLG7Ik6jj1CiiiRXapGS6wBpbGXNJYrQQIVEqBRYhJbOj2MPB90LX1GKuYU4jWQkbof1nErbmcRGag==")!;
+            byte[] salt = Utils.DecodeFromBase64("JOF9bCSdcNWf6mBZbZ0Vulw7+huwUXVC1rulPMT4XQy/riMI6UbHSDJR11LWokHoctPueavXQfRlD1Xfn0sdwQ==")!;
 
             TestHasher legacy = new TestHasher(salt);
 
@@ -72,7 +71,7 @@ namespace Devolutions.Crypto.Tests
             Assert.IsFalse(Managed.VerifyPassword(Encoding.UTF8.GetBytes("Wrong password!"), hash, legacy));
         }
 
-        private static bool CompareArrays(byte[] a1, byte[] a2)
+        private static bool CompareArrays(byte[]? a1, byte[]? a2)
         {
             if (a1 == null || a2 == null || a1.Length != a2.Length)
             {

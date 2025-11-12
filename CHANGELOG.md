@@ -10,9 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Multiple functions, such as `generate_key` and `hash_password`, now return a `Result` due to the `rand` library upgrade.
 
+## Added
+
+- C#: Nullable annotations were added for nullable reference types.
+
 ### Removed
 
-- Removed `EncryptWithKeyAsString`, `EncryptWithPasswordAsString`, `DecryptWithKeyAsString`, `DecryptWithPasswordAsString`,
+- C#: Removed `EncryptWithKeyAsString`, `EncryptWithPasswordAsString`, `DecryptWithKeyAsString`, `DecryptWithPasswordAsString`,
   `GenerateAPIKey`.
 
 ## [0.9.2] - 2025-01-20

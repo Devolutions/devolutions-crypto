@@ -12,10 +12,10 @@ namespace Devolutions.Crypto.Tests
         [TestMethod]
         public void EncryptStream()
         {
-            byte[] base64DataAsUtf8ByteArray = Utils.Base64StringToByteArray(TestData.Base64TestDataStream);
+            byte[] base64DataAsUtf8ByteArray = Utils.Base64StringToByteArray(TestData.Base64TestDataStream)!;
 
             using MemoryStream ms = new MemoryStream();
-            using (EncryptionStream ec = new EncryptionStream(TestData.BytesTestKey, Array.Empty<byte>(), 1000, false, 0, ms))
+            using (EncryptionStream ec = new EncryptionStream(TestData.BytesTestKey, [], 1000, false, 0, ms))
             {
                 byte[] header = ec.GetHeader();
 
@@ -35,13 +35,13 @@ namespace Devolutions.Crypto.Tests
         [TestMethod]
         public void DecryptStream()
         {
-            byte[] base64DataAsUtf8ByteArray = Utils.Base64StringToByteArray(TestData.Base64TestDataStreamEncrypted);
+            byte[] base64DataAsUtf8ByteArray = Utils.Base64StringToByteArray(TestData.Base64TestDataStreamEncrypted)!;
 
             using MemoryStream ms = new MemoryStream();
 
-            byte[] header = Utils.Base64StringToByteArray((TestData.Base64HeaderDataStreamEncrypted));
+            byte[] header = Utils.Base64StringToByteArray(TestData.Base64HeaderDataStreamEncrypted)!;
             using (DecryptionStream ec =
-                   new DecryptionStream(TestData.BytesTestKey, Array.Empty<byte>(), header, false, ms, false))
+                   new DecryptionStream(TestData.BytesTestKey, [], header, false, ms, false))
             {
                 Assert.IsTrue(Utils.ValidateHeader(header, DataType.OnlineCiphertext));
 

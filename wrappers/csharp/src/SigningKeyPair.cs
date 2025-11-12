@@ -10,8 +10,9 @@ namespace Devolutions.Cryptography.Signature
         /// <summary>
         /// Initializes a new instance of the <see cref="SigningKeyPair"/> class.
         /// </summary>
-        public SigningKeyPair()
+        public SigningKeyPair(byte[] payload)
         {
+            this.Payload = payload;
         }
 
         /// <summary>
@@ -26,9 +27,7 @@ namespace Devolutions.Cryptography.Signature
         /// <returns>Returns the deserialized parameters.</returns>
         public static SigningKeyPair FromByteArray(byte[] data)
         {
-            SigningKeyPair keypair = new SigningKeyPair();
-            keypair.Payload = data;
-
+            SigningKeyPair keypair = new SigningKeyPair(data);
             return keypair;
         }
 

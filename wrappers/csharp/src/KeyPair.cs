@@ -10,12 +10,12 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// Gets or sets the private key.
         /// </summary>
-        public byte[] PrivateKey { get; set; }
+        public byte[]? PrivateKey { get; set; }
 
         /// <summary>
         /// Gets the private key as base 64 string.
         /// </summary>
-        public string PrivateKeyString
+        public string? PrivateKeyString
         {
             get
             {
@@ -31,12 +31,12 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// Gets or sets the public key.
         /// </summary>
-        public byte[] PublicKey { get; set; }
+        public byte[]? PublicKey { get; set; }
 
         /// <summary>
         /// Gets the public key key as base 64 string.
         /// </summary>
-        public string PublicKeyString
+        public string? PublicKeyString
         {
             get
             {

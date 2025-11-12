@@ -31,13 +31,7 @@ namespace Devolutions.Cryptography.Argon2
         /// <summary>
         /// Gets the size of the raw Argon2 data.
         /// </summary>
-        public static long NativeSize
-        {
-            get
-            {
-                return Native.GetDefaultArgon2ParametersSizeNative();
-            }
-        }
+        public static long NativeSize => Native.GetDefaultArgon2ParametersSizeNative();
 
         /// <summary>
         /// Gets or sets the number of iterations over the memory.
@@ -62,7 +56,7 @@ namespace Devolutions.Cryptography.Argon2
         /// <summary>
         /// Gets or sets the associated data.
         /// </summary>
-        internal byte[] AssociatedData { get; set; }
+        internal byte[]? AssociatedData { get; set; }
 
         /// <summary>
         /// Gets or sets the devolutions crypto version.
@@ -72,7 +66,7 @@ namespace Devolutions.Cryptography.Argon2
         /// <summary>
         /// Gets or sets the salt used by the algorithm.
         /// </summary>
-        internal byte[] Salt { get; set; }
+        internal byte[]? Salt { get; set; }
 
         /// <summary>
         /// Gets or sets the Argon2 variant used by the algorithm.
@@ -89,7 +83,7 @@ namespace Devolutions.Cryptography.Argon2
         /// </summary>
         /// <param name="data">The data to deserialize.</param>
         /// <returns>Returns the deserialized parameters.</returns>
-        public static Argon2Parameters FromByteArray(byte[] data)
+        public static Argon2Parameters? FromByteArray(byte[]? data)
         {
             if (data == null)
             {
@@ -281,7 +275,7 @@ namespace Devolutions.Cryptography.Argon2
                 // === Salt Length ===
                 if (this.Salt == null)
                 {
-                    this.Salt = Array.Empty<byte>();
+                    this.Salt = [];
                 }
 
                 byte[] saltLength = BitConverter.GetBytes(this.Salt.Length);

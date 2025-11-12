@@ -7,19 +7,14 @@ namespace Devolutions.Cryptography
         : Stream, IDisposable
     {
         private UIntPtr _native_ptr = UIntPtr.Zero;
-        private readonly int _chunkLength;
-        private readonly int _tagLength;
         private bool _finalBlockTransformed = false;
         private readonly bool _leaveOpen;
 
-        public int ChunkLength { get { return _chunkLength; } }
+        public int ChunkLength { get; }
 
-        public int TagLength { get { return _tagLength; } }
+        public int TagLength { get; }
 
-        public bool HasFlushedFinalBlock
-        {
-            get { return _finalBlockTransformed; }
-        }
+        public bool HasFlushedFinalBlock => _finalBlockTransformed;
 
         private readonly byte[] _inputBuffer;
 
@@ -33,7 +28,7 @@ namespace Devolutions.Cryptography
 
         public EncryptionStream(byte[] key, byte[] aad, int chunkLength, bool asymmetric, int version, Stream outputStream, bool leaveOpen)
         {
-            _chunkLength = chunkLength;
+            ChunkLength = chunkLength;
             _outputStream = outputStream;
             _leaveOpen = leaveOpen;
 
@@ -51,7 +46,7 @@ namespace Devolutions.Cryptography
                 Utils.HandleError(tagSize);
             }
 
-            _tagLength = (int)tagSize;
+            TagLength = (int)tagSize;
 
             _inputBuffer = new byte[chunkLength];
         }
@@ -108,7 +103,6 @@ namespace Devolutions.Cryptography
 
         public override void Flush()
         {
-            return;
         }
 
         public override int Read(byte[] buffer, int offset, int count)

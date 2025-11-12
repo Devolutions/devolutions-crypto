@@ -52,8 +52,8 @@ namespace Devolutions.Cryptography
 
             Version assemblyVersion = assembly.GetName().Version;
             Version managedVersion = Version.Parse(ManagedVersion);
-            
-            if(managedVersion.Revision == -1)
+
+            if (managedVersion.Revision == -1)
             {
                 managedVersion = Version.Parse(ManagedVersion + ".0");
             }
@@ -68,7 +68,7 @@ namespace Devolutions.Cryptography
         }
 
         [Obsolete("This method has been deprecated. Use Managed.Decrypt instead.")]
-        public static byte[] Decrypt(byte[] data, byte[] key)
+        public static byte[]? Decrypt(byte[] data, byte[] key)
         {
             return Managed.Decrypt(data, key);
         }
@@ -86,7 +86,7 @@ namespace Devolutions.Cryptography
         }
 
         [Obsolete("This method has been deprecated. Use Managed.Encrypt instead.")]
-        public static byte[] Encrypt(byte[] data, byte[] key, uint version = 0)
+        public static byte[]? Encrypt(byte[] data, byte[] key, uint version = 0)
         {
             return Managed.Encrypt(data, key, null, (CipherTextVersion)version);
         }

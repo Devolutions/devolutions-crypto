@@ -15,7 +15,8 @@ namespace Devolutions.Crypto.Tests
         [TestMethod]
         public void FromByteArray()
         {
-            Argon2Parameters parameters = Argon2Parameters.FromByteArray(Convert.FromBase64String(TestData.Argon2DefaultParametersb64));
+            Argon2Parameters? parameters = Argon2Parameters.FromByteArray(Convert.FromBase64String(TestData.Argon2DefaultParametersb64));
+            Assert.IsNotNull(parameters);
             Assert.IsTrue(parameters.Iterations == 2);
             Assert.IsTrue(parameters.Lanes == 1);
             Assert.IsTrue(parameters.Length == 32);

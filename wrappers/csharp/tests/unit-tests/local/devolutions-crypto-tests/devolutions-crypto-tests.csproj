@@ -2,6 +2,7 @@
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <EnableMicrosoftTestingExtensionsCrashDump>true</EnableMicrosoftTestingExtensionsCrashDump>
+      <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
         <Compile Include="..\..\*.cs" />
