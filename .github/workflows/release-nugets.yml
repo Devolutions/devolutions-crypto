@@ -15,6 +15,8 @@ jobs:
   deploy:
     environment: publish
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
 
     steps:
     - uses: actions/checkout@v4
@@ -57,10 +59,16 @@ jobs:
         version=$(grep "version" config.txt | sed -E 's/version = "(.*)"/\1/')
         echo "version=$version" >> $GITHUB_OUTPUT
 
+    - name: NuGet login (OIDC)
+      id: nuget-login
+      uses: NuGet/login@v1
+      with:
+        user: ${{ secrets.NUGET_BOT_USERNAME }}
+
     - name: Publish Core NuGet
       if: ${{ inputs.publish_core_nuget }}
       run: |
-        COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Core.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
+        COMMAND="dotnet nuget push ./devolutions-crypto-nugets/Devolutions.Crypto.Core.*.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json"
 
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           echo "Dry Run : True"
@@ -70,7 +78,7 @@ jobs:
 
         echo "Running : $COMMAND"
 
-        if [ "${{ inputs.publish_dry_run }}" != "true" ]; then # if not dry run, actually run the command
+        if [ "${{ inputs.publish_dry_run }}" != "true" ]; then
           eval "$COMMAND"
 
           git tag "nuget-v${{ steps.version.outputs.version }}"
