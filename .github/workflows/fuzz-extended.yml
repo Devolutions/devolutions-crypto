@@ -39,7 +39,7 @@ jobs:
         working-directory: ./fuzz
         run: |
           DURATION=${{ inputs.duration || '300' }}
-          ./run_all_fuzz_tests.sh $DURATION
+          bash run_all_fuzz_tests.sh $DURATION
 
       - name: Save corpus cache
         if: always()
