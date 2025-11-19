@@ -2,66 +2,66 @@ import {
   KeyPair, PublicKey, PrivateKey, Argon2Parameters,
   generateKey, generateKeyPair, encryptAsymmetric, decryptAsymmetric, mixKeyExchange
 } from 'devolutions-crypto'
-import { expect } from 'chai'
-import { describe, it } from 'mocha'
+import { describe, test } from 'node:test'
+import assert from 'node:assert/strict'
 
 const encoder: TextEncoder = new TextEncoder()
 
 describe('generateKeyPair', () => {
-  it('should generate a random keypair', () => {
+  test('should generate a random keypair', () => {
     const keypair: KeyPair = generateKeyPair()
-    expect(keypair.private.bytes).to.not.have.lengthOf(0)
-    expect(keypair.public.bytes).to.not.have.lengthOf(0)
-    expect(keypair.private).to.not.eql(keypair.public)
+    assert.notStrictEqual(keypair.private.bytes.length, 0)
+    assert.notStrictEqual(keypair.public.bytes.length, 0)
+    assert.notDeepStrictEqual(keypair.private, keypair.public)
   })
 })
 
 describe('asymmetricEncrypt/asymmetricDecrypt', () => {
-  it('should be able to encrypt and decrypt', () => {
+  test('should be able to encrypt and decrypt', () => {
     const input: Uint8Array = encoder.encode('This is some test data')
     const keypair: KeyPair = generateKeyPair()
     const encrypted: Uint8Array = encryptAsymmetric(input, keypair.public)
     const decrypted: Uint8Array = decryptAsymmetric(encrypted, keypair.private)
-    expect(encrypted).to.not.contains(input)
-    expect(decrypted).to.eql(input)
+    assert.notDeepStrictEqual(encrypted, input)
+    assert.deepStrictEqual(decrypted, input)
   })
 
-  it('should be able to encrypt and decrypt with an AAD', () => {
+  test('should be able to encrypt and decrypt with an AAD', () => {
     const input: Uint8Array = encoder.encode('This is some test data')
     const aad: Uint8Array = encoder.encode('This is some public data')
     const keypair: KeyPair = generateKeyPair()
     const encrypted: Uint8Array = encryptAsymmetric(input, keypair.public, aad)
     const decrypted: Uint8Array = decryptAsymmetric(encrypted, keypair.private, aad)
-    expect(encrypted).to.not.contains(input)
-    expect(decrypted).to.eql(input)
+    assert.notDeepStrictEqual(encrypted, input)
+    assert.deepStrictEqual(decrypted, input)
   })
 
-  it('should fail if AAD is invalid', () => {
+  test('should fail if AAD is invalid', () => {
     const input: Uint8Array = encoder.encode('This is some test data')
     const aad: Uint8Array = encoder.encode('This is some public data')
     const wrongAad: Uint8Array = encoder.encode('this is some public data')
     const keypair: KeyPair = generateKeyPair()
     const encrypted: Uint8Array = encryptAsymmetric(input, keypair.public, aad)
 
-    expect(() => decryptAsymmetric(encrypted, keypair.private)).to.throw()
-    expect(() => decryptAsymmetric(encrypted, keypair.private, wrongAad)).to.throw()
+    assert.throws(() => decryptAsymmetric(encrypted, keypair.private))
+    assert.throws(() => decryptAsymmetric(encrypted, keypair.private, wrongAad))
   })
 })
 
 describe('mixKeyExchange', () => {
-  it('should give the same 32 byte shared key', () => {
+  test('should give the same 32 byte shared key', () => {
     const bobKeyPair: KeyPair = generateKeyPair()
     const aliceKeyPair: KeyPair = generateKeyPair()
 
     const bobShared: Uint8Array = mixKeyExchange(bobKeyPair.private, aliceKeyPair.public)
     const aliceShared: Uint8Array = mixKeyExchange(aliceKeyPair.private, bobKeyPair.public)
 
-    expect(bobShared).to.have.lengthOf(32)
-    expect(bobShared).to.not.eql(new Array(32).fill(0))
-    expect(bobShared).to.eql(aliceShared)
+    assert.strictEqual(bobShared.length, 32)
+    assert.notDeepStrictEqual(bobShared, new Uint8Array(32))
+    assert.deepStrictEqual(bobShared, aliceShared)
   })
 
-  it('should not give the same 32 byte shared key', () => {
+  test('should not give the same 32 byte shared key', () => {
     const bobKeyPair: KeyPair = generateKeyPair()
     const aliceKeyPair: KeyPair = generateKeyPair()
     const eveKeyPair: KeyPair = generateKeyPair()
@@ -72,15 +72,15 @@ describe('mixKeyExchange', () => {
     const eveBobShared: Uint8Array = mixKeyExchange(eveKeyPair.private, bobKeyPair.public)
     const eveAliceShared: Uint8Array = mixKeyExchange(eveKeyPair.private, aliceKeyPair.public)
 
-    expect(eveBobShared).to.not.eql(bobShared)
-    expect(eveBobShared).to.not.eql(aliceShared)
-    expect(eveAliceShared).to.not.eql(bobShared)
-    expect(eveAliceShared).to.not.eql(aliceShared)
+    assert.notDeepStrictEqual(eveBobShared, bobShared)
+    assert.notDeepStrictEqual(eveBobShared, aliceShared)
+    assert.notDeepStrictEqual(eveAliceShared, bobShared)
+    assert.notDeepStrictEqual(eveAliceShared, aliceShared)
   })
 })
 
 describe('KeyPair serialization', () => {
-  it('should return the same keypair', () => {
+  test('should return the same keypair', () => {
     const keypair = generateKeyPair()
     const privateKeyBytes: Uint8Array = keypair.private.bytes
     const publicKeyBytes: Uint8Array = keypair.public.bytes
@@ -88,20 +88,20 @@ describe('KeyPair serialization', () => {
     const privateKey: PrivateKey = PrivateKey.fromBytes(privateKeyBytes)
     const publicKey: PublicKey = PublicKey.fromBytes(publicKeyBytes)
 
-    expect(privateKey.bytes).to.eql(privateKeyBytes)
-    expect(publicKey.bytes).to.eql(publicKeyBytes)
+    assert.deepStrictEqual(privateKey.bytes, privateKeyBytes)
+    assert.deepStrictEqual(publicKey.bytes, publicKeyBytes)
   })
 
-  it('should not allow to parse a public key as a private key and vis-versa', () => {
+  test('should not allow to parse a public key as a private key and vis-versa', () => {
     const keypair = generateKeyPair()
     const privateKeyBytes: Uint8Array = keypair.private.bytes
     const publicKeyBytes: Uint8Array = keypair.public.bytes
 
     const symmetricKey: Uint8Array = generateKey()
 
-    expect(() => PrivateKey.fromBytes(publicKeyBytes)).to.throw()
-    expect(() => PublicKey.fromBytes(privateKeyBytes)).to.throw()
-    expect(() => PrivateKey.fromBytes(symmetricKey)).to.throw()
-    expect(() => PublicKey.fromBytes(symmetricKey)).to.throw()
+    assert.throws(() => PrivateKey.fromBytes(publicKeyBytes))
+    assert.throws(() => PublicKey.fromBytes(privateKeyBytes))
+    assert.throws(() => PrivateKey.fromBytes(symmetricKey))
+    assert.throws(() => PublicKey.fromBytes(symmetricKey))
   })
 })
