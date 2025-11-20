@@ -1,148 +1,148 @@
 import { generateKey, deriveKeyPbkdf2, validateHeader, base64encode, base64decode, base64urlEncode, base64urlDecode, DataType, Argon2Parameters, deriveKeyArgon2 } from 'devolutions-crypto'
-import { expect } from 'chai'
-import { describe, it } from 'mocha'
+import { describe, test } from 'node:test'
+import assert from 'node:assert/strict'
 
 const encoder: TextEncoder = new TextEncoder()
 const decoder: TextDecoder = new TextDecoder()
 
 describe('generateKey', () => {
-  it('should return a 32 bytes random key by default', () => {
+  test('should return a 32 bytes random key by default', () => {
     const result: Uint8Array = generateKey()
-    expect(result).to.have.lengthOf(32)
-    expect(result).to.not.eql(new Array(32).fill(0))
+    assert.strictEqual(result.length, 32)
+    assert.notDeepStrictEqual(result, new Uint8Array(32))
   })
 
-  it('should return a 41 bytes random key', () => {
+  test('should return a 41 bytes random key', () => {
     const result: Uint8Array = generateKey(41)
-    expect(result).to.have.lengthOf(41)
-    expect(result).to.not.eql(new Array(41).fill(0))
+    assert.strictEqual(result.length, 41)
+    assert.notDeepStrictEqual(result, new Uint8Array(41))
   })
 
-  it('should return different keys', () => {
+  test('should return different keys', () => {
     const result1: Uint8Array = generateKey()
     const result2: Uint8Array = generateKey()
-    expect(result1).to.not.eql(result2)
+    assert.notDeepStrictEqual(result1, result2)
   })
 })
 
 describe('deriveKeyPbkdf2', () => {
-  it('should derive a key of 32 bytes', () => {
+  test('should derive a key of 32 bytes', () => {
     const result: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), null, 10)
-    expect(result).to.have.lengthOf(32)
-    expect(result).to.not.eql(new Array(32).fill(0))
+    assert.strictEqual(result.length, 32)
+    assert.notDeepStrictEqual(result, new Uint8Array(32))
   })
 
-  it('should derive a key of 41 bytes', () => {
+  test('should derive a key of 41 bytes', () => {
     const result: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), null, 10, 41)
-    expect(result).to.have.lengthOf(41)
-    expect(result).to.not.eql(new Array(41).fill(0))
+    assert.strictEqual(result.length, 41)
+    assert.notDeepStrictEqual(result, new Uint8Array(41))
   })
 
-  it('should produce the same key', () => {
+  test('should produce the same key', () => {
     const result1: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), null, 10)
     const result2: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), null, 10)
-    expect(result1).to.have.lengthOf(32)
-    expect(result1).to.not.eql(new Array(41).fill(0))
-    expect(result2).to.eql(result2)
+    assert.strictEqual(result1.length, 32)
+    assert.notDeepStrictEqual(result1, new Uint8Array(41))
+    assert.deepStrictEqual(result1, result2)
   })
 
-  it('should produce different keys', () => {
+  test('should produce different keys', () => {
     const result: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), encoder.encode('thisisasalt'), 10)
     const differentPass: Uint8Array = deriveKeyPbkdf2(encoder.encode('pa$$word'), encoder.encode('thisisasalt'), 10)
     const differentSalt: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), encoder.encode('this1sasalt'), 10)
     const differentIterations: Uint8Array = deriveKeyPbkdf2(encoder.encode('password'), encoder.encode('thisisasalt'), 11)
 
-    expect(result).to.not.eql(differentPass)
-    expect(result).to.not.eql(differentSalt)
-    expect(result).to.not.eql(differentIterations)
+    assert.notDeepStrictEqual(result, differentPass)
+    assert.notDeepStrictEqual(result, differentSalt)
+    assert.notDeepStrictEqual(result, differentIterations)
   })
 })
 
 describe('deriveKeyArgon2', () => {
-  it('should derive a key of 32 bytes', () => {
+  test('should derive a key of 32 bytes', () => {
     const parameters: Argon2Parameters = new Argon2Parameters()
     const result: Uint8Array = deriveKeyArgon2(encoder.encode('password'), parameters)
-    expect(result).to.have.lengthOf(32)
-    expect(result).to.not.eql(new Array(32).fill(0))
+    assert.strictEqual(result.length, 32)
+    assert.notDeepStrictEqual(result, new Uint8Array(32))
   })
 })
 
 describe('validateHeader', () => {
-  it('should return true', () => {
+  test('should return true', () => {
     const validCiphertext: Uint8Array = base64decode('DQwCAAAAAQA=')
     const validPasswordHash: Uint8Array = base64decode('DQwDAAAAAQA=')
     const validShare: Uint8Array = base64decode('DQwEAAAAAQA=')
     const validPrivateKey: Uint8Array = base64decode('DQwBAAEAAQA=')
     const validPublicKey: Uint8Array = base64decode('DQwBAAEAAQA=')
 
-    expect(validateHeader(validCiphertext, DataType.Ciphertext)).to.eql(true)
-    expect(validateHeader(validPasswordHash, DataType.PasswordHash)).to.eql(true)
-    expect(validateHeader(validShare, DataType.Share)).to.eql(true)
-    expect(validateHeader(validPrivateKey, DataType.Key)).to.eql(true)
-    expect(validateHeader(validPublicKey, DataType.Key)).to.eql(true)
+    assert.strictEqual(validateHeader(validCiphertext, DataType.Ciphertext), true)
+    assert.strictEqual(validateHeader(validPasswordHash, DataType.PasswordHash), true)
+    assert.strictEqual(validateHeader(validShare, DataType.Share), true)
+    assert.strictEqual(validateHeader(validPrivateKey, DataType.Key), true)
+    assert.strictEqual(validateHeader(validPublicKey, DataType.Key), true)
   })
 
-  it('should return false', () => {
+  test('should return false', () => {
     const validCiphertext: Uint8Array = base64decode('DQwCAAAAAQA=')
 
-    expect(validateHeader(validCiphertext, DataType.PasswordHash)).to.eql(false)
+    assert.strictEqual(validateHeader(validCiphertext, DataType.PasswordHash), false)
 
     const invalidSignature: Uint8Array = base64decode('DAwBAAEAAQA=')
     const invalidType: Uint8Array = base64decode('DQwIAAEAAQA=')
     const invalidSubtype: Uint8Array = base64decode('DQwBAAgAAQA=')
     const invalidVersion: Uint8Array = base64decode('DQwBAAEACAA=')
 
-    expect(validateHeader(invalidSignature, DataType.Key)).to.eql(false)
-    expect(validateHeader(invalidType, DataType.Key)).to.eql(false)
-    expect(validateHeader(invalidSubtype, DataType.Key)).to.eql(false)
-    expect(validateHeader(invalidVersion, DataType.Key)).to.eql(false)
+    assert.strictEqual(validateHeader(invalidSignature, DataType.Key), false)
+    assert.strictEqual(validateHeader(invalidType, DataType.Key), false)
+    assert.strictEqual(validateHeader(invalidSubtype, DataType.Key), false)
+    assert.strictEqual(validateHeader(invalidVersion, DataType.Key), false)
 
     const notLongEnough: Uint8Array = base64decode('DQwBAAEAAQ==')
 
-    expect(validateHeader(notLongEnough, DataType.Key)).to.eql(false)
+    assert.strictEqual(validateHeader(notLongEnough, DataType.Key), false)
   })
 })
 
 describe('base64', () => {
-  it('should give the right encoded value', () => {
+  test('should give the right encoded value', () => {
     const input: Uint8Array = Uint8Array.from([0x41, 0x42, 0x43, 0x44, 0x45])
     const result: string = base64encode(input)
-    expect(result).to.eql('QUJDREU=')
+    assert.strictEqual(result, 'QUJDREU=')
   })
 
-  it('should give the right decoded value', () => {
+  test('should give the right decoded value', () => {
     const input: string = 'YWJjZGU='
     const result: Uint8Array = base64decode(input)
-    expect(result).to.eql(Uint8Array.from([0x61, 0x62, 0x63, 0x64, 0x65]))
+    assert.deepStrictEqual(result, Uint8Array.from([0x61, 0x62, 0x63, 0x64, 0x65]))
   })
 })
 
 describe('base64url', () => {
-  it('should give the right encoded value', () => {
+  test('should give the right encoded value', () => {
     const input1: Uint8Array = encoder.encode('Ab6/')
     const result1: string = base64urlEncode(input1)
-    expect(result1).to.eql('QWI2Lw')
+    assert.strictEqual(result1, 'QWI2Lw')
 
     const input2: Uint8Array = encoder.encode('Ab6/75')
     const result2: string = base64urlEncode(input2)
-    expect(result2).to.eql('QWI2Lzc1')
+    assert.strictEqual(result2, 'QWI2Lzc1')
 
     const input3: Uint8Array = Uint8Array.from([0xff, 0xff, 0xfe, 0xff])
     const result3: string = base64urlEncode(input3)
-    expect(result3).to.eql('___-_w')
+    assert.strictEqual(result3, '___-_w')
   })
 
-  it('should give the right decoded value', () => {
+  test('should give the right decoded value', () => {
     const input1: string = 'QWI2Lw'
     const result1: string = decoder.decode(base64urlDecode(input1))
-    expect(result1).to.eql('Ab6/')
+    assert.strictEqual(result1, 'Ab6/')
 
     const input2: string = 'QWI2Lzc1'
     const result2: string = decoder.decode(base64urlDecode(input2))
-    expect(result2).to.eql('Ab6/75')
+    assert.strictEqual(result2, 'Ab6/75')
 
     const input3: string = '___-_w'
     const result3: Uint8Array = base64urlDecode(input3)
-    expect(result3).to.eql(Uint8Array.from([0xff, 0xff, 0xfe, 0xff]))
+    assert.deepStrictEqual(result3, Uint8Array.from([0xff, 0xff, 0xfe, 0xff]))
   })
 })

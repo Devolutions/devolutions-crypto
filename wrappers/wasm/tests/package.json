@@ -2,10 +2,10 @@
   "name": "devolutions-crypto-tests",
   "version": "1.0.0",
   "description": "Tests for the devolutions cryptographic library",
-  "main": "./src/bootstrap.js",
+  "type": "module",
   "scripts": {
-    "test": "mocha -r tsx tests/**.ts",
-    "fmt": "eslint tests/**.ts --fix"
+    "test": "tsx --test tests/asymmetric.ts tests/conformity.ts tests/hashing.ts tests/secret-sharing.ts tests/signature.ts tests/symmetric.ts tests/utils.ts",
+    "test:watch": "tsx --test --watch tests/*.ts"
   },
   "repository": {
     "type": "git",
@@ -18,20 +18,8 @@
   },
   "homepage": "https://github.com/Devolutions/devolutions-crypto#readme",
   "devDependencies": {
-    "@types/chai": "^5.2.0",
-    "@types/jest": "^29.5.14",
-    "@types/mocha": "^10.0.10",
-    "@typescript-eslint/eslint-plugin": "^2.23.0",
-    "@typescript-eslint/parser": "^2.23.0",
-    "chai": "^5.2.0",
+    "@types/node": "^22.10.0",
     "devolutions-crypto": "file:../dist/node/",
-    "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-import": "^2.20.1",
-    "eslint-plugin-node": "^11.0.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^11.1.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }
