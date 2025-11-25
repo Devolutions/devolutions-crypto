@@ -106,6 +106,11 @@ jobs:
         git config user.email "bot@devolutions.net"
         git fetch --all
 
+    - name: Authenticate with crates.io
+      if: ${{ inputs.publish_crate_rust }}
+      id: auth
+      uses: rust-lang/crates-io-auth-action@v1
+
     - name: Publish Rust Crate
       if: ${{ inputs.publish_crate_rust }}
       working-directory: ./rust-release
@@ -113,11 +118,13 @@ jobs:
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
           cargo publish --dry-run
         else
-          cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
+          cargo publish
 
           git tag "rust-v${{ steps.version.outputs.version_native }}"
           git push origin "rust-v${{ steps.version.outputs.version_native }}"
         fi
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
 
     - name: Publish NPM Bundler
       if: ${{ inputs.publish_npm }}
