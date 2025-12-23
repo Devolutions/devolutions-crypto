@@ -103,14 +103,13 @@ fn hash_password(
     iterations: u32,
     version: u16,
 ) -> Result<Py<PyBytes>> {
-    let version =
-        match devolutions_crypto::password_hash::PasswordHashVersion::try_from(version) {
-            Ok(v) => v,
-            Err(_) => {
-                let error: DevolutionsCryptoError = Error::UnknownVersion.into();
-                return Err(error);
-            }
-        };
+    let version = match devolutions_crypto::password_hash::PasswordHashVersion::try_from(version) {
+        Ok(v) => v,
+        Err(_) => {
+            let error: DevolutionsCryptoError = Error::UnknownVersion.into();
+            return Err(error);
+        }
+    };
 
     let hash: Vec<u8> =
         devolutions_crypto::password_hash::hash_password(password, iterations, version)?.into();
