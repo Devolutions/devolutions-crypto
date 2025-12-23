@@ -4,7 +4,7 @@ runs:
   steps:
     - uses: actions/setup-python@v5
       with:
-        python-version: "3.13"
+        python-version: "3.14"
 
     - name: Installing dependencies
       shell: bash
@@ -30,6 +30,18 @@ runs:
       run: maturin sdist
       working-directory: "./python"
       shell: bash
+
+    - name: Building 3.14 wheel
+      working-directory: ./python
+      shell: bash
+      run: |
+        maturin build -i 3.14 --release --target=x86_64-unknown-linux-gnu
+        maturin build -i 3.14 --release --target=i686-unknown-linux-gnu
+        maturin build -i 3.14 --release --target=aarch64-unknown-linux-gnu
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
 
     - name: Building 3.13 wheel
       working-directory: ./python
@@ -74,18 +86,6 @@ runs:
         maturin build -i 3.10 --release --target=x86_64-unknown-linux-gnu
         maturin build -i 3.10 --release --target=i686-unknown-linux-gnu
         maturin build -i 3.10 --release --target=aarch64-unknown-linux-gnu
-
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.9"
-
-    - name: Building 3.9 Wheel
-      working-directory: ./python
-      shell: bash
-      run: |
-        maturin build -i 3.9 --release --target=x86_64-unknown-linux-gnu
-        maturin build -i 3.9 --release --target=i686-unknown-linux-gnu
-        maturin build -i 3.9 --release --target=aarch64-unknown-linux-gnu
 
     - name: Place Artifacts
       shell: bash

@@ -4,7 +4,7 @@ runs:
   steps:
     - uses: actions/setup-python@v5
       with:
-        python-version: "3.13"
+        python-version: "3.14"
 
     - name: Setting up PATH environment variable
       shell: bash
@@ -21,6 +21,28 @@ runs:
       working-directory: ./python
       shell: bash
       run: pip install maturin
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.14"
+        architecture: "x86"
+
+    - name: Building i686 3.14 wheel
+      working-directory: ./python
+      shell: bash
+      run: maturin build -i 3.14 --release --target=i686-pc-windows-msvc
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.14"
+        architecture: "x64"
+
+    - name: Building x86_64, aarch64 3.14 wheel
+      working-directory: ./python
+      shell: bash
+      run: |
+        maturin build -i 3.14 --release --target=x86_64-pc-windows-msvc
+        maturin build -i 3.14 --release --target=aarch64-pc-windows-msvc
 
     - uses: actions/setup-python@v5
       with:
@@ -109,28 +131,6 @@ runs:
       run: |
         maturin build -i 3.10 --release --target=x86_64-pc-windows-msvc
         maturin build -i 3.10 --release --target=aarch64-pc-windows-msvc
-
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.9"
-        architecture: "x86"
-
-    - name: Building i686 3.9 wheel
-      working-directory: ./python
-      shell: bash
-      run: maturin build -i 3.9 --release --target=i686-pc-windows-msvc
-
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.9"
-        architecture: "x64"
-
-    - name: Building x86_64, aarch64 3.9 wheel
-      working-directory: ./python
-      shell: bash
-      run: |
-        maturin build -i 3.9 --release --target=x86_64-pc-windows-msvc
-        maturin build -i 3.9 --release --target=aarch64-pc-windows-msvc
 
     - name: Place Artifacts
       shell: bash
