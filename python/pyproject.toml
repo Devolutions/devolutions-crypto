@@ -2,7 +2,7 @@
 name = "devolutions-crypto"
 version = "0.9.3"
 description = "An abstraction layer for the cryptography used by Devolutions"
-readme = "README.md"
+readme = "PYPI_README.md"
 authors = [
     { name = "Philippe Dugre", email = "pdugre@devolutions.net" },
     { name = "Mathieu Morrissette", email = "mmorrissette@devolutions.net" }
@@ -25,10 +25,10 @@ Homepage = "https://github.com/devolutions/devolutions-crypto"
 Repository = "https://github.com/devolutions/devolutions-crypto"
 
 [build-system]
-requires = ["maturin>=0.13"]
+requires = ["maturin>=1.10"]
 build-backend = "maturin"
 
 [tool.maturin]
 bindings = "pyo3"
 module-name = "devolutions_crypto"
-include = ["devolutions_crypto.pyi", "README.md"]
+include = ["devolutions_crypto.pyi"]
