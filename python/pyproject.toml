@@ -1,5 +1,28 @@
 [project]
 name = "devolutions-crypto"
+version = "0.9.3"
+description = "An abstraction layer for the cryptography used by Devolutions"
+readme = "README.md"
+authors = [
+    { name = "Philippe Dugre", email = "pdugre@devolutions.net" },
+    { name = "Mathieu Morrissette", email = "mmorrissette@devolutions.net" }
+]
+license = { text = "MIT OR Apache-2.0" }
+requires-python = ">=3.10"
+dependencies = []
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "Topic :: Security :: Cryptography"
+]
+
+[project.urls]
+Homepage = "https://github.com/devolutions/devolutions-crypto"
+Repository = "https://github.com/devolutions/devolutions-crypto"
 
 [build-system]
 requires = ["maturin>=0.13"]
@@ -8,3 +31,4 @@ build-backend = "maturin"
 [tool.maturin]
 bindings = "pyo3"
 module-name = "devolutions_crypto"
+include = ["devolutions_crypto.pyi", "README.md"]
