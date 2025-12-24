@@ -1,0 +1,29 @@
+# Files and directories created by pub
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# Conventional directory for build outputs
+dist/
+
+# Omit committing pubspec.lock for library packages
+# See https://dart.dev/guides/libraries/private-files
+# pubspec.lock
+
+# Generated files
+lib/src/generated/
+
+# Native libraries (these should be built, not committed)
+lib/native/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

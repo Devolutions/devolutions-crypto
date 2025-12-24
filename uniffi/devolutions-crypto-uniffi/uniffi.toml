@@ -1,2 +1,5 @@
 [bindings.kotlin]
 package_name = "org.devolutions.crypto"
+
+[bindings.dart]
+package_name = "devolutions_crypto"

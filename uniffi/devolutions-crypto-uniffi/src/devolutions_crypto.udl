@@ -156,5 +156,5 @@ namespace devolutions_crypto {
     bytes sign([ByRef] bytes data, [ByRef] bytes keypair, optional SignatureVersion version = "Latest");
 
     // Signing Key
-    SigningKeyPair generate_signing_keypair(optional SigningKeyVersion version = "Latest");  
+    SigningKeyPair generate_signing_keypair(optional SigningKeyVersion version = "Latest");
 };

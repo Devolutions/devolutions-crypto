@@ -1,0 +1,15 @@
+[package]
+name = "dart-bindgen"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# Exclude from parent workspace
+[workspace]
+
+[[bin]]
+name = "dart-bindgen"
+path = "src/dart-bindgen.rs"
+
+[dependencies]
+uniffi-dart = { path = "D:/dev/git/matmo", features = ["cli"] }
