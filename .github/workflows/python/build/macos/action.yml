@@ -4,7 +4,7 @@ runs:
   steps:
     - uses: actions/setup-python@v5
       with:
-        python-version: "3.13"
+        python-version: "3.14"
 
     - name: Install rust
       shell: bash
@@ -21,6 +21,19 @@ runs:
       working-directory: ./python
       shell: bash
       run: pip install maturin --disable-pip-version-check
+
+    - name: Building 3.14 Wheel
+      working-directory: ./python
+      shell: bash
+      run: |
+        source $HOME/.cargo/env
+
+        maturin build --release -i 3.14 --target=x86_64-apple-darwin
+        maturin build --release -i 3.14 --target=aarch64-apple-darwin
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
 
     - name: Building 3.13 Wheel
       working-directory: ./python
@@ -69,19 +82,6 @@ runs:
 
         maturin build --release -i 3.10 --target=x86_64-apple-darwin
         maturin build --release -i 3.10 --target=aarch64-apple-darwin
-
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.9"
-
-    - name: Building 3.9 Wheel
-      working-directory: ./python
-      shell: bash
-      run: |
-        source $HOME/.cargo/env
-
-        maturin build --release -i 3.9 --target=x86_64-apple-darwin
-        maturin build --release -i 3.9 --target=aarch64-apple-darwin
 
     - name: Place Artifacts
       shell: bash
