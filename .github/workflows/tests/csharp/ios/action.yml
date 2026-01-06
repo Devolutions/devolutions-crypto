@@ -28,7 +28,7 @@ runs:
       shell: bash
       run: |
         # Find the UDID of the iPhone 17 simulator running iOS 26
-        SIMULATOR_UDID=$(xcrun simctl list devices available | grep -E 'iOS 26' | grep 'iPhone 17 ' | awk -F '[()]' '{print $2}' | head -n 1)
+        SIMULATOR_UDID=$(xcrun simctl list devices available | grep -A 20 -E 'iOS 26' | grep 'iPhone 17 ' | awk -F '[()]' '{print $2}' | head -n 1)
 
         # Check if a UDID was found
         if [ -n "$SIMULATOR_UDID" ]; then
