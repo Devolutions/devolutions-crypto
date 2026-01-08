@@ -1,12 +1,14 @@
 use crate::Result;
 use crate::SecretSharingVersion;
 
+#[uniffi::export(default(length = 32, version = None))]
 pub fn generate_shared_key(
     n_shares: u8,
     threshold: u8,
     length: u32,
-    version: SecretSharingVersion,
+    version: Option<SecretSharingVersion>,
 ) -> Result<Vec<Vec<u8>>> {
+    let version = version.unwrap_or(SecretSharingVersion::Latest);
     Ok(devolutions_crypto::secret_sharing::generate_shared_key(
         n_shares,
         threshold,

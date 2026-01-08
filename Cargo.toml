@@ -11,7 +11,7 @@ members = [
   ]
 
 [workspace.dependencies]
-uniffi = "0.29.1"
+uniffi = "0.30.0"
 
 [package]
 name = "devolutions-crypto"
@@ -51,6 +51,7 @@ rand_08 = { package = "rand", version = "0.8" }
 thiserror = "2.0.12"
 typed-builder = "0.23.2"
 rust-argon2 = { version = "3.0", default-features = false }
+uniffi = { workspace = true, optional = true }
 
 ed25519-dalek = { version = "2", features = [ "rand_core" ] }
 x25519-dalek = { version = "2", features = [ "static_secrets" ] }
@@ -76,6 +77,7 @@ wasm-bindgen-test = "0.3"
 default = []
 fuzz = ["arbitrary", "blahaj/fuzzing"]
 wbindgen = ["wasm-bindgen", "serde-wasm-bindgen", "js-sys"]
+uniffi-support = ["uniffi"]
 
 [dependencies.getrandom_v02]
 package = "getrandom"
