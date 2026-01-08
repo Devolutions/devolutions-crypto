@@ -191,7 +191,10 @@ macro_rules! online_ciphertext_impl {
                     data: &[u8],
                     aad: &[u8],
                 ) -> Result<Vec<u8>> {
-                    if data.len() as u32 != self.header.get_chunk_size() && data.len() as u32 != (self.header.get_chunk_size() + self.get_tag_size() as u32){
+                    let chunk_size_with_tag = self.header.get_chunk_size()
+                        .checked_add(self.get_tag_size() as u32)
+                        .ok_or(Error::InvalidLength)?;
+                    if data.len() as u32 != self.header.get_chunk_size() && data.len() as u32 != chunk_size_with_tag {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -216,7 +219,10 @@ macro_rules! online_ciphertext_impl {
                     data: &mut Vec<u8>,
                     aad: &[u8],
                 ) -> Result<()> {
-                    if data.len() as u32 != self.header.get_chunk_size() &&  data.len() as u32 != (self.header.get_chunk_size() + self.get_tag_size() as u32){
+                    let chunk_size_with_tag = self.header.get_chunk_size()
+                        .checked_add(self.get_tag_size() as u32)
+                        .ok_or(Error::InvalidLength)?;
+                    if data.len() as u32 != self.header.get_chunk_size() &&  data.len() as u32 != chunk_size_with_tag {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -237,7 +243,10 @@ macro_rules! online_ciphertext_impl {
                     data: &[u8],
                     aad: &[u8],
                 ) -> Result<Vec<u8>> {
-                    if (data.len() as u32) > (self.header.get_chunk_size() + self.get_tag_size() as u32) {
+                    let chunk_size_with_tag = self.header.get_chunk_size()
+                        .checked_add(self.get_tag_size() as u32)
+                        .ok_or(Error::InvalidLength)?;
+                    if (data.len() as u32) > chunk_size_with_tag {
                         return Err(Error::InvalidChunkLength);
                     };
 
@@ -262,7 +271,10 @@ macro_rules! online_ciphertext_impl {
                     data: &mut Vec<u8>,
                     aad: &[u8],
                 ) -> Result<()> {
-                    if (data.len() as u32) > (self.header.get_chunk_size() + self.get_tag_size() as u32) {
+                    let chunk_size_with_tag = self.header.get_chunk_size()
+                        .checked_add(self.get_tag_size() as u32)
+                        .ok_or(Error::InvalidLength)?;
+                    if (data.len() as u32) > chunk_size_with_tag {
                         return Err(Error::InvalidChunkLength);
                     };
 
