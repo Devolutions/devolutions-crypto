@@ -7,6 +7,7 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import uniffi.devolutions_crypto.Exception
 
 class SecretSharingTest {
     @Test
@@ -47,7 +48,7 @@ class SecretSharingTest {
 
     @Test
     fun sharedSecretWrongParamsTest() {
-        assertThrows<DevolutionsCryptoException> {
+        assertThrows<Exception> {
             generateSharedKey(3u, 5u)
         }
     }
@@ -56,7 +57,7 @@ class SecretSharingTest {
     fun sharedSecrectNotEnoughShare() {
         val shares = generateSharedKey(5u, 3u)
         val sharesGroup = shares.slice(0..1)
-        assertThrows<DevolutionsCryptoException> {
+        assertThrows<Exception> {
             joinShares(sharesGroup)
         }
     }
