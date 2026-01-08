@@ -6,6 +6,7 @@ package org.devolutions.crypto
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertFailsWith
+import uniffi.devolutions_crypto.Exception
 
 class SymmetricTest {
     @Test
@@ -44,7 +45,7 @@ class SymmetricTest {
 
         val encrypted = encryptWithAad(data, key, aad)
 
-        assertFailsWith<DevolutionsCryptoException> {
+        assertFailsWith<Exception> {
             decryptWithAad(encrypted, key, wrongAad)
         }
     }

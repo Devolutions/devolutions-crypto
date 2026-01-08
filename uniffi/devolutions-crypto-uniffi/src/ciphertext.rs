@@ -1,16 +1,20 @@
 use crate::CiphertextVersion;
 use crate::Result;
 
-pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Vec<u8>> {
+#[uniffi::export(default(version = None))]
+pub fn encrypt(data: &[u8], key: &[u8], version: Option<CiphertextVersion>) -> Result<Vec<u8>> {
+    let version = version.unwrap_or(CiphertextVersion::Latest);
     Ok(devolutions_crypto::ciphertext::encrypt(data, key, version)?.into())
 }
 
+#[uniffi::export(default(version = None))]
 pub fn encrypt_with_aad(
     data: &[u8],
     key: &[u8],
     aad: &[u8],
-    version: CiphertextVersion,
+    version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>> {
+    let version = version.unwrap_or(CiphertextVersion::Latest);
     Ok(devolutions_crypto::ciphertext::encrypt_with_aad(data, key, aad, version)?.into())
 }
 
@@ -26,17 +30,21 @@ fn decrypt_with_aad(data: &[u8], key: &[u8], aad: &[u8]) -> Result<Vec<u8>> {
     data.decrypt_with_aad(key, aad)
 }
 
-pub fn encrypt_asymmetric(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Vec<u8>> {
+#[uniffi::export(default(version = None))]
+pub fn encrypt_asymmetric(data: &[u8], key: &[u8], version: Option<CiphertextVersion>) -> Result<Vec<u8>> {
+    let version = version.unwrap_or(CiphertextVersion::Latest);
     let key = key.try_into()?;
     Ok(devolutions_crypto::ciphertext::encrypt_asymmetric(data, &key, version)?.into())
 }
 
+#[uniffi::export(default(version = None))]
 pub fn encrypt_asymmetric_with_aad(
     data: &[u8],
     key: &[u8],
     aad: &[u8],
-    version: CiphertextVersion,
+    version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>> {
+    let version = version.unwrap_or(CiphertextVersion::Latest);
     let key = key.try_into()?;
     Ok(
         devolutions_crypto::ciphertext::encrypt_asymmetric_with_aad(data, &key, aad, version)?
