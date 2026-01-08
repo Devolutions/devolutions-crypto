@@ -24,7 +24,7 @@ pub fn derive_key_pbkdf2(
 
 #[uniffi::export]
 pub fn derive_key_argon2(key: &[u8], parameters: &Arc<Argon2Parameters>) -> Result<Vec<u8>> {
-    devolutions_crypto::utils::derive_key_argon2(key, &parameters.0)
+    devolutions_crypto::utils::derive_key_argon2(key, &parameters.inner)
 }
 
 #[uniffi::export]

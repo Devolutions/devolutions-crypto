@@ -7,6 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import uniffi.devolutions_crypto.Exception
 
 class AsymmetricTest {
     @Test
@@ -55,15 +56,15 @@ class AsymmetricTest {
 
         val encrypted = encryptAsymmetricWithAad(data, keypair.publicKey, aad)
 
-        assertFailsWith<DevolutionsCryptoException> {
+        assertFailsWith<Exception> {
             decryptAsymmetricWithAad(encrypted, keypair.privateKey, wrongAad)
         }
     }
 
     @Test
     fun mixKeyExchangeTest() {
-        val bobKeypair = generateKeypair()
-        val aliceKeypair = generateKeypair()
+        val bobKeypair = generateKeypair(null)
+        val aliceKeypair = generateKeypair(null)
 
         val bobShared = mixKeyExchange(bobKeypair.privateKey, aliceKeypair.publicKey)
         val aliceShared = mixKeyExchange(aliceKeypair.privateKey, bobKeypair.publicKey)
@@ -75,9 +76,9 @@ class AsymmetricTest {
 
     @Test
     fun mixKeyExchangeNotEqualsTest() {
-        val bobKeypair = generateKeypair()
-        val aliceKeypair = generateKeypair()
-        val eveKeypair = generateKeypair()
+        val bobKeypair = generateKeypair(null)
+        val aliceKeypair = generateKeypair(null)
+        val eveKeypair = generateKeypair(null)
 
         val bobAliceShared = mixKeyExchange(bobKeypair.privateKey, aliceKeypair.publicKey)
         val aliceBobShared = mixKeyExchange(aliceKeypair.privateKey, bobKeypair.publicKey)

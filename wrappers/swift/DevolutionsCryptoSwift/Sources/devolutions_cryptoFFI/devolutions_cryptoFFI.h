@@ -50,9 +50,9 @@ typedef void (*UniffiRustFutureContinuationCallback)(uint64_t, int8_t
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_FREE
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_FREE
-typedef void (*UniffiForeignFutureFree)(uint64_t
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_DROPPED_CALLBACK
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_DROPPED_CALLBACK
+typedef void (*UniffiForeignFutureDroppedCallback)(uint64_t
     );
 
 #endif
@@ -62,309 +62,301 @@ typedef void (*UniffiCallbackInterfaceFree)(uint64_t
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE
-typedef struct UniffiForeignFuture {
-    uint64_t handle;
-    UniffiForeignFutureFree _Nonnull free;
-} UniffiForeignFuture;
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_CLONE
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_CLONE
+typedef uint64_t (*UniffiCallbackInterfaceClone)(uint64_t
+    );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U8
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U8
-typedef struct UniffiForeignFutureStructU8 {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_DROPPED_CALLBACK_STRUCT
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_DROPPED_CALLBACK_STRUCT
+typedef struct UniffiForeignFutureDroppedCallbackStruct {
+    uint64_t handle;
+    UniffiForeignFutureDroppedCallback _Nonnull free;
+} UniffiForeignFutureDroppedCallbackStruct;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_U8
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_U8
+typedef struct UniffiForeignFutureResultU8 {
     uint8_t returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructU8;
+} UniffiForeignFutureResultU8;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U8
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U8
-typedef void (*UniffiForeignFutureCompleteU8)(uint64_t, UniffiForeignFutureStructU8
+typedef void (*UniffiForeignFutureCompleteU8)(uint64_t, UniffiForeignFutureResultU8
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I8
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I8
-typedef struct UniffiForeignFutureStructI8 {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_I8
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_I8
+typedef struct UniffiForeignFutureResultI8 {
     int8_t returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructI8;
+} UniffiForeignFutureResultI8;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I8
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I8
-typedef void (*UniffiForeignFutureCompleteI8)(uint64_t, UniffiForeignFutureStructI8
+typedef void (*UniffiForeignFutureCompleteI8)(uint64_t, UniffiForeignFutureResultI8
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U16
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U16
-typedef struct UniffiForeignFutureStructU16 {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_U16
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_U16
+typedef struct UniffiForeignFutureResultU16 {
     uint16_t returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructU16;
+} UniffiForeignFutureResultU16;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U16
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U16
-typedef void (*UniffiForeignFutureCompleteU16)(uint64_t, UniffiForeignFutureStructU16
+typedef void (*UniffiForeignFutureCompleteU16)(uint64_t, UniffiForeignFutureResultU16
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I16
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I16
-typedef struct UniffiForeignFutureStructI16 {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_I16
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_I16
+typedef struct UniffiForeignFutureResultI16 {
     int16_t returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructI16;
+} UniffiForeignFutureResultI16;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I16
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I16
-typedef void (*UniffiForeignFutureCompleteI16)(uint64_t, UniffiForeignFutureStructI16
+typedef void (*UniffiForeignFutureCompleteI16)(uint64_t, UniffiForeignFutureResultI16
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U32
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U32
-typedef struct UniffiForeignFutureStructU32 {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_U32
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_U32
+typedef struct UniffiForeignFutureResultU32 {
     uint32_t returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructU32;
+} UniffiForeignFutureResultU32;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U32
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U32
-typedef void (*UniffiForeignFutureCompleteU32)(uint64_t, UniffiForeignFutureStructU32
+typedef void (*UniffiForeignFutureCompleteU32)(uint64_t, UniffiForeignFutureResultU32
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I32
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I32
-typedef struct UniffiForeignFutureStructI32 {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_I32
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_I32
+typedef struct UniffiForeignFutureResultI32 {
     int32_t returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructI32;
+} UniffiForeignFutureResultI32;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I32
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I32
-typedef void (*UniffiForeignFutureCompleteI32)(uint64_t, UniffiForeignFutureStructI32
+typedef void (*UniffiForeignFutureCompleteI32)(uint64_t, UniffiForeignFutureResultI32
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U64
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U64
-typedef struct UniffiForeignFutureStructU64 {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_U64
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_U64
+typedef struct UniffiForeignFutureResultU64 {
     uint64_t returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructU64;
+} UniffiForeignFutureResultU64;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U64
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U64
-typedef void (*UniffiForeignFutureCompleteU64)(uint64_t, UniffiForeignFutureStructU64
+typedef void (*UniffiForeignFutureCompleteU64)(uint64_t, UniffiForeignFutureResultU64
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I64
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I64
-typedef struct UniffiForeignFutureStructI64 {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_I64
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_I64
+typedef struct UniffiForeignFutureResultI64 {
     int64_t returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructI64;
+} UniffiForeignFutureResultI64;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I64
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I64
-typedef void (*UniffiForeignFutureCompleteI64)(uint64_t, UniffiForeignFutureStructI64
+typedef void (*UniffiForeignFutureCompleteI64)(uint64_t, UniffiForeignFutureResultI64
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_F32
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_F32
-typedef struct UniffiForeignFutureStructF32 {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_F32
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_F32
+typedef struct UniffiForeignFutureResultF32 {
     float returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructF32;
+} UniffiForeignFutureResultF32;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_F32
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_F32
-typedef void (*UniffiForeignFutureCompleteF32)(uint64_t, UniffiForeignFutureStructF32
+typedef void (*UniffiForeignFutureCompleteF32)(uint64_t, UniffiForeignFutureResultF32
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_F64
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_F64
-typedef struct UniffiForeignFutureStructF64 {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_F64
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_F64
+typedef struct UniffiForeignFutureResultF64 {
     double returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructF64;
+} UniffiForeignFutureResultF64;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_F64
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_F64
-typedef void (*UniffiForeignFutureCompleteF64)(uint64_t, UniffiForeignFutureStructF64
+typedef void (*UniffiForeignFutureCompleteF64)(uint64_t, UniffiForeignFutureResultF64
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_POINTER
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_POINTER
-typedef struct UniffiForeignFutureStructPointer {
-    void*_Nonnull returnValue;
-    RustCallStatus callStatus;
-} UniffiForeignFutureStructPointer;
-
-#endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_POINTER
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_POINTER
-typedef void (*UniffiForeignFutureCompletePointer)(uint64_t, UniffiForeignFutureStructPointer
-    );
-
-#endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_RUST_BUFFER
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_RUST_BUFFER
-typedef struct UniffiForeignFutureStructRustBuffer {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_RUST_BUFFER
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_RUST_BUFFER
+typedef struct UniffiForeignFutureResultRustBuffer {
     RustBuffer returnValue;
     RustCallStatus callStatus;
-} UniffiForeignFutureStructRustBuffer;
+} UniffiForeignFutureResultRustBuffer;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_RUST_BUFFER
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_RUST_BUFFER
-typedef void (*UniffiForeignFutureCompleteRustBuffer)(uint64_t, UniffiForeignFutureStructRustBuffer
+typedef void (*UniffiForeignFutureCompleteRustBuffer)(uint64_t, UniffiForeignFutureResultRustBuffer
     );
 
 #endif
-#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_VOID
-#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_VOID
-typedef struct UniffiForeignFutureStructVoid {
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_VOID
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_RESULT_VOID
+typedef struct UniffiForeignFutureResultVoid {
     RustCallStatus callStatus;
-} UniffiForeignFutureStructVoid;
+} UniffiForeignFutureResultVoid;
 
 #endif
 #ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_VOID
 #define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_VOID
-typedef void (*UniffiForeignFutureCompleteVoid)(uint64_t, UniffiForeignFutureStructVoid
+typedef void (*UniffiForeignFutureCompleteVoid)(uint64_t, UniffiForeignFutureResultVoid
     );
 
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CLONE_ARGON2PARAMETERS
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CLONE_ARGON2PARAMETERS
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_clone_argon2parameters(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_clone_argon2parameters(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FREE_ARGON2PARAMETERS
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FREE_ARGON2PARAMETERS
-void uniffi_devolutions_crypto_uniffi_fn_free_argon2parameters(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+void uniffi_devolutions_crypto_uniffi_fn_free_argon2parameters(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CONSTRUCTOR_ARGON2PARAMETERS_NEW_FROM_BYTES
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CONSTRUCTOR_ARGON2PARAMETERS_NEW_FROM_BYTES
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_constructor_argon2parameters_new_from_bytes(RustBuffer data, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_constructor_argon2parameters_new_from_bytes(RustBuffer data, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERS_GET_BYTES
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERS_GET_BYTES
-RustBuffer uniffi_devolutions_crypto_uniffi_fn_method_argon2parameters_get_bytes(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+RustBuffer uniffi_devolutions_crypto_uniffi_fn_method_argon2parameters_get_bytes(uint64_t ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CLONE_ARGON2PARAMETERSBUILDER
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CLONE_ARGON2PARAMETERSBUILDER
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_clone_argon2parametersbuilder(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_clone_argon2parametersbuilder(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FREE_ARGON2PARAMETERSBUILDER
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FREE_ARGON2PARAMETERSBUILDER
-void uniffi_devolutions_crypto_uniffi_fn_free_argon2parametersbuilder(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+void uniffi_devolutions_crypto_uniffi_fn_free_argon2parametersbuilder(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CONSTRUCTOR_ARGON2PARAMETERSBUILDER_NEW
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CONSTRUCTOR_ARGON2PARAMETERSBUILDER_NEW
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_constructor_argon2parametersbuilder_new(RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_constructor_argon2parametersbuilder_new(RustCallStatus *_Nonnull out_status
     
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_ASSOCIATED_DATA
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_ASSOCIATED_DATA
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_associated_data(void*_Nonnull ptr, RustBuffer value, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_associated_data(uint64_t ptr, RustBuffer value, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_BUILD
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_BUILD
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_build(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_build(uint64_t ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_DC_VERSION
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_DC_VERSION
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_dc_version(void*_Nonnull ptr, uint32_t value, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_dc_version(uint64_t ptr, uint32_t value, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_ITERATIONS
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_ITERATIONS
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_iterations(void*_Nonnull ptr, uint32_t value, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_iterations(uint64_t ptr, uint32_t value, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_LANES
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_LANES
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_lanes(void*_Nonnull ptr, uint32_t value, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_lanes(uint64_t ptr, uint32_t value, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_LENGTH
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_LENGTH
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_length(void*_Nonnull ptr, uint32_t value, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_length(uint64_t ptr, uint32_t value, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_MEMORY
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_MEMORY
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_memory(void*_Nonnull ptr, uint32_t value, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_memory(uint64_t ptr, uint32_t value, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_SALT
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_SALT
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_salt(void*_Nonnull ptr, RustBuffer value, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_salt(uint64_t ptr, RustBuffer value, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_SECRET_KEY
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_SECRET_KEY
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_secret_key(void*_Nonnull ptr, RustBuffer value, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_secret_key(uint64_t ptr, RustBuffer value, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_VARIANT
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_VARIANT
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_variant(void*_Nonnull ptr, RustBuffer value, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_variant(uint64_t ptr, RustBuffer value, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_VERSION
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_ARGON2PARAMETERSBUILDER_VERSION
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_version(void*_Nonnull ptr, RustBuffer value, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_version(uint64_t ptr, RustBuffer value, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CLONE_SIGNINGKEYPAIR
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CLONE_SIGNINGKEYPAIR
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_clone_signingkeypair(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_clone_signingkeypair(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FREE_SIGNINGKEYPAIR
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FREE_SIGNINGKEYPAIR
-void uniffi_devolutions_crypto_uniffi_fn_free_signingkeypair(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+void uniffi_devolutions_crypto_uniffi_fn_free_signingkeypair(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CONSTRUCTOR_SIGNINGKEYPAIR_NEW_FROM_BYTES
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_CONSTRUCTOR_SIGNINGKEYPAIR_NEW_FROM_BYTES
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_constructor_signingkeypair_new_from_bytes(RustBuffer data, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_constructor_signingkeypair_new_from_bytes(RustBuffer data, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_SIGNINGKEYPAIR_GET_PRIVATE_KEY
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_SIGNINGKEYPAIR_GET_PRIVATE_KEY
-RustBuffer uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_private_key(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+RustBuffer uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_private_key(uint64_t ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_SIGNINGKEYPAIR_GET_PUBLIC_KEY
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_METHOD_SIGNINGKEYPAIR_GET_PUBLIC_KEY
-RustBuffer uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_public_key(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+RustBuffer uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_public_key(uint64_t ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FUNC_BASE64_DECODE
@@ -409,7 +401,7 @@ RustBuffer uniffi_devolutions_crypto_uniffi_fn_func_decrypt_with_aad(RustBuffer 
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FUNC_DERIVE_KEY_ARGON2
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FUNC_DERIVE_KEY_ARGON2
-RustBuffer uniffi_devolutions_crypto_uniffi_fn_func_derive_key_argon2(RustBuffer key, void*_Nonnull parameters, RustCallStatus *_Nonnull out_status
+RustBuffer uniffi_devolutions_crypto_uniffi_fn_func_derive_key_argon2(RustBuffer key, uint64_t parameters, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FUNC_DERIVE_KEY_PBKDF2
@@ -454,7 +446,7 @@ RustBuffer uniffi_devolutions_crypto_uniffi_fn_func_generate_shared_key(uint8_t 
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FUNC_GENERATE_SIGNING_KEYPAIR
 #define UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FUNC_GENERATE_SIGNING_KEYPAIR
-void*_Nonnull uniffi_devolutions_crypto_uniffi_fn_func_generate_signing_keypair(RustBuffer version, RustCallStatus *_Nonnull out_status
+uint64_t uniffi_devolutions_crypto_uniffi_fn_func_generate_signing_keypair(RustBuffer version, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DEVOLUTIONS_CRYPTO_UNIFFI_FN_FUNC_HASH_PASSWORD
@@ -710,26 +702,6 @@ void ffi_devolutions_crypto_uniffi_rust_future_free_f64(uint64_t handle
 #ifndef UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_COMPLETE_F64
 #define UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_COMPLETE_F64
 double ffi_devolutions_crypto_uniffi_rust_future_complete_f64(uint64_t handle, RustCallStatus *_Nonnull out_status
-);
-#endif
-#ifndef UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_POLL_POINTER
-#define UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_POLL_POINTER
-void ffi_devolutions_crypto_uniffi_rust_future_poll_pointer(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
-);
-#endif
-#ifndef UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_CANCEL_POINTER
-#define UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_CANCEL_POINTER
-void ffi_devolutions_crypto_uniffi_rust_future_cancel_pointer(uint64_t handle
-);
-#endif
-#ifndef UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_FREE_POINTER
-#define UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_FREE_POINTER
-void ffi_devolutions_crypto_uniffi_rust_future_free_pointer(uint64_t handle
-);
-#endif
-#ifndef UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_COMPLETE_POINTER
-#define UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_COMPLETE_POINTER
-void*_Nonnull ffi_devolutions_crypto_uniffi_rust_future_complete_pointer(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_FFI_DEVOLUTIONS_CRYPTO_UNIFFI_RUST_FUTURE_POLL_RUST_BUFFER

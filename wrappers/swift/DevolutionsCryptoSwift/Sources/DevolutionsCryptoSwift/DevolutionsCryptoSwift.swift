@@ -7,8 +7,8 @@ import Foundation
 // Depending on the consumer's build setup, the low-level FFI code
 // might be in a separate module, or it might be compiled inline into
 // this module. This is a bit of light hackery to work with both.
-#if canImport(devolutions_cryptoFFI)
-import devolutions_cryptoFFI
+#if canImport(devolutions_crypto_uniffiFFI)
+import devolutions_crypto_uniffiFFI
 #endif
 
 fileprivate extension RustBuffer {
@@ -352,19 +352,29 @@ private func uniffiTraitInterfaceCallWithError<T, E>(
         callStatus.pointee.errorBuf = FfiConverterString.lower(String(describing: error))
     }
 }
+// Initial value and increment amount for handles. 
+// These ensure that SWIFT handles always have the lowest bit set
+fileprivate let UNIFFI_HANDLEMAP_INITIAL: UInt64 = 1
+fileprivate let UNIFFI_HANDLEMAP_DELTA: UInt64 = 2
+
 fileprivate final class UniffiHandleMap<T>: @unchecked Sendable {
     // All mutation happens with this lock held, which is why we implement @unchecked Sendable.
     private let lock = NSLock()
     private var map: [UInt64: T] = [:]
-    private var currentHandle: UInt64 = 1
+    private var currentHandle: UInt64 = UNIFFI_HANDLEMAP_INITIAL
 
     func insert(obj: T) -> UInt64 {
         lock.withLock {
-            let handle = currentHandle
-            currentHandle += 1
-            map[handle] = obj
-            return handle
+            return doInsert(obj)
         }
+    }
+
+    // Low-level insert function, this assumes `lock` is held.
+    private func doInsert(_ obj: T) -> UInt64 {
+        let handle = currentHandle
+        currentHandle += UNIFFI_HANDLEMAP_DELTA
+        map[handle] = obj
+        return handle
     }
 
      func get(handle: UInt64) throws -> T {
@@ -373,6 +383,15 @@ fileprivate final class UniffiHandleMap<T>: @unchecked Sendable {
                 throw UniffiInternalError.unexpectedStaleHandle
             }
             return obj
+        }
+    }
+
+     func clone(handle: UInt64) throws -> UInt64 {
+        try lock.withLock {
+            guard let obj = map[handle] else {
+                throw UniffiInternalError.unexpectedStaleHandle
+            }
+            return doInsert(obj)
         }
     }
 
@@ -521,13 +540,13 @@ public protocol Argon2ParametersProtocol: AnyObject, Sendable {
     
 }
 open class Argon2Parameters: Argon2ParametersProtocol, @unchecked Sendable {
-    fileprivate let pointer: UnsafeMutableRawPointer!
+    fileprivate let handle: UInt64
 
-    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public struct NoPointer {
+    public struct NoHandle {
         public init() {}
     }
 
@@ -537,41 +556,37 @@ open class Argon2Parameters: Argon2ParametersProtocol, @unchecked Sendable {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
-        self.pointer = pointer
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
     }
 
     // This constructor can be used to instantiate a fake object.
-    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
     //
     // - Warning:
-    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public init(noPointer: NoPointer) {
-        self.pointer = nil
+    public init(noHandle: NoHandle) {
+        self.handle = 0
     }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
-        return try! rustCall { uniffi_devolutions_crypto_uniffi_fn_clone_argon2parameters(self.pointer, $0) }
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_devolutions_crypto_uniffi_fn_clone_argon2parameters(self.handle, $0) }
     }
     // No primary constructor declared for this class.
 
     deinit {
-        guard let pointer = pointer else {
-            return
-        }
-
-        try! rustCall { uniffi_devolutions_crypto_uniffi_fn_free_argon2parameters(pointer, $0) }
+        try! rustCall { uniffi_devolutions_crypto_uniffi_fn_free_argon2parameters(handle, $0) }
     }
 
     
 public static func newFromBytes(data: Data)throws  -> Argon2Parameters  {
-    return try  FfiConverterTypeArgon2Parameters_lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterTypeArgon2Parameters_lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_constructor_argon2parameters_new_from_bytes(
         FfiConverterData.lower(data),$0
     )
@@ -582,12 +597,14 @@ public static func newFromBytes(data: Data)throws  -> Argon2Parameters  {
     
 open func getBytes() -> Data  {
     return try!  FfiConverterData.lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parameters_get_bytes(self.uniffiClonePointer(),$0
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parameters_get_bytes(
+            self.uniffiCloneHandle(),$0
     )
 })
 }
     
 
+    
 }
 
 
@@ -595,33 +612,24 @@ open func getBytes() -> Data  {
 @_documentation(visibility: private)
 #endif
 public struct FfiConverterTypeArgon2Parameters: FfiConverter {
-
-    typealias FfiType = UnsafeMutableRawPointer
+    typealias FfiType = UInt64
     typealias SwiftType = Argon2Parameters
 
-    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> Argon2Parameters {
-        return Argon2Parameters(unsafeFromRawPointer: pointer)
+    public static func lift(_ handle: UInt64) throws -> Argon2Parameters {
+        return Argon2Parameters(unsafeFromHandle: handle)
     }
 
-    public static func lower(_ value: Argon2Parameters) -> UnsafeMutableRawPointer {
-        return value.uniffiClonePointer()
+    public static func lower(_ value: Argon2Parameters) -> UInt64 {
+        return value.uniffiCloneHandle()
     }
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Argon2Parameters {
-        let v: UInt64 = try readInt(&buf)
-        // The Rust code won't compile if a pointer won't fit in a UInt64.
-        // We have to go via `UInt` because that's the thing that's the size of a pointer.
-        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
-        if (ptr == nil) {
-            throw UniffiInternalError.unexpectedNullPointer
-        }
-        return try lift(ptr!)
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
     }
 
     public static func write(_ value: Argon2Parameters, into buf: inout [UInt8]) {
-        // This fiddling is because `Int` is the thing that's the same size as a pointer.
-        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
-        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+        writeInt(&buf, lower(value))
     }
 }
 
@@ -629,14 +637,14 @@ public struct FfiConverterTypeArgon2Parameters: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeArgon2Parameters_lift(_ pointer: UnsafeMutableRawPointer) throws -> Argon2Parameters {
-    return try FfiConverterTypeArgon2Parameters.lift(pointer)
+public func FfiConverterTypeArgon2Parameters_lift(_ handle: UInt64) throws -> Argon2Parameters {
+    return try FfiConverterTypeArgon2Parameters.lift(handle)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeArgon2Parameters_lower(_ value: Argon2Parameters) -> UnsafeMutableRawPointer {
+public func FfiConverterTypeArgon2Parameters_lower(_ value: Argon2Parameters) -> UInt64 {
     return FfiConverterTypeArgon2Parameters.lower(value)
 }
 
@@ -671,13 +679,13 @@ public protocol Argon2ParametersBuilderProtocol: AnyObject, Sendable {
     
 }
 open class Argon2ParametersBuilder: Argon2ParametersBuilderProtocol, @unchecked Sendable {
-    fileprivate let pointer: UnsafeMutableRawPointer!
+    fileprivate let handle: UInt64
 
-    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public struct NoPointer {
+    public struct NoHandle {
         public init() {}
     }
 
@@ -687,43 +695,39 @@ open class Argon2ParametersBuilder: Argon2ParametersBuilderProtocol, @unchecked 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
-        self.pointer = pointer
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
     }
 
     // This constructor can be used to instantiate a fake object.
-    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
     //
     // - Warning:
-    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public init(noPointer: NoPointer) {
-        self.pointer = nil
+    public init(noHandle: NoHandle) {
+        self.handle = 0
     }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
-        return try! rustCall { uniffi_devolutions_crypto_uniffi_fn_clone_argon2parametersbuilder(self.pointer, $0) }
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_devolutions_crypto_uniffi_fn_clone_argon2parametersbuilder(self.handle, $0) }
     }
 public convenience init() {
-    let pointer =
+    let handle =
         try! rustCall() {
     uniffi_devolutions_crypto_uniffi_fn_constructor_argon2parametersbuilder_new($0
     )
 }
-    self.init(unsafeFromRawPointer: pointer)
+    self.init(unsafeFromHandle: handle)
 }
 
     deinit {
-        guard let pointer = pointer else {
-            return
-        }
-
-        try! rustCall { uniffi_devolutions_crypto_uniffi_fn_free_argon2parametersbuilder(pointer, $0) }
+        try! rustCall { uniffi_devolutions_crypto_uniffi_fn_free_argon2parametersbuilder(handle, $0) }
     }
 
     
@@ -731,7 +735,8 @@ public convenience init() {
     
 open func associatedData(value: Data) -> Argon2ParametersBuilder  {
     return try!  FfiConverterTypeArgon2ParametersBuilder_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_associated_data(self.uniffiClonePointer(),
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_associated_data(
+            self.uniffiCloneHandle(),
         FfiConverterData.lower(value),$0
     )
 })
@@ -739,14 +744,16 @@ open func associatedData(value: Data) -> Argon2ParametersBuilder  {
     
 open func build() -> Argon2Parameters  {
     return try!  FfiConverterTypeArgon2Parameters_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_build(self.uniffiClonePointer(),$0
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_build(
+            self.uniffiCloneHandle(),$0
     )
 })
 }
     
 open func dcVersion(value: UInt32) -> Argon2ParametersBuilder  {
     return try!  FfiConverterTypeArgon2ParametersBuilder_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_dc_version(self.uniffiClonePointer(),
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_dc_version(
+            self.uniffiCloneHandle(),
         FfiConverterUInt32.lower(value),$0
     )
 })
@@ -754,7 +761,8 @@ open func dcVersion(value: UInt32) -> Argon2ParametersBuilder  {
     
 open func iterations(value: UInt32) -> Argon2ParametersBuilder  {
     return try!  FfiConverterTypeArgon2ParametersBuilder_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_iterations(self.uniffiClonePointer(),
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_iterations(
+            self.uniffiCloneHandle(),
         FfiConverterUInt32.lower(value),$0
     )
 })
@@ -762,7 +770,8 @@ open func iterations(value: UInt32) -> Argon2ParametersBuilder  {
     
 open func lanes(value: UInt32) -> Argon2ParametersBuilder  {
     return try!  FfiConverterTypeArgon2ParametersBuilder_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_lanes(self.uniffiClonePointer(),
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_lanes(
+            self.uniffiCloneHandle(),
         FfiConverterUInt32.lower(value),$0
     )
 })
@@ -770,7 +779,8 @@ open func lanes(value: UInt32) -> Argon2ParametersBuilder  {
     
 open func length(value: UInt32) -> Argon2ParametersBuilder  {
     return try!  FfiConverterTypeArgon2ParametersBuilder_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_length(self.uniffiClonePointer(),
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_length(
+            self.uniffiCloneHandle(),
         FfiConverterUInt32.lower(value),$0
     )
 })
@@ -778,7 +788,8 @@ open func length(value: UInt32) -> Argon2ParametersBuilder  {
     
 open func memory(value: UInt32) -> Argon2ParametersBuilder  {
     return try!  FfiConverterTypeArgon2ParametersBuilder_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_memory(self.uniffiClonePointer(),
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_memory(
+            self.uniffiCloneHandle(),
         FfiConverterUInt32.lower(value),$0
     )
 })
@@ -786,7 +797,8 @@ open func memory(value: UInt32) -> Argon2ParametersBuilder  {
     
 open func salt(value: Data) -> Argon2ParametersBuilder  {
     return try!  FfiConverterTypeArgon2ParametersBuilder_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_salt(self.uniffiClonePointer(),
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_salt(
+            self.uniffiCloneHandle(),
         FfiConverterData.lower(value),$0
     )
 })
@@ -794,7 +806,8 @@ open func salt(value: Data) -> Argon2ParametersBuilder  {
     
 open func secretKey(value: Data) -> Argon2ParametersBuilder  {
     return try!  FfiConverterTypeArgon2ParametersBuilder_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_secret_key(self.uniffiClonePointer(),
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_secret_key(
+            self.uniffiCloneHandle(),
         FfiConverterData.lower(value),$0
     )
 })
@@ -802,7 +815,8 @@ open func secretKey(value: Data) -> Argon2ParametersBuilder  {
     
 open func variant(value: Argon2Variant) -> Argon2ParametersBuilder  {
     return try!  FfiConverterTypeArgon2ParametersBuilder_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_variant(self.uniffiClonePointer(),
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_variant(
+            self.uniffiCloneHandle(),
         FfiConverterTypeArgon2Variant_lower(value),$0
     )
 })
@@ -810,13 +824,15 @@ open func variant(value: Argon2Variant) -> Argon2ParametersBuilder  {
     
 open func version(value: Argon2Version) -> Argon2ParametersBuilder  {
     return try!  FfiConverterTypeArgon2ParametersBuilder_lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_version(self.uniffiClonePointer(),
+    uniffi_devolutions_crypto_uniffi_fn_method_argon2parametersbuilder_version(
+            self.uniffiCloneHandle(),
         FfiConverterTypeArgon2Version_lower(value),$0
     )
 })
 }
     
 
+    
 }
 
 
@@ -824,33 +840,24 @@ open func version(value: Argon2Version) -> Argon2ParametersBuilder  {
 @_documentation(visibility: private)
 #endif
 public struct FfiConverterTypeArgon2ParametersBuilder: FfiConverter {
-
-    typealias FfiType = UnsafeMutableRawPointer
+    typealias FfiType = UInt64
     typealias SwiftType = Argon2ParametersBuilder
 
-    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> Argon2ParametersBuilder {
-        return Argon2ParametersBuilder(unsafeFromRawPointer: pointer)
+    public static func lift(_ handle: UInt64) throws -> Argon2ParametersBuilder {
+        return Argon2ParametersBuilder(unsafeFromHandle: handle)
     }
 
-    public static func lower(_ value: Argon2ParametersBuilder) -> UnsafeMutableRawPointer {
-        return value.uniffiClonePointer()
+    public static func lower(_ value: Argon2ParametersBuilder) -> UInt64 {
+        return value.uniffiCloneHandle()
     }
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Argon2ParametersBuilder {
-        let v: UInt64 = try readInt(&buf)
-        // The Rust code won't compile if a pointer won't fit in a UInt64.
-        // We have to go via `UInt` because that's the thing that's the size of a pointer.
-        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
-        if (ptr == nil) {
-            throw UniffiInternalError.unexpectedNullPointer
-        }
-        return try lift(ptr!)
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
     }
 
     public static func write(_ value: Argon2ParametersBuilder, into buf: inout [UInt8]) {
-        // This fiddling is because `Int` is the thing that's the same size as a pointer.
-        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
-        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+        writeInt(&buf, lower(value))
     }
 }
 
@@ -858,14 +865,14 @@ public struct FfiConverterTypeArgon2ParametersBuilder: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeArgon2ParametersBuilder_lift(_ pointer: UnsafeMutableRawPointer) throws -> Argon2ParametersBuilder {
-    return try FfiConverterTypeArgon2ParametersBuilder.lift(pointer)
+public func FfiConverterTypeArgon2ParametersBuilder_lift(_ handle: UInt64) throws -> Argon2ParametersBuilder {
+    return try FfiConverterTypeArgon2ParametersBuilder.lift(handle)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeArgon2ParametersBuilder_lower(_ value: Argon2ParametersBuilder) -> UnsafeMutableRawPointer {
+public func FfiConverterTypeArgon2ParametersBuilder_lower(_ value: Argon2ParametersBuilder) -> UInt64 {
     return FfiConverterTypeArgon2ParametersBuilder.lower(value)
 }
 
@@ -882,13 +889,13 @@ public protocol SigningKeyPairProtocol: AnyObject, Sendable {
     
 }
 open class SigningKeyPair: SigningKeyPairProtocol, @unchecked Sendable {
-    fileprivate let pointer: UnsafeMutableRawPointer!
+    fileprivate let handle: UInt64
 
-    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public struct NoPointer {
+    public struct NoHandle {
         public init() {}
     }
 
@@ -898,41 +905,37 @@ open class SigningKeyPair: SigningKeyPairProtocol, @unchecked Sendable {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
-        self.pointer = pointer
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
     }
 
     // This constructor can be used to instantiate a fake object.
-    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
     //
     // - Warning:
-    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public init(noPointer: NoPointer) {
-        self.pointer = nil
+    public init(noHandle: NoHandle) {
+        self.handle = 0
     }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
-        return try! rustCall { uniffi_devolutions_crypto_uniffi_fn_clone_signingkeypair(self.pointer, $0) }
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_devolutions_crypto_uniffi_fn_clone_signingkeypair(self.handle, $0) }
     }
     // No primary constructor declared for this class.
 
     deinit {
-        guard let pointer = pointer else {
-            return
-        }
-
-        try! rustCall { uniffi_devolutions_crypto_uniffi_fn_free_signingkeypair(pointer, $0) }
+        try! rustCall { uniffi_devolutions_crypto_uniffi_fn_free_signingkeypair(handle, $0) }
     }
 
     
 public static func newFromBytes(data: Data)throws  -> SigningKeyPair  {
-    return try  FfiConverterTypeSigningKeyPair_lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterTypeSigningKeyPair_lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_constructor_signingkeypair_new_from_bytes(
         FfiConverterData.lower(data),$0
     )
@@ -943,19 +946,22 @@ public static func newFromBytes(data: Data)throws  -> SigningKeyPair  {
     
 open func getPrivateKey() -> Data  {
     return try!  FfiConverterData.lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_private_key(self.uniffiClonePointer(),$0
+    uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_private_key(
+            self.uniffiCloneHandle(),$0
     )
 })
 }
     
 open func getPublicKey() -> Data  {
     return try!  FfiConverterData.lift(try! rustCall() {
-    uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_public_key(self.uniffiClonePointer(),$0
+    uniffi_devolutions_crypto_uniffi_fn_method_signingkeypair_get_public_key(
+            self.uniffiCloneHandle(),$0
     )
 })
 }
     
 
+    
 }
 
 
@@ -963,33 +969,24 @@ open func getPublicKey() -> Data  {
 @_documentation(visibility: private)
 #endif
 public struct FfiConverterTypeSigningKeyPair: FfiConverter {
-
-    typealias FfiType = UnsafeMutableRawPointer
+    typealias FfiType = UInt64
     typealias SwiftType = SigningKeyPair
 
-    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> SigningKeyPair {
-        return SigningKeyPair(unsafeFromRawPointer: pointer)
+    public static func lift(_ handle: UInt64) throws -> SigningKeyPair {
+        return SigningKeyPair(unsafeFromHandle: handle)
     }
 
-    public static func lower(_ value: SigningKeyPair) -> UnsafeMutableRawPointer {
-        return value.uniffiClonePointer()
+    public static func lower(_ value: SigningKeyPair) -> UInt64 {
+        return value.uniffiCloneHandle()
     }
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SigningKeyPair {
-        let v: UInt64 = try readInt(&buf)
-        // The Rust code won't compile if a pointer won't fit in a UInt64.
-        // We have to go via `UInt` because that's the thing that's the size of a pointer.
-        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
-        if (ptr == nil) {
-            throw UniffiInternalError.unexpectedNullPointer
-        }
-        return try lift(ptr!)
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
     }
 
     public static func write(_ value: SigningKeyPair, into buf: inout [UInt8]) {
-        // This fiddling is because `Int` is the thing that's the same size as a pointer.
-        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
-        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+        writeInt(&buf, lower(value))
     }
 }
 
@@ -997,55 +994,37 @@ public struct FfiConverterTypeSigningKeyPair: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeSigningKeyPair_lift(_ pointer: UnsafeMutableRawPointer) throws -> SigningKeyPair {
-    return try FfiConverterTypeSigningKeyPair.lift(pointer)
+public func FfiConverterTypeSigningKeyPair_lift(_ handle: UInt64) throws -> SigningKeyPair {
+    return try FfiConverterTypeSigningKeyPair.lift(handle)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeSigningKeyPair_lower(_ value: SigningKeyPair) -> UnsafeMutableRawPointer {
+public func FfiConverterTypeSigningKeyPair_lower(_ value: SigningKeyPair) -> UInt64 {
     return FfiConverterTypeSigningKeyPair.lower(value)
 }
 
 
 
 
-public struct KeyPair {
-    public var publicKey: Data
+public struct KeyPair: Equatable, Hashable {
     public var privateKey: Data
+    public var publicKey: Data
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(publicKey: Data, privateKey: Data) {
-        self.publicKey = publicKey
+    public init(privateKey: Data, publicKey: Data) {
         self.privateKey = privateKey
+        self.publicKey = publicKey
     }
+
+    
 }
 
 #if compiler(>=6)
 extension KeyPair: Sendable {}
 #endif
-
-
-extension KeyPair: Equatable, Hashable {
-    public static func ==(lhs: KeyPair, rhs: KeyPair) -> Bool {
-        if lhs.publicKey != rhs.publicKey {
-            return false
-        }
-        if lhs.privateKey != rhs.privateKey {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(publicKey)
-        hasher.combine(privateKey)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -1054,14 +1033,14 @@ public struct FfiConverterTypeKeyPair: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> KeyPair {
         return
             try KeyPair(
-                publicKey: FfiConverterData.read(from: &buf), 
-                privateKey: FfiConverterData.read(from: &buf)
+                privateKey: FfiConverterData.read(from: &buf), 
+                publicKey: FfiConverterData.read(from: &buf)
         )
     }
 
     public static func write(_ value: KeyPair, into buf: inout [UInt8]) {
-        FfiConverterData.write(value.publicKey, into: &buf)
         FfiConverterData.write(value.privateKey, into: &buf)
+        FfiConverterData.write(value.publicKey, into: &buf)
     }
 }
 
@@ -1083,13 +1062,15 @@ public func FfiConverterTypeKeyPair_lower(_ value: KeyPair) -> RustBuffer {
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
-public enum Argon2Variant {
+public enum Argon2Variant: Equatable, Hashable {
     
     case argon2d
     case argon2i
     case argon2id
-}
 
+
+
+}
 
 #if compiler(>=6)
 extension Argon2Variant: Sendable {}
@@ -1150,19 +1131,17 @@ public func FfiConverterTypeArgon2Variant_lower(_ value: Argon2Variant) -> RustB
 }
 
 
-extension Argon2Variant: Equatable, Hashable {}
-
-
-
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
-public enum Argon2Version {
+public enum Argon2Version: Equatable, Hashable {
     
     case version10
     case version13
-}
 
+
+
+}
 
 #if compiler(>=6)
 extension Argon2Version: Sendable {}
@@ -1217,737 +1196,6 @@ public func FfiConverterTypeArgon2Version_lower(_ value: Argon2Version) -> RustB
 }
 
 
-extension Argon2Version: Equatable, Hashable {}
-
-
-
-// Note that we don't yet support `indirect` for enums.
-// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
-
-public enum CiphertextVersion {
-    
-    case latest
-    case v1
-    case v2
-}
-
-
-#if compiler(>=6)
-extension CiphertextVersion: Sendable {}
-#endif
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public struct FfiConverterTypeCiphertextVersion: FfiConverterRustBuffer {
-    typealias SwiftType = CiphertextVersion
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> CiphertextVersion {
-        let variant: Int32 = try readInt(&buf)
-        switch variant {
-        
-        case 1: return .latest
-        
-        case 2: return .v1
-        
-        case 3: return .v2
-        
-        default: throw UniffiInternalError.unexpectedEnumCase
-        }
-    }
-
-    public static func write(_ value: CiphertextVersion, into buf: inout [UInt8]) {
-        switch value {
-        
-        
-        case .latest:
-            writeInt(&buf, Int32(1))
-        
-        
-        case .v1:
-            writeInt(&buf, Int32(2))
-        
-        
-        case .v2:
-            writeInt(&buf, Int32(3))
-        
-        }
-    }
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeCiphertextVersion_lift(_ buf: RustBuffer) throws -> CiphertextVersion {
-    return try FfiConverterTypeCiphertextVersion.lift(buf)
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeCiphertextVersion_lower(_ value: CiphertextVersion) -> RustBuffer {
-    return FfiConverterTypeCiphertextVersion.lower(value)
-}
-
-
-extension CiphertextVersion: Equatable, Hashable {}
-
-
-
-// Note that we don't yet support `indirect` for enums.
-// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
-
-public enum DataType {
-    
-    case none
-    case key
-    case ciphertext
-    case passwordHash
-    case share
-    case signingKey
-    case signature
-    case onlineCiphertext
-}
-
-
-#if compiler(>=6)
-extension DataType: Sendable {}
-#endif
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public struct FfiConverterTypeDataType: FfiConverterRustBuffer {
-    typealias SwiftType = DataType
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> DataType {
-        let variant: Int32 = try readInt(&buf)
-        switch variant {
-        
-        case 1: return .none
-        
-        case 2: return .key
-        
-        case 3: return .ciphertext
-        
-        case 4: return .passwordHash
-        
-        case 5: return .share
-        
-        case 6: return .signingKey
-        
-        case 7: return .signature
-        
-        case 8: return .onlineCiphertext
-        
-        default: throw UniffiInternalError.unexpectedEnumCase
-        }
-    }
-
-    public static func write(_ value: DataType, into buf: inout [UInt8]) {
-        switch value {
-        
-        
-        case .none:
-            writeInt(&buf, Int32(1))
-        
-        
-        case .key:
-            writeInt(&buf, Int32(2))
-        
-        
-        case .ciphertext:
-            writeInt(&buf, Int32(3))
-        
-        
-        case .passwordHash:
-            writeInt(&buf, Int32(4))
-        
-        
-        case .share:
-            writeInt(&buf, Int32(5))
-        
-        
-        case .signingKey:
-            writeInt(&buf, Int32(6))
-        
-        
-        case .signature:
-            writeInt(&buf, Int32(7))
-        
-        
-        case .onlineCiphertext:
-            writeInt(&buf, Int32(8))
-        
-        }
-    }
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeDataType_lift(_ buf: RustBuffer) throws -> DataType {
-    return try FfiConverterTypeDataType.lift(buf)
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeDataType_lower(_ value: DataType) -> RustBuffer {
-    return FfiConverterTypeDataType.lower(value)
-}
-
-
-extension DataType: Equatable, Hashable {}
-
-
-
-
-public enum DevolutionsCryptoError: Swift.Error {
-
-    
-    
-    case InvalidLength(message: String)
-    
-    case InvalidKeyLength(message: String)
-    
-    case InvalidOutputLength(message: String)
-    
-    case InvalidSignature(message: String)
-    
-    case InvalidMac(message: String)
-    
-    case InvalidDataType(message: String)
-    
-    case UnknownType(message: String)
-    
-    case UnknownSubtype(message: String)
-    
-    case UnknownVersion(message: String)
-    
-    case InvalidData(message: String)
-    
-    case NullPointer(message: String)
-    
-    case CryptoError(message: String)
-    
-    case RandomError(message: String)
-    
-    case IoError(message: String)
-    
-    case NotEnoughShares(message: String)
-    
-    case InconsistentVersion(message: String)
-    
-    case InvalidChunkLength(message: String)
-    
-    case PoisonedMutex(message: String)
-    
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public struct FfiConverterTypeDevolutionsCryptoError: FfiConverterRustBuffer {
-    typealias SwiftType = DevolutionsCryptoError
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> DevolutionsCryptoError {
-        let variant: Int32 = try readInt(&buf)
-        switch variant {
-
-        
-
-        
-        case 1: return .InvalidLength(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 2: return .InvalidKeyLength(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 3: return .InvalidOutputLength(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 4: return .InvalidSignature(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 5: return .InvalidMac(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 6: return .InvalidDataType(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 7: return .UnknownType(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 8: return .UnknownSubtype(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 9: return .UnknownVersion(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 10: return .InvalidData(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 11: return .NullPointer(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 12: return .CryptoError(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 13: return .RandomError(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 14: return .IoError(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 15: return .NotEnoughShares(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 16: return .InconsistentVersion(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 17: return .InvalidChunkLength(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-        case 18: return .PoisonedMutex(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
-
-        default: throw UniffiInternalError.unexpectedEnumCase
-        }
-    }
-
-    public static func write(_ value: DevolutionsCryptoError, into buf: inout [UInt8]) {
-        switch value {
-
-        
-
-        
-        case .InvalidLength(_ /* message is ignored*/):
-            writeInt(&buf, Int32(1))
-        case .InvalidKeyLength(_ /* message is ignored*/):
-            writeInt(&buf, Int32(2))
-        case .InvalidOutputLength(_ /* message is ignored*/):
-            writeInt(&buf, Int32(3))
-        case .InvalidSignature(_ /* message is ignored*/):
-            writeInt(&buf, Int32(4))
-        case .InvalidMac(_ /* message is ignored*/):
-            writeInt(&buf, Int32(5))
-        case .InvalidDataType(_ /* message is ignored*/):
-            writeInt(&buf, Int32(6))
-        case .UnknownType(_ /* message is ignored*/):
-            writeInt(&buf, Int32(7))
-        case .UnknownSubtype(_ /* message is ignored*/):
-            writeInt(&buf, Int32(8))
-        case .UnknownVersion(_ /* message is ignored*/):
-            writeInt(&buf, Int32(9))
-        case .InvalidData(_ /* message is ignored*/):
-            writeInt(&buf, Int32(10))
-        case .NullPointer(_ /* message is ignored*/):
-            writeInt(&buf, Int32(11))
-        case .CryptoError(_ /* message is ignored*/):
-            writeInt(&buf, Int32(12))
-        case .RandomError(_ /* message is ignored*/):
-            writeInt(&buf, Int32(13))
-        case .IoError(_ /* message is ignored*/):
-            writeInt(&buf, Int32(14))
-        case .NotEnoughShares(_ /* message is ignored*/):
-            writeInt(&buf, Int32(15))
-        case .InconsistentVersion(_ /* message is ignored*/):
-            writeInt(&buf, Int32(16))
-        case .InvalidChunkLength(_ /* message is ignored*/):
-            writeInt(&buf, Int32(17))
-        case .PoisonedMutex(_ /* message is ignored*/):
-            writeInt(&buf, Int32(18))
-
-        
-        }
-    }
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeDevolutionsCryptoError_lift(_ buf: RustBuffer) throws -> DevolutionsCryptoError {
-    return try FfiConverterTypeDevolutionsCryptoError.lift(buf)
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeDevolutionsCryptoError_lower(_ value: DevolutionsCryptoError) -> RustBuffer {
-    return FfiConverterTypeDevolutionsCryptoError.lower(value)
-}
-
-
-extension DevolutionsCryptoError: Equatable, Hashable {}
-
-
-
-extension DevolutionsCryptoError: Foundation.LocalizedError {
-    public var errorDescription: String? {
-        String(reflecting: self)
-    }
-}
-
-
-// Note that we don't yet support `indirect` for enums.
-// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
-
-public enum KeyVersion {
-    
-    case latest
-    case v1
-}
-
-
-#if compiler(>=6)
-extension KeyVersion: Sendable {}
-#endif
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public struct FfiConverterTypeKeyVersion: FfiConverterRustBuffer {
-    typealias SwiftType = KeyVersion
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> KeyVersion {
-        let variant: Int32 = try readInt(&buf)
-        switch variant {
-        
-        case 1: return .latest
-        
-        case 2: return .v1
-        
-        default: throw UniffiInternalError.unexpectedEnumCase
-        }
-    }
-
-    public static func write(_ value: KeyVersion, into buf: inout [UInt8]) {
-        switch value {
-        
-        
-        case .latest:
-            writeInt(&buf, Int32(1))
-        
-        
-        case .v1:
-            writeInt(&buf, Int32(2))
-        
-        }
-    }
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeKeyVersion_lift(_ buf: RustBuffer) throws -> KeyVersion {
-    return try FfiConverterTypeKeyVersion.lift(buf)
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeKeyVersion_lower(_ value: KeyVersion) -> RustBuffer {
-    return FfiConverterTypeKeyVersion.lower(value)
-}
-
-
-extension KeyVersion: Equatable, Hashable {}
-
-
-
-// Note that we don't yet support `indirect` for enums.
-// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
-
-public enum PasswordHashVersion {
-    
-    case latest
-    case v1
-}
-
-
-#if compiler(>=6)
-extension PasswordHashVersion: Sendable {}
-#endif
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public struct FfiConverterTypePasswordHashVersion: FfiConverterRustBuffer {
-    typealias SwiftType = PasswordHashVersion
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> PasswordHashVersion {
-        let variant: Int32 = try readInt(&buf)
-        switch variant {
-        
-        case 1: return .latest
-        
-        case 2: return .v1
-        
-        default: throw UniffiInternalError.unexpectedEnumCase
-        }
-    }
-
-    public static func write(_ value: PasswordHashVersion, into buf: inout [UInt8]) {
-        switch value {
-        
-        
-        case .latest:
-            writeInt(&buf, Int32(1))
-        
-        
-        case .v1:
-            writeInt(&buf, Int32(2))
-        
-        }
-    }
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypePasswordHashVersion_lift(_ buf: RustBuffer) throws -> PasswordHashVersion {
-    return try FfiConverterTypePasswordHashVersion.lift(buf)
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypePasswordHashVersion_lower(_ value: PasswordHashVersion) -> RustBuffer {
-    return FfiConverterTypePasswordHashVersion.lower(value)
-}
-
-
-extension PasswordHashVersion: Equatable, Hashable {}
-
-
-
-// Note that we don't yet support `indirect` for enums.
-// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
-
-public enum SecretSharingVersion {
-    
-    case latest
-    case v1
-}
-
-
-#if compiler(>=6)
-extension SecretSharingVersion: Sendable {}
-#endif
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public struct FfiConverterTypeSecretSharingVersion: FfiConverterRustBuffer {
-    typealias SwiftType = SecretSharingVersion
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SecretSharingVersion {
-        let variant: Int32 = try readInt(&buf)
-        switch variant {
-        
-        case 1: return .latest
-        
-        case 2: return .v1
-        
-        default: throw UniffiInternalError.unexpectedEnumCase
-        }
-    }
-
-    public static func write(_ value: SecretSharingVersion, into buf: inout [UInt8]) {
-        switch value {
-        
-        
-        case .latest:
-            writeInt(&buf, Int32(1))
-        
-        
-        case .v1:
-            writeInt(&buf, Int32(2))
-        
-        }
-    }
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeSecretSharingVersion_lift(_ buf: RustBuffer) throws -> SecretSharingVersion {
-    return try FfiConverterTypeSecretSharingVersion.lift(buf)
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeSecretSharingVersion_lower(_ value: SecretSharingVersion) -> RustBuffer {
-    return FfiConverterTypeSecretSharingVersion.lower(value)
-}
-
-
-extension SecretSharingVersion: Equatable, Hashable {}
-
-
-
-// Note that we don't yet support `indirect` for enums.
-// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
-
-public enum SignatureVersion {
-    
-    case latest
-    case v1
-}
-
-
-#if compiler(>=6)
-extension SignatureVersion: Sendable {}
-#endif
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public struct FfiConverterTypeSignatureVersion: FfiConverterRustBuffer {
-    typealias SwiftType = SignatureVersion
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SignatureVersion {
-        let variant: Int32 = try readInt(&buf)
-        switch variant {
-        
-        case 1: return .latest
-        
-        case 2: return .v1
-        
-        default: throw UniffiInternalError.unexpectedEnumCase
-        }
-    }
-
-    public static func write(_ value: SignatureVersion, into buf: inout [UInt8]) {
-        switch value {
-        
-        
-        case .latest:
-            writeInt(&buf, Int32(1))
-        
-        
-        case .v1:
-            writeInt(&buf, Int32(2))
-        
-        }
-    }
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeSignatureVersion_lift(_ buf: RustBuffer) throws -> SignatureVersion {
-    return try FfiConverterTypeSignatureVersion.lift(buf)
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeSignatureVersion_lower(_ value: SignatureVersion) -> RustBuffer {
-    return FfiConverterTypeSignatureVersion.lower(value)
-}
-
-
-extension SignatureVersion: Equatable, Hashable {}
-
-
-
-// Note that we don't yet support `indirect` for enums.
-// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
-
-public enum SigningKeyVersion {
-    
-    case latest
-    case v1
-}
-
-
-#if compiler(>=6)
-extension SigningKeyVersion: Sendable {}
-#endif
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public struct FfiConverterTypeSigningKeyVersion: FfiConverterRustBuffer {
-    typealias SwiftType = SigningKeyVersion
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SigningKeyVersion {
-        let variant: Int32 = try readInt(&buf)
-        switch variant {
-        
-        case 1: return .latest
-        
-        case 2: return .v1
-        
-        default: throw UniffiInternalError.unexpectedEnumCase
-        }
-    }
-
-    public static func write(_ value: SigningKeyVersion, into buf: inout [UInt8]) {
-        switch value {
-        
-        
-        case .latest:
-            writeInt(&buf, Int32(1))
-        
-        
-        case .v1:
-            writeInt(&buf, Int32(2))
-        
-        }
-    }
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeSigningKeyVersion_lift(_ buf: RustBuffer) throws -> SigningKeyVersion {
-    return try FfiConverterTypeSigningKeyVersion.lift(buf)
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeSigningKeyVersion_lower(_ value: SigningKeyVersion) -> RustBuffer {
-    return FfiConverterTypeSigningKeyVersion.lower(value)
-}
-
-
-extension SigningKeyVersion: Equatable, Hashable {}
-
-
-
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
@@ -1967,6 +1215,150 @@ fileprivate struct FfiConverterOptionData: FfiConverterRustBuffer {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterData.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeCiphertextVersion: FfiConverterRustBuffer {
+    typealias SwiftType = CiphertextVersion?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeCiphertextVersion.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeCiphertextVersion.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeKeyVersion: FfiConverterRustBuffer {
+    typealias SwiftType = KeyVersion?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeKeyVersion.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeKeyVersion.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypePasswordHashVersion: FfiConverterRustBuffer {
+    typealias SwiftType = PasswordHashVersion?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypePasswordHashVersion.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypePasswordHashVersion.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeSecretSharingVersion: FfiConverterRustBuffer {
+    typealias SwiftType = SecretSharingVersion?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeSecretSharingVersion.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeSecretSharingVersion.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeSignatureVersion: FfiConverterRustBuffer {
+    typealias SwiftType = SignatureVersion?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeSignatureVersion.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeSignatureVersion.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeSigningKeyVersion: FfiConverterRustBuffer {
+    typealias SwiftType = SigningKeyVersion?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeSigningKeyVersion.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeSigningKeyVersion.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
     }
@@ -1997,14 +1389,14 @@ fileprivate struct FfiConverterSequenceData: FfiConverterRustBuffer {
     }
 }
 public func base64Decode(data: String)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_base64_decode(
         FfiConverterString.lower(data),$0
     )
 })
 }
 public func base64DecodeUrl(data: String)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_base64_decode_url(
         FfiConverterString.lower(data),$0
     )
@@ -2025,7 +1417,7 @@ public func base64EncodeUrl(data: Data) -> String  {
 })
 }
 public func decrypt(data: Data, key: Data)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_decrypt(
         FfiConverterData.lower(data),
         FfiConverterData.lower(key),$0
@@ -2033,7 +1425,7 @@ public func decrypt(data: Data, key: Data)throws  -> Data  {
 })
 }
 public func decryptAsymmetric(data: Data, key: Data)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_decrypt_asymmetric(
         FfiConverterData.lower(data),
         FfiConverterData.lower(key),$0
@@ -2041,7 +1433,7 @@ public func decryptAsymmetric(data: Data, key: Data)throws  -> Data  {
 })
 }
 public func decryptAsymmetricWithAad(data: Data, key: Data, aad: Data)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_decrypt_asymmetric_with_aad(
         FfiConverterData.lower(data),
         FfiConverterData.lower(key),
@@ -2050,7 +1442,7 @@ public func decryptAsymmetricWithAad(data: Data, key: Data, aad: Data)throws  ->
 })
 }
 public func decryptWithAad(data: Data, key: Data, aad: Data)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_decrypt_with_aad(
         FfiConverterData.lower(data),
         FfiConverterData.lower(key),
@@ -2059,7 +1451,7 @@ public func decryptWithAad(data: Data, key: Data, aad: Data)throws  -> Data  {
 })
 }
 public func deriveKeyArgon2(key: Data, parameters: Argon2Parameters)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_derive_key_argon2(
         FfiConverterData.lower(key),
         FfiConverterTypeArgon2Parameters_lower(parameters),$0
@@ -2076,105 +1468,105 @@ public func deriveKeyPbkdf2(key: Data, salt: Data?, iterations: UInt32 = UInt32(
     )
 })
 }
-public func encrypt(data: Data, key: Data, version: CiphertextVersion = .latest)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+public func encrypt(data: Data, key: Data, version: CiphertextVersion? = nil)throws  -> Data  {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_encrypt(
         FfiConverterData.lower(data),
         FfiConverterData.lower(key),
-        FfiConverterTypeCiphertextVersion_lower(version),$0
+        FfiConverterOptionTypeCiphertextVersion.lower(version),$0
     )
 })
 }
-public func encryptAsymmetric(data: Data, key: Data, version: CiphertextVersion = .latest)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+public func encryptAsymmetric(data: Data, key: Data, version: CiphertextVersion? = nil)throws  -> Data  {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_encrypt_asymmetric(
         FfiConverterData.lower(data),
         FfiConverterData.lower(key),
-        FfiConverterTypeCiphertextVersion_lower(version),$0
+        FfiConverterOptionTypeCiphertextVersion.lower(version),$0
     )
 })
 }
-public func encryptAsymmetricWithAad(data: Data, key: Data, aad: Data, version: CiphertextVersion = .latest)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+public func encryptAsymmetricWithAad(data: Data, key: Data, aad: Data, version: CiphertextVersion? = nil)throws  -> Data  {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_encrypt_asymmetric_with_aad(
         FfiConverterData.lower(data),
         FfiConverterData.lower(key),
         FfiConverterData.lower(aad),
-        FfiConverterTypeCiphertextVersion_lower(version),$0
+        FfiConverterOptionTypeCiphertextVersion.lower(version),$0
     )
 })
 }
-public func encryptWithAad(data: Data, key: Data, aad: Data, version: CiphertextVersion = .latest)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+public func encryptWithAad(data: Data, key: Data, aad: Data, version: CiphertextVersion? = nil)throws  -> Data  {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_encrypt_with_aad(
         FfiConverterData.lower(data),
         FfiConverterData.lower(key),
         FfiConverterData.lower(aad),
-        FfiConverterTypeCiphertextVersion_lower(version),$0
+        FfiConverterOptionTypeCiphertextVersion.lower(version),$0
     )
 })
 }
 public func generateKey(length: UInt32 = UInt32(32))throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_generate_key(
         FfiConverterUInt32.lower(length),$0
     )
 })
 }
-public func generateKeypair(version: KeyVersion = .latest) -> KeyPair  {
+public func generateKeypair(version: KeyVersion? = nil) -> KeyPair  {
     return try!  FfiConverterTypeKeyPair_lift(try! rustCall() {
     uniffi_devolutions_crypto_uniffi_fn_func_generate_keypair(
-        FfiConverterTypeKeyVersion_lower(version),$0
+        FfiConverterOptionTypeKeyVersion.lower(version),$0
     )
 })
 }
-public func generateSharedKey(nShares: UInt8, threshold: UInt8, length: UInt32 = UInt32(32), version: SecretSharingVersion = .latest)throws  -> [Data]  {
-    return try  FfiConverterSequenceData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+public func generateSharedKey(nShares: UInt8, threshold: UInt8, length: UInt32 = UInt32(32), version: SecretSharingVersion? = nil)throws  -> [Data]  {
+    return try  FfiConverterSequenceData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_generate_shared_key(
         FfiConverterUInt8.lower(nShares),
         FfiConverterUInt8.lower(threshold),
         FfiConverterUInt32.lower(length),
-        FfiConverterTypeSecretSharingVersion_lower(version),$0
+        FfiConverterOptionTypeSecretSharingVersion.lower(version),$0
     )
 })
 }
-public func generateSigningKeypair(version: SigningKeyVersion = .latest) -> SigningKeyPair  {
+public func generateSigningKeypair(version: SigningKeyVersion? = nil) -> SigningKeyPair  {
     return try!  FfiConverterTypeSigningKeyPair_lift(try! rustCall() {
     uniffi_devolutions_crypto_uniffi_fn_func_generate_signing_keypair(
-        FfiConverterTypeSigningKeyVersion_lower(version),$0
+        FfiConverterOptionTypeSigningKeyVersion.lower(version),$0
     )
 })
 }
-public func hashPassword(password: Data, iterations: UInt32 = UInt32(10000), version: PasswordHashVersion = .latest)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+public func hashPassword(password: Data, iterations: UInt32 = UInt32(10000), version: PasswordHashVersion? = nil)throws  -> Data  {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_hash_password(
         FfiConverterData.lower(password),
         FfiConverterUInt32.lower(iterations),
-        FfiConverterTypePasswordHashVersion_lower(version),$0
+        FfiConverterOptionTypePasswordHashVersion.lower(version),$0
     )
 })
 }
 public func joinShares(shares: [Data])throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_join_shares(
         FfiConverterSequenceData.lower(shares),$0
     )
 })
 }
 public func mixKeyExchange(privateKey: Data, publicKey: Data)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_mix_key_exchange(
         FfiConverterData.lower(privateKey),
         FfiConverterData.lower(publicKey),$0
     )
 })
 }
-public func sign(data: Data, keypair: Data, version: SignatureVersion = .latest)throws  -> Data  {
-    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+public func sign(data: Data, keypair: Data, version: SignatureVersion? = nil)throws  -> Data  {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_sign(
         FfiConverterData.lower(data),
         FfiConverterData.lower(keypair),
-        FfiConverterTypeSignatureVersion_lower(version),$0
+        FfiConverterOptionTypeSignatureVersion.lower(version),$0
     )
 })
 }
@@ -2187,7 +1579,7 @@ public func validateHeader(data: Data, dataType: DataType) -> Bool  {
 })
 }
 public func verifyPassword(password: Data, hash: Data)throws  -> Bool  {
-    return try  FfiConverterBool.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterBool.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_verify_password(
         FfiConverterData.lower(password),
         FfiConverterData.lower(hash),$0
@@ -2195,7 +1587,7 @@ public func verifyPassword(password: Data, hash: Data)throws  -> Bool  {
 })
 }
 public func verifySignature(data: Data, publicKey: Data, signature: Data)throws  -> Bool  {
-    return try  FfiConverterBool.lift(try rustCallWithError(FfiConverterTypeDevolutionsCryptoError_lift) {
+    return try  FfiConverterBool.lift(try rustCallWithError(FfiConverterTypeError_lift) {
     uniffi_devolutions_crypto_uniffi_fn_func_verify_signature(
         FfiConverterData.lower(data),
         FfiConverterData.lower(publicKey),
@@ -2213,16 +1605,16 @@ private enum InitializationResult {
 // the code inside is only computed once.
 private let initializationResult: InitializationResult = {
     // Get the bindings contract version from our ComponentInterface
-    let bindings_contract_version = 29
+    let bindings_contract_version = 30
     // Get the scaffolding contract version by calling the into the dylib
     let scaffolding_contract_version = ffi_devolutions_crypto_uniffi_uniffi_contract_version()
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_base64_decode() != 64610) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_base64_decode() != 15059) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_base64_decode_url() != 15029) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_base64_decode_url() != 15429) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_devolutions_crypto_uniffi_checksum_func_base64_encode() != 61134) {
@@ -2231,121 +1623,122 @@ private let initializationResult: InitializationResult = {
     if (uniffi_devolutions_crypto_uniffi_checksum_func_base64_encode_url() != 31513) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_decrypt() != 41817) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_decrypt() != 39921) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_decrypt_asymmetric() != 47124) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_decrypt_asymmetric() != 6283) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_decrypt_asymmetric_with_aad() != 9987) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_decrypt_asymmetric_with_aad() != 45166) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_decrypt_with_aad() != 59734) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_decrypt_with_aad() != 43775) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_derive_key_argon2() != 60451) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_derive_key_argon2() != 27403) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_derive_key_pbkdf2() != 12853) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_derive_key_pbkdf2() != 32212) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_encrypt() != 21235) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_encrypt() != 28651) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric() != 16258) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric() != 17008) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric_with_aad() != 34280) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_asymmetric_with_aad() != 61461) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_with_aad() != 56466) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_encrypt_with_aad() != 29699) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_generate_key() != 6364) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_generate_key() != 29427) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_generate_keypair() != 13437) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_generate_keypair() != 38891) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_generate_shared_key() != 9340) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_generate_shared_key() != 57051) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_generate_signing_keypair() != 33572) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_generate_signing_keypair() != 51146) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_hash_password() != 41934) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_hash_password() != 12769) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_join_shares() != 64867) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_join_shares() != 65529) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_mix_key_exchange() != 52615) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_mix_key_exchange() != 21197) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_sign() != 54825) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_sign() != 42756) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_validate_header() != 50316) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_validate_header() != 53669) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_verify_password() != 39819) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_verify_password() != 7704) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_func_verify_signature() != 35870) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_func_verify_signature() != 51084) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parameters_get_bytes() != 51334) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parameters_get_bytes() != 26758) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_associated_data() != 20223) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_associated_data() != 27028) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_build() != 6812) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_build() != 8751) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_dc_version() != 40712) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_dc_version() != 35235) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_iterations() != 28254) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_iterations() != 15990) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_lanes() != 3637) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_lanes() != 57040) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_length() != 791) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_length() != 65258) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_memory() != 14913) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_memory() != 41617) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_salt() != 59352) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_salt() != 5080) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_secret_key() != 38451) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_secret_key() != 14932) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_variant() != 50137) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_variant() != 48907) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_version() != 39743) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_argon2parametersbuilder_version() != 31568) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_signingkeypair_get_private_key() != 10265) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_signingkeypair_get_private_key() != 2977) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_method_signingkeypair_get_public_key() != 47363) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_method_signingkeypair_get_public_key() != 50462) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_constructor_argon2parameters_new_from_bytes() != 3781) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_constructor_argon2parameters_new_from_bytes() != 58986) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_constructor_argon2parametersbuilder_new() != 19859) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_constructor_argon2parametersbuilder_new() != 40769) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_devolutions_crypto_uniffi_checksum_constructor_signingkeypair_new_from_bytes() != 17809) {
+    if (uniffi_devolutions_crypto_uniffi_checksum_constructor_signingkeypair_new_from_bytes() != 59560) {
         return InitializationResult.apiChecksumMismatch
     }
 
+    uniffiEnsureDevolutionsCryptoInitialized()
     return InitializationResult.ok
 }()
 
