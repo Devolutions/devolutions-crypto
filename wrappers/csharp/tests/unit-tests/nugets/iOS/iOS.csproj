@@ -7,10 +7,9 @@
     <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
     <RuntimeIdentifier>iossimulator-arm64</RuntimeIdentifier>
     <PublishTrimmed>true</PublishTrimmed>
-    <MtouchLink>None</MtouchLink>
     <UseInterpreter>true</UseInterpreter>
     <MTouchUseLlvm>false</MTouchUseLlvm>
-    <RunILLink>false</RunILLink>
+    <AotAssemblies>True</AotAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
