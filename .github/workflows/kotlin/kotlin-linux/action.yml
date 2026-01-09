@@ -1,4 +1,5 @@
 name: Build Kotlin Package
+description: Builds Kotlin package for Linux and Android platforms
 runs:
   using: composite
   steps:
