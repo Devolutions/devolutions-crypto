@@ -1,4 +1,5 @@
 name: Build macos natives for kotlin
+description: Builds macOS native libraries for Kotlin wrapper
 runs:
   using: composite
   steps:
