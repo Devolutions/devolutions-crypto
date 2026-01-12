@@ -9,4 +9,4 @@ crate-type = ["cdylib", "staticlib"]
 [dependencies]
 devolutions-crypto = { path = "../../", features = ["uniffi-support"] }
 uniffi = { workspace = true }
-rust-argon2 = "3.0"
+rust-argon2 = { workspace = true }
