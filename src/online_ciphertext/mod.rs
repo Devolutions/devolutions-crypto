@@ -220,6 +220,9 @@ macro_rules! online_ciphertext_header_impl {
                 type Error = Error;
 
                 fn try_from(value: &[u8]) -> Result<Self> {
+                    if value.len() < 8 {
+                        return Err(Error::InvalidLength);
+                    }
                     let header = Header::<OnlineCiphertextHeader>::try_from(&value[..8])?;
 
                     let version = if header.version == OnlineCiphertextVersion::Latest { OnlineCiphertextVersion::V1 } else { header.version };
