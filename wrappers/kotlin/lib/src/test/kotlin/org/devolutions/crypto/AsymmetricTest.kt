@@ -63,8 +63,8 @@ class AsymmetricTest {
 
     @Test
     fun mixKeyExchangeTest() {
-        val bobKeypair = generateKeypair(null)
-        val aliceKeypair = generateKeypair(null)
+        val bobKeypair = generateKeypair()
+        val aliceKeypair = generateKeypair()
 
         val bobShared = mixKeyExchange(bobKeypair.privateKey, aliceKeypair.publicKey)
         val aliceShared = mixKeyExchange(aliceKeypair.privateKey, bobKeypair.publicKey)
@@ -76,9 +76,9 @@ class AsymmetricTest {
 
     @Test
     fun mixKeyExchangeNotEqualsTest() {
-        val bobKeypair = generateKeypair(null)
-        val aliceKeypair = generateKeypair(null)
-        val eveKeypair = generateKeypair(null)
+        val bobKeypair = generateKeypair()
+        val aliceKeypair = generateKeypair()
+        val eveKeypair = generateKeypair()
 
         val bobAliceShared = mixKeyExchange(bobKeypair.privateKey, aliceKeypair.publicKey)
         val aliceBobShared = mixKeyExchange(aliceKeypair.privateKey, bobKeypair.publicKey)

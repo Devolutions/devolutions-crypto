@@ -84,7 +84,6 @@ impl Argon2ParametersBuilder {
     }
 
     pub fn build(self: Arc<Self>) -> Arc<Argon2Parameters> {
-        // Get all the values
         let length = *self.length.lock().unwrap();
         let lanes = *self.lanes.lock().unwrap();
         let memory = *self.memory.lock().unwrap();
@@ -96,7 +95,6 @@ impl Argon2ParametersBuilder {
         let secret_key = self.secret_key.lock().unwrap().clone();
         let salt = self.salt.lock().unwrap().clone();
 
-        // Build by chaining all fields together (typed-builder requires all fields to be set)
         let inner =
             devolutions_crypto::Argon2Parameters::builder()
                 .length(length.unwrap_or(32))
