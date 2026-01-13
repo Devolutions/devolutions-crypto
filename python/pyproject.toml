@@ -1,6 +1,6 @@
 [project]
 name = "devolutions-crypto"
-version = "0.9.3"
+version = "2026.1.13"
 description = "An abstraction layer for the cryptography used by Devolutions"
 readme = "PYPI_README.md"
 authors = [
