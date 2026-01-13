@@ -36,7 +36,7 @@ jobs:
     environment: publish
     runs-on: ubuntu-22.04
     permissions:
-      contents: read
+      contents: write
       id-token: write
 
     steps:
@@ -99,6 +99,9 @@ jobs:
 
         version_native=$(cargo pkgid | cut -d "#" -f2)
         echo "version_native=$version_native" >> $GITHUB_OUTPUT
+
+        version_python=$(grep '^version = ' python/pyproject.toml | sed -E 's/version = "(.*)"/\1/')
+        echo "version_python=$version_python" >> $GITHUB_OUTPUT
 
     - name: Setup git
       run: |
@@ -175,8 +178,8 @@ jobs:
     - name: Tag Python Release
       if: ${{ inputs.publish_python && !inputs.publish_dry_run }}
       run: |
-        git tag "python-v${{ steps.version.outputs.version_native }}"
-        git push origin "python-v${{ steps.version.outputs.version_native }}"
+        git tag "python-v${{ steps.version.outputs.version_python }}"
+        git push origin "python-v${{ steps.version.outputs.version_python }}"
 
     - name: Publish Kotlin to Cloudsmith
       if: ${{ inputs.publish_kotlin && !inputs.publish_dry_run }}
