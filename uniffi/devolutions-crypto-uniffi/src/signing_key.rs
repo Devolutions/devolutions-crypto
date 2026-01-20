@@ -4,11 +4,23 @@ use crate::DevolutionsCryptoError;
 use crate::Result;
 use crate::SigningKeyVersion;
 
+#[derive(uniffi::Object)]
 pub struct SigningKeyPair(devolutions_crypto::signing_key::SigningKeyPair);
 
+#[uniffi::export]
 impl SigningKeyPair {
-    pub fn new_from_bytes(data: &[u8]) -> Result<Self> {
-        data.try_into()
+    #[uniffi::constructor]
+    pub fn new_from_bytes(data: &[u8]) -> Result<Arc<Self>> {
+        let inner = data.try_into()?;
+        Ok(Arc::new(Self(inner)))
+    }
+
+    pub fn get_public_key(&self) -> Vec<u8> {
+        self.0.get_public_key().into()
+    }
+
+    pub fn get_private_key(&self) -> Vec<u8> {
+        self.0.clone().into()
     }
 }
 
@@ -26,16 +38,8 @@ impl TryFrom<&[u8]> for SigningKeyPair {
     }
 }
 
-impl SigningKeyPair {
-    pub fn get_public_key(&self) -> Vec<u8> {
-        self.0.get_public_key().into()
-    }
-
-    pub fn get_private_key(&self) -> Vec<u8> {
-        self.0.clone().into()
-    }
-}
-
-pub fn generate_signing_keypair(version: SigningKeyVersion) -> Arc<SigningKeyPair> {
+#[uniffi::export(default(version = None))]
+pub fn generate_signing_keypair(version: Option<SigningKeyVersion>) -> Arc<SigningKeyPair> {
+    let version = version.unwrap_or(SigningKeyVersion::Latest);
     Arc::new(devolutions_crypto::signing_key::generate_signing_keypair(version).into())
 }

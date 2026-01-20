@@ -22,6 +22,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 // }
 
 /// This crate's error type.
+#[cfg_attr(feature = "uniffi-support", derive(uniffi::Error))]
+#[cfg_attr(feature = "uniffi-support", uniffi(flat_error))]
 #[derive(Debug, IntoStaticStr, thiserror::Error)]
 pub enum Error {
     /// The provided data has an invalid length. Error code: -1
