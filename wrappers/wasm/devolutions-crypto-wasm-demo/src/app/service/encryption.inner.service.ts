@@ -1,6 +1,9 @@
-import { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, Argon2Parameters, PasswordHashVersion } from '@devolutions/devolutions-crypto-web';
+import wasmInit, { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, Argon2Parameters, PasswordHashVersion } from '@devolutions/devolutions-crypto-web';
 export { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, Argon2Parameters, PasswordHashVersion } from '@devolutions/devolutions-crypto-web';
 import * as devolutionsCrypto from '@devolutions/devolutions-crypto-web';
+
+// Initialize WASM before any functions are used
+export const ready: Promise<void> = wasmInit('/devolutions_crypto_bg.wasm').then(() => undefined);
 
 export function encrypt(data: Uint8Array, key: Uint8Array, version?: CiphertextVersion): Uint8Array {
     return devolutionsCrypto.encrypt(data, key, undefined, version);

@@ -8,6 +8,9 @@ type EncryptionServiceInner = typeof import('./encryption.inner.service');
 export class EncryptionService {
   public innerModule: Promise<EncryptionServiceInner>;
   constructor() {
-    this.innerModule = import('./encryption.inner.service').then((mod) => mod);
+    this.innerModule = import('./encryption.inner.service').then(async (mod) => {
+      await mod.ready;
+      return mod;
+    });
   }
 }
