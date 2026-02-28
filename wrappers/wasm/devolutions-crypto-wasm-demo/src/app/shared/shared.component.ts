@@ -1,5 +1,5 @@
 export function w3_open() {
-  (document.getElementById('mySidebar') as HTMLElement).style.display = 'block';
+  (document.getElementById('mySidebar') as HTMLElement).style.display = 'flex';
   (document.getElementById('myOverlay') as HTMLElement).style.display = 'block';
 }
 

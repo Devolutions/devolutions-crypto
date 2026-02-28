@@ -1,2 +1,269 @@
-/* You can add global styles to this file, and also import other style files */
-@import "https://www.w3schools.com/w3css/4/w3.css";
+@import "tailwindcss";
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
+}
+a { text-decoration: none; color: inherit; }
+
+/* ── Close button (mobile only) ─────────────────────────────── */
+.sidebar-close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+.sidebar-close-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+/* ── Sidebar brand header ────────────────────────────────────── */
+.sidebar-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem 2rem;
+  background: linear-gradient(160deg, #1e3a5f 0%, #0d6e63 100%);
+  text-align: center;
+}
+.sidebar-brand h1 {
+  margin: 0.75rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.4;
+}
+
+/* ── Sidebar nav links ───────────────────────────────────────── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0.75rem 1.5rem;
+  gap: 0.25rem;
+}
+.sidebar-nav a {
+  display: block;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+.sidebar-nav a:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+/* ── Mobile header ──────────────────────────────────────────── */
+.mobile-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3.5rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  z-index: 30;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.mobile-header button {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-right: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+.mobile-header button:hover { color: #2dd4bf; }
+.mobile-header span { font-size: 1.05rem; font-weight: 600; }
+
+/* ── Page inner wrapper ─────────────────────────────────────── */
+.page-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ── Page heading ───────────────────────────────────────────── */
+.page-heading {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.page-heading h1 {
+  margin: 0.75rem 0 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* ── Card ───────────────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.card-title {
+  background: #1e293b;
+  color: #fff;
+  text-align: center;
+  padding: 0.9rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.card-body {
+  padding: 1.75rem 1.75rem 1.5rem;
+}
+
+/* ── Form fields ────────────────────────────────────────────── */
+.field { margin-bottom: 1.25rem; }
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.field input,
+.field textarea {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 0.875rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #1e293b;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  resize: vertical;
+}
+.field input:focus,
+.field textarea:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20,184,166,0.15);
+  background: #fff;
+}
+.field input::placeholder,
+.field textarea::placeholder { color: #94a3b8; }
+
+/* ── Result label ────────────────────────────────────────────── */
+.result-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0f766e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 1.4rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  outline: none;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary {
+  background: #0d9488;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(13,148,136,0.3);
+}
+.btn-primary:hover { background: #0f766e; box-shadow: 0 2px 8px rgba(13,148,136,0.4); }
+.btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+
+/* ── Key list (secret sharing) ──────────────────────────────── */
+.key-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.key-list li {
+  font-size: 0.78rem;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  word-break: break-all;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────── */
+#mySidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 18rem;
+  height: 100%;
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+  overflow-y: auto;
+  background-color: #0f172a;
+  color: #e2e8f0;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+}
+
+/* ── Overlay ────────────────────────────────────────────────── */
+#myOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0,0,0,0.55);
+  cursor: pointer;
+}
+
+/* ── Page content ───────────────────────────────────────────── */
+.page-content {
+  margin-left: 0;
+  min-height: 100vh;
+  padding-top: 3.5rem;
+}
+
+@media (min-width: 1024px) {
+  #mySidebar { display: flex !important; }
+  #myOverlay { display: none !important; }
+  .sidebar-close-btn { display: none !important; }
+  .mobile-header { display: none !important; }
+  .page-content {
+    margin-left: 18rem;
+    padding-top: 0;
+  }
+}

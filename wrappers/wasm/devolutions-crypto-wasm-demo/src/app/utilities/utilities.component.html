@@ -1,85 +1,83 @@
-<!-- Top menu on small screens -->
-<header class="w3-container w3-top w3-hide-large w3-red w3-xlarge w3-padding">
-  <a href="javascript:void(0)" class="w3-button w3-red w3-margin-right" (click)="w3Open()">☰</a>
-  <span>Devolutions crypto</span>
+<!-- Mobile header -->
+<header class="mobile-header">
+  <button (click)="w3Open()">&#9776;</button>
+  <span>Devolutions Crypto</span>
 </header>
 
-<!-- Overlay effect when opening sidebar on small screens -->
-<div class="w3-overlay w3-hide-large" (click)="w3Close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+<!-- Mobile overlay -->
+<div id="myOverlay" (click)="w3Close()" style="display:none; position:fixed; inset:0; z-index:40; background:rgba(0,0,0,0.55); cursor:pointer;"></div>
 
-<!-- !PAGE CONTENT! -->
-<div class="w3-main" style="margin-left:340px;margin-right:40px;padding-top: 30px;">
+<div class="page-inner">
 
-  <div style="margin-top:40px;text-align: center;">
-    <b><fa-icon class="fa-3x" [icon]="faTools"></fa-icon></b>
+  <div class="page-heading">
+    <fa-icon size="3x" [icon]="faTools"></fa-icon>
     <h1>Utilities</h1>
   </div>
 
-  <div class="container" style="margin-top:40px; border: 2px groove;border-radius: 10px;border-color: lightgray;">
-    <h2 style="background-color: #f44336; color: white; margin-top: 10px;text-align: center;height: 40px;padding-top: 5px;">Encode/Decode</h2>
-    <form [formGroup]="encodeDecodeForm">
-      <div class="form-group">
-        <label for="enDecodeText">Text</label>
-        <input type="text" class="form-control" formControlName="enDecodeText" required>
-      </div>
-
-      <div style="margin-top: 20px;">
-        <button type="button" class="btn btn-success" (click)="encode()">Encode</button>
-        &nbsp;&nbsp;
-        <button type="button" class="btn btn-success" (click)="decode()">Decode</button>
-      </div>
-
-      <div class="form-group" style="margin-top:20px;margin-bottom: 20px;">
-        <label for="enDecodeResult"><h4>Result</h4></label>
-        <textarea rows="3" type="text" class="form-control" formControlName="enDecodeResult"></textarea>
-      </div>
-    </form>
+  <div class="card">
+    <div class="card-title">Encode / Decode</div>
+    <div class="card-body">
+      <form [formGroup]="encodeDecodeForm">
+        <div class="field">
+          <label>Text</label>
+          <input type="text" formControlName="enDecodeText" required placeholder="Enter text">
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" (click)="encode()">Encode</button>
+          <button type="button" class="btn btn-primary" (click)="decode()">Decode</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Result</span>
+          <textarea rows="3" formControlName="enDecodeResult" placeholder="Output will appear here"></textarea>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <div class="container" style="margin-top:40px; border: 2px groove;border-radius: 10px;border-color: lightgray;">
-    <h2 style="background-color: #f44336; color: white; margin-top: 10px;text-align: center;height: 40px;padding-top: 5px;">Key Generation</h2>
-    <form [formGroup]="keyGenerationForm" (ngSubmit)="generateKey()">
-      <div style="margin-top: 20px;">
-        <button type="submit" class="btn btn-success">Generate key</button>
-      </div>
-
-      <div class="form-group" style="margin-top:20px;margin-bottom: 20px;">
-        <label for="generationResult"><h4>Result</h4></label>
-        <textarea rows="3" type="text" class="form-control" formControlName="generationResult"></textarea>
-      </div>
-    </form>
+  <div class="card">
+    <div class="card-title">Key Generation</div>
+    <div class="card-body">
+      <form [formGroup]="keyGenerationForm" (ngSubmit)="generateKey()">
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Generate Key</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Result</span>
+          <textarea rows="3" formControlName="generationResult" placeholder="Generated key will appear here"></textarea>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <div class="container" style="margin-top:40px; border: 2px groove;border-radius: 10px;border-color: lightgray;">
-    <h2 style="background-color: #f44336; color: white; margin-top: 10px;text-align: center;height: 40px;padding-top: 5px;">Derive Key</h2>
-    <form [formGroup]="deriveKeyForm" (ngSubmit)="deriveKey()">
-      <div class="form-group">
-        <label for="derivePassword">Password</label>
-        <input type="text" class="form-control" formControlName="derivePassword" required>
-      </div>
-
-      <div class="form-group">
-        <label for="deriveSalt">Salt (base64)</label>
-        <input type="text" class="form-control" formControlName="deriveSalt">
-      </div>
-
-      <div class="form-group">
-        <label for="deriveIterations">Iterations</label>
-        <input type="text" class="form-control" formControlName="deriveIterations">
-      </div>
-
-      <div class="form-group">
-        <label for="deriveLength">Desired length</label>
-        <input type="text" class="form-control" formControlName="deriveLength">
-      </div>
-
-      <button type="submit" class="btn btn-success">Derive</button>
-
-      <div class="form-group" style="margin-top:20px;margin-bottom: 20px;">
-        <label for="deriveResult"><h4>Result</h4></label>
-        <textarea rows="5" type="text" class="form-control" formControlName="deriveResult"></textarea>
-      </div>
-    </form>
+  <div class="card">
+    <div class="card-title">Derive Key</div>
+    <div class="card-body">
+      <form [formGroup]="deriveKeyForm" (ngSubmit)="deriveKey()">
+        <div class="field">
+          <label>Password</label>
+          <input type="text" formControlName="derivePassword" required placeholder="Enter password">
+        </div>
+        <div class="field">
+          <label>Salt (base64)</label>
+          <input type="text" formControlName="deriveSalt" placeholder="Optional">
+        </div>
+        <div class="field">
+          <label>Iterations</label>
+          <input type="text" formControlName="deriveIterations" placeholder="E.g. 10000">
+        </div>
+        <div class="field">
+          <label>Desired length</label>
+          <input type="text" formControlName="deriveLength" placeholder="E.g. 32">
+        </div>
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Derive</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Result</span>
+          <textarea rows="5" formControlName="deriveResult" placeholder="Derived key output"></textarea>
+        </div>
+      </form>
+    </div>
   </div>
 
 </div>

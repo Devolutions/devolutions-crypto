@@ -1,21 +1,31 @@
-<!-- Sidebar/menu -->
-<nav class="w3-sidebar w3-red w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:300px;font-weight:bold;" id="mySidebar">
-  <br>
-  <a href="javascript:void(0)" (click)="w3Close()" class="w3-button w3-hide-large w3-display-topleft" style="width:100%;font-size:22px">Close Menu</a>
-  <div class="w3-container" style="text-align: center;background-image:linear-gradient(brown, green)">
-    <h1 class="w3-padding-64"><fa-icon [icon]="faLock"></fa-icon></h1>
-    <h1>Devolutions-Crypto</h1>
+<!-- Sidebar -->
+<nav id="mySidebar">
+
+  <!-- Close button (mobile only) -->
+  <button (click)="w3Close()" class="sidebar-close-btn">&#x2715;</button>
+
+  <!-- Brand header -->
+  <div class="sidebar-brand">
+    <fa-icon [icon]="faLock" size="3x"></fa-icon>
+    <h1>Devolutions<br>Crypto</h1>
   </div>
-  <div class="w3-bar-block">
-    <a routerLink="/encryption" class="w3-bar-item w3-button w3-hover-white">Encryption</a>
-    <a routerLink="/secret-sharing" class="w3-bar-item w3-button w3-hover-white">Secret Sharing</a>
-    <a routerLink="/password" class="w3-bar-item w3-button w3-hover-white">Password Hashing</a>
-    <a routerLink="/asymmetric" class="w3-bar-item w3-button w3-hover-white">Asymmetric</a>
-    <a routerLink="/utilities" class="w3-bar-item w3-button w3-hover-white">Utilities</a>
+
+  <!-- Nav links -->
+  <div class="sidebar-nav">
+    <a routerLink="/encryption">Encryption</a>
+    <a routerLink="/secret-sharing">Secret Sharing</a>
+    <a routerLink="/password">Password Hashing</a>
+    <a routerLink="/asymmetric">Asymmetric</a>
+    <a routerLink="/utilities">Utilities</a>
   </div>
+
 </nav>
 
-<div class="content" role="main">
+<!-- Mobile overlay -->
+<div id="myOverlay" (click)="w3Close()"></div>
+
+<!-- Main content -->
+<div class="page-content">
   <router-outlet></router-outlet>
 </div>
 
