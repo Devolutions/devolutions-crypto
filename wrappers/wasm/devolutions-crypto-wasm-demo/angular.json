@@ -11,14 +11,11 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "customWebpackConfig": {
-              "path": "./webpack.config.js"
-            },
             "outputPath": "dist/devolutions-crypto-wasm-demo",
             "index": "src/index.html",
-            "main": "src/main.ts",
+            "browser": "src/main.ts",
             "polyfills": [
               "zone.js"
             ],
@@ -33,9 +30,6 @@
                 "input": "node_modules/@devolutions/devolutions-crypto-web",
                 "output": "/"
               }
-            ],
-            "allowedCommonJsDependencies": [
-              "@devolutions/devolutions-crypto-web"
             ],
             "styles": [
               "src/styles.css"
@@ -67,7 +61,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "devolutions-crypto-wasm-demo:build:production"
