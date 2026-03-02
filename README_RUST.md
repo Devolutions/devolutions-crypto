@@ -212,17 +212,15 @@ assert_eq!(32, key.len());
 
 ### Key Derivation
 
-This is a method used to generate a key from a password or another key. Useful for password-dependant cryptography. Salt should be a random 16 bytes array if possible and iterations should be 10000 or configurable by the user.
+Key derivation can be used to generate a key of a specific length from an input of arbitrary length such as a password.
 
 ```rust
-use devolutions_crypto::utils::{generate_key, derive_key};
+use devolutions_crypto::utils::derive_key_argon2;
+use devolutions_crypto::Argon2Parameters;
+
 let key = b"this is a secret password";
-let salt = generate_key(16);
-let iterations = 10000;
-let length = 32;
-
-let new_key = derive_key(key, &salt, iterations, length);
-
+let parameters = Argon2Parameters::default();
+let new_key = derive_key_argon2(key, &parameters).expect("default parameters should not fail");
 assert_eq!(32, new_key.len());
 ```
 
