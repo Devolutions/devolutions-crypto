@@ -29,8 +29,6 @@ a { text-decoration: none; color: inherit; }
 
 /* ── Sidebar brand header ────────────────────────────────────── */
 .sidebar-brand {
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 2.5rem 1.5rem 2rem;

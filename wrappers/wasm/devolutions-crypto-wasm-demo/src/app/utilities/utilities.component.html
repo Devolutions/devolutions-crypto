@@ -4,9 +4,6 @@
   <span>Devolutions Crypto</span>
 </header>
 
-<!-- Mobile overlay -->
-<div id="myOverlay" (click)="w3Close()" style="display:none; position:fixed; inset:0; z-index:40; background:rgba(0,0,0,0.55); cursor:pointer;"></div>
-
 <div class="page-inner">
 
   <div class="page-heading">
@@ -58,23 +55,23 @@
           <input type="text" formControlName="derivePassword" required placeholder="Enter password">
         </div>
         <div class="field">
-          <label>Salt (base64)</label>
-          <input type="text" formControlName="deriveSalt" placeholder="Optional">
+          <label>Salt</label>
+          <input type="text" formControlName="deriveSalt" placeholder="Optional salt">
         </div>
         <div class="field">
           <label>Iterations</label>
-          <input type="text" formControlName="deriveIterations" placeholder="E.g. 10000">
+          <input type="number" formControlName="deriveIterations" placeholder="E.g. 10000">
         </div>
         <div class="field">
           <label>Desired length</label>
-          <input type="text" formControlName="deriveLength" placeholder="E.g. 32">
+          <input type="number" formControlName="deriveLength" placeholder="E.g. 32">
         </div>
         <div class="field">
           <button type="submit" class="btn btn-primary">Derive</button>
         </div>
         <div class="field">
           <span class="result-label">Result</span>
-          <textarea rows="5" formControlName="deriveResult" placeholder="Derived key output"></textarea>
+          <textarea rows="5" formControlName="deriveResult" placeholder="Derived key output will appear here"></textarea>
         </div>
       </form>
     </div>

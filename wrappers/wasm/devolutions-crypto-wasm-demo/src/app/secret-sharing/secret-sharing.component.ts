@@ -20,8 +20,8 @@ export class SecretSharingComponent implements OnInit {
   joinSharesForm: FormGroup;
 
   generatedKeysBase64: string[] = [];
-  joinnedSharesToShow: string[] = [];
-  joinnedShares: Uint8Array[] = [];
+  joinedSharesToShow: string[] = [];
+  joinedShares: Uint8Array[] = [];
 
   decoder: TextDecoder;
   encoder: TextEncoder;
@@ -79,8 +79,8 @@ export class SecretSharingComponent implements OnInit {
     if (shareBase64 === null || shareBase64 === '') { return; }
 
     const share: Uint8Array = service.base64decode(shareBase64.trim());
-    this.joinnedSharesToShow.push(shareBase64);
-    this.joinnedShares.push(share);
+    this.joinedSharesToShow.push(shareBase64);
+    this.joinedShares.push(share);
 
     this.joinSharesForm.setValue({ addSharekey: '', joinResult: '' });
   }
@@ -88,9 +88,9 @@ export class SecretSharingComponent implements OnInit {
   async joinShares() {
     const service: EncryptionServiceInner = await this.encryptionService.innerModule;
 
-    if (this.joinnedShares === null || this.joinnedShares.length === 0) { return; }
+    if (this.joinedShares === null || this.joinedShares.length === 0) { return; }
 
-    const key: Uint8Array = service.joinShares(this.joinnedShares);
+    const key: Uint8Array = service.joinShares(this.joinedShares);
     const keyBase64: string = service.base64encode(key);
 
     this.joinSharesForm.setValue({ addSharekey: '', joinResult: keyBase64 });

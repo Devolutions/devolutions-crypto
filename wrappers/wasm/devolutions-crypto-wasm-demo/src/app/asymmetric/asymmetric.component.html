@@ -4,45 +4,11 @@
   <span>Devolutions Crypto</span>
 </header>
 
-<!-- Mobile overlay -->
-<div id="myOverlay" (click)="w3Close()" style="display:none; position:fixed; inset:0; z-index:40; background:rgba(0,0,0,0.55); cursor:pointer;"></div>
-
 <div class="page-inner">
 
   <div class="page-heading">
     <fa-icon size="3x" [icon]="faSyncAlt"></fa-icon>
     <h1>Asymmetric</h1>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Argon2 Parameters</div>
-    <div class="card-body">
-      <form [formGroup]="argon2Form" (ngSubmit)="createArgon2()">
-        <div class="field">
-          <label>Iterations</label>
-          <input type="text" formControlName="argon2Iterations" placeholder="E.g. 3">
-        </div>
-        <div class="field">
-          <label>Lanes</label>
-          <input type="text" formControlName="argon2Lanes" placeholder="E.g. 4">
-        </div>
-        <div class="field">
-          <label>Length</label>
-          <input type="text" formControlName="argon2Length" placeholder="E.g. 32">
-        </div>
-        <div class="field">
-          <label>Memory</label>
-          <input type="text" formControlName="argon2Memory" placeholder="E.g. 65536">
-        </div>
-        <div class="field">
-          <button type="submit" class="btn btn-primary">Generate Argon2 Parameters</button>
-        </div>
-        <div class="field">
-          <span class="result-label">Result</span>
-          <textarea rows="5" formControlName="argon2Result" placeholder="Argon2 parameters output"></textarea>
-        </div>
-      </form>
-    </div>
   </div>
 
   <div class="card">
