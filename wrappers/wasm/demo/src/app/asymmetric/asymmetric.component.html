@@ -1,0 +1,98 @@
+<!-- Mobile header -->
+<header class="mobile-header">
+  <button (click)="w3Open()">&#9776;</button>
+  <span>Devolutions Crypto</span>
+</header>
+
+<div class="page-inner">
+
+  <div class="page-heading">
+    <fa-icon size="3x" [icon]="faSyncAlt"></fa-icon>
+    <h1>Asymmetric</h1>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Key Generation</div>
+    <div class="card-body">
+      <form [formGroup]="keypairGenerationForm" (ngSubmit)="generateKeypair()">
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Generate Key Pair</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Result</span>
+          <textarea rows="3" formControlName="generationResult" placeholder="Key pair output"></textarea>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Key Exchange</div>
+    <div class="card-body">
+      <form [formGroup]="mixKeyForm" (ngSubmit)="mixKeys()">
+        <div class="field">
+          <label>Private key</label>
+          <input type="text" formControlName="mixPrivateKey" required placeholder="Paste private key">
+        </div>
+        <div class="field">
+          <label>Public key</label>
+          <input type="text" formControlName="mixPublicKey" required placeholder="Paste public key">
+        </div>
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Mix Key</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Result</span>
+          <textarea rows="3" formControlName="mixKeyResult" placeholder="Mixed key output"></textarea>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Encrypt Asymmetric</div>
+    <div class="card-body">
+      <form [formGroup]="encryptAsymmetricForm" (ngSubmit)="encryptAsymmetric()">
+        <div class="field">
+          <label>Text</label>
+          <input type="text" formControlName="textToEncrypt" required placeholder="Enter text to encrypt">
+        </div>
+        <div class="field">
+          <label>Public key</label>
+          <input type="text" formControlName="publicKeyEncrypt" required placeholder="Paste public key">
+        </div>
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Encrypt</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Result</span>
+          <textarea rows="5" formControlName="encryptAsymmetricResult" placeholder="Encrypted output"></textarea>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Decrypt Asymmetric</div>
+    <div class="card-body">
+      <form [formGroup]="decryptAsymmetricForm" (ngSubmit)="decryptAsymmetric()">
+        <div class="field">
+          <label>Encrypted text</label>
+          <input type="text" formControlName="textToDecrypt" required placeholder="Paste encrypted text">
+        </div>
+        <div class="field">
+          <label>Private key</label>
+          <input type="text" formControlName="privateKeyDecrypt" required placeholder="Paste private key">
+        </div>
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Decrypt</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Result</span>
+          <textarea rows="5" formControlName="decryptAsymmetricResult" placeholder="Decrypted output"></textarea>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>

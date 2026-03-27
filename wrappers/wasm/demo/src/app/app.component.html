@@ -1,0 +1,27 @@
+<nav id="mySidebar">
+  <button (click)="w3Close()" class="sidebar-close-btn">&#x2715;</button>
+
+  <div class="sidebar-brand flex flex-row">
+    <fa-icon [icon]="faLock" size="2x"></fa-icon>
+    <h1>DevolutionsCrypto</h1>
+  </div>
+
+  <!-- Nav links -->
+  <div class="sidebar-nav">
+    <a routerLink="/encryption">Encryption</a>
+    <a routerLink="/secret-sharing">Secret Sharing</a>
+    <a routerLink="/password">Password Hashing</a>
+    <a routerLink="/asymmetric">Asymmetric</a>
+    <a routerLink="/utilities">Utilities</a>
+  </div>
+
+</nav>
+
+<!-- Mobile overlay -->
+<div id="myOverlay" (click)="w3Close()"></div>
+
+<!-- Main content -->
+<div class="page-content">
+  <router-outlet></router-outlet>
+</div>
+
