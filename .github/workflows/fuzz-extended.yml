@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 180 # 3 hours max
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Rust nightly
         run: |
@@ -28,7 +28,7 @@ jobs:
         run: cargo install cargo-fuzz
 
       - name: Restore corpus cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: fuzz/corpus
           key: fuzz-corpus-${{ github.sha }}
@@ -43,14 +43,14 @@ jobs:
 
       - name: Save corpus cache
         if: always()
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: fuzz/corpus
           key: fuzz-corpus-${{ github.sha }}
 
       - name: Upload crash artifacts
         if: failure()
-        uses: actions/upload-artifact@v4.3.6
+        uses: actions/upload-artifact@v7
         with:
           name: fuzz-crash-artifacts-extended-${{ github.run_id }}
           path: fuzz/artifacts/
@@ -58,7 +58,7 @@ jobs:
 
       - name: Upload corpus on failure
         if: failure()
-        uses: actions/upload-artifact@v4.3.6
+        uses: actions/upload-artifact@v7
         with:
           name: fuzz-corpus-${{ github.run_id }}
           path: fuzz/corpus/
