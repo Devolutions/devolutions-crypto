@@ -1,11 +1,13 @@
 use crate::PasswordHashVersion;
 use crate::Result;
 
+#[uniffi::export(default(iterations = 10000, version = None))]
 pub fn hash_password(
     password: &[u8],
     iterations: u32,
-    version: PasswordHashVersion,
+    version: Option<PasswordHashVersion>,
 ) -> Result<Vec<u8>> {
+    let version = version.unwrap_or(PasswordHashVersion::Latest);
     Ok(devolutions_crypto::password_hash::hash_password(password, iterations, version)?.into())
 }
 

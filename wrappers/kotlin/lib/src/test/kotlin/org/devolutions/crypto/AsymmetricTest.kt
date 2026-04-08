@@ -7,6 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import uniffi.devolutions_crypto.Exception
 
 class AsymmetricTest {
     @Test
@@ -55,7 +56,7 @@ class AsymmetricTest {
 
         val encrypted = encryptAsymmetricWithAad(data, keypair.publicKey, aad)
 
-        assertFailsWith<DevolutionsCryptoException> {
+        assertFailsWith<Exception> {
             decryptAsymmetricWithAad(encrypted, keypair.privateKey, wrongAad)
         }
     }

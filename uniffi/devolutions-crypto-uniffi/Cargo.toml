@@ -7,9 +7,6 @@ version.workspace = true
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-devolutions-crypto = { path = "../../" }
-uniffi-builder-macro = { path = "./uniffi-builder-macro" }
+devolutions-crypto = { path = "../../", features = ["uniffi-support"] }
 uniffi = { workspace = true }
-
-[build-dependencies]
-uniffi = { workspace = true, features = ["build"] }
+rust-argon2 = { workspace = true }
