@@ -16,6 +16,9 @@ on:
         required: false
         type: string
 
+env:
+  XCODE_VERSION: 26.3
+
 jobs:
   setup_config:
     runs-on: ubuntu-22.04
@@ -150,7 +153,14 @@ jobs:
       - uses: actions/checkout@v6
         with:
           lfs: true
+
       - run: git lfs pull
+
+      - name: Set Xcode version
+        run: |
+          sudo xcode-select --switch '/Applications/Xcode_${{ env.XCODE_VERSION }}.app/Contents/Developer'
+          /usr/bin/xcodebuild -version
+
       - uses: ./.github/workflows/tests/csharp/ios
 
   tests_nuget_linux:
