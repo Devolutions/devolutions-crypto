@@ -61,38 +61,20 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
-        public void DecryptWithPassword2()
+        public void DecryptWithPassword()
         {
-            string encryptedDataAsBase64 = "DQwCAAAAAgDsQkLRs1I3054gNOYP7ifVSpOMFEV8vTfoMuZOWAzbMR2b1QLyIe0/NFNKr8rniijd8PxHv29N";
+            string encryptedDataAsBase64 = "DQwCAAAAAgDutPWBLPHG0+ocNw+Yzs6xygGOeOlNPOAjbYDdbJKjPRnEP8HuDN7Y3h3dCoH81Szf3tCf3mNf";
             string password = "testPa$$";
-            byte[]? decryptResult = Managed.DecryptWithPassword(encryptedDataAsBase64, password);
+            byte[]? decryptResult = Managed.DecryptWithPassword(encryptedDataAsBase64, password, 10000);
             string? decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
             Assert.AreEqual(decryptResultString, "test Ciph3rtext");
-        }
-
-        [TestMethod]
-        public void DecryptWithPassword2_5()
-        {
-            try
-            {
-                string encryptedDataAsBase64 = "DQwCAAAAAgDutPWBLPHG0+ocNw+Yzs6xygGOeOlNPOAjbYDdbJKjPRnEP8HuDN7Y3h3dCoH81Szf3tCf3mNf";
-                string password = "testPa$$";
-                byte[]? decryptResult = Managed.DecryptWithPassword(encryptedDataAsBase64, password);
-                string? decryptResultString = Utils.ByteArrayToUtf8String(decryptResult);
-                Assert.AreEqual(decryptResultString, "test Ciph3rtext");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.InnerException?.Message);
-                Console.WriteLine(ex.InnerException?.StackTrace);
-            }
         }
 
         [TestMethod]
         public void DecryptWithPasswordAsUtf8String()
         {
             string encryptedDataAsBase64 = "DQwCAAAAAgCoE9Y3m06QaPSAiL2qegthcm0+zZWt4fXbdqcefkzD6y8pnWsMzLkx/32t";
-            string? decryptResultString = Managed.DecryptWithPasswordAsUtf8String(encryptedDataAsBase64, TestData.TestPassword);
+            string? decryptResultString = Managed.DecryptWithPasswordAsUtf8String(encryptedDataAsBase64, TestData.TestPassword, 10000);
             Assert.AreEqual(decryptResultString, TestData.StringTestData);
         }
 

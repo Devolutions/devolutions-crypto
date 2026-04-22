@@ -102,7 +102,7 @@ namespace Devolutions.Crypto.Tests
             byte[] encodedPassword = Utils.StringToUtf8ByteArray("testpassword");
             byte[] derivedPassword = Managed.DeriveKey(encodedPassword);
             string derivedPasswordAsBase64String = Utils.EncodeToBase64String(derivedPassword)!;
-            Assert.AreEqual(derivedPasswordAsBase64String, "ImfGCyv6PwMYaJShGxR4MfVrjuUrsI0CSarJgOApwf8=");
+            Assert.AreEqual(derivedPasswordAsBase64String, "wdU+cxAOpTFddVhTQlKQTSzmVjZqPAXVx1cRrAqTGek=");
         }
 
         [TestMethod]

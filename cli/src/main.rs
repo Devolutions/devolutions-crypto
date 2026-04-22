@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 use std::{borrow::Borrow, convert::TryFrom};
+use devolutions_crypto::DEFAULT_PBKDF2_ITERATIONS;
 
 /// Gives a CLI interface to Devolutions Crypto Library
 #[derive(Debug, Parser)]
@@ -254,7 +255,7 @@ fn derive_key(data: String, salt: Option<String>, iterations: Option<u32>, lengt
         None => vec![0u8; 0],
     };
 
-    let iterations = iterations.unwrap_or(10000);
+    let iterations = iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS);
 
     let length = length.unwrap_or(32);
 
@@ -311,7 +312,7 @@ fn decrypt_asymmetric(data: String, key: String) {
 }
 
 fn hash_password(password: String, iterations: Option<u32>) {
-    let iterations = iterations.unwrap_or(10000);
+    let iterations = iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS);
 
     let hash: Vec<u8> = devolutions_crypto::password_hash::hash_password(
         &password.as_bytes(),

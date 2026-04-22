@@ -29,6 +29,8 @@ namespace Devolutions.Cryptography
             Justification = "Preprocessor directive")]
         private const SignatureVersion SIGNATURE_VERSION = SignatureVersion.Latest;
 
+        public const uint DEFAULT_PBKDF2_ITERATIONS = 600000;
+
         /// <summary>
         /// Performs a key exchange.
         /// </summary>
@@ -166,10 +168,10 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="key">The password to derive.</param>
         /// <param name="salt">The salt. (Optional).</param>
-        /// <param name="iterations">The amount of iterations. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations (defaults to 600000).</param>
         /// <param name="length">The resulting key length.</param>
         /// <returns>Returns the derived password.</returns>
-        public static byte[] DeriveKey(byte[] key, byte[]? salt = null, uint iterations = 10000, uint length = 32)
+        public static byte[] DeriveKey(byte[] key, byte[]? salt = null, uint iterations = DEFAULT_PBKDF2_ITERATIONS, uint length = 32)
         {
             return DeriveKeyPbkdf2(key, salt, iterations, length);
         }
@@ -179,10 +181,10 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="key">The password to derive.</param>
         /// <param name="salt">The salt. (Optional).</param>
-        /// <param name="iterations">The amount of iterations. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations. (defaults to 600000).</param>
         /// <param name="length">The resulting key length.</param>
         /// <returns>Returns the derived password.</returns>
-        public static byte[] DeriveKeyPbkdf2(byte[] key, byte[]? salt = null, uint iterations = 10000, uint length = 32)
+        public static byte[] DeriveKeyPbkdf2(byte[] key, byte[]? salt = null, uint iterations = DEFAULT_PBKDF2_ITERATIONS, uint length = 32)
         {
             if (key == null || key.Length == 0)
             {
@@ -208,10 +210,10 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="password">The password to derive.</param>
         /// <param name="salt">The salt. (Optional).</param>
-        /// <param name="iterations">The amount of iterations. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations (defaults to 600,000).</param>
         /// <param name="length">The resulting key length.</param>
         /// <returns>Returns the derived password.</returns>
-        public static byte[] DerivePassword(string password, byte[]? salt = null, uint iterations = 10000, uint length = 32)
+        public static byte[] DerivePassword(string password, byte[]? salt = null, uint iterations = DEFAULT_PBKDF2_ITERATIONS, uint length = 32)
         {
             return DeriveKey(Utils.StringToUtf8ByteArray(password), salt, iterations, length);
         }
@@ -221,9 +223,9 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="password">The data to decrypt.</param>
         /// <param name="salt">The salt. (Optional).</param>
-        /// <param name="iterations">The amount of iterations. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The amount of iterations (defaults to 600,000).</param>
         /// <returns>Returns the decryption result in a byte array.</returns>
-        public static byte[] DerivePassword(string password, string? salt, uint iterations = 10000)
+        public static byte[] DerivePassword(string password, string? salt, uint iterations = DEFAULT_PBKDF2_ITERATIONS)
         {
             return DeriveKey(Utils.StringToUtf8ByteArray(password), Utils.StringToUtf8ByteArray(salt), iterations);
         }
@@ -343,11 +345,11 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
-        /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations used to derive the password (defaults to 600,000).</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string? EncryptWithPasswordAsBase64String(byte[]? data, string password, uint iterations = 10000, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
+        public static string? EncryptWithPasswordAsBase64String(byte[]? data, string password, uint iterations = DEFAULT_PBKDF2_ITERATIONS, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (data == null || data.Length == 0)
             {
@@ -376,11 +378,11 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
-        /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations used to derive the password (defaults to 600,000).</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string? EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = 10000, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
+        public static string? EncryptBase64WithPasswordAsString(string b64data, string password, uint iterations = DEFAULT_PBKDF2_ITERATIONS, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             return EncryptBase64WithPasswordAsBase64String(b64data, password, iterations, aad, cipherTextVersion);
         }
@@ -390,14 +392,14 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
-        /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations used to derive the password (defaults to 600,000).</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
         public static string? EncryptBase64WithPasswordAsBase64String(
             string b64data,
             string password,
-            uint iterations = 10000,
+            uint iterations = DEFAULT_PBKDF2_ITERATIONS,
             byte[]? aad = null,
             CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
@@ -487,9 +489,9 @@ namespace Devolutions.Cryptography
         /// Hash a password.
         /// </summary>
         /// <param name="password">The password to hash in bytes.</param>
-        /// <param name="iterations">The number of iterations used to hash the password. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations used to hash the password (defaults to 600,000).</param>
         /// <returns>Returns the hashed password in bytes.</returns>
-        public static byte[] HashPassword(byte[] password, uint iterations = 10000)
+        public static byte[] HashPassword(byte[] password, uint iterations = DEFAULT_PBKDF2_ITERATIONS)
         {
             if (password == null || password.Length == 0)
             {
@@ -712,11 +714,11 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
-        /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations used to derive the password (defaults to 600,000).</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a base 64 encoded string.</returns>
-        public static string? EncryptWithPasswordAsBase64String(string data, string password, uint iterations = 10000, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
+        public static string? EncryptWithPasswordAsBase64String(string data, string password, uint iterations = DEFAULT_PBKDF2_ITERATIONS, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (string.IsNullOrEmpty(data))
             {
@@ -745,11 +747,11 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
-        /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations used to derive the password (defaults to 600,000).</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[]? EncryptWithPassword(byte[]? data, string password, uint iterations = 10000, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
+        public static byte[]? EncryptWithPassword(byte[]? data, string password, uint iterations = DEFAULT_PBKDF2_ITERATIONS, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (data == null || data.Length == 0)
             {
@@ -778,11 +780,11 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="b64data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
-        /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations used to derive the password. (defaults to 600,000).</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[]? EncryptBase64WithPassword(string? b64data, string password, uint iterations = 10000, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
+        public static byte[]? EncryptBase64WithPassword(string? b64data, string password, uint iterations = DEFAULT_PBKDF2_ITERATIONS, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             // sduquette 2025-11-12: Explicitly comparing b64data to null because the NotNullWhen directive used by string.IsNullOrEmpty
             // is not available in netstandard2.0.
@@ -813,11 +815,11 @@ namespace Devolutions.Cryptography
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
         /// <param name="password">The password to use for encryption.</param>
-        /// <param name="iterations">The number of iterations used to derive the password. 10 000 Recommended by NIST.</param>
+        /// <param name="iterations">The number of iterations used to derive the password (defaults to 600,000).</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <param name="cipherTextVersion">The cipher version to use. (Latest is recommended).</param>
         /// <returns>Returns the encryption result as a byte array.</returns>
-        public static byte[]? EncryptWithPassword(string data, string password, uint iterations = 10000, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
+        public static byte[]? EncryptWithPassword(string data, string password, uint iterations = DEFAULT_PBKDF2_ITERATIONS, byte[]? aad = null, CipherTextVersion cipherTextVersion = CIPHERTEXT_VERSION)
         {
             if (string.IsNullOrEmpty(data))
             {
@@ -907,7 +909,7 @@ namespace Devolutions.Cryptography
         /// <param name="iterations">The number of iterations used to derive the password.</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
-        public static string? DecryptWithPasswordAsUtf8String(byte[]? data, string password, uint iterations = 10000, byte[]? aad = null)
+        public static string? DecryptWithPasswordAsUtf8String(byte[]? data, string password, uint iterations = DEFAULT_PBKDF2_ITERATIONS, byte[]? aad = null)
         {
             if (data == null || data.Length == 0)
             {
@@ -997,7 +999,7 @@ namespace Devolutions.Cryptography
         /// <param name="iterations">The number of iterations used to derive the password.</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <returns>Returns the decryption result as a UTF8 encoded string.</returns>
-        public static string? DecryptWithPasswordAsUtf8String(string? b64data, string password, uint iterations = 10000, byte[]? aad = null)
+        public static string? DecryptWithPasswordAsUtf8String(string? b64data, string password, uint iterations = DEFAULT_PBKDF2_ITERATIONS, byte[]? aad = null)
         {
             // sduquette 2025-11-12: Explicitly comparing b64data to null because the NotNullWhen directive used by string.IsNullOrEmpty
             // is not available in netstandard2.0.
@@ -1006,22 +1008,8 @@ namespace Devolutions.Cryptography
                 return null;
             }
 
-            // There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#.
-            // This is unfortunately the best way we found to fix it while keeping backward compatibility.
-            // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
-            //   we try with the buggy 256 bytes key.
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
-            byte[]? result = DecryptSafe(Utils.Base64StringToByteArray(b64data), key, out DevolutionsCryptoException? exception, aad);
-
-            if (exception is { NativeError: NativeError.InvalidMac })
-            {
-                key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
-                result = Decrypt(Utils.Base64StringToByteArray(b64data), key, aad);
-            }
-            else if (exception != null)
-            {
-                throw exception;
-            }
+            byte[]? result = Decrypt(Utils.Base64StringToByteArray(b64data), key, aad);
 
             return Utils.ByteArrayToUtf8String(result);
         }
@@ -1079,7 +1067,7 @@ namespace Devolutions.Cryptography
         /// <param name="iterations">The number of iterations used to derive the password.</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <returns>Returns the decryption result as a byte array.</returns>
-        public static byte[]? DecryptWithPassword(byte[]? data, string password, uint iterations = 10000, byte[]? aad = null)
+        public static byte[]? DecryptWithPassword(byte[]? data, string password, uint iterations = DEFAULT_PBKDF2_ITERATIONS, byte[]? aad = null)
         {
             if (data == null || data.Length == 0)
             {
@@ -1114,30 +1102,15 @@ namespace Devolutions.Cryptography
         /// <param name="iterations">The number of iterations used to derive the password.</param>
         /// <param name="aad">Additional authenticated data. (Optional).</param>
         /// <returns>Returns the decryption result as a byte array.</returns>
-        public static byte[]? DecryptWithPassword(string b64data, string password, uint iterations = 10000, byte[]? aad = null)
+        public static byte[]? DecryptWithPassword(string b64data, string password, uint iterations = DEFAULT_PBKDF2_ITERATIONS, byte[]? aad = null)
         {
             if (string.IsNullOrEmpty(b64data))
             {
                 return null;
             }
 
-            // There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#.
-            // This is unfortunately the best way we found to fix it while keeping backward compatibility.
-            // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
-            //   we try with the buggy 256 bytes key.
-            byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
-
-            byte[]? result = DecryptSafe(Utils.Base64StringToByteArray(b64data), key, out DevolutionsCryptoException? exception, aad);
-
-            if (exception is { NativeError: NativeError.InvalidMac })
-            {
-                key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
-                result = Decrypt(Utils.Base64StringToByteArray(b64data), key, aad);
-            }
-            else if (exception != null)
-            {
-                throw exception;
-            }
+            byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations);
+            byte[]? result = Decrypt(Utils.Base64StringToByteArray(b64data), key, aad);
 
             return result;
         }

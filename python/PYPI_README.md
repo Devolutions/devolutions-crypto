@@ -150,7 +150,7 @@ import devolutions_crypto
 password = b"my_secure_password123!"
 password_hash = devolutions_crypto.hash_password(
     password,
-    iterations=100000,  # Higher is more secure but slower
+    iterations=600000,  # Higher is more secure but slower
     version=0
 )
 
@@ -221,7 +221,7 @@ salt = os.urandom(16)  # Use a unique random salt per user
 derived_key = devolutions_crypto.derive_key_pbkdf2(
     password,
     salt=salt,
-    iterations=100000,
+    iterations=600000,
     length=32
 )
 

@@ -127,7 +127,7 @@ def decrypt_asymmetric(
 
 def hash_password(
     password: bytes,
-    iterations: int = 10000,
+    iterations: int = 600000,
     version: int = 0
 ) -> bytes:
     """
@@ -135,7 +135,7 @@ def hash_password(
 
     Args:
         password: The password to hash
-        iterations: Number of iterations for the KDF (default: 10000, higher is more secure)
+        iterations: Number of iterations for the KDF (default: 600000, higher is more secure)
         version: Password hash version (default: 0)
 
     Returns:
@@ -146,7 +146,7 @@ def hash_password(
 
     Example:
         >>> password = b'my_secure_password'
-        >>> hash_value = hash_password(password, iterations=100000)
+        >>> hash_value = hash_password(password, iterations=600000)
     """
     ...
 
@@ -175,7 +175,7 @@ def verify_password(
 def derive_key_pbkdf2(
     key: bytes,
     salt: Optional[bytes] = None,
-    iterations: int = 10000,
+    iterations: int = 600000,
     length: int = 32
 ) -> bytes:
     """
@@ -184,7 +184,7 @@ def derive_key_pbkdf2(
     Args:
         key: The input key material
         salt: Optional salt (default: empty bytes)
-        iterations: Number of iterations (default: 10000, higher is more secure)
+        iterations: Number of iterations (default: 600000, higher is more secure)
         length: Length of the derived key in bytes (default: 32)
 
     Returns:
@@ -194,7 +194,7 @@ def derive_key_pbkdf2(
         DevolutionsCryptoException: If key derivation fails
 
     Example:
-        >>> derived = derive_key_pbkdf2(b'password', b'salt', iterations=100000, length=32)
+        >>> derived = derive_key_pbkdf2(b'password', b'salt', iterations=600000, length=32)
     """
     ...
 

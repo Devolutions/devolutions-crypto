@@ -103,8 +103,7 @@ You can use this module to hash a password and validate it afterward. This is th
 using Devolutions.Cryptography;
 
 byte[] password = Utils.StringToUtf8ByteArray("somesuperstrongpa$$w0rd!");
-
-byte[] hashed_password = Managed.HashPassword(password, 10000);
+byte[] hashed_password = Managed.HashPassword(password, 600000);
 ```
 
 ## SecretSharing
@@ -168,14 +167,15 @@ byte[] key = Managed.GenerateKey(32);
 
 ### Key Derivation
 
-This is a method used to generate a key from a password or another key. Useful for password-dependant cryptography. Salt should be a random 16 bytes array if possible and iterations should be 10000 or configurable by the user.
+This is a method used to generate a key from a password or another key. Useful for password-dependant cryptography.
+Salt should be a random 16 bytes array if possible and iterations should be 600,000 or configurable by the user.
 
 ```C#
 using Devolutions.Cryptography;
 
 byte[] key = Utils.StringToUtf8ByteArray("this is a secret password");
 byte[] salt = Managed.GenerateKey(16);
-uint iterations = 10000;
+uint iterations = 600000;
 uint length = 32;
 
 byte[] new_key = Managed.DeriveKey(key, salt, iterations, length);

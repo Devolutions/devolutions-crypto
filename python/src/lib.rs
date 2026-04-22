@@ -96,7 +96,7 @@ fn encrypt_asymmetric(
 
 #[pyfunction]
 #[pyo3(name = "hash_password")]
-#[pyo3(signature = (password, iterations=10000, version=0))]
+#[pyo3(signature = (password, iterations=600000, version=0))]
 fn hash_password(
     py: Python,
     password: &[u8],
@@ -160,7 +160,7 @@ fn decrypt_asymmetric(
 
 #[pyfunction]
 #[pyo3(name = "derive_key_pbkdf2")]
-#[pyo3(signature = (key, salt=None, iterations=10000, length=32))]
+#[pyo3(signature = (key, salt=None, iterations=600000, length=32))]
 fn derive_key_pbkdf2(
     py: Python,
     key: &[u8],

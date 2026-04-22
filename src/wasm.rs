@@ -1,11 +1,9 @@
 use std::convert::{TryFrom as _, TryInto as _};
 
 use wasm_bindgen::prelude::*;
-
 use js_sys::Array;
 
 use super::utils;
-
 use super::{
     ciphertext,
     ciphertext::{Ciphertext, CiphertextVersion},
@@ -30,9 +28,9 @@ use super::{
     signing_key,
     signing_key::{SigningKeyPair, SigningKeyVersion, SigningPublicKey},
 };
-
 use super::Argon2Parameters;
 use super::DataType;
+use super::DEFAULT_PBKDF2_ITERATIONS;
 
 // Local KeyPair have private fields with getters instead of public field, for wasm_bindgen
 #[wasm_bindgen(inspectable)]
@@ -204,7 +202,7 @@ pub fn hash_password(
 ) -> Result<Vec<u8>, JsValue> {
     Ok(password_hash::hash_password(
         &password,
-        iterations.unwrap_or(10000),
+        iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS),
         version.unwrap_or(PasswordHashVersion::Latest),
     )?
     .into())
@@ -324,7 +322,7 @@ pub fn derive_key_pbkdf2(
     length: Option<usize>,
 ) -> Vec<u8> {
     let salt = salt.unwrap_or_else(|| vec![0u8; 0]);
-    let iterations = iterations.unwrap_or(10000);
+    let iterations = iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS);
     let length = length.unwrap_or(32);
 
     utils::derive_key_pbkdf2(key, &salt, iterations, length)

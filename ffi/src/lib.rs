@@ -456,8 +456,7 @@ pub extern "C" fn SignSize(_version: u16) -> i64 {
 ///  * `password` - Pointer to the password to hash.
 ///  * `password_length` - Length of the password to hash.
 ///  * `iterations` - Number of iterations of the password hash.
-///                   A higher number is slower but harder to brute-force. The recommended is 10000,
-///                   but the number can be set by the user.
+///                   A higher number is slower but harder to brute-force. The recommended value is 600000.
 ///  * `result` - Pointer to the buffer to write the hash to.
 ///  * `result_length` - Length of the buffer to write the hash to. You can get the value by
 ///                         calling HashPasswordLength() beforehand.
