@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
-use std::{borrow::Borrow, convert::TryFrom};
 use devolutions_crypto::DEFAULT_PBKDF2_ITERATIONS;
+use std::{borrow::Borrow, convert::TryFrom};
 
 /// Gives a CLI interface to Devolutions Crypto Library
 #[derive(Debug, Parser)]

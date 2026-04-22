@@ -4,7 +4,7 @@ from base64 import b64encode, b64decode
 
 class TestComformity(unittest.TestCase):
     def test_derive_pbkdf2(self):
-        self.assertEqual(devolutions_crypto.derive_key_pbkdf2(b'testpassword'), b64decode(b'ImfGCyv6PwMYaJShGxR4MfVrjuUrsI0CSarJgOApwf8='))
+        self.assertEqual(devolutions_crypto.derive_key_pbkdf2(b'testpassword'), b64decode(b'wdU+cxAOpTFddVhTQlKQTSzmVjZqPAXVx1cRrAqTGek='))
         self.assertEqual(devolutions_crypto.derive_key_pbkdf2(b'testPa$$', None, 100), b64decode(b'ev/GiJLvOgIkkWrnIrHSi2fdZE5qJBIrW+DLeMLIXK4='))
         self.assertEqual(devolutions_crypto.derive_key_pbkdf2(b'testPa$$', b64decode(b'tdTt5wgeqQYLvkiXKkFirqy2hMbzadBtL+jekVeNCRA='), 100), b64decode(b'ZaYRZeQiIPJ+Jl511AgHZjv4/HbCFq4eUP9yNa3gowI='))
 

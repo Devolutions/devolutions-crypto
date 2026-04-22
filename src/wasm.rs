@@ -1,9 +1,12 @@
 use std::convert::{TryFrom as _, TryInto as _};
 
-use wasm_bindgen::prelude::*;
 use js_sys::Array;
+use wasm_bindgen::prelude::*;
 
 use super::utils;
+use super::Argon2Parameters;
+use super::DataType;
+use super::DEFAULT_PBKDF2_ITERATIONS;
 use super::{
     ciphertext,
     ciphertext::{Ciphertext, CiphertextVersion},
@@ -28,9 +31,6 @@ use super::{
     signing_key,
     signing_key::{SigningKeyPair, SigningKeyVersion, SigningPublicKey},
 };
-use super::Argon2Parameters;
-use super::DataType;
-use super::DEFAULT_PBKDF2_ITERATIONS;
 
 // Local KeyPair have private fields with getters instead of public field, for wasm_bindgen
 #[wasm_bindgen(inspectable)]
