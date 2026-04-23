@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased] - 
 
+### Breaking Changes
+
+- The default PBKDF2 iterations has been increased from 10,000 to 600,000. Review
+uses of the following methods. Specify the numbers iterations when calling the method
+if your code depends on the iterations to stay the same : `derive_key_pbkdf2`, `deriveKeyPbkdf2`, `DeriveKeyPbkdf2`,
+`EncryptWithPassword`, `EncryptWithPasswordAsBase64String`, `DecryptWithPassword`, `DecryptWithPasswordAsUtf8String`, `DeriveKey`
+
 ### Changed
 
 - Multiple functions, such as `generate_key` and `hash_password`, now return a `Result` due to the `rand` library upgrade.
