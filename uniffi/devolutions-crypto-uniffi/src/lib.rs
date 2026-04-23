@@ -16,16 +16,82 @@ pub use signature::*;
 pub use signing_key::*;
 pub use utils::*;
 
-pub use devolutions_crypto::CiphertextVersion;
-pub use devolutions_crypto::DataType;
-pub use devolutions_crypto::Error as DevolutionsCryptoError;
-pub use devolutions_crypto::KeyVersion;
-pub use devolutions_crypto::PasswordHashVersion;
-pub use devolutions_crypto::SecretSharingVersion;
-pub use devolutions_crypto::SignatureVersion;
-pub use devolutions_crypto::SigningKeyVersion;
+pub use devolutions_crypto::{
+    CiphertextVersion, DataType, Error as DevolutionsCryptoError, KeyVersion, PasswordHashVersion,
+    Result, SecretSharingVersion, SignatureVersion, SigningKeyVersion,
+};
 
-pub use devolutions_crypto::Result;
+#[uniffi::remote(Enum)]
+pub enum DataType {
+    None,
+    Key,
+    Ciphertext,
+    PasswordHash,
+    Share,
+    SigningKey,
+    Signature,
+    OnlineCiphertext,
+}
+
+#[uniffi::remote(Enum)]
+pub enum CiphertextVersion {
+    Latest,
+    V1,
+    V2,
+}
+
+#[uniffi::remote(Enum)]
+pub enum KeyVersion {
+    Latest,
+    V1,
+}
+
+#[uniffi::remote(Enum)]
+pub enum PasswordHashVersion {
+    Latest,
+    V1,
+}
+
+#[uniffi::remote(Enum)]
+pub enum SecretSharingVersion {
+    Latest,
+    V1,
+}
+
+#[uniffi::remote(Enum)]
+pub enum SignatureVersion {
+    Latest,
+    V1,
+}
+
+#[uniffi::remote(Enum)]
+pub enum SigningKeyVersion {
+    Latest,
+    V1,
+}
+
+#[uniffi::remote(Error)]
+#[uniffi(flat_error)]
+pub enum DevolutionsCryptoError {
+    InvalidLength,
+    InvalidKeyLength,
+    InvalidOutputLength,
+    InvalidSignature,
+    InvalidMac,
+    InvalidDataType,
+    UnknownType,
+    UnknownSubtype,
+    UnknownVersion,
+    InvalidData,
+    NullPointer,
+    CryptoError,
+    RandomError,
+    IoError,
+    NotEnoughShares,
+    InconsistentVersion,
+    InvalidChunkLength,
+    PoisonedMutex,
+}
 
 #[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Argon2Version {

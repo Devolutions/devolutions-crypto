@@ -10,7 +10,6 @@ use wasm_bindgen::prelude::*;
 /// The different data types.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[cfg_attr(feature = "uniffi-support", derive(uniffi::Enum))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 #[derive(Default)]
@@ -37,7 +36,6 @@ pub enum DataType {
 /// The versions of the encryption scheme to use.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[cfg_attr(feature = "uniffi-support", derive(uniffi::Enum))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 #[derive(Default)]
@@ -68,7 +66,6 @@ pub enum OnlineCiphertextVersion {
 /// The versions of the password hashing scheme to use.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[cfg_attr(feature = "uniffi-support", derive(uniffi::Enum))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 #[derive(Default)]
@@ -83,7 +80,6 @@ pub enum PasswordHashVersion {
 /// The versions of the key scheme to use.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[cfg_attr(feature = "uniffi-support", derive(uniffi::Enum))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 #[derive(Default)]
@@ -97,7 +93,6 @@ pub enum KeyVersion {
 
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[cfg_attr(feature = "uniffi-support", derive(uniffi::Enum))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 #[derive(Default)]
@@ -112,7 +107,6 @@ pub enum SigningKeyVersion {
 /// The versions of the secret sharing scheme to use.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[cfg_attr(feature = "uniffi-support", derive(uniffi::Enum))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 #[derive(Default)]
@@ -127,7 +121,6 @@ pub enum SecretSharingVersion {
 /// The versions of the secret sharing scheme to use.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[cfg_attr(feature = "uniffi-support", derive(uniffi::Enum))]
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[repr(u16)]
 #[derive(Default)]

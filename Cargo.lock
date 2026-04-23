@@ -519,7 +519,6 @@ dependencies = [
  "subtle",
  "thiserror",
  "typed-builder",
- "uniffi",
  "wasm-bindgen",
  "wasm-bindgen-test",
  "x25519-dalek",

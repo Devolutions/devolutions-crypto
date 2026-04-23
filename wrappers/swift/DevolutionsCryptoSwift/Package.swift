@@ -17,8 +17,8 @@ let package = Package(
     ],
     targets: [
         .systemLibrary(
-            name: "devolutions_cryptoFFI",
-            path: "Sources/devolutions_cryptoFFI"
+            name: "devolutions_crypto_uniffiFFI",
+            path: "Sources/devolutions_crypto_uniffiFFI"
         ),
         .binaryTarget(
             name: "libDevolutionsCrypto",
@@ -27,7 +27,7 @@ let package = Package(
         .target(
             name: "DevolutionsCryptoSwift",
             dependencies: [
-                "devolutions_cryptoFFI",
+                "devolutions_crypto_uniffiFFI",
                 "libDevolutionsCrypto"
             ],
             path: "Sources/DevolutionsCryptoSwift"

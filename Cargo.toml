@@ -52,7 +52,6 @@ rand_08 = { package = "rand", version = "0.8" }
 thiserror = "2.0.12"
 typed-builder = "0.23.2"
 rust-argon2 = { workspace = true }
-uniffi = { workspace = true, optional = true }
 
 ed25519-dalek = { version = "2", features = [ "rand_core" ] }
 x25519-dalek = { version = "2", features = [ "static_secrets" ] }
@@ -78,7 +77,6 @@ wasm-bindgen-test = "0.3"
 default = []
 fuzz = ["arbitrary", "blahaj/fuzzing"]
 wbindgen = ["wasm-bindgen", "serde-wasm-bindgen", "js-sys"]
-uniffi-support = ["uniffi"]
 
 [dependencies.getrandom_v02]
 package = "getrandom"

@@ -242,6 +242,3 @@ pub const DEFAULT_PBKDF2_ITERATIONS: u32 = 600000;
 
 #[cfg(feature = "wbindgen")]
 pub mod wasm;
-
-#[cfg(feature = "uniffi-support")]
-uniffi::setup_scaffolding!();
