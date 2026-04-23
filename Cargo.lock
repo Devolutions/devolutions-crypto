@@ -1574,14 +1574,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "uniffi-builder-macro"
-version = "0.1.0"
-dependencies = [
- "quote",
- "syn 2.0.110",
-]
-
-[[package]]
 name = "uniffi_bindgen"
 version = "0.31.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
