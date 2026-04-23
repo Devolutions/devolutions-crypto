@@ -27,7 +27,7 @@ use super::Result;
 /// ```
 /// use devolutions_crypto::utils::generate_key;
 ///
-/// let key = generate_key(32).expect("generate key shoudln't fail");;
+/// let key = generate_key(32).expect("generate key shouldn't fail");;
 /// assert_eq!(32, key.len());
 /// ```
 pub fn generate_key(length: usize) -> Result<Vec<u8>> {
@@ -49,7 +49,7 @@ pub fn generate_key(length: usize) -> Result<Vec<u8>> {
 /// ```
 /// use devolutions_crypto::utils::{derive_key_pbkdf2, generate_key};
 /// let key = b"this is a secret password";
-/// let salt = generate_key(16).expect("generate key shoudln't fail");;
+/// let salt = generate_key(16).expect("generate key shouldn't fail");;
 /// let iterations = 600000;
 /// let length = 32;
 ///

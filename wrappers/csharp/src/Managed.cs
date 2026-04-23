@@ -916,25 +916,8 @@ namespace Devolutions.Cryptography
                 return null;
             }
 
-            // There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#.
-            // This is unfortunately the best way we found to fix it while keeping backward compatibility.
-            // We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
-            //   we try with the buggy 256 bytes key.
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
-
-            byte[]? result = DecryptSafe(data, key, out DevolutionsCryptoException? exception, aad);
-
-            if (exception is { NativeError: NativeError.InvalidMac })
-            {
-                key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
-                result = Decrypt(data, key, aad);
-                return Utils.ByteArrayToUtf8String(result);
-            }
-
-            if (exception != null)
-            {
-                throw exception;
-            }
+            byte[]? result = Decrypt(data, key, aad);
 
             return Utils.ByteArrayToUtf8String(result);
         }
@@ -1074,22 +1057,8 @@ namespace Devolutions.Cryptography
                 return null;
             }
 
-            //// There was a bug in DeriveKey v1 where the generated key was 256 bytes instead of 256 bits, only in C#.
-            //// This is unfortunately the best way we found to fix it while keeping backward compatibility.
-            //// We try to decrypt with a 256 bits key, and if it doesn't work(InvalidMac means either the data or the key is invalid),
-            ////   we try with the buggy 256 bytes key.
             byte[] key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 32);
-            byte[]? result = DecryptSafe(data, key, out DevolutionsCryptoException? exception, aad);
-
-            if (exception is { NativeError: NativeError.InvalidMac })
-            {
-                key = DeriveKey(Utils.StringToUtf8ByteArray(password), null, iterations, 256);
-                result = Decrypt(data, key, aad);
-            }
-            else if (exception != null)
-            {
-                throw exception;
-            }
+            byte[]? result = Decrypt(data, key, aad);
 
             return result;
         }

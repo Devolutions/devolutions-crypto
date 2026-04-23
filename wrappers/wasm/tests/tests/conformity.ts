@@ -10,7 +10,7 @@ const decoder: TextDecoder = new TextDecoder()
 
 describe('Conformity Tests', () => {
   test('Key Derivation PBKDF2', () => {
-    const derivedKey: Uint8Array = deriveKeyPbkdf2(encoder.encode('testpassword'),)
+    const derivedKey: Uint8Array = deriveKeyPbkdf2(encoder.encode('testpassword'))
     const derivedKeyWithIterations: Uint8Array = deriveKeyPbkdf2(encoder.encode('testPa$$'), null, 100)
     const derivedKeyWithSalt: Uint8Array = deriveKeyPbkdf2(encoder.encode('testPa$$'), base64decode('tdTt5wgeqQYLvkiXKkFirqy2hMbzadBtL+jekVeNCRA='), 100)
 

@@ -167,7 +167,7 @@ byte[] key = Managed.GenerateKey(32);
 
 ### Key Derivation
 
-This is a method used to generate a key from a password or another key. Useful for password-dependant cryptography.
+This is a method used to generate a key from a password or another key. Useful for password-dependent cryptography.
 Salt should be a random 16 bytes array if possible and iterations should be 600,000 or configurable by the user.
 
 ```C#
