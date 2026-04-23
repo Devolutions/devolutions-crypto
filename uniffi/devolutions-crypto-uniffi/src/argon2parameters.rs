@@ -95,29 +95,20 @@ impl Argon2ParametersBuilder {
         let secret_key = self.secret_key.lock().unwrap().clone();
         let salt = self.salt.lock().unwrap().clone();
 
-        let inner =
-            devolutions_crypto::Argon2Parameters::builder()
-                .length(length.unwrap_or(32))
-                .lanes(lanes.unwrap_or(1))
-                .memory(memory.unwrap_or(4096))
-                .iterations(iterations.unwrap_or(3))
-                .variant(
-                    variant
-                        .map(|v| v.into())
-                        .unwrap_or(argon2::Variant::Argon2id),
-                )
-                .version(
-                    version
-                        .map(|v| v.into())
-                        .unwrap_or(argon2::Version::Version13),
-                )
-                .dc_version(dc_version.unwrap_or(1))
-                .associated_data(associated_data.unwrap_or_default())
-                .secret_key(secret_key.unwrap_or_default())
-                .salt(salt.unwrap_or_else(|| {
-                    devolutions_crypto::argon2parameters_defaults::salt().unwrap()
-                }))
-                .build();
+        use devolutions_crypto::argon2parameters_defaults as defaults;
+
+        let inner = devolutions_crypto::Argon2Parameters::builder()
+            .length(length.unwrap_or(defaults::LENGTH))
+            .lanes(lanes.unwrap_or(defaults::LANES))
+            .memory(memory.unwrap_or(defaults::MEMORY))
+            .iterations(iterations.unwrap_or(defaults::ITERATIONS))
+            .variant(variant.map(|v| v.into()).unwrap_or(defaults::VARIANT))
+            .version(version.map(|v| v.into()).unwrap_or(defaults::VERSION))
+            .dc_version(dc_version.unwrap_or(defaults::DC_VERSION))
+            .associated_data(associated_data.unwrap_or_default())
+            .secret_key(secret_key.unwrap_or_default())
+            .salt(salt.unwrap_or_else(|| defaults::salt().unwrap()))
+            .build();
 
         Arc::new(Argon2Parameters { inner })
     }
