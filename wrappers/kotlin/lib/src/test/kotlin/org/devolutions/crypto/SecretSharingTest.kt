@@ -7,7 +7,6 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
-import uniffi.devolutions_crypto.Exception
 
 class SecretSharingTest {
     @Test

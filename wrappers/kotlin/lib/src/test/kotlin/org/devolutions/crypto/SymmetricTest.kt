@@ -6,7 +6,6 @@ package org.devolutions.crypto
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertFailsWith
-import uniffi.devolutions_crypto.Exception
 
 class SymmetricTest {
     @Test
