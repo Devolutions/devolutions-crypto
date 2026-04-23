@@ -16,7 +16,6 @@ pub use signature::*;
 pub use signing_key::*;
 pub use utils::*;
 
-// Re-export types from devolutions_crypto
 pub use devolutions_crypto::CiphertextVersion;
 pub use devolutions_crypto::DataType;
 pub use devolutions_crypto::Error as DevolutionsCryptoError;
@@ -28,7 +27,6 @@ pub use devolutions_crypto::SigningKeyVersion;
 
 pub use devolutions_crypto::Result;
 
-// Wrapper types for Argon2 enums from rust-argon2 crate
 #[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Argon2Version {
     Version10,
