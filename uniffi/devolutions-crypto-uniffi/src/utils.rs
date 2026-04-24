@@ -7,7 +7,7 @@ pub fn generate_key(length: u32) -> Result<Vec<u8>> {
     devolutions_crypto::utils::generate_key(length as usize)
 }
 
-#[uniffi::export(default(iterations = 10000, length = 32))]
+#[uniffi::export(default(iterations = 600000, length = 32))]
 pub fn derive_key_pbkdf2(
     key: &[u8],
     salt: Option<Vec<u8>>,

@@ -34,11 +34,11 @@ fn test_derive_key_default() {
     let password = b"testpassword";
     let salt = b"";
 
-    let derived_password = derive_key_pbkdf2(password, salt, 10000, 32);
+    let derived_password = derive_key_pbkdf2(password, salt, 600000, 32);
     assert_eq!(
         derived_password,
         general_purpose::STANDARD
-            .decode("ImfGCyv6PwMYaJShGxR4MfVrjuUrsI0CSarJgOApwf8=")
+            .decode("wdU+cxAOpTFddVhTQlKQTSzmVjZqPAXVx1cRrAqTGek=")
             .unwrap()
     );
 }

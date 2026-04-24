@@ -147,7 +147,7 @@ use devolutions_crypto::password_hash::{hash_password, PasswordHashVersion};
 
 let password = b"somesuperstrongpa$$w0rd!";
 
-let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest);
+let hashed_password = hash_password(password, 600000, PasswordHashVersion::Latest);
 
 assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!"));
 assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));

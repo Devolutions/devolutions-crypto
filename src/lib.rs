@@ -28,7 +28,7 @@
 //! use devolutions_crypto::utils::generate_key;
 //! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
 //!
-//! let key: Vec<u8> = generate_key(32).expect("generate key shoudln't fail");;
+//! let key: Vec<u8> = generate_key(32).expect("generate key shouldn't fail");;
 //!
 //! let data = b"somesecretdata";
 //!
@@ -59,7 +59,7 @@
 //! use devolutions_crypto::utils::generate_key;
 //! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
 //!
-//! let key: Vec<u8> = generate_key(32).expect("generate key shoudln't fail");;
+//! let key: Vec<u8> = generate_key(32).expect("generate key shouldn't fail");;
 //!
 //! let data = b"somesecretdata";
 //!
@@ -139,7 +139,7 @@
 //!
 //! let password = b"somesuperstrongpa$$w0rd!";
 //!
-//! let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest).expect("hash password shoudln't fail");;
+//! let hashed_password = hash_password(password, 600000, PasswordHashVersion::Latest).expect("hash password shouldn't fail");;
 //!
 //! assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!"));
 //! assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));
@@ -176,19 +176,21 @@
 //! ```rust
 //! use devolutions_crypto::utils::generate_key;
 //!
-//! let key = generate_key(32).expect("generate key shoudln't fail");;
+//! let key = generate_key(32).expect("generate key shouldn't fail");;
 //! assert_eq!(32, key.len());
 //! ```
 //!
 //! ### Key Derivation
 //!
-//! This is a method used to generate a key from a password or another key. Useful for password-dependant cryptography. Salt should be a random 16 bytes array if possible and iterations should be 10000 or configurable by the user.
+//! This is a method used to generate a key from a password or another key. Useful for password-dependent
+//! cryptography. Salt should be a random 16 bytes array if possible and iterations should be 600,000 or configurable
+//! by the user.
 //!
 //! ```rust
 //! use devolutions_crypto::utils::{generate_key, derive_key_pbkdf2};
 //! let key = b"this is a secret password";
-//! let salt = generate_key(16).expect("generate key shoudln't fail");;
-//! let iterations = 10000;
+//! let salt = generate_key(16).expect("generate key shouldn't fail");;
+//! let iterations = 600000;
 //! let length = 32;
 //!
 //! let new_key = derive_key_pbkdf2(key, &salt, iterations, length);
@@ -236,7 +238,7 @@ pub use argon2parameters::Argon2ParametersBuilder;
 pub use error::{Error, Result};
 
 pub const DEFAULT_KEY_SIZE: usize = 32;
-pub const DEFAULT_PBKDF2_ITERATIONS: u32 = 10000;
+pub const DEFAULT_PBKDF2_ITERATIONS: u32 = 600000;
 
 #[cfg(feature = "wbindgen")]
 pub mod wasm;

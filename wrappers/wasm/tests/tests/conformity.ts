@@ -14,7 +14,7 @@ describe('Conformity Tests', () => {
     const derivedKeyWithIterations: Uint8Array = deriveKeyPbkdf2(encoder.encode('testPa$$'), null, 100)
     const derivedKeyWithSalt: Uint8Array = deriveKeyPbkdf2(encoder.encode('testPa$$'), base64decode('tdTt5wgeqQYLvkiXKkFirqy2hMbzadBtL+jekVeNCRA='), 100)
 
-    assert.strictEqual(base64encode(derivedKey), 'ImfGCyv6PwMYaJShGxR4MfVrjuUrsI0CSarJgOApwf8=')
+    assert.strictEqual(base64encode(derivedKey), 'wdU+cxAOpTFddVhTQlKQTSzmVjZqPAXVx1cRrAqTGek=')
     assert.strictEqual(base64encode(derivedKeyWithIterations), 'ev/GiJLvOgIkkWrnIrHSi2fdZE5qJBIrW+DLeMLIXK4=')
     assert.strictEqual(base64encode(derivedKeyWithSalt), 'ZaYRZeQiIPJ+Jl511AgHZjv4/HbCFq4eUP9yNa3gowI=')
   })

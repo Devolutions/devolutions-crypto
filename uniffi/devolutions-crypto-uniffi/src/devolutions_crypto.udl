@@ -145,7 +145,7 @@ namespace devolutions_crypto {
 
     // Password Hash
     [Throws=DevolutionsCryptoError]
-    bytes hash_password([ByRef] bytes password, optional u32 iterations = 10000, optional PasswordHashVersion version = "Latest");
+    bytes hash_password([ByRef] bytes password, optional u32 iterations = 600000, optional PasswordHashVersion version = "Latest");
 
     // Secret Sharing
     [Throws=DevolutionsCryptoError]

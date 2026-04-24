@@ -18,7 +18,7 @@ class ConformityTest {
             iterations = 100u
         )
 
-        val expected = base64Decode("ImfGCyv6PwMYaJShGxR4MfVrjuUrsI0CSarJgOApwf8=")
+        val expected = base64Decode("wdU+cxAOpTFddVhTQlKQTSzmVjZqPAXVx1cRrAqTGek=")
         val expectedWithIterations = base64Decode("ev/GiJLvOgIkkWrnIrHSi2fdZE5qJBIrW+DLeMLIXK4=")
         val expectedWithSalt = base64Decode("ZaYRZeQiIPJ+Jl511AgHZjv4/HbCFq4eUP9yNa3gowI=")
 

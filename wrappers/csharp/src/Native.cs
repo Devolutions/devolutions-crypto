@@ -74,13 +74,13 @@ namespace Devolutions.Cryptography
         }
 
         [Obsolete("This method has been deprecated. Use Managed.DerivePassword instead.")]
-        public static byte[] DerivePassword(string password, string salt, uint iterations = 10000)
+        public static byte[] DerivePassword(string password, string salt, uint iterations = 600000)
         {
             return Managed.DerivePassword(password, salt, iterations);
         }
 
         [Obsolete("This method has been deprecated. Use Managed.DeriveKey instead.")]
-        public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 10000, uint length = 32)
+        public static byte[] DeriveKey(byte[] key, byte[] salt, uint iterations = 600000, uint length = 32)
         {
             return Managed.DeriveKey(key, salt, iterations, length);
         }
@@ -104,7 +104,7 @@ namespace Devolutions.Cryptography
         }
 
         [Obsolete("This method has been deprecated. Use Managed.HashPassword instead.")]
-        public static byte[] HashPassword(byte[] password, uint iterations = 10000)
+        public static byte[] HashPassword(byte[] password, uint iterations = 600000)
         {
             return Managed.HashPassword(password, iterations);
         }

@@ -27,7 +27,7 @@ use super::Result;
 /// ```
 /// use devolutions_crypto::utils::generate_key;
 ///
-/// let key = generate_key(32).expect("generate key shoudln't fail");;
+/// let key = generate_key(32).expect("generate key shouldn't fail");;
 /// assert_eq!(32, key.len());
 /// ```
 pub fn generate_key(length: usize) -> Result<Vec<u8>> {
@@ -43,14 +43,14 @@ pub fn generate_key(length: usize) -> Result<Vec<u8>> {
 ///  * `key` - The key or password to derive.
 ///  * `salt` - The cryptographic salt to be used to add randomness. Can be empty. Recommended size is 16 bytes.
 ///  * `iterations` - The number of time the key will be derived. A higher number is slower but harder to brute-force.
-///    10 000 iterations are recommended for a password.
+///    600,000 iterations are recommended for a password.
 ///  * `length` - Length of the desired key.
 /// # Example
 /// ```
 /// use devolutions_crypto::utils::{derive_key_pbkdf2, generate_key};
 /// let key = b"this is a secret password";
-/// let salt = generate_key(16).expect("generate key shoudln't fail");;
-/// let iterations = 10000;
+/// let salt = generate_key(16).expect("generate key shouldn't fail");;
+/// let iterations = 600000;
 /// let length = 32;
 ///
 /// let new_key = derive_key_pbkdf2(key, &salt, iterations, length);

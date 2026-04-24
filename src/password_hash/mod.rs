@@ -6,7 +6,7 @@
 //!
 //! let password = b"somesuperstrongpa$$w0rd!";
 //!
-//! let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest).expect("hash password shoudln't fail");;
+//! let hashed_password = hash_password(password, 600000, PasswordHashVersion::Latest).expect("hash password shouldn't fail");;
 //!
 //! assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!"));
 //! assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));
@@ -57,8 +57,7 @@ enum PasswordHashPayload {
 /// # Arguments
 ///  * `password` - The password to hash.
 ///  * `iterations` - The number of iterations of the password hash.
-///    A higher number is slower but harder to brute-force.
-///    The recommended is 10000, but the number can be set by the user.
+///    A higher number is slower but harder to brute-force (recommended value is 600,000 or higher)
 ///  * `version` - Version of the library to hash the password with. Use `PasswordHashVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns the `PasswordHash` containing the password verifier.
@@ -68,7 +67,7 @@ enum PasswordHashPayload {
 ///
 /// let password = b"somesuperstrongpa$$w0rd!";
 ///
-/// let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest);
+/// let hashed_password = hash_password(password, 600000, PasswordHashVersion::Latest);
 /// ```
 pub fn hash_password(
     password: &[u8],
@@ -99,7 +98,7 @@ impl PasswordHash {
     ///
     /// let password = b"somesuperstrongpa$$w0rd!";
     ///
-    /// let hashed_password = hash_password(password, 10000, PasswordHashVersion::Latest).expect("hash password shoudln't fail");;
+    /// let hashed_password = hash_password(password, 600000, PasswordHashVersion::Latest).expect("hash password shouldn't fail");;
     /// assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!"));
     /// assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));
     /// ```
