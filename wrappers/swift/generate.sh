@@ -53,26 +53,26 @@ mkdir ./framework-simulator/lib$LIBNAME.framework/Headers
 mkdir ./framework-ios/lib$LIBNAME.framework/Headers
 mkdir ./framework-macos/lib$LIBNAME.framework/Headers
 
-cp ./bindings/devolutions_cryptoFFI.h ./framework-simulator/lib$LIBNAME.framework/Headers
-cp ./bindings/devolutions_cryptoFFI.h ./framework-ios/lib$LIBNAME.framework/Headers
-cp ./bindings/devolutions_cryptoFFI.h ./framework-macos/lib$LIBNAME.framework/Headers
-cp ./bindings/devolutions_cryptoFFI.h ./DevolutionsCryptoSwift/Sources/devolutions_cryptoFFI/
+cp ./bindings/devolutions_crypto_uniffiFFI.h ./framework-simulator/lib$LIBNAME.framework/Headers
+cp ./bindings/devolutions_crypto_uniffiFFI.h ./framework-ios/lib$LIBNAME.framework/Headers
+cp ./bindings/devolutions_crypto_uniffiFFI.h ./framework-macos/lib$LIBNAME.framework/Headers
+cp ./bindings/devolutions_crypto_uniffiFFI.h ./DevolutionsCryptoSwift/Sources/devolutions_crypto_uniffiFFI/
 
 mkdir ./framework-simulator/lib$LIBNAME.framework/Modules
 mkdir ./framework-ios/lib$LIBNAME.framework/Modules
 mkdir ./framework-macos/lib$LIBNAME.framework/Modules
 
-cp ./DevolutionsCryptoSwift/Sources/devolutions_cryptoFFI/framework.modulemap ./framework-simulator/lib$LIBNAME.framework/Modules/module.modulemap
-cp ./DevolutionsCryptoSwift/Sources/devolutions_cryptoFFI/framework.modulemap ./framework-ios/lib$LIBNAME.framework/Modules/module.modulemap
-cp ./DevolutionsCryptoSwift/Sources/devolutions_cryptoFFI/framework.modulemap ./framework-macos/lib$LIBNAME.framework/Modules/module.modulemap
+cp ./DevolutionsCryptoSwift/Sources/devolutions_crypto_uniffiFFI/framework.modulemap ./framework-simulator/lib$LIBNAME.framework/Modules/module.modulemap
+cp ./DevolutionsCryptoSwift/Sources/devolutions_crypto_uniffiFFI/framework.modulemap ./framework-ios/lib$LIBNAME.framework/Modules/module.modulemap
+cp ./DevolutionsCryptoSwift/Sources/devolutions_crypto_uniffiFFI/framework.modulemap ./framework-macos/lib$LIBNAME.framework/Modules/module.modulemap
 
 mkdir ./framework-simulator/lib$LIBNAME.framework/Sources
 mkdir ./framework-ios/lib$LIBNAME.framework/Sources
 mkdir ./framework-macos/lib$LIBNAME.framework/Sources
 
-cp ./bindings/devolutions_crypto.swift ./framework-simulator/lib$LIBNAME.framework/Sources
-cp ./bindings/devolutions_crypto.swift ./framework-ios/lib$LIBNAME.framework/Sources
-cp ./bindings/devolutions_crypto.swift ./framework-macos/lib$LIBNAME.framework/Sources
+cp ./bindings/devolutions_crypto_uniffi.swift ./framework-simulator/lib$LIBNAME.framework/Sources
+cp ./bindings/devolutions_crypto_uniffi.swift ./framework-ios/lib$LIBNAME.framework/Sources
+cp ./bindings/devolutions_crypto_uniffi.swift ./framework-macos/lib$LIBNAME.framework/Sources
 
 mv "./bindings/ios-simulator/lib$LIBNAME.dylib" ./framework-simulator/lib$LIBNAME.framework/lib$LIBNAME
 mv "../../target/aarch64-apple-ios/release/lib$LIBNAMEOUTPUT.dylib" ./framework-ios/lib$LIBNAME.framework/lib$LIBNAME
@@ -110,7 +110,7 @@ ditto -c -k --sequesterRsrc --keepParent "$XCFRAMEWORK_FOLDER" "$XCFRAMEWORK_FOL
 swift package compute-checksum "$XCFRAMEWORK_FOLDER.zip"
 
 # Move swift file to package
-cp "./bindings/devolutions_crypto.swift" ./DevolutionsCryptoSwift/Sources/DevolutionsCryptoSwift/DevolutionsCryptoSwift.swift
+cp "./bindings/devolutions_crypto_uniffi.swift" ./DevolutionsCryptoSwift/Sources/DevolutionsCryptoSwift/DevolutionsCryptoSwift.swift
 
 # Tests
 cd ./DevolutionsCryptoSwift
@@ -124,7 +124,7 @@ mkdir package
 cp -R $XCFRAMEWORK_FOLDER ./package
 cp -R ./DevolutionsCryptoSwift/Sources ./package
 cp -R ./DevolutionsCryptoSwift/Tests ./package
-rm ./package/Sources/devolutions_cryptoFFI/framework.modulemap
+rm ./package/Sources/devolutions_crypto_uniffiFFI/framework.modulemap
 cp ./DevolutionsCryptoSwift/Package.swift ./package
 cp ./DevolutionsCryptoSwift.podspec ./package
 

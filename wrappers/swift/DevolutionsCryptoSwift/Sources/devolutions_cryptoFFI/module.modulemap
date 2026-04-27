@@ -1,4 +1,0 @@
-module devolutions_cryptoFFI [system] {
-    header "devolutions_cryptoFFI.h"
-    export *
-}

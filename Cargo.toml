@@ -7,11 +7,11 @@ members = [
   "python",
   "uniffi/uniffi-bindgen",
   "uniffi/devolutions-crypto-uniffi",
-  "uniffi/devolutions-crypto-uniffi/uniffi-builder-macro",
   ]
 
 [workspace.dependencies]
-uniffi = "0.29.1"
+uniffi = "0.31.1"
+rust-argon2 = { version = "3.0", default-features = false }
 
 [package]
 name = "devolutions-crypto"
@@ -50,7 +50,7 @@ rand = "0.9"
 rand_08 = { package = "rand", version = "0.8" }
 thiserror = "2.0.12"
 typed-builder = "0.23.2"
-rust-argon2 = { version = "3.0", default-features = false }
+rust-argon2 = { workspace = true }
 
 ed25519-dalek = { version = "2", features = [ "rand_core" ] }
 x25519-dalek = { version = "2", features = [ "static_secrets" ] }

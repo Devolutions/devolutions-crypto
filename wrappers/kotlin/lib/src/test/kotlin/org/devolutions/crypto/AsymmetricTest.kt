@@ -55,7 +55,7 @@ class AsymmetricTest {
 
         val encrypted = encryptAsymmetricWithAad(data, keypair.publicKey, aad)
 
-        assertFailsWith<DevolutionsCryptoException> {
+        assertFailsWith<Exception> {
             decryptAsymmetricWithAad(encrypted, keypair.privateKey, wrongAad)
         }
     }

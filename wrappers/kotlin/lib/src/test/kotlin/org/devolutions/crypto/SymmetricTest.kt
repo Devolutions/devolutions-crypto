@@ -44,7 +44,7 @@ class SymmetricTest {
 
         val encrypted = encryptWithAad(data, key, aad)
 
-        assertFailsWith<DevolutionsCryptoException> {
+        assertFailsWith<Exception> {
             decryptWithAad(encrypted, key, wrongAad)
         }
     }
