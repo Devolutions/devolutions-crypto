@@ -15,7 +15,6 @@ on:
 jobs:
   extended_fuzz:
     runs-on: ubuntu-22.04
-    timeout-minutes: 360 # GitHub-hosted runners cap at 360 min
     steps:
       - uses: actions/checkout@v6
 
