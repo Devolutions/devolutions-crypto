@@ -9,13 +9,12 @@ on:
       duration:
         description: 'Duration per target in seconds'
         required: false
-        default: '300'
+        default: '480'
         type: string
 
 jobs:
   extended_fuzz:
     runs-on: ubuntu-22.04
-    timeout-minutes: 180 # 3 hours max
     steps:
       - uses: actions/checkout@v6
 
@@ -38,7 +37,7 @@ jobs:
       - name: Run extended fuzz tests
         working-directory: ./fuzz
         run: |
-          DURATION=${{ inputs.duration || '300' }}
+          DURATION=${{ inputs.duration || '480' }}
           bash run_all_fuzz_tests.sh $DURATION
 
       - name: Save corpus cache
