@@ -1,4 +1,3 @@
-//! [![Build Status](https://dev.azure.com/devolutions-net/Open%20Source/_apis/build/status/devolutions-crypto?branchName=master)](https://dev.azure.com/devolutions-net/Open%20Source/_build/latest?definitionId=170&branchName=master) [![](https://meritbadge.herokuapp.com/devolutions-crypto)](https://crates.io/crates/devolutions-crypto)  
 //! Cryptographic library used in Devolutions products. It is made to be fast, easy to use and misuse-resistant.
 //!
 //! # Usage
@@ -17,11 +16,11 @@
 //!
 //! ## Overview
 //!
-//! The library is split into multiple modules, which are explained below. When
-//! dealing with "managed" data, that includes an header and versionning, you deal
-//! with structures like `Ciphertext`, `PublicKey`, etc.  
+//! This library is split into multiple modules, which are explained below. When
+//! dealing with "managed" data, that includes an header and versioning, you deal
+//! with structures like `Ciphertext`, `SecretKey`, `PublicKey`, etc.  
 //!
-//! These all implements `TryFrom<&[u8]>` and `Into<Vec<u8>>` which are the implemented way to serialize and deserialize data.
+//! These structures all implement `TryFrom<&[u8]>` and `Into<Vec<u8>>` to serialize and deserialize data.
 //!
 //! ```rust
 //! use std::convert::TryFrom as _;
@@ -29,22 +28,15 @@
 //! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
 //!
 //! let key: Vec<u8> = generate_key(32).expect("generate key shouldn't fail");;
-//!
 //! let data = b"somesecretdata";
-//!
 //! let encrypted_data: Ciphertext = encrypt(data, &key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
 //!
-//! // The ciphertext can be serialized.
+//! // The ciphertext can be serialized to be saved somewhere, passed to another language or over the network.
 //! let encrypted_data_vec: Vec<u8> = encrypted_data.into();
 //!
-//! // This data can be saved somewhere, passed to another language or over the network
-//! // ...
 //! // When you receive the data as a byte array, you can deserialize it into a struct using TryFrom
-//!
 //! let ciphertext = Ciphertext::try_from(encrypted_data_vec.as_slice()).expect("deserialization shouldn't fail");
-//!
 //! let decrypted_data = ciphertext.decrypt(&key).expect("The decryption shouldn't fail");
-//!
 //! assert_eq!(decrypted_data, data);
 //! ```
 //!
@@ -57,16 +49,13 @@
 //!
 //! ```rust
 //! use devolutions_crypto::utils::generate_key;
-//! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
+//! use devolutions_crypto::ciphertext::{encrypt, CiphertextVersion, Ciphertext};
 //!
-//! let key: Vec<u8> = generate_key(32).expect("generate key shouldn't fail");;
-//!
+//! let key: Vec<u8> = generate_key(32).expect("generate key shouldn't fail");
 //! let data = b"somesecretdata";
 //!
 //! let encrypted_data: Ciphertext = encrypt(data, &key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
-//!
 //! let decrypted_data = encrypted_data.decrypt(&key).expect("The decryption shouldn't fail");
-//!
 //! assert_eq!(decrypted_data, data);
 //! ```
 //!
@@ -80,27 +69,23 @@
 //! use devolutions_crypto::ciphertext::{ encrypt_asymmetric, CiphertextVersion, Ciphertext };
 //!
 //! let keypair: KeyPair = generate_keypair(KeyVersion::Latest);
-//!
 //! let data = b"somesecretdata";
 //!
 //! let encrypted_data: Ciphertext = encrypt_asymmetric(data, &keypair.public_key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
-//!
 //! let decrypted_data = encrypted_data.decrypt_asymmetric(&keypair.private_key).expect("The decryption shouldn't fail");
-//!
 //! assert_eq!(decrypted_data, data);
 //! ```
 //!
 //! ## Key
 //!
-//! For now, this module only deal with keypairs, as the symmetric keys are not wrapped yet.
+//! This module provides secret keys and keypairs.
 //!
 //! ### Generation/Derivation
 //!
-//! Using `generate_keypair` will generate a random keypair.
+//! Use `generate_secret_key` to a generate a random symmetric key and `generate_keypair` to generate a random keypair.
 //!
 //! Asymmetric keys have two uses. They can be used to [encrypt and decrypt data](##asymmetric) and to perform a [key exchange](#key-exchange).
 //!
-//! #### `generate_keypair`
 //! ```rust
 //! use devolutions_crypto::key::{generate_keypair, KeyVersion, KeyPair};
 //!

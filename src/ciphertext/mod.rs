@@ -87,7 +87,7 @@ enum CiphertextPayload {
     V2Asymmetric(CiphertextV2Asymmetric),
 }
 
-/// Returns an `Ciphertext` from cleartext data and a key.
+/// Returns a `Ciphertext` from cleartext data and a key.
 /// # Arguments
 ///  * `data` - The data to encrypt.
 ///  * `key` - The key to use. The recommended size is 32 bytes.
@@ -108,7 +108,7 @@ pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ci
 }
 
 
-/// Returns an `Ciphertext` from cleartext data and a key.
+/// Returns a `Ciphertext` from cleartext data and a key.
 /// # Arguments
 ///  * `data` - The data to encrypt.
 ///  * `key` - The key to use. The recommended size is 32 bytes.
@@ -128,7 +128,7 @@ pub fn encrypt_with_raw_key(data: &[u8], key: &[u8], version: CiphertextVersion)
     encrypt_with_aad(data, key, [].as_slice(), version)
 }
 
-/// Returns an `Ciphertext` from cleartext data and a key.
+/// Returns a `Ciphertext` from cleartext data and a key.
 /// # Arguments
 ///  * `data` - The data to encrypt.
 ///  * `key` - The key to use. The recommended size is 32 bytes.
@@ -170,7 +170,7 @@ pub fn encrypt_with_aad(
     Ok(Ciphertext { header, payload })
 }
 
-/// Returns an `Ciphertext` from cleartext data and a `PublicKey`.
+/// Returns a `Ciphertext` from cleartext data and a `PublicKey`.
 /// You will need the corresponding `PrivateKey` to decrypt it.
 /// # Arguments
 ///  * `data` - The data to encrypt.
@@ -196,7 +196,7 @@ pub fn encrypt_asymmetric(
     encrypt_asymmetric_with_aad(data, public_key, [].as_slice(), version)
 }
 
-/// Returns an `Ciphertext` from cleartext data and a `PublicKey`.
+/// Returns a `Ciphertext` from cleartext data and a `PublicKey`.
 /// You will need the corresponding `PrivateKey` to decrypt it.
 /// # Arguments
 ///  * `data` - The data to encrypt.
