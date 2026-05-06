@@ -153,6 +153,7 @@ pub enum KeySubtype {
     Private = 1,
     Public = 2,
     Pair = 3,
+    Secret = 4,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]

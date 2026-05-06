@@ -222,12 +222,12 @@ pub mod signature;
 pub mod signing_key;
 pub mod utils;
 
-use enums::{CiphertextSubtype, KeySubtype, PasswordHashSubtype, ShareSubtype, SignatureSubtype};
+use enums::{CiphertextSubtype, PasswordHashSubtype, ShareSubtype, SignatureSubtype};
 pub use header::{Header, HeaderType};
 
 pub use enums::{
-    CiphertextVersion, DataType, KeyVersion, OnlineCiphertextVersion, PasswordHashVersion,
-    SecretSharingVersion, SignatureVersion, SigningKeyVersion,
+    CiphertextVersion, DataType, KeySubtype, KeyVersion, OnlineCiphertextVersion,
+    PasswordHashVersion, SecretSharingVersion, SignatureVersion, SigningKeyVersion,
 };
 
 pub use argon2::Variant as Argon2Variant;
