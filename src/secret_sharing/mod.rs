@@ -1,8 +1,8 @@
-//! Module for creating keys splitted between multiple parties.
+//! Module for creating keys split between multiple parties.
 //! Use this for "Break The Glass" scenarios or when you want to cryptographically enforce
 //! approval of multiple users.
 //!
-//! This module is used to generate a key that is splitted in multiple `Share`
+//! This module is used to generate a key that is split in multiple `Share`
 //! and that requires a specific amount of them to regenerate the key.
 //! You can think of it as a "Break The Glass" scenario. You can
 //! generate a key using this, lock your entire data by encrypting it
@@ -12,7 +12,7 @@
 //! ```rust
 //! use devolutions_crypto::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion, Share};
 //!
-//! // You want a key of 32 bytes, splitted between 5 people, and I want a
+//! // You want a key of 32 bytes, split between 5 people, and I want a
 //! // minimum of 3 of these shares to regenerate the key.
 //! let shares: Vec<Share> = generate_shared_key(5, 3, 32, SecretSharingVersion::Latest).expect("generation shouldn't fail with the right parameters");
 //!

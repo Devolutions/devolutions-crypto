@@ -17,7 +17,7 @@
 //!
 //! ## Overview
 //!
-//! The library is splitted into multiple modules, which are explained below. When
+//! The library is split into multiple modules, which are explained below. When
 //! dealing with "managed" data, that includes an header and versionning, you deal
 //! with structures like `Ciphertext`, `PublicKey`, etc.  
 //!
@@ -146,7 +146,7 @@
 //! ```
 //!
 //! ## SecretSharing
-//! This module is used to generate a key that is splitted in multiple `Share`
+//! This module is used to generate a key that is split in multiple `Share`
 //! and that requires a specific amount of them to regenerate the key.  
 //! You can think of it as a "Break The Glass" scenario. You can
 //! generate a key using this, lock your entire data by encrypting it
@@ -156,7 +156,7 @@
 //! ```rust
 //! use devolutions_crypto::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion, Share};
 //!
-//! // You want a key of 32 bytes, splitted between 5 people, and I want a
+//! // You want a key of 32 bytes, split between 5 people, and I want a
 //! // minimum of 3 of these shares to regenerate the key.
 //! let shares: Vec<Share> = generate_shared_key(5, 3, 32, SecretSharingVersion::Latest).expect("generation shouldn't fail with the right parameters");
 //!
