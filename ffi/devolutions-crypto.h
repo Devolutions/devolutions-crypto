@@ -318,6 +318,27 @@ int64_t GenerateKeyPair(uint8_t *private_,
 int64_t GenerateKeyPairSize(void);
 
 /**
+ * Generate a secret key for symmetric encryption.
+ * # Arguments
+ *  * `result` - Pointer to the buffer to write the secret key to.
+ *  * `result_length` - Length of the buffer to write the secret key to.
+ *                       You can get the value by calling `GenerateSecretKeySize()` beforehand.
+ * # Returns
+ * Returns 0 if the generation worked. If there is an error,
+ *     it will return the appropriate error code defined in DevoCryptoError.
+ * # Safety
+ * This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+ */
+int64_t GenerateSecretKey(uint8_t *result, size_t result_length);
+
+/**
+ * Get the size of a serialized secret key.
+ * # Returns
+ * Returns the length of the buffer to pass as `result_length` in `GenerateSecretKey()`.
+ */
+int64_t GenerateSecretKeySize(void);
+
+/**
  * Generates a secret key shared amongst multiple actor.
  * # Arguments
  *  * n_shares - The number of shares to generate.

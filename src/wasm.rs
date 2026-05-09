@@ -13,7 +13,7 @@ use super::{
 };
 use super::{
     key,
-    key::{KeyVersion, PrivateKey, PublicKey},
+    key::{KeyVersion, PrivateKey, PublicKey, SecretKey},
 };
 use super::{
     password_hash,
@@ -217,6 +217,50 @@ pub fn verify_password(password: &[u8], hash: &[u8]) -> Result<bool, JsValue> {
 #[wasm_bindgen(js_name = "generateKeyPair")]
 pub fn generate_keypair(version: Option<KeyVersion>) -> KeyPair {
     key::generate_keypair(version.unwrap_or(KeyVersion::Latest)).into()
+}
+
+#[wasm_bindgen]
+impl SecretKey {
+    #[wasm_bindgen(getter)]
+    pub fn bytes(&self) -> Vec<u8> {
+        self.clone().into()
+    }
+
+    #[wasm_bindgen(js_name = "fromBytes")]
+    pub fn from_bytes(buffer: &[u8]) -> Result<SecretKey, JsValue> {
+        Ok(SecretKey::try_from(buffer)?)
+    }
+}
+
+#[wasm_bindgen(js_name = "generateSecretKey")]
+pub fn generate_secret_key(version: Option<KeyVersion>) -> SecretKey {
+    key::generate_secret_key(version.unwrap_or(KeyVersion::Latest))
+}
+
+#[wasm_bindgen(js_name = "encryptWithSecretKey")]
+pub fn encrypt_with_secret_key(
+    data: &[u8],
+    key: &SecretKey,
+    aad: Option<Vec<u8>>,
+    version: Option<CiphertextVersion>,
+) -> Result<Vec<u8>, JsValue> {
+    Ok(ciphertext::encrypt_with_aad(
+        data,
+        key.as_bytes(),
+        &aad.unwrap_or_default(),
+        version.unwrap_or(CiphertextVersion::Latest),
+    )?
+    .into())
+}
+
+#[wasm_bindgen(js_name = "decryptWithSecretKey")]
+pub fn decrypt_with_secret_key(
+    data: &[u8],
+    key: &SecretKey,
+    aad: Option<Vec<u8>>,
+) -> Result<Vec<u8>, JsValue> {
+    let data_blob = Ciphertext::try_from(data)?;
+    Ok(data_blob.decrypt_with_aad(key.as_bytes(), &aad.unwrap_or_default())?)
 }
 
 #[wasm_bindgen(js_name = "generateSigningKeyPair")]

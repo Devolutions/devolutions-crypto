@@ -36,7 +36,7 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
-        public void DecryptAsymmetric_Test()
+        public void DecryptAsymmetric()
         {
             byte[] encryptedData = Convert.FromBase64String("DQwCAAIAAgD5rUXkPQO55rzI69WSxtVTA43lDXougn6BxJ7evqf+Yq+SEGXZxpE49874fz/aEk39LTnh1yWnY2VNoAAqKVB5CWZryd6SSld8Sx8v");
             byte[]? decryptedData = Managed.DecryptAsymmetric(encryptedData, TestData.AlicePrivateKey);
@@ -105,9 +105,9 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
-        public void EncryptAsymmetric_Test()
+        public void EncryptAsymmetric()
         {
-            byte[] dataToEncrypt = Encoding.UTF8.GetBytes("test");
+            byte[] dataToEncrypt = "test"u8.ToArray();
             byte[]? encryptedData = Managed.EncryptAsymmetric(dataToEncrypt, TestData.AlicePublicKey);
 
             Assert.IsNotNull(encryptedData);
@@ -197,6 +197,63 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
+        public void GenerateSecretKeyObject()
+        {
+            SecretKey key = Managed.GenerateSecretKey();
+            Assert.IsNotNull(key.ToByteArray());
+            Assert.IsTrue(key.ToByteArray().Length > 0);
+        }
+
+        [TestMethod]
+        public void EncryptDecryptWithSecretKey()
+        {
+            byte[] plaintext = "test secret message"u8.ToArray();
+            SecretKey key = Managed.GenerateSecretKey();
+
+            byte[]? ciphertext = Managed.Encrypt(plaintext, key);
+            Assert.IsNotNull(ciphertext);
+            Assert.IsTrue(Utils.ValidateHeader(ciphertext, DataType.Cipher));
+
+            byte[]? decrypted = Managed.Decrypt(ciphertext, key);
+            Assert.IsNotNull(decrypted);
+            Assert.AreEqual("test secret message", Encoding.UTF8.GetString(decrypted));
+        }
+
+        [TestMethod]
+        public void EncryptDecryptWithSecretKeyAndAad()
+        {
+            byte[] plaintext = "test secret message"u8.ToArray();
+            byte[] aad = "public metadata"u8.ToArray();
+            byte[] wrongAad = "tampered metadata"u8.ToArray();
+            SecretKey key = Managed.GenerateSecretKey();
+
+            byte[]? ciphertext = Managed.Encrypt(plaintext, key, aad);
+            Assert.IsNotNull(ciphertext);
+
+            byte[]? decrypted = Managed.Decrypt(ciphertext, key, aad);
+            Assert.IsNotNull(decrypted);
+            Assert.AreEqual("test secret message", Encoding.UTF8.GetString(decrypted));
+
+            Assert.ThrowsException<DevolutionsCryptoException>(() => Managed.Decrypt(ciphertext, key, wrongAad));
+        }
+
+        [TestMethod]
+        public void SecretKeyRoundTrip()
+        {
+            SecretKey original = Managed.GenerateSecretKey();
+            byte[] serialized = original.ToByteArray();
+            SecretKey restored = SecretKey.FromByteArray(serialized);
+
+            byte[] plaintext = "round-trip test"u8.ToArray();
+
+            byte[]? ciphertext = Managed.Encrypt(plaintext, original);
+            byte[]? decrypted = Managed.Decrypt(ciphertext, restored);
+
+            Assert.IsNotNull(decrypted);
+            Assert.AreEqual(Encoding.UTF8.GetString(decrypted), "round-trip test");
+        }
+
+        [TestMethod]
         public void GenerateSigningKeyPair()
         {
             SigningKeyPair keypair = Managed.GenerateSigningKeyPair();
@@ -213,7 +270,7 @@ namespace Devolutions.Crypto.Tests
 
             byte[]? signature = Managed.Sign(data, keypair);
             Assert.IsNotNull(signature);
-            Assert.AreEqual(Convert.ToBase64String(signature), TestData.SignedTestingb64);
+            Assert.AreEqual(TestData.SignedTestingb64, Convert.ToBase64String(signature));
         }
 
         [TestMethod]
@@ -226,7 +283,7 @@ namespace Devolutions.Crypto.Tests
 
             bool res = Managed.VerifySignature(Encoding.UTF8.GetBytes(TestData.SignTesting), pubkey, signature);
 
-            Assert.AreEqual(res, true);
+            Assert.IsTrue(res);
         }
 
         [TestMethod]
@@ -237,9 +294,9 @@ namespace Devolutions.Crypto.Tests
             SigningKeyPair keypair = SigningKeyPair.FromByteArray(Convert.FromBase64String(TestData.SigningKeyPairb64));
             SigningPublicKey pubkey = SigningPublicKey.FromByteArray(Convert.FromBase64String(TestData.SigningPublicKeyb64));
 
-            bool res = Managed.VerifySignature(Encoding.UTF8.GetBytes("bad data"), pubkey, signature);
+            bool res = Managed.VerifySignature("bad data"u8.ToArray(), pubkey, signature);
 
-            Assert.AreEqual(res, false);
+            Assert.IsFalse(res);
         }
 
         [TestMethod]
@@ -266,7 +323,7 @@ namespace Devolutions.Crypto.Tests
 
             bool res = Managed.VerifySignature(Encoding.UTF8.GetBytes(TestData.SignTesting), pubkey, signature);
 
-            Assert.AreEqual(res, false);
+            Assert.IsFalse(res);
         }
 
         [TestMethod]

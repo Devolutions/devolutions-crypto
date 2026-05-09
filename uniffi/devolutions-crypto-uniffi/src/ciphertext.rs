@@ -1,5 +1,6 @@
 use crate::CiphertextVersion;
 use crate::Result;
+use devolutions_crypto::key::SecretKey;
 
 #[uniffi::export(default(version = None))]
 pub fn encrypt(data: &[u8], key: &[u8], version: Option<CiphertextVersion>) -> Result<Vec<u8>> {
@@ -68,4 +69,41 @@ fn decrypt_asymmetric_with_aad(data: &[u8], key: &[u8], aad: &[u8]) -> Result<Ve
     let key = key.try_into()?;
     let data = devolutions_crypto::ciphertext::Ciphertext::try_from(data)?;
     data.decrypt_asymmetric_with_aad(&key, aad)
+}
+
+#[uniffi::export(default(version = None))]
+pub fn encrypt_with_secret_key(
+    data: &[u8],
+    key: &[u8],
+    version: Option<CiphertextVersion>,
+) -> Result<Vec<u8>> {
+    let version = version.unwrap_or(CiphertextVersion::Latest);
+    let key = SecretKey::try_from(key)?;
+    Ok(devolutions_crypto::ciphertext::encrypt_with_secret_key(data, &key, version)?.into())
+}
+
+#[uniffi::export(default(version = None))]
+pub fn encrypt_with_secret_key_and_aad(
+    data: &[u8],
+    key: &[u8],
+    aad: &[u8],
+    version: Option<CiphertextVersion>,
+) -> Result<Vec<u8>> {
+    let version = version.unwrap_or(CiphertextVersion::Latest);
+    let key = SecretKey::try_from(key)?;
+    Ok(devolutions_crypto::ciphertext::encrypt_with_secret_key_and_aad(data, &key, aad, version)?.into())
+}
+
+#[uniffi::export]
+pub fn decrypt_with_secret_key(data: &[u8], key: &[u8]) -> Result<Vec<u8>> {
+    let key = SecretKey::try_from(key)?;
+    let data = devolutions_crypto::ciphertext::Ciphertext::try_from(data)?;
+    data.decrypt_with_secret_key(&key)
+}
+
+#[uniffi::export]
+pub fn decrypt_with_secret_key_and_aad(data: &[u8], key: &[u8], aad: &[u8]) -> Result<Vec<u8>> {
+    let key = SecretKey::try_from(key)?;
+    let data = devolutions_crypto::ciphertext::Ciphertext::try_from(data)?;
+    data.decrypt_with_secret_key_and_aad(&key, aad)
 }

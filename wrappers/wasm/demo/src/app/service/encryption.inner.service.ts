@@ -1,5 +1,5 @@
-import wasmInit, { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, Argon2Parameters, PasswordHashVersion } from '@devolutions/devolutions-crypto-web';
-export { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, Argon2Parameters, PasswordHashVersion } from '@devolutions/devolutions-crypto-web';
+import wasmInit, { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, SecretKey, Argon2Parameters, PasswordHashVersion } from '@devolutions/devolutions-crypto-web';
+export { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, SecretKey, Argon2Parameters, PasswordHashVersion } from '@devolutions/devolutions-crypto-web';
 import * as devolutionsCrypto from '@devolutions/devolutions-crypto-web';
 
 // Initialize WASM before any functions are used
@@ -60,4 +60,16 @@ export function generateKeyPair(version?: KeyVersion): KeyPair {
 export function mixKeyExchange(privateKey: PrivateKey, publicKey: PublicKey): Uint8Array {
     const result = devolutionsCrypto.mixKeyExchange(privateKey, publicKey);
     return result;
+}
+
+export function generateSecretKey(version?: KeyVersion): SecretKey {
+    return devolutionsCrypto.generateSecretKey(version);
+}
+
+export function encryptWithSecretKey(data: Uint8Array, key: SecretKey, version?: CiphertextVersion): Uint8Array {
+    return devolutionsCrypto.encryptWithSecretKey(data, key, undefined, version);
+}
+
+export function decryptWithSecretKey(data: Uint8Array, key: SecretKey): Uint8Array {
+    return devolutionsCrypto.decryptWithSecretKey(data, key);
 }

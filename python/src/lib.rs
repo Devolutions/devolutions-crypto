@@ -10,7 +10,7 @@ use devolutions_crypto::Error;
 use devolutions_crypto::{ciphertext, ciphertext::Ciphertext};
 use devolutions_crypto::{
     key,
-    key::{PrivateKey, PublicKey},
+    key::{PrivateKey, PublicKey, SecretKey},
 };
 use devolutions_crypto::{signature, signature::Signature};
 use devolutions_crypto::{
@@ -243,6 +243,64 @@ fn generate_keypair(py: Python, version: u16) -> Result<Keypair> {
 }
 
 #[pyfunction]
+#[pyo3(name = "generate_secret_key")]
+#[pyo3(signature = (version=0))]
+fn generate_secret_key(py: Python, version: u16) -> Result<Py<PyBytes>> {
+    let version = match KeyVersion::try_from(version) {
+        Ok(v) => v,
+        Err(_) => {
+            let error: DevolutionsCryptoError = Error::UnknownVersion.into();
+            return Err(error);
+        }
+    };
+
+    let key = key::generate_secret_key(version);
+    let bytes: Vec<u8> = key.into();
+    Ok(PyBytes::new(py, &bytes).into())
+}
+
+#[pyfunction]
+#[pyo3(name = "encrypt_with_secret_key")]
+#[pyo3(signature = (data, key, aad=None, version=0))]
+fn encrypt_with_secret_key(
+    py: Python,
+    data: &[u8],
+    key: &[u8],
+    aad: Option<&[u8]>,
+    version: u16,
+) -> Result<Py<PyBytes>> {
+    let version = match CiphertextVersion::try_from(version) {
+        Ok(v) => v,
+        Err(_) => {
+            let error: DevolutionsCryptoError = Error::UnknownVersion.into();
+            return Err(error);
+        }
+    };
+
+    let key = SecretKey::try_from(key)?;
+    let aad = aad.unwrap_or(&[]);
+    let ct: Vec<u8> =
+        ciphertext::encrypt_with_secret_key_and_aad(data, &key, aad, version)?.into();
+    Ok(PyBytes::new(py, &ct).into())
+}
+
+#[pyfunction]
+#[pyo3(name = "decrypt_with_secret_key")]
+#[pyo3(signature = (data, key, aad=None))]
+fn decrypt_with_secret_key(
+    py: Python,
+    data: &[u8],
+    key: &[u8],
+    aad: Option<&[u8]>,
+) -> Result<Py<PyBytes>> {
+    let key = SecretKey::try_from(key)?;
+    let aad = aad.unwrap_or(&[]);
+    let ct = ciphertext::Ciphertext::try_from(data)?;
+    let plaintext = ct.decrypt_with_secret_key_and_aad(&key, aad)?;
+    Ok(PyBytes::new(py, &plaintext).into())
+}
+
+#[pyfunction]
 #[pyo3(name = "generate_signing_keypair")]
 #[pyo3(signature = (version=0))]
 fn generate_signing_keypair(py: Python, version: u16) -> Result<Py<PyBytes>> {
@@ -287,6 +345,9 @@ fn devolutions_crypto_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_keypair, m)?)?;
     m.add_function(wrap_pyfunction!(generate_signing_keypair, m)?)?;
     m.add_function(wrap_pyfunction!(get_signing_public_key, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_secret_key, m)?)?;
+    m.add_function(wrap_pyfunction!(encrypt_with_secret_key, m)?)?;
+    m.add_function(wrap_pyfunction!(decrypt_with_secret_key, m)?)?;
     m.add_class::<Keypair>()?;
     m.add(
         "DevolutionsCryptoException",
