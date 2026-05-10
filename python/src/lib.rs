@@ -279,8 +279,7 @@ fn encrypt_with_secret_key(
 
     let key = SecretKey::try_from(key)?;
     let aad = aad.unwrap_or(&[]);
-    let ct: Vec<u8> =
-        ciphertext::encrypt_with_secret_key_and_aad(data, &key, aad, version)?.into();
+    let ct: Vec<u8> = ciphertext::encrypt_with_secret_key_and_aad(data, &key, aad, version)?.into();
     Ok(PyBytes::new(py, &ct).into())
 }
 

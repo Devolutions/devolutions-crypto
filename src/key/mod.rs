@@ -422,9 +422,7 @@ impl TryFrom<&[u8]> for SecretKey {
         }
 
         let payload = match header.version {
-            KeyVersion::V1 => {
-                SecretKeyPayload::V1(SecretKeyV1::try_from(&data[Header::len()..])?)
-            }
+            KeyVersion::V1 => SecretKeyPayload::V1(SecretKeyV1::try_from(&data[Header::len()..])?),
             _ => return Err(Error::UnknownVersion),
         };
 

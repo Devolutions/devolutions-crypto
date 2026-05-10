@@ -91,7 +91,10 @@ pub fn encrypt_with_secret_key_and_aad(
 ) -> Result<Vec<u8>> {
     let version = version.unwrap_or(CiphertextVersion::Latest);
     let key = SecretKey::try_from(key)?;
-    Ok(devolutions_crypto::ciphertext::encrypt_with_secret_key_and_aad(data, &key, aad, version)?.into())
+    Ok(
+        devolutions_crypto::ciphertext::encrypt_with_secret_key_and_aad(data, &key, aad, version)?
+            .into(),
+    )
 }
 
 #[uniffi::export]

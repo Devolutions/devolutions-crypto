@@ -1855,6 +1855,7 @@ fn test_generate_secret_key() {
     let res = unsafe { GenerateSecretKey(key_buf.as_mut_ptr(), size) };
     assert_eq!(res, 0);
 
-    let key = devolutions_crypto::key::SecretKey::try_from(key_buf.as_slice()).expect("should parse as SecretKey");
+    let key = devolutions_crypto::key::SecretKey::try_from(key_buf.as_slice())
+        .expect("should parse as SecretKey");
     assert_eq!(key.as_bytes().len(), 32);
 }

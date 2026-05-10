@@ -107,7 +107,6 @@ pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ci
     encrypt_with_raw_key(data, key, version)
 }
 
-
 /// Returns a `Ciphertext` from cleartext data and a key.
 /// # Arguments
 ///  * `data` - The data to encrypt.
@@ -124,7 +123,11 @@ pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ci
 ///
 /// let encrypted_data = encrypt_with_raw_key(data, key, CiphertextVersion::Latest).unwrap();
 /// ```
-pub fn encrypt_with_raw_key(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ciphertext> {
+pub fn encrypt_with_raw_key(
+    data: &[u8],
+    key: &[u8],
+    version: CiphertextVersion,
+) -> Result<Ciphertext> {
     encrypt_with_aad(data, key, [].as_slice(), version)
 }
 
@@ -792,7 +795,9 @@ fn encrypt_decrypt_with_secret_key_aad() {
 
     let encrypted =
         encrypt_with_secret_key_and_aad(data, &key, aad, CiphertextVersion::Latest).unwrap();
-    let decrypted = encrypted.decrypt_with_secret_key_and_aad(&key, aad).unwrap();
+    let decrypted = encrypted
+        .decrypt_with_secret_key_and_aad(&key, aad)
+        .unwrap();
 
     assert_eq!(decrypted, data);
 
