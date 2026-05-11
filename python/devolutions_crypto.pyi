@@ -284,7 +284,7 @@ def encrypt_with_secret_key(
     version: int = 0
 ) -> bytes:
     """
-    Encrypt data using a SecretKey (AES-256-GCM).
+    Encrypt data using a SecretKey.
 
     Args:
         data: The plaintext data to encrypt

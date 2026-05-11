@@ -21,8 +21,7 @@ namespace Devolutions.Cryptography
         internal byte[] Payload { get; }
 
         /// <summary>
-        /// Gets the raw 32-byte key material, without the serialization header.
-        /// This is the value used as the actual encryption key.
+        /// Gets the raw key material, without the serialization header. This is the value used as the actual encryption key.
         /// </summary>
         internal byte[] KeyMaterial
         {

@@ -250,7 +250,7 @@ namespace Devolutions.Crypto.Tests
             byte[]? decrypted = Managed.Decrypt(ciphertext, restored);
 
             Assert.IsNotNull(decrypted);
-            Assert.AreEqual(Encoding.UTF8.GetString(decrypted), "round-trip test");
+            Assert.AreEqual("round-trip test", Encoding.UTF8.GetString(decrypted));
         }
 
         [TestMethod]

@@ -149,3 +149,35 @@ A Curve25519 private key from Devolutions Crypto
 |  V1                       |  0x10  | Uses version 1: XChaCha20-Poly1305 wrapped in a STREAM construction. |
 
 
+# Local development setup
+
+## Rust
+
+Build the project with cargo.
+
+```
+cargo build
+cargo test
+```
+
+## C#
+
+Build the rust library, then open the solution wrappers\csharp\tests\unit-tests\local\devolutions-crypto-tests\devolutions-crypto-tests.sln.
+
+## WebAssembly
+
+**Setup**
+
+- Install the wasm32-unknown-unknown target with `rustup target add wasm32-unknown-unknown`
+- Install `wasm-pack` with `cargo install wasm-pack`.
+
+**Building**
+
+Run `wasm_build.ps1` or `wasm_build.sh` in the wrappers/wasm folder.
+
+Tests can then be run in the wrappers/wasm/tests folder.
+
+```
+npm install
+npm run test
+```

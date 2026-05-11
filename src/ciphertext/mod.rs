@@ -91,7 +91,7 @@ enum CiphertextPayload {
 /// # Arguments
 ///  * `data` - The data to encrypt.
 ///  * `key` - The key to use. The recommended size is 32 bytes.
-///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
@@ -111,7 +111,7 @@ pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ci
 /// # Arguments
 ///  * `data` - The data to encrypt.
 ///  * `key` - The key to use. The recommended size is 32 bytes.
-///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
@@ -136,7 +136,7 @@ pub fn encrypt_with_raw_key(
 ///  * `data` - The data to encrypt.
 ///  * `key` - The key to use. The recommended size is 32 bytes.
 ///  * `aad` - Additionnal data to authenticate alongside the ciphertext.
-///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data, which also authenticates the `aad` argument.
 /// # Example
@@ -178,7 +178,7 @@ pub fn encrypt_with_aad(
 /// # Arguments
 ///  * `data` - The data to encrypt.
 ///  * `public_key` - The `PublicKey` to use. Use `generate_keypair` to generate a keypair.
-///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
@@ -205,7 +205,7 @@ pub fn encrypt_asymmetric(
 ///  * `data` - The data to encrypt.
 ///  * `public_key` - The `PublicKey` to use. Use `generate_keypair` to generate a keypair.
 ///  * `aad` - Additionnal data to authenticate alongside the ciphertext.
-///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
