@@ -17,7 +17,7 @@ on:
         type: string
 
 env:
-  XCODE_VERSION: 26.3
+  XCODE_VERSION: 26.4.1
 
 jobs:
   setup_config:
@@ -60,9 +60,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/native/native-build-macos
 
   native_build_ios:
@@ -71,9 +68,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/native/native-build-ios
 
   native_build_windows:
@@ -82,9 +76,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/native/native-build-windows
 
   #### NUGET BUILD ####
@@ -94,9 +85,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/nugets/nugets-windows
 
   #### WEB ASSEMBLY BUILD ####
@@ -106,9 +94,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/other/webassembly-build
 
   #### WEB ASSEMBLY TEST ####
@@ -118,9 +103,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/tests/webassembly/safari
 
   #### TESTS NUGETS ####
@@ -130,9 +112,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/tests/csharp/windows
 
   tests_nuget_macos:
@@ -141,9 +120,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/tests/csharp/macos
 
   tests_nuget_ios:
@@ -151,10 +127,6 @@ jobs:
     runs-on: "macos-26"
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-
-      - run: git lfs pull
 
       - name: Set Xcode version
         run: |
@@ -169,9 +141,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/tests/csharp/linux
 
 ##### SWIFT BUILD #####
@@ -181,9 +150,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/swift
 
 ##### KOTLIN BUILD #####
@@ -193,9 +159,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/kotlin/kotlin-windows
 
   kotlin_macos:
@@ -204,9 +167,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/kotlin/kotlin-macos
 
   build_kotlin:
@@ -215,9 +175,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/kotlin/kotlin-linux
 
   tests_nuget_android:
@@ -226,9 +183,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/tests/csharp/android
 
   #### CODE FORMATTING ####
@@ -252,9 +206,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/formatting/csharp
 
   #### PYTHON BUILD ####
@@ -263,9 +214,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/python/build/linux
 
   build_python_macos:
@@ -273,9 +221,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/python/build/macos
 
   build_python_windows:
@@ -283,9 +228,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/python/build/windows
 
   #### PYTHON TEST ####
@@ -319,7 +261,4 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
-      - run: git lfs pull
       - uses: ./.github/workflows/other/source-publish
