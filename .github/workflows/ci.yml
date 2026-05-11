@@ -17,7 +17,7 @@ on:
         type: string
 
 env:
-  XCODE_VERSION: 26.4
+  XCODE_VERSION: 26.4.1
 
 jobs:
   setup_config:
