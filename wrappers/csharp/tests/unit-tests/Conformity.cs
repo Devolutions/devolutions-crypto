@@ -157,6 +157,21 @@ namespace Devolutions.Crypto.Tests
             Assert.IsTrue(Managed.VerifySignature(data, publicKey, signature));
             Assert.IsFalse(Managed.VerifySignature(wrongData, publicKey, signature));
         }
+
+        [TestMethod]
+        public void DecryptWithSecretKeyV2()
+        {
+            // SecretKey wrapping the known key ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=
+            // Header: sig=0x0D0C, DataType::Key=1, KeySubtype::Secret=4, KeyVersion::V1=1
+            SecretKey secretKey = SecretKey.FromByteArray(
+                Utils.Base64StringToByteArray("DQwBAAQAAQCjMlUSZ7j7l7/g0bcL5GXboZBsZYCoZzRA9fz/XG9oUw==")!);
+
+            byte[] ciphertext = Utils.Base64StringToByteArray(
+                "DQwCAAAAAgAA0iPpI4IEzcrWAQiy6tqDqLbRYduGvlMC32mVH7tpIN2CXDUu5QHF91I7pMrmjt/61pm5CeR/IcU=")!;
+
+            byte[]? result = Managed.Decrypt(ciphertext, secretKey);
+            Assert.AreEqual("test Ciph3rtext~2", Utils.ByteArrayToUtf8String(result));
+        }
     }
 }
 #pragma warning restore SA1600 // Elements should be documented

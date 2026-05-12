@@ -541,6 +541,55 @@ namespace Devolutions.Cryptography
             };
         }
 
+        internal static byte[] GenerateSecretKeyBytes()
+        {
+            long size = Native.GenerateSecretKeySizeNative();
+            byte[] result = new byte[size];
+
+            long res = Native.GenerateSecretKeyNative(result, (UIntPtr)result.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Generates a random secret key for symmetric encryption.
+        /// </summary>
+        /// <returns>Returns the generated <see cref="SecretKey"/>.</returns>
+        public static SecretKey GenerateSecretKey()
+        {
+            return new SecretKey(GenerateSecretKeyBytes());
+        }
+
+        /// <summary>
+        /// Encrypts data using a <see cref="SecretKey"/>.
+        /// </summary>
+        /// <param name="data">The data to encrypt.</param>
+        /// <param name="key">The <see cref="SecretKey"/> to use for encryption.</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
+        /// <param name="version">The cipher version to use. (Latest is recommended).</param>
+        /// <returns>Returns the encrypted data as a byte array.</returns>
+        public static byte[]? Encrypt(byte[]? data, SecretKey key, byte[]? aad = null, CipherTextVersion version = CIPHERTEXT_VERSION)
+        {
+            return Encrypt(data, key.KeyMaterial, aad, version);
+        }
+
+        /// <summary>
+        /// Decrypts data using a <see cref="SecretKey"/>.
+        /// </summary>
+        /// <param name="data">The data to decrypt.</param>
+        /// <param name="key">The <see cref="SecretKey"/> used for encryption.</param>
+        /// <param name="aad">Additional authenticated data. (Optional).</param>
+        /// <returns>Returns the decrypted data as a byte array.</returns>
+        public static byte[]? Decrypt(byte[]? data, SecretKey key, byte[]? aad = null)
+        {
+            return Decrypt(data, key.KeyMaterial, aad);
+        }
+
         /// <summary>
         /// Encrypts the data.
         /// </summary>

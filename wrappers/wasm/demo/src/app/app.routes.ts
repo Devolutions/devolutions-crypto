@@ -4,6 +4,7 @@ import { SecretSharingComponent } from './secret-sharing/secret-sharing.componen
 import { PasswordComponent } from './password/password.component';
 import { UtilitiesComponent } from './utilities/utilities.component';
 import { AsymmetricComponent } from './asymmetric/asymmetric.component';
+import { SecretKeyEncryptionComponent } from './secret-key-encryption/secret-key-encryption.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/encryption', pathMatch: 'full' },
@@ -11,5 +12,6 @@ export const routes: Routes = [
   { path: 'secret-sharing', component: SecretSharingComponent },
   { path: 'password', component: PasswordComponent },
   { path: 'utilities', component: UtilitiesComponent },
-  { path: 'asymmetric', component: AsymmetricComponent }
+  { path: 'asymmetric', component: AsymmetricComponent },
+  { path: 'secret-key-encryption', component: SecretKeyEncryptionComponent }
 ];

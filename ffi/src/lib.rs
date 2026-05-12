@@ -22,7 +22,7 @@ use devolutions_crypto::ciphertext::{
     encrypt_asymmetric_with_aad, encrypt_with_aad, Ciphertext, CiphertextVersion,
 };
 use devolutions_crypto::key::{
-    generate_keypair, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
+    generate_keypair, generate_secret_key, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
 };
 use devolutions_crypto::password_hash::{hash_password, PasswordHash, PasswordHashVersion};
 use devolutions_crypto::secret_sharing::{
@@ -669,6 +669,43 @@ pub unsafe extern "C" fn GetSigningPublicKey(
 ///     and `public_length` in `GenerateKeyPair()`.
 #[no_mangle]
 pub extern "C" fn GenerateKeyPairSize() -> i64 {
+    8 + 32 // header + key length
+}
+
+/// Generate a secret key for symmetric encryption.
+/// # Arguments
+///  * `result` - Pointer to the buffer to write the secret key to.
+///  * `result_length` - Length of the buffer to write the secret key to.
+///                       You can get the value by calling `GenerateSecretKeySize()` beforehand.
+/// # Returns
+/// Returns 0 if the generation worked. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn GenerateSecretKey(result: *mut u8, result_length: usize) -> i64 {
+    if result.is_null() {
+        return Error::NullPointer.error_code();
+    }
+
+    if result_length != GenerateSecretKeySize() as usize {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    let result = slice::from_raw_parts_mut(result, result_length);
+
+    let key = generate_secret_key(KeyVersion::Latest);
+    let key_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(key.into());
+
+    result[0..key_bytes.len()].copy_from_slice(&key_bytes);
+    0
+}
+
+/// Get the size of a serialized secret key.
+/// # Returns
+/// Returns the length of the buffer to pass as `result_length` in `GenerateSecretKey()`.
+#[no_mangle]
+pub extern "C" fn GenerateSecretKeySize() -> i64 {
     8 + 32 // header + key length
 }
 
@@ -1808,4 +1845,17 @@ fn test_decode() {
         );
         assert!(res > 0i64)
     }
+}
+
+#[test]
+fn test_generate_secret_key() {
+    let size = GenerateSecretKeySize() as usize;
+    let mut key_buf = vec![0u8; size];
+
+    let res = unsafe { GenerateSecretKey(key_buf.as_mut_ptr(), size) };
+    assert_eq!(res, 0);
+
+    let key = devolutions_crypto::key::SecretKey::try_from(key_buf.as_slice())
+        .expect("should parse as SecretKey");
+    assert_eq!(key.as_bytes().len(), 32);
 }

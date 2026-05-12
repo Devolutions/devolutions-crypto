@@ -51,7 +51,7 @@ use super::Header;
 use super::HeaderType;
 use super::Result;
 
-use super::key::{PrivateKey, PublicKey};
+use super::key::{PrivateKey, PublicKey, SecretKey};
 
 use ciphertext_v1::CiphertextV1;
 use ciphertext_v2::{CiphertextV2Asymmetric, CiphertextV2Symmetric};
@@ -87,11 +87,11 @@ enum CiphertextPayload {
     V2Asymmetric(CiphertextV2Asymmetric),
 }
 
-/// Returns an `Ciphertext` from cleartext data and a key.
+/// Returns a `Ciphertext` from cleartext data and a key.
 /// # Arguments
 ///  * `data` - The data to encrypt.
 ///  * `key` - The key to use. The recommended size is 32 bytes.
-///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
@@ -104,15 +104,39 @@ enum CiphertextPayload {
 /// let encrypted_data = encrypt(data, key, CiphertextVersion::Latest).unwrap();
 /// ```
 pub fn encrypt(data: &[u8], key: &[u8], version: CiphertextVersion) -> Result<Ciphertext> {
+    encrypt_with_raw_key(data, key, version)
+}
+
+/// Returns a `Ciphertext` from cleartext data and a key.
+/// # Arguments
+///  * `data` - The data to encrypt.
+///  * `key` - The key to use. The recommended size is 32 bytes.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
+/// # Returns
+/// Returns a `Ciphertext` containing the encrypted data.
+/// # Example
+/// ```rust
+/// use devolutions_crypto::ciphertext::{ encrypt_with_raw_key, CiphertextVersion };
+///
+/// let data = b"somesecretdata";
+/// let key = b"somesecretkey";
+///
+/// let encrypted_data = encrypt_with_raw_key(data, key, CiphertextVersion::Latest).unwrap();
+/// ```
+pub fn encrypt_with_raw_key(
+    data: &[u8],
+    key: &[u8],
+    version: CiphertextVersion,
+) -> Result<Ciphertext> {
     encrypt_with_aad(data, key, [].as_slice(), version)
 }
 
-/// Returns an `Ciphertext` from cleartext data and a key.
+/// Returns a `Ciphertext` from cleartext data and a key.
 /// # Arguments
 ///  * `data` - The data to encrypt.
 ///  * `key` - The key to use. The recommended size is 32 bytes.
 ///  * `aad` - Additionnal data to authenticate alongside the ciphertext.
-///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data, which also authenticates the `aad` argument.
 /// # Example
@@ -149,12 +173,12 @@ pub fn encrypt_with_aad(
     Ok(Ciphertext { header, payload })
 }
 
-/// Returns an `Ciphertext` from cleartext data and a `PublicKey`.
+/// Returns a `Ciphertext` from cleartext data and a `PublicKey`.
 /// You will need the corresponding `PrivateKey` to decrypt it.
 /// # Arguments
 ///  * `data` - The data to encrypt.
 ///  * `public_key` - The `PublicKey` to use. Use `generate_keypair` to generate a keypair.
-///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
@@ -175,13 +199,13 @@ pub fn encrypt_asymmetric(
     encrypt_asymmetric_with_aad(data, public_key, [].as_slice(), version)
 }
 
-/// Returns an `Ciphertext` from cleartext data and a `PublicKey`.
+/// Returns a `Ciphertext` from cleartext data and a `PublicKey`.
 /// You will need the corresponding `PrivateKey` to decrypt it.
 /// # Arguments
 ///  * `data` - The data to encrypt.
 ///  * `public_key` - The `PublicKey` to use. Use `generate_keypair` to generate a keypair.
 ///  * `aad` - Additionnal data to authenticate alongside the ciphertext.
-///  * `version` - Version of the library to encrypt with. Use `CiphertTextVersion::Latest` if you're not dealing with shared data.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
@@ -218,6 +242,59 @@ pub fn encrypt_asymmetric_with_aad(
     Ok(Ciphertext { header, payload })
 }
 
+/// Returns a `Ciphertext` from cleartext data and a `SecretKey`.
+/// # Arguments
+///  * `data` - The data to encrypt.
+///  * `key` - The `SecretKey` to use. Generate one with `generate_secret_key`.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
+/// # Returns
+/// Returns a `Ciphertext` containing the encrypted data.
+/// # Example
+/// ```rust
+/// use devolutions_crypto::ciphertext::{ encrypt_with_secret_key, CiphertextVersion };
+/// use devolutions_crypto::key::{ generate_secret_key, KeyVersion };
+///
+/// let data = b"somesecretdata";
+/// let key = generate_secret_key(KeyVersion::Latest);
+///
+/// let encrypted_data = encrypt_with_secret_key(data, &key, CiphertextVersion::Latest).unwrap();
+/// ```
+pub fn encrypt_with_secret_key(
+    data: &[u8],
+    key: &SecretKey,
+    version: CiphertextVersion,
+) -> Result<Ciphertext> {
+    encrypt(data, key.as_bytes(), version)
+}
+
+/// Returns a `Ciphertext` from cleartext data and a `SecretKey` with additional authenticated data.
+/// # Arguments
+///  * `data` - The data to encrypt.
+///  * `key` - The `SecretKey` to use. Generate one with `generate_secret_key`.
+///  * `aad` - Additional data to authenticate alongside the ciphertext.
+///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
+/// # Returns
+/// Returns a `Ciphertext` containing the encrypted data, which also authenticates the `aad` argument.
+/// # Example
+/// ```rust
+/// use devolutions_crypto::ciphertext::{ encrypt_with_secret_key_and_aad, CiphertextVersion };
+/// use devolutions_crypto::key::{ generate_secret_key, KeyVersion };
+///
+/// let data = b"somesecretdata";
+/// let aad = b"somepublicdata";
+/// let key = generate_secret_key(KeyVersion::Latest);
+///
+/// let encrypted_data = encrypt_with_secret_key_and_aad(data, &key, aad, CiphertextVersion::Latest).unwrap();
+/// ```
+pub fn encrypt_with_secret_key_and_aad(
+    data: &[u8],
+    key: &SecretKey,
+    aad: &[u8],
+    version: CiphertextVersion,
+) -> Result<Ciphertext> {
+    encrypt_with_aad(data, key.as_bytes(), aad, version)
+}
+
 impl Ciphertext {
     /// Decrypt the data blob using a key.
     /// # Arguments
@@ -237,6 +314,27 @@ impl Ciphertext {
     /// assert_eq!(data.to_vec(), decrypted_data);
     ///```
     pub fn decrypt(&self, key: &[u8]) -> Result<Vec<u8>> {
+        self.decrypt_with_raw_key(key)
+    }
+
+    /// Decrypt the data blob using a key.
+    /// # Arguments
+    ///  * `key` - Key to use. The recommended size is 32 bytes.
+    /// # Returns
+    /// Returns the decrypted data.
+    /// # Example
+    /// ```rust
+    /// use devolutions_crypto::ciphertext::{ encrypt_with_raw_key, CiphertextVersion};
+    ///
+    /// let data = b"somesecretdata";
+    /// let key = b"somesecretkey";
+    ///
+    /// let encrypted_data = encrypt_with_raw_key(data, key, CiphertextVersion::Latest).unwrap();
+    /// let decrypted_data = encrypted_data.decrypt_with_raw_key(key).unwrap();
+    ///
+    /// assert_eq!(data.to_vec(), decrypted_data);
+    ///```
+    pub fn decrypt_with_raw_key(&self, key: &[u8]) -> Result<Vec<u8>> {
         self.decrypt_with_aad(key, [].as_slice())
     }
 
@@ -319,6 +417,52 @@ impl Ciphertext {
             CiphertextPayload::V1(_) => Err(Error::UnknownVersion),
             _ => Err(Error::InvalidDataType),
         }
+    }
+
+    /// Decrypt the data blob using a `SecretKey`.
+    /// # Arguments
+    ///  * `key` - The `SecretKey` used for encryption.
+    /// # Returns
+    /// Returns the decrypted data.
+    /// # Example
+    /// ```rust
+    /// use devolutions_crypto::ciphertext::{ encrypt_with_secret_key, CiphertextVersion };
+    /// use devolutions_crypto::key::{ generate_secret_key, KeyVersion };
+    ///
+    /// let data = b"somesecretdata";
+    /// let key = generate_secret_key(KeyVersion::Latest);
+    ///
+    /// let encrypted_data = encrypt_with_secret_key(data, &key, CiphertextVersion::Latest).unwrap();
+    /// let decrypted_data = encrypted_data.decrypt_with_secret_key(&key).unwrap();
+    ///
+    /// assert_eq!(decrypted_data, data);
+    ///```
+    pub fn decrypt_with_secret_key(&self, key: &SecretKey) -> Result<Vec<u8>> {
+        self.decrypt(key.as_bytes())
+    }
+
+    /// Decrypt the data blob using a `SecretKey` and additional authenticated data.
+    /// # Arguments
+    ///  * `key` - The `SecretKey` used for encryption.
+    ///  * `aad` - Additional data to authenticate alongside the ciphertext.
+    /// # Returns
+    /// Returns the decrypted data.
+    /// # Example
+    /// ```rust
+    /// use devolutions_crypto::ciphertext::{ encrypt_with_secret_key_and_aad, CiphertextVersion };
+    /// use devolutions_crypto::key::{ generate_secret_key, KeyVersion };
+    ///
+    /// let data = b"somesecretdata";
+    /// let aad = b"somepublicdata";
+    /// let key = generate_secret_key(KeyVersion::Latest);
+    ///
+    /// let encrypted_data = encrypt_with_secret_key_and_aad(data, &key, aad, CiphertextVersion::Latest).unwrap();
+    /// let decrypted_data = encrypted_data.decrypt_with_secret_key_and_aad(&key, aad).unwrap();
+    ///
+    /// assert_eq!(decrypted_data, data);
+    ///```
+    pub fn decrypt_with_secret_key_and_aad(&self, key: &SecretKey, aad: &[u8]) -> Result<Vec<u8>> {
+        self.decrypt_with_aad(key.as_bytes(), aad)
     }
 }
 
@@ -625,4 +769,76 @@ fn asymmetric_aad_test_v2() {
     let decrypted = encrypted_data.decrypt_asymmetric(&keypair.private_key);
 
     assert!(decrypted.is_err());
+}
+
+#[test]
+fn encrypt_decrypt_with_secret_key() {
+    use super::key::{generate_secret_key, KeyVersion};
+
+    let data = b"somesecretdata";
+    let key = generate_secret_key(KeyVersion::Latest);
+
+    let encrypted = encrypt_with_secret_key(data, &key, CiphertextVersion::Latest).unwrap();
+    let decrypted = encrypted.decrypt_with_secret_key(&key).unwrap();
+
+    assert_eq!(decrypted, data);
+}
+
+#[test]
+fn encrypt_decrypt_with_secret_key_aad() {
+    use super::key::{generate_secret_key, KeyVersion};
+
+    let data = b"somesecretdata";
+    let aad = b"somepublicdata";
+    let wrong_aad = b"somewrongdata";
+    let key = generate_secret_key(KeyVersion::Latest);
+
+    let encrypted =
+        encrypt_with_secret_key_and_aad(data, &key, aad, CiphertextVersion::Latest).unwrap();
+    let decrypted = encrypted
+        .decrypt_with_secret_key_and_aad(&key, aad)
+        .unwrap();
+
+    assert_eq!(decrypted, data);
+
+    assert!(encrypted
+        .decrypt_with_secret_key_and_aad(&key, wrong_aad)
+        .is_err());
+    assert!(encrypted.decrypt_with_secret_key(&key).is_err());
+}
+
+#[test]
+fn encrypt_decrypt_with_secret_key_v1() {
+    use super::key::{generate_secret_key, KeyVersion};
+
+    let data = b"somesecretdata";
+    let key = generate_secret_key(KeyVersion::Latest);
+
+    let encrypted = encrypt_with_secret_key(data, &key, CiphertextVersion::V1).unwrap();
+
+    assert_eq!(encrypted.header.version, CiphertextVersion::V1);
+
+    let encrypted_bytes: Vec<u8> = encrypted.into();
+    let encrypted = Ciphertext::try_from(encrypted_bytes.as_slice()).unwrap();
+    let decrypted = encrypted.decrypt_with_secret_key(&key).unwrap();
+
+    assert_eq!(decrypted, data);
+}
+
+#[test]
+fn encrypt_decrypt_with_secret_key_v2() {
+    use super::key::{generate_secret_key, KeyVersion};
+
+    let data = b"somesecretdata";
+    let key = generate_secret_key(KeyVersion::Latest);
+
+    let encrypted = encrypt_with_secret_key(data, &key, CiphertextVersion::V2).unwrap();
+
+    assert_eq!(encrypted.header.version, CiphertextVersion::V2);
+
+    let encrypted_bytes: Vec<u8> = encrypted.into();
+    let encrypted = Ciphertext::try_from(encrypted_bytes.as_slice()).unwrap();
+    let decrypted = encrypted.decrypt_with_secret_key(&key).unwrap();
+
+    assert_eq!(decrypted, data);
 }

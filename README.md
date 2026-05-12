@@ -59,7 +59,6 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 This header represents : 
 A Curve25519 private key from Devolutions Crypto
 
-
 - Signature Bytes
   -  The first two bytes specifies that the data is from Devolutions Crypto (DC) 
 - Data type
@@ -70,6 +69,7 @@ A Curve25519 private key from Devolutions Crypto
   - The fourth two bytes (pos: 7, 8) represents the version.
 
 ## Data Type
+
 | Data Types          | Value  |  Description                                                                 |
 |---------------------|--------|------------------------------------------------------------------------------|
 |  None               |  0x00  | No data type. Only used as a default value.                                  |
@@ -82,7 +82,6 @@ A Curve25519 private key from Devolutions Crypto
 |  OnlineCiphertext   |  0x70  | A wrapped online ciphertext that can be encrypted/decrypted chunk by chunk  |
 
 
-
 ## Sub types
 
 | Key Sub Types | Value  |
@@ -91,6 +90,7 @@ A Curve25519 private key from Devolutions Crypto
 |  Private      |  0x10  |
 |  Public       |  0x20  |
 |  Pair         |  0x30  |
+|  Secret       |  0x40  |
 
 | Ciphertext Sub Types | Value  |
 |----------------------|--------|
@@ -149,3 +149,35 @@ A Curve25519 private key from Devolutions Crypto
 |  V1                       |  0x10  | Uses version 1: XChaCha20-Poly1305 wrapped in a STREAM construction. |
 
 
+# Local development setup
+
+## Rust
+
+Build the project with cargo.
+
+```
+cargo build
+cargo test
+```
+
+## C#
+
+Build the rust library, then open the solution wrappers\csharp\tests\unit-tests\local\devolutions-crypto-tests\devolutions-crypto-tests.sln.
+
+## WebAssembly
+
+**Setup**
+
+- Install the wasm32-unknown-unknown target with `rustup target add wasm32-unknown-unknown`
+- Install `wasm-pack` with `cargo install wasm-pack`.
+
+**Building**
+
+Run `wasm_build.ps1` or `wasm_build.sh` in the wrappers/wasm folder.
+
+Tests can then be run in the wrappers/wasm/tests folder.
+
+```
+npm install
+npm run test
+```

@@ -1,7 +1,5 @@
 //! Module for dealing with wrapped keys and key exchange.
 //!
-//! For now, this module only deal with keypairs, as the symmetric keys are not wrapped yet.
-//!
 //! ### Generation/Derivation
 //!
 //! Using `generate_keypair` will generate a random keypair.
@@ -41,6 +39,7 @@
 //! ```
 
 mod key_v1;
+mod secret_key_v1;
 
 use super::DataType;
 use super::Error;
@@ -51,6 +50,7 @@ pub use super::KeyVersion;
 use super::Result;
 
 use key_v1::{KeyV1Private, KeyV1Public};
+use secret_key_v1::SecretKeyV1;
 
 use std::borrow::Borrow;
 use std::convert::TryFrom;
@@ -333,6 +333,111 @@ impl From<&PrivateKey> for x25519_dalek::StaticSecret {
     }
 }
 
+/// A secret key for symmetric encryption. Should never be sent over an insecure channel or stored unsecurely.
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[derive(Clone, Debug)]
+pub struct SecretKey {
+    pub(crate) header: Header<SecretKey>,
+    payload: SecretKeyPayload,
+}
+
+impl HeaderType for SecretKey {
+    type Version = KeyVersion;
+    type Subtype = KeySubtype;
+
+    fn data_type() -> DataType {
+        DataType::Key
+    }
+
+    fn subtype() -> Self::Subtype {
+        KeySubtype::Secret
+    }
+}
+
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+enum SecretKeyPayload {
+    V1(SecretKeyV1),
+}
+
+impl SecretKey {
+    /// Returns the raw key bytes for use with symmetric encryption primitives.
+    pub fn as_bytes(&self) -> &[u8] {
+        match &self.payload {
+            SecretKeyPayload::V1(k) => k.as_bytes(),
+        }
+    }
+}
+
+/// Generates a `SecretKey` for use with symmetric encryption.
+/// # Arguments
+///  * `version` - Version of the key scheme to use. Use `KeyVersion::Latest` if you're not dealing with shared data.
+/// # Returns
+/// Returns a `SecretKey` containing the raw key material.
+/// # Example
+/// ```rust
+/// use devolutions_crypto::key::{generate_secret_key, KeyVersion};
+///
+/// let key = generate_secret_key(KeyVersion::Latest);
+/// ```
+pub fn generate_secret_key(version: KeyVersion) -> SecretKey {
+    let mut header: Header<SecretKey> = Header::default();
+
+    match version {
+        KeyVersion::V1 | KeyVersion::Latest => {
+            header.version = KeyVersion::V1;
+        }
+    }
+
+    SecretKey {
+        header,
+        payload: SecretKeyPayload::V1(SecretKeyV1::generate()),
+    }
+}
+
+impl From<SecretKey> for Vec<u8> {
+    /// Serialize the structure into a `Vec<u8>`, for storage, transmission or use in another language.
+    fn from(data: SecretKey) -> Self {
+        let mut header: Self = data.header.borrow().into();
+        let mut payload: Self = data.payload.into();
+        header.append(&mut payload);
+        header
+    }
+}
+
+impl TryFrom<&[u8]> for SecretKey {
+    type Error = Error;
+
+    /// Parses the data. Can return an Error if the data is invalid or unrecognized.
+    fn try_from(data: &[u8]) -> Result<Self> {
+        if data.len() < Header::len() {
+            return Err(Error::InvalidLength);
+        };
+
+        let header = Header::try_from(&data[0..Header::len()])?;
+
+        if header.data_subtype != KeySubtype::Secret {
+            return Err(Error::InvalidDataType);
+        }
+
+        let payload = match header.version {
+            KeyVersion::V1 => SecretKeyPayload::V1(SecretKeyV1::try_from(&data[Header::len()..])?),
+            _ => return Err(Error::UnknownVersion),
+        };
+
+        Ok(Self { header, payload })
+    }
+}
+
+impl From<SecretKeyPayload> for Vec<u8> {
+    fn from(data: SecretKeyPayload) -> Self {
+        match data {
+            SecretKeyPayload::V1(x) => x.into(),
+        }
+    }
+}
+
 #[test]
 fn ecdh_test() {
     let bob_keypair = generate_keypair(KeyVersion::Latest);
@@ -343,4 +448,32 @@ fn ecdh_test() {
         mix_key_exchange(&alice_keypair.private_key, &bob_keypair.public_key).unwrap();
 
     assert_eq!(bob_shared, alice_shared);
+}
+
+#[test]
+fn secret_key_generate_roundtrip() {
+    let key = generate_secret_key(KeyVersion::Latest);
+    let original_bytes = key.as_bytes().to_vec();
+
+    let serialized: Vec<u8> = key.into();
+    let deserialized = SecretKey::try_from(serialized.as_slice()).unwrap();
+
+    assert_eq!(deserialized.as_bytes(), original_bytes.as_slice());
+}
+
+#[test]
+fn secret_key_wrong_subtype_rejected() {
+    use std::convert::TryFrom as _;
+    let keypair = generate_keypair(KeyVersion::Latest);
+    let private_bytes: Vec<u8> = keypair.private_key.into();
+
+    let result = SecretKey::try_from(private_bytes.as_slice());
+    assert!(matches!(result, Err(Error::InvalidDataType)));
+}
+
+#[test]
+fn secret_key_wrong_length_rejected() {
+    let short = [0u8; 4];
+    let result = SecretKey::try_from(short.as_slice());
+    assert!(matches!(result, Err(Error::InvalidLength)));
 }

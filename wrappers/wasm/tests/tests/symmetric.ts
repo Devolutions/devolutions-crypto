@@ -1,4 +1,11 @@
-import { generateKey, encrypt, decrypt } from 'devolutions-crypto'
+import {
+  generateKey,
+  generateSecretKey,
+  encrypt,
+  encryptWithSecretKey,
+  decrypt,
+  decryptWithSecretKey,
+} from 'devolutions-crypto'
 import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
 
@@ -33,5 +40,35 @@ describe('encrypt/decrypt', () => {
 
     assert.throws(() => decrypt(encrypted, key))
     assert.throws(() => decrypt(encrypted, key, wrongAad))
+  })
+
+  test('should be able to encrypt and decrypt with a secret key', () => {
+    const input: Uint8Array = encoder.encode('This is some test data')
+    const key = generateSecretKey()
+    const encrypted: Uint8Array = encryptWithSecretKey(input, key)
+    const decrypted: Uint8Array = decryptWithSecretKey(encrypted, key)
+    assert.notDeepStrictEqual(encrypted, input)
+    assert.deepStrictEqual(decrypted, input)
+  })
+
+  test('should be able to encrypt and decrypt with a secret key and AAD', () => {
+    const input: Uint8Array = encoder.encode('This is some test data')
+    const aad: Uint8Array = encoder.encode('This is some public data')
+    const key = generateSecretKey()
+    const encrypted: Uint8Array = encryptWithSecretKey(input, key, aad)
+    const decrypted: Uint8Array = decryptWithSecretKey(encrypted, key, aad)
+    assert.notDeepStrictEqual(encrypted, input)
+    assert.deepStrictEqual(decrypted, input)
+  })
+
+  test('should fail if secret key AAD is invalid', () => {
+    const input: Uint8Array = encoder.encode('This is some test data')
+    const aad: Uint8Array = encoder.encode('This is some public data')
+    const wrongAad: Uint8Array = encoder.encode('this is some public data')
+    const key = generateSecretKey()
+    const encrypted: Uint8Array = encryptWithSecretKey(input, key, aad)
+
+    assert.throws(() => decryptWithSecretKey(encrypted, key))
+    assert.throws(() => decryptWithSecretKey(encrypted, key, wrongAad))
   })
 })

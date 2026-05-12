@@ -22,6 +22,12 @@ pub fn generate_keypair(version: Option<KeyVersion>) -> KeyPair {
     devolutions_crypto::key::generate_keypair(version).into()
 }
 
+#[uniffi::export(default(version = None))]
+pub fn generate_secret_key(version: Option<KeyVersion>) -> Vec<u8> {
+    let version = version.unwrap_or(KeyVersion::Latest);
+    devolutions_crypto::key::generate_secret_key(version).into()
+}
+
 #[uniffi::export]
 pub fn mix_key_exchange(private_key: &[u8], public_key: &[u8]) -> Result<Vec<u8>> {
     let private_key = private_key.try_into()?;

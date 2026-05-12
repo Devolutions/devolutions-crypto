@@ -1,7 +1,7 @@
 use base64::{engine::general_purpose, Engine as _};
 use devolutions_crypto::{
     ciphertext::Ciphertext,
-    key::PrivateKey,
+    key::{PrivateKey, SecretKey},
     password_hash::PasswordHash,
     utils::{derive_key_argon2, derive_key_pbkdf2},
     Argon2Parameters,
@@ -226,4 +226,29 @@ fn test_utils_base64() {
     assert_eq!(base64_decode(base64_data_no_pad).unwrap(), data);
 
     assert_eq!(base64_encode(data), "QmFzZTY0VGVzdA==");
+}
+
+#[test]
+fn test_symmetric_decrypt_with_secret_key_v2() {
+    // SecretKey wrapping the known key ozJVEme4+5e/4NG3C+Rl26GQbGWAqGc0QPX8/1xvaFM=
+    // Header: sig=0x0D0C, DataType::Key=1, KeySubtype::Secret=4, KeyVersion::V1=1
+    let secret_key = SecretKey::try_from(
+        general_purpose::STANDARD
+            .decode("DQwBAAQAAQCjMlUSZ7j7l7/g0bcL5GXboZBsZYCoZzRA9fz/XG9oUw==")
+            .unwrap()
+            .as_slice(),
+    )
+    .unwrap();
+
+    let ciphertext = Ciphertext::try_from(
+        general_purpose::STANDARD
+            .decode("DQwCAAAAAgAA0iPpI4IEzcrWAQiy6tqDqLbRYduGvlMC32mVH7tpIN2CXDUu5QHF91I7pMrmjt/61pm5CeR/IcU=")
+            .unwrap()
+            .as_slice(),
+    )
+    .unwrap();
+
+    let result = ciphertext.decrypt_with_secret_key(&secret_key).unwrap();
+
+    assert_eq!(result, b"test Ciph3rtext~2");
 }
