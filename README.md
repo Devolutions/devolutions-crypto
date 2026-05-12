@@ -59,7 +59,6 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 This header represents : 
 A Curve25519 private key from Devolutions Crypto
 
-
 - Signature Bytes
   -  The first two bytes specifies that the data is from Devolutions Crypto (DC) 
 - Data type
@@ -70,6 +69,7 @@ A Curve25519 private key from Devolutions Crypto
   - The fourth two bytes (pos: 7, 8) represents the version.
 
 ## Data Type
+
 | Data Types          | Value  |  Description                                                                 |
 |---------------------|--------|------------------------------------------------------------------------------|
 |  None               |  0x00  | No data type. Only used as a default value.                                  |
@@ -82,7 +82,6 @@ A Curve25519 private key from Devolutions Crypto
 |  OnlineCiphertext   |  0x70  | A wrapped online ciphertext that can be encrypted/decrypted chunk by chunk  |
 
 
-
 ## Sub types
 
 | Key Sub Types | Value  |
@@ -91,6 +90,7 @@ A Curve25519 private key from Devolutions Crypto
 |  Private      |  0x10  |
 |  Public       |  0x20  |
 |  Pair         |  0x30  |
+|  Secret       |  0x40  |
 
 | Ciphertext Sub Types | Value  |
 |----------------------|--------|
