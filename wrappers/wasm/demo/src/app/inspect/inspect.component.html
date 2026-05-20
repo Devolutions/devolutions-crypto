@@ -1,0 +1,125 @@
+<!-- Mobile header -->
+<header class="mobile-header">
+  <button (click)="w3Open()">&#9776;</button>
+  <span>Devolutions Crypto</span>
+</header>
+
+<div class="page-inner">
+
+  <div class="page-heading">
+    <fa-icon size="3x" [icon]="faBug"></fa-icon>
+    <h1>Inspect (Debug)</h1>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Decode Devolutions-Crypto string</div>
+    <div class="card-body">
+      <form [formGroup]="debugForm" (ngSubmit)="decode()">
+        <div class="field">
+          <label>Encoded string (Base64)</label>
+          <textarea
+            rows="3"
+            formControlName="input"
+            placeholder="Paste a devolutions-crypto base64 string, e.g. DQwCAAAAAgCoE9Y3m0..."
+          ></textarea>
+        </div>
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Decode &amp; Inspect</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  @if (parseResult) {
+
+    @if (parseResult.error) {
+      <div class="card">
+        <div class="card-title debug-error-title">Error</div>
+        <div class="card-body">
+          <p class="debug-error-msg">{{ parseResult.error }}</p>
+        </div>
+      </div>
+    }
+
+    <div class="card">
+      <div class="card-title">Header</div>
+      <div class="card-body">
+        <table class="debug-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Value</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Signature</td>
+              <td>
+                <span class="debug-mono">{{ parseResult.signatureHex }}</span>
+              </td>
+              <td>
+                @if (parseResult.signatureValid) {
+                  <span class="debug-badge debug-badge-ok">✓ valid (0x0C0D)</span>
+                } @else {
+                  <span class="debug-badge debug-badge-err">✗ invalid — expected 0x0C0D</span>
+                }
+              </td>
+            </tr>
+            <tr>
+              <td>Type</td>
+              <td><span class="debug-num">{{ parseResult.dataType }}</span></td>
+              <td><span class="debug-name">{{ parseResult.dataTypeName }}</span></td>
+            </tr>
+            <tr>
+              <td>Subtype</td>
+              <td><span class="debug-num">{{ parseResult.subtype }}</span></td>
+              <td><span class="debug-name">{{ parseResult.subtypeName }}</span></td>
+            </tr>
+            <tr>
+              <td>Version</td>
+              <td><span class="debug-num">{{ parseResult.version }}</span></td>
+              <td><span class="debug-name">{{ parseResult.versionName }}</span></td>
+            </tr>
+            <tr>
+              <td>Total size</td>
+              <td colspan="2"><span class="debug-num">{{ parseResult.totalBytes }} bytes</span> (8 header + {{ parseResult.payloadBytes }} payload)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (parseResult.signatureValid && parseResult.payloadFields.length > 0) {
+      <div class="card">
+        <div class="card-title">Payload Fields</div>
+        <div class="card-body">
+          <table class="debug-table">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Offset</th>
+                <th>Size</th>
+                <th>Description</th>
+                <th>Hex</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (field of parseResult.payloadFields; track field.name) {
+                <tr>
+                  <td><strong>{{ field.name }}</strong></td>
+                  <td><span class="debug-num">+{{ field.offset }}</span></td>
+                  <td><span class="debug-num">{{ field.size }} B</span></td>
+                  <td class="debug-desc">{{ field.description }}</td>
+                  <td><span class="debug-hex">{{ field.hex }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+  }
+
+</div>
