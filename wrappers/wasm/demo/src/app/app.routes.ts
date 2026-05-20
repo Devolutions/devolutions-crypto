@@ -5,6 +5,7 @@ import { PasswordComponent } from './password/password.component';
 import { UtilitiesComponent } from './utilities/utilities.component';
 import { AsymmetricComponent } from './asymmetric/asymmetric.component';
 import { SecretKeyEncryptionComponent } from './secret-key-encryption/secret-key-encryption.component';
+import { InspectComponent } from './inspect/inspect.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/encryption', pathMatch: 'full' },
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'password', component: PasswordComponent },
   { path: 'utilities', component: UtilitiesComponent },
   { path: 'asymmetric', component: AsymmetricComponent },
-  { path: 'secret-key-encryption', component: SecretKeyEncryptionComponent }
+  { path: 'secret-key-encryption', component: SecretKeyEncryptionComponent },
+  { path: 'inspect', component: InspectComponent }
 ];
