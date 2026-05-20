@@ -64,7 +64,7 @@ export interface ParseResult {
 }
 
 function readUInt16LE(bytes: Uint8Array, offset: number): number {
-  return bytes[offset] | (bytes[offset + 1] << 8);
+  return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint16(offset, true);
 }
 
 function toHex(bytes: Uint8Array, maxBytes?: number): string {
