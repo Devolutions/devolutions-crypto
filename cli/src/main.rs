@@ -248,7 +248,7 @@ fn derive_key(data: String, salt: Option<String>, iterations: Option<u32>) {
 
     let (secret_key, params) = match salt {
         Some(s) => {
-            let salt = base64::decode(&s).unwrap();
+            let salt = decode_base64_arg("--salt", &s);
             pbkdf2.derive_with_salt(data, &salt).unwrap()
         }
         None => pbkdf2.derive(data).unwrap(),
@@ -265,7 +265,7 @@ fn derive_key(data: String, salt: Option<String>, iterations: Option<u32>) {
 fn detect_dc_type(bytes: &[u8]) -> String {
     use devolutions_crypto::{DataType, KeySubtype};
 
-    if bytes.len() < 6 {
+    if bytes.len() < 8 {
         return "unknown".to_string();
     }
 

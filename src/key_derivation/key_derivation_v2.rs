@@ -49,14 +49,14 @@ pub struct Argon2 {
 }
 
 impl Argon2 {
-    /// Creates an `Argon2` deriver with default parameters (a new random salt is generated per call).
+    /// Creates an `Argon2` key derivation object with default parameters.
     pub fn new() -> Self {
         Self {
             params: Argon2Parameters::default(),
         }
     }
 
-    /// Creates an `Argon2` deriver with custom `Argon2Parameters`.
+    /// Creates an `Argon2` key derivation object with custom `Argon2Parameters`.
     /// The caller is responsible for managing the salt (use `params.set_salt()` if needed).
     pub fn with_params(params: Argon2Parameters) -> Self {
         Self { params }

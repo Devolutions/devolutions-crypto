@@ -70,14 +70,14 @@ pub struct Pbkdf2 {
 }
 
 impl Pbkdf2 {
-    /// Creates a `Pbkdf2` deriver with default parameters (600,000 iterations).
+    /// Creates a `Pbkdf2` key derivation object with default parameters (600,000 iterations).
     pub fn new() -> Self {
         Self {
             iterations: DEFAULT_PBKDF2_ITERATIONS,
         }
     }
 
-    /// Creates a `Pbkdf2` deriver with a custom iteration count.
+    /// Creates a `Pbkdf2` key derivation object with a custom iteration count.
     /// The output key length is always 32 bytes to match `SecretKey`'s contract.
     pub fn with_params(iterations: u32) -> Self {
         Self { iterations }

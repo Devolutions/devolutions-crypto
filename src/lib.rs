@@ -100,7 +100,7 @@
 //! ## Key Derivation
 //!
 //! The Key Derivation module provides a way to derive a `SecretKey` from a password or passphrase. The derive operation
-//! returns a `SecretKey`, and a `DerivationParameters` that can be be serialized and reused to derive the same key at a
+//! returns a `SecretKey`, and a `DerivationParameters` that can be serialized and reused to derive the same key at a
 //! later time.
 //!
 //! Example with `derive_key`:
@@ -208,7 +208,7 @@
 //!
 //! ### Key Derivation
 //!
-//! The library exposes raw methods for key derivation with argon2 and PKBDF2. We recommend using the managed [Key Derivation](#key-derivation) module.
+//! The library exposes raw methods for key derivation with argon2 and PBKDF2. We recommend using the managed [Key Derivation](#key-derivation) module.
 //!
 //! ```rust
 //! use devolutions_crypto::utils::{generate_key, derive_key_pbkdf2};
@@ -228,7 +228,7 @@
 //!  * Symmetric cryptography uses XChaCha20Poly1305
 //!  * Asymmetric cryptography uses Curve25519.
 //!  * Asymmetric encryption uses ECIES.
-//!  * Key derivation uses Argon2 or PKBDF2
+//!  * Key derivation uses Argon2 or PBKDF2
 //!  * Key exchange uses x25519, or ECDH over Curve25519
 //!  * Password Hashing uses PBKDF2-HMAC-SHA2-256
 //!  * Secret Sharing uses Shamir Secret sharing over GF256

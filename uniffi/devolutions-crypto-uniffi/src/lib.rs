@@ -31,7 +31,7 @@ pub enum DataType {
     SigningKey,
     Signature,
     OnlineCiphertext,
-    KeyDerivation
+    KeyDerivation,
 }
 
 #[uniffi::remote(Enum)]
