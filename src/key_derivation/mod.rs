@@ -37,9 +37,9 @@ use std::convert::TryFrom;
 use arbitrary::Arbitrary;
 
 use crate::key::SecretKey;
-use crate::{DataType, Error, Header, HeaderType, KeyDerivationVersion, Result};
 #[cfg(feature = "fuzz")]
 use crate::Argon2Parameters;
+use crate::{DataType, Error, Header, HeaderType, KeyDerivationVersion, Result};
 
 use super::enums::KeyDerivationSubtype;
 

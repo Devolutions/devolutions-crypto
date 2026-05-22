@@ -113,7 +113,7 @@
 //! // Serialize params to re-derive later:
 //! let params_bytes: Vec<u8> = params.into();
 //! ```
-//! 
+//!
 //! Example with Argon2 (recommended):
 //! ```rust
 //! use devolutions_crypto::key_derivation::Argon2;
