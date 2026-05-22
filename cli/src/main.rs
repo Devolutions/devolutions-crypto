@@ -14,14 +14,10 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    /// Generate a random key of given length
-    #[command(arg_required_else_help = true)]
-    Generate {
-        /// Length of the key to generate
-        length: Option<usize>,
-    },
+    /// Generate a random secret key
+    Generate,
 
-    /// Generate a random keypair"
+    /// Generate a random keypair
     GenerateKeypair,
 
     /// Generate secret key with parts shared accross multiple parties.
@@ -73,10 +69,6 @@ enum Commands {
         /// The number of iteration for the derivation algorithm
         #[arg(short, long)]
         iterations: Option<u32>,
-
-        /// The desired length of the key
-        #[arg(short, long)]
-        length: Option<usize>,
     },
 
     /// Encrypt data
@@ -177,7 +169,7 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Generate { length } => generate_key(length),
+        Commands::Generate => generate_key(),
         Commands::GenerateKeypair => generate_keypair(),
         Commands::GenerateArgon2Parameters {
             memory,
@@ -194,8 +186,7 @@ fn main() {
             data,
             salt,
             iterations,
-            length,
-        } => derive_key(data, salt, iterations, length),
+        } => derive_key(data, salt, iterations),
         Commands::Encrypt { data, key, version } => encrypt(data, key, version),
         Commands::EncryptAsymmetric { data, key, version } => {
             encrypt_asymmetric(data, key, version)
@@ -213,11 +204,11 @@ fn main() {
     }
 }
 
-fn generate_key(length: Option<usize>) {
-    let length = length.unwrap_or(32);
+fn generate_key() {
+    use devolutions_crypto::key::{generate_secret_key, KeyVersion};
 
-    let key = base64::encode(&devolutions_crypto::utils::generate_key(length).unwrap());
-    println!("{}", key);
+    let key: Vec<u8> = generate_secret_key(KeyVersion::Latest).into();
+    println!("{}", base64::encode(&key));
 }
 
 fn generate_argon2parameters(
@@ -248,42 +239,100 @@ fn generate_argon2parameters(
     println!("{}", base64::encode(&parameters));
 }
 
-fn derive_key(data: String, salt: Option<String>, iterations: Option<u32>, length: Option<usize>) {
+fn derive_key(data: String, salt: Option<String>, iterations: Option<u32>) {
+    use devolutions_crypto::key_derivation::Pbkdf2;
+
     let data = data.as_bytes();
-    let salt = match salt {
-        Some(s) => base64::decode(&s).unwrap(),
-        None => vec![0u8; 0],
+    let iterations = iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS);
+    let pbkdf2 = Pbkdf2::with_params(iterations);
+
+    let (secret_key, params) = match salt {
+        Some(s) => {
+            let salt = base64::decode(&s).unwrap();
+            pbkdf2.derive_with_salt(data, &salt).unwrap()
+        }
+        None => pbkdf2.derive(data).unwrap(),
     };
 
-    let iterations = iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS);
+    let params_bytes: Vec<u8> = params.into();
+    let key_bytes: Vec<u8> = secret_key.into();
+    println!("Key: {}", base64::encode(&key_bytes));
+    println!("DerivationParameters: {}", base64::encode(&params_bytes));
+}
 
-    let length = length.unwrap_or(32);
+/// Returns a human-readable description of a managed type by inspecting its header.
+/// Returns "unknown" if the bytes are too short or contain an unrecognized type.
+fn detect_dc_type(bytes: &[u8]) -> String {
+    use devolutions_crypto::{DataType, KeySubtype};
 
-    let key = devolutions_crypto::utils::derive_key_pbkdf2(data, &salt, iterations, length);
-    println!("{}", base64::encode(&key));
+    if bytes.len() < 6 {
+        return "unknown".to_string();
+    }
+
+    let data_type_raw = u16::from_le_bytes([bytes[2], bytes[3]]);
+    let subtype_raw = u16::from_le_bytes([bytes[4], bytes[5]]);
+
+    match DataType::try_from(data_type_raw) {
+        Ok(DataType::Key) => match KeySubtype::try_from(subtype_raw) {
+            Ok(KeySubtype::Secret) => "SecretKey".to_string(),
+            Ok(KeySubtype::Public) => "PublicKey".to_string(),
+            Ok(KeySubtype::Private) => "PrivateKey".to_string(),
+            Ok(KeySubtype::Pair) => "KeyPair".to_string(),
+            _ => "Key (unknown subtype)".to_string(),
+        },
+        Ok(DataType::Ciphertext) => "Ciphertext".to_string(),
+        Ok(DataType::PasswordHash) => "PasswordHash".to_string(),
+        Ok(DataType::Share) => "Share".to_string(),
+        Ok(DataType::SigningKey) => "SigningKey".to_string(),
+        Ok(DataType::Signature) => "Signature".to_string(),
+        Ok(DataType::KeyDerivation) => "DerivationParameters".to_string(),
+        _ => "unknown".to_string(),
+    }
+}
+
+fn decode_base64_arg(arg_name: &str, value: &str) -> Vec<u8> {
+    base64::decode(value).unwrap_or_else(|_| {
+        eprintln!("Error: '{}' is not valid base64.", arg_name);
+        std::process::exit(1);
+    })
 }
 
 fn encrypt(data: String, key: String, version: Option<u16>) {
-    let key = base64::decode(&key).unwrap();
+    use devolutions_crypto::ciphertext::encrypt_with_secret_key;
+    use devolutions_crypto::key::SecretKey;
+
+    let key_bytes = decode_base64_arg("key", &key);
+    let key = SecretKey::try_from(key_bytes.as_slice()).unwrap_or_else(|_| {
+        eprintln!(
+            "Error: 'key' - expected SecretKey, received {}.",
+            detect_dc_type(&key_bytes)
+        );
+        std::process::exit(1);
+    });
 
     let version = version.unwrap_or(0);
-
     let version = devolutions_crypto::CiphertextVersion::try_from(version).unwrap();
 
-    let data: Vec<u8> = devolutions_crypto::ciphertext::encrypt(data.as_bytes(), &key, version)
+    let data: Vec<u8> = encrypt_with_secret_key(data.as_bytes(), &key, version)
         .unwrap()
         .into();
     println!("{}", base64::encode(&data));
 }
 
 fn encrypt_asymmetric(data: String, key: String, version: Option<u16>) {
-    let key = base64::decode(&key).unwrap();
+    use devolutions_crypto::key::PublicKey;
+
+    let key_bytes = decode_base64_arg("key", &key);
+    let key = PublicKey::try_from(key_bytes.as_slice()).unwrap_or_else(|_| {
+        eprintln!(
+            "Error: 'key' - expected PublicKey, received {}.",
+            detect_dc_type(&key_bytes)
+        );
+        std::process::exit(1);
+    });
 
     let version = version.unwrap_or(0);
-
     let version = devolutions_crypto::CiphertextVersion::try_from(version).unwrap();
-
-    let key = devolutions_crypto::key::PublicKey::try_from(key.as_slice()).unwrap();
 
     let data: Vec<u8> =
         devolutions_crypto::ciphertext::encrypt_asymmetric(data.as_bytes(), &key, version)
@@ -293,22 +342,63 @@ fn encrypt_asymmetric(data: String, key: String, version: Option<u16>) {
 }
 
 fn decrypt(data: String, key: String) {
-    let data = base64::decode(&data).unwrap();
-    let data = devolutions_crypto::ciphertext::Ciphertext::try_from(data.as_slice()).unwrap();
-    let key = base64::decode(&key).unwrap();
+    use devolutions_crypto::ciphertext::Ciphertext;
+    use devolutions_crypto::key::SecretKey;
 
-    let data: Vec<u8> = data.decrypt(&key).unwrap();
-    println!("{}", String::from_utf8_lossy(&data));
+    let data_bytes = decode_base64_arg("data", &data);
+    let ciphertext = Ciphertext::try_from(data_bytes.as_slice()).unwrap_or_else(|_| {
+        eprintln!(
+            "Error: 'data' - expected Ciphertext, received {}.",
+            detect_dc_type(&data_bytes)
+        );
+        std::process::exit(1);
+    });
+
+    let key_bytes = decode_base64_arg("key", &key);
+    let key = SecretKey::try_from(key_bytes.as_slice()).unwrap_or_else(|_| {
+        eprintln!(
+            "Error: 'key' - expected SecretKey, received {}.",
+            detect_dc_type(&key_bytes)
+        );
+        std::process::exit(1);
+    });
+
+    let result: Vec<u8> = ciphertext
+        .decrypt_with_secret_key(&key)
+        .unwrap_or_else(|e| {
+            eprintln!("Error: decryption failed: {}.", e);
+            std::process::exit(1);
+        });
+    println!("{}", String::from_utf8_lossy(&result));
 }
 
 fn decrypt_asymmetric(data: String, key: String) {
-    let data = base64::decode(&data).unwrap();
-    let data = devolutions_crypto::ciphertext::Ciphertext::try_from(data.as_slice()).unwrap();
-    let key = base64::decode(&key).unwrap();
-    let key = devolutions_crypto::key::PrivateKey::try_from(key.as_slice()).unwrap();
+    use devolutions_crypto::ciphertext::Ciphertext;
+    use devolutions_crypto::key::PrivateKey;
 
-    let data: Vec<u8> = data.decrypt_asymmetric(&key).unwrap();
-    println!("{}", String::from_utf8_lossy(&data));
+    let data_bytes = decode_base64_arg("data", &data);
+    let ciphertext = Ciphertext::try_from(data_bytes.as_slice()).unwrap_or_else(|_| {
+        eprintln!(
+            "Error: 'data' - expected Ciphertext, received {}.",
+            detect_dc_type(&data_bytes)
+        );
+        std::process::exit(1);
+    });
+
+    let key_bytes = decode_base64_arg("key", &key);
+    let key = PrivateKey::try_from(key_bytes.as_slice()).unwrap_or_else(|_| {
+        eprintln!(
+            "Error: 'key' - expected PrivateKey, received {}.",
+            detect_dc_type(&key_bytes)
+        );
+        std::process::exit(1);
+    });
+
+    let result: Vec<u8> = ciphertext.decrypt_asymmetric(&key).unwrap_or_else(|e| {
+        eprintln!("Error: decryption failed: {}.", e);
+        std::process::exit(1);
+    });
+    println!("{}", String::from_utf8_lossy(&result));
 }
 
 fn hash_password(password: String, iterations: Option<u32>) {

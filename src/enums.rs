@@ -29,8 +29,10 @@ pub enum DataType {
     SigningKey = 5,
     /// A wrapped signature.
     Signature = 6,
-    /// A wrapped online ciphertextr that can be encrypted/decrypted chunk by chunk
+    /// A wrapped online ciphertext that can be encrypted/decrypted chunk by chunk
     OnlineCiphertext = 7,
+    /// Serialized key derivation parameters.
+    KeyDerivation = 8,
 }
 
 /// The versions of the encryption scheme to use.
@@ -179,6 +181,31 @@ pub enum ShareSubtype {
 #[repr(u16)]
 #[derive(Default)]
 pub enum SignatureSubtype {
+    #[default]
+    None = 0,
+}
+
+/// The versions of the key derivation scheme to use.
+#[cfg_attr(feature = "wbindgen", wasm_bindgen())]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+#[repr(u16)]
+#[derive(Default)]
+pub enum KeyDerivationVersion {
+    /// Uses the latest version.
+    #[default]
+    Latest = 0,
+    /// Uses version 1: PBKDF2-HMAC-SHA256.
+    V1 = 1,
+    /// Uses version 2: Argon2id.
+    V2 = 2,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[repr(u16)]
+#[derive(Default)]
+pub enum KeyDerivationSubtype {
     #[default]
     None = 0,
 }

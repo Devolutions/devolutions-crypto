@@ -30,6 +30,26 @@ fn test_derive_key_argon2() {
 }
 
 #[test]
+fn test_derive_key_argon2_struct() {
+    use devolutions_crypto::key_derivation::Argon2;
+    let params = Argon2Parameters::try_from(
+        general_purpose::STANDARD
+            .decode("AQAAACAAAAABAAAAIAAAAAEAAAACEwAAAAAQAAAAimFBkm3f8+f+YfLRnF5OoQ==")
+            .unwrap()
+            .as_slice(),
+    )
+    .unwrap();
+    let argon2 = Argon2::with_params(params.clone());
+    let (key, _derivation_params) = argon2.derive(b"password").unwrap();
+    assert_eq!(
+        key.as_bytes(),
+        &general_purpose::STANDARD
+            .decode("AcEN6Cb1Om6tomZScAM725qiXMzaxaHlj3iMiT/Ukq0=")
+            .unwrap()[..]
+    );
+}
+
+#[test]
 fn test_derive_key_default() {
     let password = b"testpassword";
     let salt = b"";
@@ -40,6 +60,21 @@ fn test_derive_key_default() {
         general_purpose::STANDARD
             .decode("wdU+cxAOpTFddVhTQlKQTSzmVjZqPAXVx1cRrAqTGek=")
             .unwrap()
+    );
+}
+
+#[test]
+fn test_derive_key_pbkdf2_struct_default() {
+    use devolutions_crypto::key_derivation::Pbkdf2;
+    let password = b"testpassword";
+    let salt = b"";
+    let pbkdf2 = Pbkdf2::with_params(600000);
+    let (key, _params) = pbkdf2.derive_with_salt(password, salt).unwrap();
+    assert_eq!(
+        key.as_bytes(),
+        &general_purpose::STANDARD
+            .decode("wdU+cxAOpTFddVhTQlKQTSzmVjZqPAXVx1cRrAqTGek=")
+            .unwrap()[..]
     );
 }
 
@@ -58,6 +93,21 @@ fn test_derive_key_iterations() {
 }
 
 #[test]
+fn test_derive_key_pbkdf2_struct_iterations() {
+    use devolutions_crypto::key_derivation::Pbkdf2;
+    let password = b"testPa$$";
+    let salt = b"";
+    let pbkdf2 = Pbkdf2::with_params(100);
+    let (key, _params) = pbkdf2.derive_with_salt(password, salt).unwrap();
+    assert_eq!(
+        key.as_bytes(),
+        &general_purpose::STANDARD
+            .decode("ev/GiJLvOgIkkWrnIrHSi2fdZE5qJBIrW+DLeMLIXK4=")
+            .unwrap()[..]
+    );
+}
+
+#[test]
 fn test_derive_key_salt() {
     let password = b"testPa$$";
     let salt = general_purpose::STANDARD
@@ -70,6 +120,23 @@ fn test_derive_key_salt() {
         general_purpose::STANDARD
             .decode("ZaYRZeQiIPJ+Jl511AgHZjv4/HbCFq4eUP9yNa3gowI=")
             .unwrap()
+    );
+}
+
+#[test]
+fn test_derive_key_pbkdf2_struct_salt() {
+    use devolutions_crypto::key_derivation::Pbkdf2;
+    let password = b"testPa$$";
+    let salt = general_purpose::STANDARD
+        .decode("tdTt5wgeqQYLvkiXKkFirqy2hMbzadBtL+jekVeNCRA=")
+        .unwrap();
+    let pbkdf2 = Pbkdf2::with_params(100);
+    let (key, _params) = pbkdf2.derive_with_salt(password, &salt).unwrap();
+    assert_eq!(
+        key.as_bytes(),
+        &general_purpose::STANDARD
+            .decode("ZaYRZeQiIPJ+Jl511AgHZjv4/HbCFq4eUP9yNa3gowI=")
+            .unwrap()[..]
     );
 }
 

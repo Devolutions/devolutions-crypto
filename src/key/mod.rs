@@ -55,6 +55,8 @@ use secret_key_v1::SecretKeyV1;
 use std::borrow::Borrow;
 use std::convert::TryFrom;
 
+use zeroize::Zeroizing;
+
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
 
@@ -368,6 +370,15 @@ impl SecretKey {
             SecretKeyPayload::V1(k) => k.as_bytes(),
         }
     }
+}
+
+/// Constructs a `SecretKey` from raw derived key bytes (must be exactly 32 bytes).
+/// Takes ownership of the `Zeroizing` wrapper to ensure the raw bytes are cleared on drop.
+pub(crate) fn secret_key_from_raw(bytes: Zeroizing<Vec<u8>>) -> Result<SecretKey> {
+    let mut header: Header<SecretKey> = Header::default();
+    header.version = KeyVersion::V1;
+    let payload = SecretKeyPayload::V1(SecretKeyV1::try_from(bytes.as_slice())?);
+    Ok(SecretKey { header, payload })
 }
 
 /// Generates a `SecretKey` for use with symmetric encryption.

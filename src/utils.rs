@@ -94,7 +94,7 @@ pub fn derive_key_argon2(key: &[u8], parameters: &Argon2Parameters) -> Result<Ve
 /// use devolutions_crypto::utils::{generate_key, validate_header};
 ///
 /// let key = generate_key(32);
-/// let ciphertext: Vec<u8> = encrypt(b"test", &key, CiphertextVersion::Latest).unwrap().into();
+/// let ciphertext: `Vec<u8>` = encrypt(b"test", &key, CiphertextVersion::Latest).unwrap().into();
 ///
 /// assert!(validate_header(&ciphertext, DataType::Ciphertext);
 /// assert!(!validate_header(&ciphertext, DataType::PasswordHash);
@@ -128,13 +128,17 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
         DataType::OnlineCiphertext => {
             Header::<OnlineCiphertextHeader>::try_from(&data[0..Header::len()]).is_ok()
         }
+        DataType::KeyDerivation => {
+            use super::key_derivation::DerivationParameters;
+            Header::<DerivationParameters>::try_from(&data[0..Header::len()]).is_ok()
+        }
     }
 }
 
 /// Temporarly binded here for a specific use case, don't rely on this.
 ///
 /// Copied and modified from:
-/// https://github.com/RustCrypto/password-hashing/blob/master/scrypt/src/simple.rs
+/// <https://github.com/RustCrypto/password-hashing/blob/master/scrypt/src/simple.rs>
 /// Because rand is outdated, I cannot use the crate directly
 pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) -> String {
     use byteorder::{ByteOrder, LittleEndian};
