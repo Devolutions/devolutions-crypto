@@ -6,13 +6,14 @@
 //!     * [Symmetric Encryption](#symmetric)
 //!     * [Asymmetric Encryption](#asymmetric)
 //! * [Key Module](#key)
-//!     * [Key Generation/Derivation](#generationderivation)
+//!     * [Key Generation](#generation)
 //!     * [Key Exchange](#key-exchange)
+//! * [Key Derivation](#key-derivation)
 //! * [PasswordHash Module](#passwordhash)
 //! * [SecretSharing Module](#secretsharing)
 //! * [Utils Module](#utils)
 //!     * [Key Generation](#key-generation)
-//!     * [Key Derivation](#key-derivation)
+//!     * [Key Derivation](#key-derivation-1)
 //!
 //! ## Overview
 //!
@@ -22,39 +23,43 @@
 //!
 //! These structures all implement `TryFrom<&[u8]>` and `Into<Vec<u8>>` to serialize and deserialize data.
 //!
+//!
+//! ## Ciphertext
+//!
+//! This module contains everything related to encryption. You can use it to encrypt and decrypt data using either a shared secret key or a keypair.
+//! The encryption will give you a `Ciphertext`, which has a method to decrypt it.
+//!
+//! ### Symmetric
+//! The library provides a `SecretKey` which can be used as a shared secret to encrypt messages.
+//!
 //! ```rust
 //! use std::convert::TryFrom as _;
-//! use devolutions_crypto::utils::generate_key;
-//! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
+//! use devolutions_crypto::key::{generate_secret_key, KeyVersion, SecretKey};
+//! use devolutions_crypto::ciphertext::{ encrypt_with_secret_key, CiphertextVersion, Ciphertext };
 //!
-//! let key: Vec<u8> = generate_key(32).expect("generate key shouldn't fail");;
+//! let secret_key = generate_secret_key(KeyVersion::Latest);
 //! let data = b"somesecretdata";
-//! let encrypted_data: Ciphertext = encrypt(data, &key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
+//! let encrypted_data = encrypt_with_secret_key(data, &secret_key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
 //!
 //! // The ciphertext can be serialized to be saved somewhere, passed to another language or over the network.
 //! let encrypted_data_vec: Vec<u8> = encrypted_data.into();
 //!
 //! // When you receive the data as a byte array, you can deserialize it into a struct using TryFrom
 //! let ciphertext = Ciphertext::try_from(encrypted_data_vec.as_slice()).expect("deserialization shouldn't fail");
-//! let decrypted_data = ciphertext.decrypt(&key).expect("The decryption shouldn't fail");
+//! let decrypted_data = ciphertext.decrypt_with_secret_key(&secret_key).expect("The decryption shouldn't fail");
 //! assert_eq!(decrypted_data, data);
 //! ```
 //!
-//! ## Ciphertext
-//!
-//! This module contains everything related to encryption. You can use it to encrypt and decrypt data using either a shared key of a keypair.  
-//! Either way, the encryption will give you a `Ciphertext`, which has a method to decrypt it.
-//!
-//! ### Symmetric
+//! The key can also be passed as raw bytes.
 //!
 //! ```rust
 //! use devolutions_crypto::utils::generate_key;
-//! use devolutions_crypto::ciphertext::{encrypt, CiphertextVersion, Ciphertext};
+//! use devolutions_crypto::ciphertext::{encrypt_with_raw_key, CiphertextVersion, Ciphertext};
 //!
 //! let key: Vec<u8> = generate_key(32).expect("generate key shouldn't fail");
 //! let data = b"somesecretdata";
 //!
-//! let encrypted_data: Ciphertext = encrypt(data, &key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
+//! let encrypted_data: Ciphertext = encrypt_with_raw_key(data, &key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
 //! let decrypted_data = encrypted_data.decrypt(&key).expect("The decryption shouldn't fail");
 //! assert_eq!(decrypted_data, data);
 //! ```
@@ -80,7 +85,7 @@
 //!
 //! This module provides secret keys and keypairs.
 //!
-//! ### Generation/Derivation
+//! ### Generation
 //!
 //! Use `generate_secret_key` to a generate a random symmetric key and `generate_keypair` to generate a random keypair.
 //!
@@ -92,16 +97,51 @@
 //! let keypair: KeyPair = generate_keypair(KeyVersion::Latest);
 //! ```
 //!
+//! ## Key Derivation
+//!
+//! The Key Derivation module provides a way to derive a `SecretKey` from a password or passphrase. The derive operation
+//! returns a `SecretKey`, and a `DerivationParameters` that can be serialized and reused to derive the same key at a
+//! later time.
+//!
+//! Example with `derive_key`:
+//! ```rust
+//! use devolutions_crypto::key_derivation::{derive_key, DerivationParameters};
+//! use devolutions_crypto::KeyDerivationVersion;
+//!
+//! let password = b"a very strong password";
+//! let (secret_key, params) = derive_key(password, KeyDerivationVersion::Latest).expect("derivation should not fail");
+//! // Serialize params to re-derive later:
+//! let params_bytes: Vec<u8> = params.into();
+//! ```
+//!
+//! Example with Argon2 (recommended):
+//! ```rust
+//! use devolutions_crypto::key_derivation::Argon2;
+//! let password = b"a very strong password";
+//! let argon2 = Argon2::new();
+//! let (secret_key, params) = argon2.derive(password).expect("derivation should not fail");
+//! // Serialize params to re-derive later:
+//! let params_bytes: Vec<u8> = params.into();
+//! ```
+//!
+//! Example with PBKDF2:
+//! ```rust
+//! use devolutions_crypto::key_derivation::Pbkdf2;
+//! let password = b"a very strong password";
+//! let pbkdf2 = Pbkdf2::new();
+//! let (secret_key, params) = pbkdf2.derive(password).expect("derivation should not fail");
+//! ```
+//!
 //! ### Key Exchange
 //!
 //! The goal of using a key exchange is to get a shared secret key between
 //! two parties without making it possible for users listening on the conversation
 //! to guess that shared key.
-//! 1. Alice and Bob generates a `KeyPair` each.
-//! 2. Alice and Bob exchanges their `PublicKey`.
-//! 3. Alice mix her `PrivateKey` with Bob's `PublicKey`. This gives her the shared key.
+//! 1. Alice and Bob generate a `KeyPair` each.
+//! 2. Alice and Bob exchange their `PublicKey`.
+//! 3. Alice mixes her `PrivateKey` with Bob's `PublicKey`. This gives her the shared key.
 //! 4. Bob mixes his `PrivateKey` with Alice's `PublicKey`. This gives him the shared key.
-//! 5. Both Bob and Alice has the same shared key, which they can use for symmetric encryption for further communications.
+//! 5. Both Bob and Alice have the same shared key, which they can use for symmetric encryption for further communications.
 //!
 //! ```rust
 //! use devolutions_crypto::key::{generate_keypair, mix_key_exchange, KeyVersion, KeyPair};
@@ -165,11 +205,10 @@
 //! assert_eq!(32, key.len());
 //! ```
 //!
+//!
 //! ### Key Derivation
 //!
-//! This is a method used to generate a key from a password or another key. Useful for password-dependent
-//! cryptography. Salt should be a random 16 bytes array if possible and iterations should be 600,000 or configurable
-//! by the user.
+//! The library exposes raw methods for key derivation with argon2 and PBKDF2. We recommend using the managed [Key Derivation](#key-derivation) module.
 //!
 //! ```rust
 //! use devolutions_crypto::utils::{generate_key, derive_key_pbkdf2};
@@ -183,11 +222,13 @@
 //! assert_eq!(32, new_key.len());
 //! ```
 //!
+//!
 //! # Underlying algorithms
 //! As of the current version:
 //!  * Symmetric cryptography uses XChaCha20Poly1305
 //!  * Asymmetric cryptography uses Curve25519.
 //!  * Asymmetric encryption uses ECIES.
+//!  * Key derivation uses Argon2 or PBKDF2
 //!  * Key exchange uses x25519, or ECDH over Curve25519
 //!  * Password Hashing uses PBKDF2-HMAC-SHA2-256
 //!  * Secret Sharing uses Shamir Secret sharing over GF256
@@ -200,6 +241,7 @@ mod header;
 
 pub mod ciphertext;
 pub mod key;
+pub mod key_derivation;
 pub mod online_ciphertext;
 pub mod password_hash;
 pub mod secret_sharing;
@@ -211,8 +253,9 @@ use enums::{CiphertextSubtype, PasswordHashSubtype, ShareSubtype, SignatureSubty
 pub use header::{Header, HeaderType};
 
 pub use enums::{
-    CiphertextVersion, DataType, KeySubtype, KeyVersion, OnlineCiphertextVersion,
-    PasswordHashVersion, SecretSharingVersion, SignatureVersion, SigningKeyVersion,
+    CiphertextVersion, DataType, KeyDerivationVersion, KeySubtype, KeyVersion,
+    OnlineCiphertextVersion, PasswordHashVersion, SecretSharingVersion, SignatureVersion,
+    SigningKeyVersion,
 };
 
 pub use argon2::Variant as Argon2Variant;
@@ -221,6 +264,7 @@ pub use argon2parameters::defaults as argon2parameters_defaults;
 pub use argon2parameters::Argon2Parameters;
 pub use argon2parameters::Argon2ParametersBuilder;
 pub use error::{Error, Result};
+pub use key_derivation::{derive_key, Argon2, DerivationParameters, Pbkdf2};
 
 pub const DEFAULT_KEY_SIZE: usize = 32;
 pub const DEFAULT_PBKDF2_ITERATIONS: u32 = 600000;
