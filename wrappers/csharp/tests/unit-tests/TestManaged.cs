@@ -413,6 +413,67 @@ namespace Devolutions.Crypto.Tests
             Assert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, TestData.TestHash));
         }
 
+        [TestMethod]
+        public void DeriveSecretKeyPbkdf2_ReturnsDifferentKeysAndParams()
+        {
+            byte[] password = "my test password"u8.ToArray();
+
+            KeyDerivationResult result1 = Managed.DeriveSecretKeyPbkdf2(password, 10);
+            KeyDerivationResult result2 = Managed.DeriveSecretKeyPbkdf2(password, 10);
+
+            Assert.IsNotNull(result1.SecretKey);
+            Assert.IsNotNull(result1.Parameters);
+
+            // Random salt → different params and different derived keys on each call
+            CollectionAssert.AreNotEqual(result1.Parameters.ToByteArray(), result2.Parameters.ToByteArray());
+            CollectionAssert.AreNotEqual(result1.SecretKey.ToByteArray(), result2.SecretKey.ToByteArray());
+        }
+
+        [TestMethod]
+        public void DeriveSecretKeyPbkdf2_ParametersRoundTrip()
+        {
+            byte[] password = "round-trip password"u8.ToArray();
+
+            KeyDerivationResult result = Managed.DeriveSecretKeyPbkdf2(password, 10);
+
+            byte[] paramsBytes = result.Parameters.ToByteArray();
+            Assert.IsTrue(paramsBytes.Length > 0);
+
+            // Parameters can be round-tripped through byte array
+            DerivationParameters restored = DerivationParameters.FromByteArray(paramsBytes);
+            CollectionAssert.AreEqual(paramsBytes, restored.ToByteArray());
+        }
+
+        [TestMethod]
+        public void DeriveSecretKeyArgon2_WithFixedSalt_ProducesSameKey()
+        {
+            byte[] password = "argon2 test password"u8.ToArray();
+
+            // Use a pre-serialized Argon2Parameters with a known fixed salt for deterministic derivation
+            byte[] fixedParamsBytes = Convert.FromBase64String(TestData.Argon2DefaultParametersb64);
+            Argon2Parameters parameters1 = Argon2Parameters.FromByteArray(fixedParamsBytes)!;
+            Argon2Parameters parameters2 = Argon2Parameters.FromByteArray(fixedParamsBytes)!;
+
+            KeyDerivationResult result1 = Managed.DeriveSecretKeyArgon2(password, parameters1);
+            KeyDerivationResult result2 = Managed.DeriveSecretKeyArgon2(password, parameters2);
+
+            // Same parameters (same salt) + same password → same derived key
+            CollectionAssert.AreEqual(result1.SecretKey.ToByteArray(), result2.SecretKey.ToByteArray());
+        }
+
+        [TestMethod]
+        public void DeriveSecretKeyArgon2_DifferentSalts_ProduceDifferentKeys()
+        {
+            byte[] password = "argon2 test password"u8.ToArray();
+
+            // Default params generate a random salt on each call
+            KeyDerivationResult result1 = Managed.DeriveSecretKeyArgon2(password, Managed.GetDefaultArgon2Parameters());
+            KeyDerivationResult result2 = Managed.DeriveSecretKeyArgon2(password, Managed.GetDefaultArgon2Parameters());
+
+            CollectionAssert.AreNotEqual(result1.SecretKey.ToByteArray(), result2.SecretKey.ToByteArray());
+            CollectionAssert.AreNotEqual(result1.Parameters.ToByteArray(), result2.Parameters.ToByteArray());
+        }
+
         private static byte[][] GetSharesKeys()
         {
             const int nbShares = 3;

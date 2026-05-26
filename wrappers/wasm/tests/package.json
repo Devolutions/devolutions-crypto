@@ -4,7 +4,7 @@
   "description": "Tests for the devolutions cryptographic library",
   "type": "module",
   "scripts": {
-    "test": "tsx --test tests/asymmetric.ts tests/conformity.ts tests/hashing.ts tests/secret-sharing.ts tests/signature.ts tests/symmetric.ts tests/utils.ts",
+    "test": "tsx --test tests/asymmetric.ts tests/conformity.ts tests/hashing.ts tests/key-derivation.ts tests/secret-sharing.ts tests/signature.ts tests/symmetric.ts tests/utils.ts",
     "test:watch": "tsx --test --watch tests/*.ts"
   },
   "repository": {
