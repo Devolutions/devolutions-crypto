@@ -418,6 +418,12 @@ export class InspectComponent implements OnInit {
       }
       const iterations = dv.getUint32(0, true);
       const saltLen = dv.getUint32(4, true);
+      if (8 + saltLen > payload.length) {
+        fields.push({ name: 'Iterations', offset: abs(0), size: 4, hex: toHex(payload.slice(0, 4)), description: `PBKDF2 iteration count: ${iterations.toLocaleString()}` });
+        fields.push({ name: 'Salt Length', offset: abs(4), size: 4, hex: toHex(payload.slice(4, 8)), description: `Salt length: ${saltLen} bytes` });
+        fields.push({ name: 'Error', offset: abs(8), size: payload.length - 8, hex: toHex(payload.slice(8)), description: `Truncated: salt claims ${saltLen} bytes but only ${payload.length - 8} bytes remain` });
+        return fields;
+      }
       const salt = payload.slice(8, 8 + saltLen);
       fields.push({
         name: 'Iterations',
@@ -541,6 +547,16 @@ export class InspectComponent implements OnInit {
       pos += 4;
 
       if (assocDataLen > 0) {
+        if (pos + assocDataLen > payload.length) {
+          fields.push({
+            name: 'Error',
+            offset: abs(pos),
+            size: payload.length - pos,
+            hex: toHex(payload.slice(pos)),
+            description: `Truncated: assoc data claims ${assocDataLen} bytes but only ${payload.length - pos} bytes remain`,
+          });
+          return fields;
+        }
         fields.push({
           name: 'Assoc. Data',
           offset: abs(pos),
@@ -549,6 +565,17 @@ export class InspectComponent implements OnInit {
           description: `Associated data (${assocDataLen} bytes)`,
         });
         pos += assocDataLen;
+      }
+
+      if (pos + 4 > payload.length) {
+        fields.push({
+          name: 'Error',
+          offset: abs(pos),
+          size: payload.length - pos,
+          hex: toHex(payload.slice(pos)),
+          description: `Truncated: expected salt-length field (4 bytes) but only ${payload.length - pos} bytes remain`,
+        });
+        return fields;
       }
 
       const saltLen = dv.getUint32(pos, true);
@@ -560,6 +587,17 @@ export class InspectComponent implements OnInit {
         description: `Salt length: ${saltLen} bytes`,
       });
       pos += 4;
+
+      if (pos + saltLen > payload.length) {
+        fields.push({
+          name: 'Error',
+          offset: abs(pos),
+          size: payload.length - pos,
+          hex: toHex(payload.slice(pos)),
+          description: `Truncated: salt claims ${saltLen} bytes but only ${payload.length - pos} bytes remain`,
+        });
+        return fields;
+      }
 
       const salt = payload.slice(pos, pos + saltLen);
       fields.push({

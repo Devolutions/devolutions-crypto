@@ -82,12 +82,14 @@ export class KeyDerivationComponent implements OnInit {
         const saltStr: string = this.deriveForm.value.pbkdf2Salt;
 
         const iterations: number | undefined = iterStr ? Number(iterStr) : undefined;
-        const salt: Uint8Array | undefined = saltStr ? this.encoder.encode(saltStr) : undefined;
 
-        // PBKDF2 uses a random salt unless one is embedded via derive_with_salt (not directly exposed to WASM).
-        // We call deriveSecretKeyPbkdf2 with the requested iterations; salt is always random on this path.
-        // If a custom salt was provided, inform the user it is not used on this path.
-        const result = service.deriveSecretKeyPbkdf2(passwordBytes, iterations);
+        let result;
+        if (saltStr) {
+          const salt: Uint8Array = this.encoder.encode(saltStr);
+          result = service.deriveSecretKeyPbkdf2WithSalt(passwordBytes, salt, iterations);
+        } else {
+          result = service.deriveSecretKeyPbkdf2(passwordBytes, iterations);
+        }
 
         this.deriveForm.patchValue({
           secretKeyResult: service.base64encode(result.secretKey.bytes),

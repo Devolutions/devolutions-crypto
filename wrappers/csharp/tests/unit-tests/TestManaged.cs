@@ -474,6 +474,20 @@ namespace Devolutions.Crypto.Tests
             CollectionAssert.AreNotEqual(result1.Parameters.ToByteArray(), result2.Parameters.ToByteArray());
         }
 
+        [TestMethod]
+        public void DeriveSecretKeyPbkdf2WithSalt_FixedSalt_ProducesSameKey()
+        {
+            byte[] password = "pbkdf2 test password"u8.ToArray();
+            byte[] salt = "fixed_salt_16byt"u8.ToArray();
+
+            KeyDerivationResult result1 = Managed.DeriveSecretKeyPbkdf2WithSalt(password, salt, 10);
+            KeyDerivationResult result2 = Managed.DeriveSecretKeyPbkdf2WithSalt(password, salt, 10);
+
+            // Same password + same salt + same iterations → same key and same parameters
+            CollectionAssert.AreEqual(result1.SecretKey.ToByteArray(), result2.SecretKey.ToByteArray());
+            CollectionAssert.AreEqual(result1.Parameters.ToByteArray(), result2.Parameters.ToByteArray());
+        }
+
         private static byte[][] GetSharesKeys()
         {
             const int nbShares = 3;

@@ -66,9 +66,10 @@
             <label>Iterations <span style="font-weight:normal;color:#888;">— default: 600 000</span></label>
             <input type="number" formControlName="pbkdf2Iterations" min="1" placeholder="e.g. 600000">
           </div>
-          <p style="font-size:0.85rem;color:#888;margin:0.25rem 0 0.75rem;">
-            A random salt is generated automatically and embedded in the output parameters.
-          </p>
+          <div class="field">
+            <label>Salt <span style="font-weight:normal;color:#888;">— optional, leave blank to generate randomly</span></label>
+            <input type="text" formControlName="pbkdf2Salt" placeholder="Custom salt (UTF-8 text)">
+          </div>
         </ng-container>
 
         <div class="field">

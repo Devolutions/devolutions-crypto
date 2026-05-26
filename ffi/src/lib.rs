@@ -49,6 +49,9 @@ use std::sync::Mutex;
 
 use zeroize::Zeroizing;
 
+#[cfg(test)]
+use devolutions_crypto::key_derivation::DerivationParameters;
+
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Encrypt a data blob
@@ -1533,10 +1536,80 @@ pub unsafe extern "C" fn DeriveSecretKeyArgon2(
     0
 }
 
-/// Returns the size of the DerivationParameters output buffer for `DeriveSecretKeyArgon2()`.
-/// The size is 8 (header) + the length of the serialized Argon2Parameters.
+/// Derive a key with PBKDF2 and return both the SecretKey and the DerivationParameters.
 /// # Arguments
-///  * argon2_parameters_length - The length of the Argon2Parameters buffer passed to `DeriveSecretKeyArgon2()`.
+///  * password - Pointer to the password to derive.
+///  * password_length - Length of the password to derive.
+///  * iterations - Number of PBKDF2 iterations.
+///  * salt - Pointer to the salt to use for derivation.
+///  * salt_length - Length of the salt.
+///  * secret_key - Pointer to the buffer to write the derived SecretKey to.
+///                 Must be `GenerateSecretKeySize()` bytes.
+///  * secret_key_length - Length of the secret key output buffer.
+///  * params_out - Pointer to the buffer to write the DerivationParameters to.
+///                 Must be `DeriveSecretKeyPbkdf2WithSaltSize(salt_length)` bytes.
+///  * params_out_length - Length of the params output buffer.
+/// # Returns
+/// Returns 0 if the operation is successful. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn DeriveSecretKeyPbkdf2WithSalt(
+    password: *const u8,
+    password_length: usize,
+    iterations: u32,
+    salt: *const u8,
+    salt_length: usize,
+    secret_key: *mut u8,
+    secret_key_length: usize,
+    params_out: *mut u8,
+    params_out_length: usize,
+) -> i64 {
+    if password.is_null() || salt.is_null() || secret_key.is_null() || params_out.is_null() {
+        return Error::NullPointer.error_code();
+    }
+
+    if secret_key_length != GenerateSecretKeySize() as usize {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    if params_out_length != DeriveSecretKeyPbkdf2WithSaltSize(salt_length) as usize {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    let password = slice::from_raw_parts(password, password_length);
+    let salt = slice::from_raw_parts(salt, salt_length);
+
+    let (sk, params) = match Pbkdf2::with_params(iterations).derive_with_salt(password, salt) {
+        Ok(x) => x,
+        Err(e) => return e.error_code(),
+    };
+
+    let sk_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(sk.into());
+    let params_bytes: Vec<u8> = params.into();
+
+    let secret_key = slice::from_raw_parts_mut(secret_key, secret_key_length);
+    let params_out = slice::from_raw_parts_mut(params_out, params_out_length);
+
+    secret_key.copy_from_slice(&sk_bytes);
+    params_out.copy_from_slice(&params_bytes);
+    0
+}
+
+/// Returns the size of the DerivationParameters output buffer for `DeriveSecretKeyPbkdf2WithSalt()`.
+/// The size is: 8 (header) + 4 (iterations) + 4 (salt length field) + salt_length (salt bytes).
+/// # Arguments
+///  * salt_length - The length of the salt that will be passed to `DeriveSecretKeyPbkdf2WithSalt()`.
+#[no_mangle]
+pub extern "C" fn DeriveSecretKeyPbkdf2WithSaltSize(salt_length: usize) -> i64 {
+    (8 + 4 + 4 + salt_length) as i64
+}
+
+/// Returns the size of the DerivationParameters output buffer for `DeriveSecretKeyArgon2()`.
+/// The size is: 8 (header) + argon2_parameters_length (serialized Argon2Parameters bytes).
+/// # Arguments
+///  * argon2_parameters_length - The length of the Argon2Parameters that will be passed to `DeriveSecretKeyArgon2()`.
 #[no_mangle]
 pub extern "C" fn DeriveSecretKeyArgon2ParametersSize(argon2_parameters_length: usize) -> i64 {
     (8 + argon2_parameters_length) as i64
@@ -2041,7 +2114,7 @@ fn test_derive_secret_key_pbkdf2_deterministic() {
     let mut params2 = vec![0u8; params_size];
 
     unsafe {
-        DeriveSecretKeyPbkdf2(
+        let retval1 = DeriveSecretKeyPbkdf2(
             password.as_ptr(),
             password.len(),
             10,
@@ -2050,7 +2123,7 @@ fn test_derive_secret_key_pbkdf2_deterministic() {
             params1.as_mut_ptr(),
             params_size,
         );
-        DeriveSecretKeyPbkdf2(
+        let retval2 = DeriveSecretKeyPbkdf2(
             password.as_ptr(),
             password.len(),
             10,
@@ -2059,6 +2132,9 @@ fn test_derive_secret_key_pbkdf2_deterministic() {
             params2.as_mut_ptr(),
             params_size,
         );
+
+        assert_eq!(retval1, 0);
+        assert_eq!(retval2, 0);
     }
 
     // Random salt → different params and different derived keys each call
@@ -2094,6 +2170,56 @@ fn test_derive_secret_key_argon2() {
     assert_eq!(sk.as_bytes().len(), 32);
 
     let params = DerivationParameters::try_from(params_buf.as_slice())
+        .expect("should parse as DerivationParameters");
+    let _round_trip: Vec<u8> = params.into();
+}
+
+#[test]
+fn test_derive_secret_key_pbkdf2_with_salt() {
+    let password = b"test_password";
+    let salt = b"fixed_salt_16byt";
+    let sk_size = GenerateSecretKeySize() as usize;
+    let params_size = DeriveSecretKeyPbkdf2WithSaltSize(salt.len()) as usize;
+    let mut sk1 = vec![0u8; sk_size];
+    let mut params1 = vec![0u8; params_size];
+    let mut sk2 = vec![0u8; sk_size];
+    let mut params2 = vec![0u8; params_size];
+
+    unsafe {
+        let retval1 = DeriveSecretKeyPbkdf2WithSalt(
+            password.as_ptr(),
+            password.len(),
+            10,
+            salt.as_ptr(),
+            salt.len(),
+            sk1.as_mut_ptr(),
+            sk_size,
+            params1.as_mut_ptr(),
+            params_size,
+        );
+        let retval2 = DeriveSecretKeyPbkdf2WithSalt(
+            password.as_ptr(),
+            password.len(),
+            10,
+            salt.as_ptr(),
+            salt.len(),
+            sk2.as_mut_ptr(),
+            sk_size,
+            params2.as_mut_ptr(),
+            params_size,
+        );
+        assert_eq!(retval1, 0);
+        assert_eq!(retval2, 0);
+    }
+
+    assert_eq!(sk1, sk2);
+    assert_eq!(params1, params2);
+
+    let sk = devolutions_crypto::key::SecretKey::try_from(sk1.as_slice())
+        .expect("should parse as SecretKey");
+    assert_eq!(sk.as_bytes().len(), 32);
+
+    let params = DerivationParameters::try_from(params1.as_slice())
         .expect("should parse as DerivationParameters");
     let _round_trip: Vec<u8> = params.into();
 }

@@ -78,6 +78,10 @@ export function deriveSecretKeyPbkdf2(password: Uint8Array, iterations?: number)
     return devolutionsCrypto.deriveSecretKeyPbkdf2(password, iterations);
 }
 
+export function deriveSecretKeyPbkdf2WithSalt(password: Uint8Array, salt: Uint8Array, iterations?: number): KeyDerivationResult {
+    return devolutionsCrypto.deriveSecretKeyPbkdf2WithSalt(password, salt, iterations);
+}
+
 export function deriveSecretKeyArgon2(password: Uint8Array, parameters: Argon2Parameters): KeyDerivationResult {
     return devolutionsCrypto.deriveSecretKeyArgon2(password, parameters);
 }

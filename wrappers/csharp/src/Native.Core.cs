@@ -60,6 +60,12 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "DeriveSecretKeyArgon2ParametersSize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long DeriveSecretKeyArgon2ParametersSizeNative(UIntPtr argon2ParametersLength);
 
+        [DllImport(LibName, EntryPoint = "DeriveSecretKeyPbkdf2WithSalt", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DeriveSecretKeyPbkdf2WithSaltNative(byte[] key, UIntPtr keyLength, System.UInt32 iterations, byte[] salt, UIntPtr saltLength, byte[] secretKey, UIntPtr secretKeyLength, byte[] paramsOut, UIntPtr paramsOutLength);
+
+        [DllImport(LibName, EntryPoint = "DeriveSecretKeyPbkdf2WithSaltSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DeriveSecretKeyPbkdf2WithSaltSizeNative(UIntPtr saltLength);
+
         [DllImport(LibName, EntryPoint = "Encode", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long EncodeNative(byte[] input, UIntPtr input_length, byte[] output, UIntPtr output_length);
 

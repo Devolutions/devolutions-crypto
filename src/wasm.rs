@@ -3,6 +3,7 @@ use std::convert::{TryFrom as _, TryInto as _};
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
 
+use super::key_derivation::{Argon2, DerivationParameters, Pbkdf2};
 use super::utils;
 use super::Argon2Parameters;
 use super::DataType;
@@ -14,9 +15,6 @@ use super::{
 use super::{
     key,
     key::{KeyVersion, PrivateKey, PublicKey, SecretKey},
-};
-use super::{
-    key_derivation::{DerivationParameters, Pbkdf2, Argon2},
 };
 use super::{
     password_hash,
@@ -35,7 +33,6 @@ use super::{
     signing_key::{SigningKeyPair, SigningKeyVersion, SigningPublicKey},
 };
 
-// Local KeyPair have private fields with getters instead of public field, for wasm_bindgen
 #[wasm_bindgen(inspectable)]
 #[derive(Clone)]
 pub struct KeyDerivationResult {
@@ -71,7 +68,9 @@ impl DerivationParameters {
 
 #[wasm_bindgen(inspectable)]
 #[derive(Clone)]
-pub struct KeyPair {private_key: PrivateKey,
+// Local KeyPair have private fields with getters instead of public field, for wasm_bindgen
+pub struct KeyPair {
+    private_key: PrivateKey,
     public_key: PublicKey,
 }
 
@@ -419,6 +418,21 @@ pub fn derive_secret_key_pbkdf2(
 ) -> Result<KeyDerivationResult, JsValue> {
     let (secret_key, parameters) =
         Pbkdf2::with_params(iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS)).derive(password)?;
+    Ok(KeyDerivationResult {
+        secret_key,
+        parameters,
+    })
+}
+
+#[wasm_bindgen(js_name = "deriveSecretKeyPbkdf2WithSalt")]
+pub fn derive_secret_key_pbkdf2_with_salt(
+    password: &[u8],
+    salt: &[u8],
+    iterations: Option<u32>,
+) -> Result<KeyDerivationResult, JsValue> {
+    let (secret_key, parameters) =
+        Pbkdf2::with_params(iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS))
+            .derive_with_salt(password, salt)?;
     Ok(KeyDerivationResult {
         secret_key,
         parameters,

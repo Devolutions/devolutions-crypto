@@ -311,6 +311,53 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// Derives a <see cref="SecretKey"/> from a password using PBKDF2-HMAC-SHA256 with a caller-supplied salt.
+        /// Use this overload when you need a deterministic derivation (e.g. re-deriving the same key from stored parameters).
+        /// For new derivations prefer <see cref="DeriveSecretKeyPbkdf2(byte[], uint)"/>, which generates a random salt automatically.
+        /// </summary>
+        /// <param name="key">The password to derive from.</param>
+        /// <param name="salt">The salt to use. Must not be empty.</param>
+        /// <param name="iterations">Number of PBKDF2 iterations. Defaults to 600 000.</param>
+        /// <returns>Returns a <see cref="KeyDerivationResult"/> containing the derived key and the parameters needed to reproduce it.</returns>
+        public static KeyDerivationResult DeriveSecretKeyPbkdf2WithSalt(byte[] key, byte[] salt, uint iterations = DEFAULT_PBKDF2_ITERATIONS)
+        {
+            if (key == null || key.Length == 0)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            if (salt == null || salt.Length == 0)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            long skSize = Native.GenerateSecretKeySizeNative();
+            long paramsSize = Native.DeriveSecretKeyPbkdf2WithSaltSizeNative((UIntPtr)salt.Length);
+
+            if (skSize < 0)
+            {
+                Utils.HandleError(skSize);
+            }
+
+            if (paramsSize < 0)
+            {
+                Utils.HandleError(paramsSize);
+            }
+
+            byte[] skBuf = new byte[skSize];
+            byte[] paramsBuf = new byte[paramsSize];
+
+            long res = Native.DeriveSecretKeyPbkdf2WithSaltNative(key, (UIntPtr)key.Length, iterations, salt, (UIntPtr)salt.Length, skBuf, (UIntPtr)skBuf.Length, paramsBuf, (UIntPtr)paramsBuf.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return new KeyDerivationResult(SecretKey.FromByteArray(skBuf), DerivationParameters.FromByteArray(paramsBuf));
+        }
+
+        /// <summary>
         /// Decrypts the data with the provided key.
         /// </summary>
         /// <param name="data">The data to decrypt.</param>

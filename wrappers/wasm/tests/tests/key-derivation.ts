@@ -1,4 +1,4 @@
-import { deriveSecretKeyPbkdf2, deriveSecretKeyArgon2, Argon2Parameters, DerivationParameters, KeyDerivationResult, base64encode, base64decode } from 'devolutions-crypto'
+import { deriveSecretKeyPbkdf2, deriveSecretKeyPbkdf2WithSalt, deriveSecretKeyArgon2, Argon2Parameters, DerivationParameters, KeyDerivationResult, base64encode, base64decode } from 'devolutions-crypto'
 import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
 
@@ -21,6 +21,28 @@ describe('key derivation', () => {
     // Random salt → different parameters and different derived keys
     assert.notStrictEqual(base64encode(result1.parameters.bytes), base64encode(result2.parameters.bytes))
     assert.notStrictEqual(base64encode(result1.secretKey.bytes), base64encode(result2.secretKey.bytes))
+  })
+
+  test('deriveSecretKeyPbkdf2WithSalt with fixed salt produces the same key', () => {
+    const password = encoder.encode('test password')
+    const salt = encoder.encode('fixed_salt_16byt')
+
+    const result1: KeyDerivationResult = deriveSecretKeyPbkdf2WithSalt(password, salt, 10)
+    const result2: KeyDerivationResult = deriveSecretKeyPbkdf2WithSalt(password, salt, 10)
+
+    // Fixed salt → same key and same parameters both times
+    assert.strictEqual(base64encode(result1.secretKey.bytes), base64encode(result2.secretKey.bytes))
+    assert.strictEqual(base64encode(result1.parameters.bytes), base64encode(result2.parameters.bytes))
+  })
+
+  test('deriveSecretKeyPbkdf2WithSalt with different salts produces different keys', () => {
+    const password = encoder.encode('test password')
+
+    const result1: KeyDerivationResult = deriveSecretKeyPbkdf2WithSalt(password, encoder.encode('salt_one_16bytes'), 10)
+    const result2: KeyDerivationResult = deriveSecretKeyPbkdf2WithSalt(password, encoder.encode('salt_two_16bytes'), 10)
+
+    assert.notStrictEqual(base64encode(result1.secretKey.bytes), base64encode(result2.secretKey.bytes))
+    assert.notStrictEqual(base64encode(result1.parameters.bytes), base64encode(result2.parameters.bytes))
   })
 
   test('deriveSecretKeyArgon2 with fixed parameters produces the same key', () => {
