@@ -1528,6 +1528,10 @@ pub unsafe extern "C" fn DeriveSecretKeyArgon2(
     let sk_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(sk.into());
     let params_bytes: Vec<u8> = params.into();
 
+    if params_bytes.len() != params_out_length {
+        return Error::InvalidOutputLength.error_code();
+    }
+
     let secret_key = slice::from_raw_parts_mut(secret_key, secret_key_length);
     let params_out = slice::from_raw_parts_mut(params_out, params_out_length);
 
