@@ -36,6 +36,9 @@ use std::convert::TryFrom;
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
 
+#[cfg(feature = "wbindgen")]
+use wasm_bindgen::prelude::*;
+
 use crate::key::SecretKey;
 #[cfg(feature = "fuzz")]
 use crate::Argon2Parameters;
@@ -49,6 +52,7 @@ use super::enums::KeyDerivationSubtype;
 /// Can be stored alongside a user record to re-derive the same key later.
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[cfg_attr(feature = "wbindgen", wasm_bindgen(inspectable))]
 pub struct DerivationParameters {
     pub(crate) header: Header<DerivationParameters>,
     pub(super) payload: DerivationParametersPayload,

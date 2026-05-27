@@ -231,6 +231,133 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// Derives a password using PBKDF2 and returns the structured <see cref="SecretKey"/> and <see cref="DerivationParameters"/>.
+        /// </summary>
+        /// <param name="key">The password or key material to derive.</param>
+        /// <param name="iterations">The number of PBKDF2 iterations (defaults to 600,000).</param>
+        /// <returns>Returns a <see cref="KeyDerivationResult"/> containing the derived key and the parameters needed to reproduce it.</returns>
+        public static KeyDerivationResult DeriveSecretKeyPbkdf2(byte[] key, uint iterations = DEFAULT_PBKDF2_ITERATIONS)
+        {
+            if (key == null || key.Length == 0)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            long skSize = Native.GenerateSecretKeySizeNative();
+            long paramsSize = Native.DeriveSecretKeyPbkdf2SizeNative();
+
+            if (skSize < 0)
+            {
+                Utils.HandleError(skSize);
+            }
+
+            if (paramsSize < 0)
+            {
+                Utils.HandleError(paramsSize);
+            }
+
+            byte[] skBuf = new byte[skSize];
+            byte[] paramsBuf = new byte[paramsSize];
+
+            long res = Native.DeriveSecretKeyPbkdf2Native(key, (UIntPtr)key.Length, iterations, skBuf, (UIntPtr)skBuf.Length, paramsBuf, (UIntPtr)paramsBuf.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return new KeyDerivationResult(SecretKey.FromByteArray(skBuf), DerivationParameters.FromByteArray(paramsBuf));
+        }
+
+        /// <summary>
+        /// Derives a password using Argon2 and returns the structured <see cref="SecretKey"/> and <see cref="DerivationParameters"/>.
+        /// </summary>
+        /// <param name="key">The password or key material to derive.</param>
+        /// <param name="parameters">The Argon2 parameters to use for derivation.</param>
+        /// <returns>Returns a <see cref="KeyDerivationResult"/> containing the derived key and the parameters needed to reproduce it.</returns>
+        public static KeyDerivationResult DeriveSecretKeyArgon2(byte[] key, Argon2Parameters parameters)
+        {
+            if (key == null || key.Length == 0 || parameters == null)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            byte[] parametersRaw = parameters.ToByteArray();
+
+            long skSize = Native.GenerateSecretKeySizeNative();
+            long paramsSize = Native.DeriveSecretKeyArgon2ParametersSizeNative((UIntPtr)parametersRaw.Length);
+
+            if (skSize < 0)
+            {
+                Utils.HandleError(skSize);
+            }
+
+            if (paramsSize < 0)
+            {
+                Utils.HandleError(paramsSize);
+            }
+
+            byte[] skBuf = new byte[skSize];
+            byte[] paramsBuf = new byte[paramsSize];
+
+            long res = Native.DeriveSecretKeyArgon2Native(key, (UIntPtr)key.Length, parametersRaw, (UIntPtr)parametersRaw.Length, skBuf, (UIntPtr)skBuf.Length, paramsBuf, (UIntPtr)paramsBuf.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return new KeyDerivationResult(SecretKey.FromByteArray(skBuf), DerivationParameters.FromByteArray(paramsBuf));
+        }
+
+        /// <summary>
+        /// Derives a <see cref="SecretKey"/> from a password using PBKDF2-HMAC-SHA256 with a caller-supplied salt.
+        /// Use this overload when you need a deterministic derivation (e.g. re-deriving the same key from stored parameters).
+        /// For new derivations prefer <see cref="DeriveSecretKeyPbkdf2(byte[], uint)"/>, which generates a random salt automatically.
+        /// </summary>
+        /// <param name="key">The password to derive from.</param>
+        /// <param name="salt">The salt to use. Must not be empty.</param>
+        /// <param name="iterations">Number of PBKDF2 iterations. Defaults to 600 000.</param>
+        /// <returns>Returns a <see cref="KeyDerivationResult"/> containing the derived key and the parameters needed to reproduce it.</returns>
+        public static KeyDerivationResult DeriveSecretKeyPbkdf2WithSalt(byte[] key, byte[] salt, uint iterations = DEFAULT_PBKDF2_ITERATIONS)
+        {
+            if (key == null || key.Length == 0)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            if (salt == null || salt.Length == 0)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            long skSize = Native.GenerateSecretKeySizeNative();
+            long paramsSize = Native.DeriveSecretKeyPbkdf2WithSaltSizeNative((UIntPtr)salt.Length);
+
+            if (skSize < 0)
+            {
+                Utils.HandleError(skSize);
+            }
+
+            if (paramsSize < 0)
+            {
+                Utils.HandleError(paramsSize);
+            }
+
+            byte[] skBuf = new byte[skSize];
+            byte[] paramsBuf = new byte[paramsSize];
+
+            long res = Native.DeriveSecretKeyPbkdf2WithSaltNative(key, (UIntPtr)key.Length, iterations, salt, (UIntPtr)salt.Length, skBuf, (UIntPtr)skBuf.Length, paramsBuf, (UIntPtr)paramsBuf.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return new KeyDerivationResult(SecretKey.FromByteArray(skBuf), DerivationParameters.FromByteArray(paramsBuf));
+        }
+
+        /// <summary>
         /// Decrypts the data with the provided key.
         /// </summary>
         /// <param name="data">The data to decrypt.</param>

@@ -20,6 +20,7 @@ const DATA_TYPE_NAMES: Record<number, string> = {
   5: 'SigningKey',
   6: 'Signature',
   7: 'OnlineCiphertext',
+  8: 'KeyDerivation',
 };
 
 const SUBTYPE_NAMES: Record<number, Record<number, string>> = {
@@ -29,6 +30,7 @@ const SUBTYPE_NAMES: Record<number, Record<number, string>> = {
   4: { 0: 'None' },
   5: { 0: 'None', 1: 'Pair', 2: 'Public' },
   6: { 0: 'None' },
+  8: { 0: 'None' },
 };
 
 const VERSION_NAMES: Record<number, Record<number, string>> = {
@@ -38,6 +40,7 @@ const VERSION_NAMES: Record<number, Record<number, string>> = {
   4: { 0: 'Latest', 1: 'V1 – Shamir Secret Sharing over GF256' },
   5: { 0: 'Latest', 1: 'V1 – Ed25519' },
   6: { 0: 'Latest', 1: 'V1 – Ed25519' },
+  8: { 0: 'Latest', 1: 'V1 – PBKDF2-HMAC-SHA256', 2: 'V2 – Argon2id' },
 };
 
 export interface PayloadField {
@@ -191,6 +194,8 @@ export class InspectComponent implements OnInit {
         return this.parsePasswordHashPayload(payload, abs);
       case 4:
         return this.parseSharePayload(payload, abs);
+      case 8:
+        return this.parseDerivationParametersPayload(payload, version, abs);
       default:
         return [
           {
@@ -387,6 +392,233 @@ export class InspectComponent implements OnInit {
         size: payload.length,
         hex: toHex(payload, 32),
         description: `Secret share payload (${payload.length} bytes)`,
+      },
+    ];
+  }
+
+  private parseDerivationParametersPayload(
+    payload: Uint8Array,
+    version: number,
+    abs: (n: number) => number
+  ): PayloadField[] {
+    const fields: PayloadField[] = [];
+    const dv = new DataView(payload.buffer, payload.byteOffset, payload.byteLength);
+
+    if (version === 1) {
+      // V1 PBKDF2: iterations(4 LE u32) + salt_len(4 LE u32) + salt(N bytes)
+      if (payload.length < 8) {
+        fields.push({
+          name: 'Error',
+          offset: abs(0),
+          size: payload.length,
+          hex: toHex(payload),
+          description: `Payload too short for V1 derivation parameters (min 8 bytes, got ${payload.length})`,
+        });
+        return fields;
+      }
+      const iterations = dv.getUint32(0, true);
+      const saltLen = dv.getUint32(4, true);
+      if (8 + saltLen > payload.length) {
+        fields.push({ name: 'Iterations', offset: abs(0), size: 4, hex: toHex(payload.slice(0, 4)), description: `PBKDF2 iteration count: ${iterations.toLocaleString()}` });
+        fields.push({ name: 'Salt Length', offset: abs(4), size: 4, hex: toHex(payload.slice(4, 8)), description: `Salt length: ${saltLen} bytes` });
+        fields.push({ name: 'Error', offset: abs(8), size: payload.length - 8, hex: toHex(payload.slice(8)), description: `Truncated: salt claims ${saltLen} bytes but only ${payload.length - 8} bytes remain` });
+        return fields;
+      }
+      const salt = payload.slice(8, 8 + saltLen);
+      fields.push({
+        name: 'Iterations',
+        offset: abs(0),
+        size: 4,
+        hex: toHex(payload.slice(0, 4)),
+        description: `PBKDF2 iteration count: ${iterations.toLocaleString()}`,
+      });
+      fields.push({
+        name: 'Salt Length',
+        offset: abs(4),
+        size: 4,
+        hex: toHex(payload.slice(4, 8)),
+        description: `Salt length: ${saltLen} bytes`,
+      });
+      fields.push({
+        name: 'Salt',
+        offset: abs(8),
+        size: saltLen,
+        hex: toHex(salt),
+        description: `Random salt for PBKDF2 (${saltLen} bytes)`,
+      });
+      return fields;
+    }
+
+    if (version === 2) {
+      // V2 Argon2: Argon2Parameters binary format
+      // dc_version(4) + length(4) + lanes(4) + memory(4) + iterations(4) + variant(1) + version(1) + assoc_data_len(4) + assoc_data(N) + salt_len(4) + salt(M)
+      if (payload.length < 26) {
+        fields.push({
+          name: 'Error',
+          offset: abs(0),
+          size: payload.length,
+          hex: toHex(payload),
+          description: `Payload too short for V2 derivation parameters (min 26 bytes, got ${payload.length})`,
+        });
+        return fields;
+      }
+      let pos = 0;
+
+      const dcVersion = dv.getUint32(pos, true);
+      fields.push({
+        name: 'DC Version',
+        offset: abs(pos),
+        size: 4,
+        hex: toHex(payload.slice(pos, pos + 4)),
+        description: `Devolutions-Crypto Argon2Parameters version: ${dcVersion}`,
+      });
+      pos += 4;
+
+      const hashLength = dv.getUint32(pos, true);
+      fields.push({
+        name: 'Hash Length',
+        offset: abs(pos),
+        size: 4,
+        hex: toHex(payload.slice(pos, pos + 4)),
+        description: `Argon2 output length: ${hashLength} bytes`,
+      });
+      pos += 4;
+
+      const lanes = dv.getUint32(pos, true);
+      fields.push({
+        name: 'Lanes',
+        offset: abs(pos),
+        size: 4,
+        hex: toHex(payload.slice(pos, pos + 4)),
+        description: `Argon2 parallelism (lanes): ${lanes}`,
+      });
+      pos += 4;
+
+      const memory = dv.getUint32(pos, true);
+      fields.push({
+        name: 'Memory',
+        offset: abs(pos),
+        size: 4,
+        hex: toHex(payload.slice(pos, pos + 4)),
+        description: `Argon2 memory usage: ${memory.toLocaleString()} KiB`,
+      });
+      pos += 4;
+
+      const iterations = dv.getUint32(pos, true);
+      fields.push({
+        name: 'Iterations',
+        offset: abs(pos),
+        size: 4,
+        hex: toHex(payload.slice(pos, pos + 4)),
+        description: `Argon2 time cost (iterations): ${iterations}`,
+      });
+      pos += 4;
+
+      const variantByte = payload[pos];
+      const variantName = variantByte === 0 ? 'Argon2d' : variantByte === 1 ? 'Argon2i' : variantByte === 2 ? 'Argon2id' : `Unknown (${variantByte})`;
+      fields.push({
+        name: 'Variant',
+        offset: abs(pos),
+        size: 1,
+        hex: toHex(payload.slice(pos, pos + 1)),
+        description: `Argon2 variant: ${variantName}`,
+      });
+      pos += 1;
+
+      const versionByte = payload[pos];
+      const versionName = versionByte === 0x13 ? '1.3 (0x13)' : `0x${versionByte.toString(16).padStart(2, '0')}`;
+      fields.push({
+        name: 'Argon2 Version',
+        offset: abs(pos),
+        size: 1,
+        hex: toHex(payload.slice(pos, pos + 1)),
+        description: `Argon2 algorithm version: ${versionName}`,
+      });
+      pos += 1;
+
+      const assocDataLen = dv.getUint32(pos, true);
+      fields.push({
+        name: 'Assoc. Data Length',
+        offset: abs(pos),
+        size: 4,
+        hex: toHex(payload.slice(pos, pos + 4)),
+        description: `Associated data length: ${assocDataLen} bytes`,
+      });
+      pos += 4;
+
+      if (assocDataLen > 0) {
+        if (pos + assocDataLen > payload.length) {
+          fields.push({
+            name: 'Error',
+            offset: abs(pos),
+            size: payload.length - pos,
+            hex: toHex(payload.slice(pos)),
+            description: `Truncated: assoc data claims ${assocDataLen} bytes but only ${payload.length - pos} bytes remain`,
+          });
+          return fields;
+        }
+        fields.push({
+          name: 'Assoc. Data',
+          offset: abs(pos),
+          size: assocDataLen,
+          hex: toHex(payload.slice(pos, pos + assocDataLen)),
+          description: `Associated data (${assocDataLen} bytes)`,
+        });
+        pos += assocDataLen;
+      }
+
+      if (pos + 4 > payload.length) {
+        fields.push({
+          name: 'Error',
+          offset: abs(pos),
+          size: payload.length - pos,
+          hex: toHex(payload.slice(pos)),
+          description: `Truncated: expected salt-length field (4 bytes) but only ${payload.length - pos} bytes remain`,
+        });
+        return fields;
+      }
+
+      const saltLen = dv.getUint32(pos, true);
+      fields.push({
+        name: 'Salt Length',
+        offset: abs(pos),
+        size: 4,
+        hex: toHex(payload.slice(pos, pos + 4)),
+        description: `Salt length: ${saltLen} bytes`,
+      });
+      pos += 4;
+
+      if (pos + saltLen > payload.length) {
+        fields.push({
+          name: 'Error',
+          offset: abs(pos),
+          size: payload.length - pos,
+          hex: toHex(payload.slice(pos)),
+          description: `Truncated: salt claims ${saltLen} bytes but only ${payload.length - pos} bytes remain`,
+        });
+        return fields;
+      }
+
+      const salt = payload.slice(pos, pos + saltLen);
+      fields.push({
+        name: 'Salt',
+        offset: abs(pos),
+        size: saltLen,
+        hex: toHex(salt),
+        description: `Random salt for Argon2 (${saltLen} bytes)`,
+      });
+
+      return fields;
+    }
+
+    // Unknown version — show raw payload
+    return [
+      {
+        name: 'Raw Payload',
+        offset: abs(0),
+        size: payload.length,
+        hex: toHex(payload, 32),
+        description: `${payload.length} bytes — unknown derivation parameters version`,
       },
     ];
   }

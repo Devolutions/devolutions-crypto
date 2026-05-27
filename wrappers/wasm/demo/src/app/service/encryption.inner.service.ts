@@ -1,5 +1,5 @@
-import wasmInit, { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, SecretKey, Argon2Parameters, PasswordHashVersion } from '@devolutions/devolutions-crypto-web';
-export { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, SecretKey, Argon2Parameters, PasswordHashVersion } from '@devolutions/devolutions-crypto-web';
+import wasmInit, { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, SecretKey, Argon2Parameters, PasswordHashVersion, KeyDerivationResult, DerivationParameters } from '@devolutions/devolutions-crypto-web';
+export { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, SecretKey, Argon2Parameters, PasswordHashVersion, KeyDerivationResult, DerivationParameters } from '@devolutions/devolutions-crypto-web';
 import * as devolutionsCrypto from '@devolutions/devolutions-crypto-web';
 
 // Initialize WASM before any functions are used
@@ -72,4 +72,16 @@ export function encryptWithSecretKey(data: Uint8Array, key: SecretKey, version?:
 
 export function decryptWithSecretKey(data: Uint8Array, key: SecretKey): Uint8Array {
     return devolutionsCrypto.decryptWithSecretKey(data, key);
+}
+
+export function deriveSecretKeyPbkdf2(password: Uint8Array, iterations?: number): KeyDerivationResult {
+    return devolutionsCrypto.deriveSecretKeyPbkdf2(password, iterations);
+}
+
+export function deriveSecretKeyPbkdf2WithSalt(password: Uint8Array, salt: Uint8Array, iterations?: number): KeyDerivationResult {
+    return devolutionsCrypto.deriveSecretKeyPbkdf2WithSalt(password, salt, iterations);
+}
+
+export function deriveSecretKeyArgon2(password: Uint8Array, parameters: Argon2Parameters): KeyDerivationResult {
+    return devolutionsCrypto.deriveSecretKeyArgon2(password, parameters);
 }

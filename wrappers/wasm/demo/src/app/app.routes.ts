@@ -6,12 +6,14 @@ import { UtilitiesComponent } from './utilities/utilities.component';
 import { AsymmetricComponent } from './asymmetric/asymmetric.component';
 import { SecretKeyEncryptionComponent } from './secret-key-encryption/secret-key-encryption.component';
 import { InspectComponent } from './inspect/inspect.component';
+import { KeyDerivationComponent } from './key-derivation/key-derivation.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/encryption', pathMatch: 'full' },
   { path: 'encryption', component: EncryptionComponent },
   { path: 'secret-sharing', component: SecretSharingComponent },
   { path: 'password', component: PasswordComponent },
+  { path: 'key-derivation', component: KeyDerivationComponent },
   { path: 'utilities', component: UtilitiesComponent },
   { path: 'asymmetric', component: AsymmetricComponent },
   { path: 'secret-key-encryption', component: SecretKeyEncryptionComponent },

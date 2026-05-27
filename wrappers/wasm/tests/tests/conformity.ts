@@ -1,6 +1,6 @@
 // These tests are there to make sure that the implementations are compatible between one language and another
 import {
-  KeyPair, deriveKeyPbkdf2, base64encode, base64decode, decrypt, Argon2Parameters, PrivateKey, SigningPublicKey, decryptAsymmetric, verifyPassword, verifySignature, deriveKeyArgon2
+  KeyPair, deriveKeyPbkdf2, base64encode, base64decode, decrypt, Argon2Parameters, PrivateKey, SigningPublicKey, decryptAsymmetric, verifyPassword, verifySignature, deriveKeyArgon2, deriveSecretKeyPbkdf2, deriveSecretKeyArgon2, KeyDerivationResult, DerivationParameters
 } from 'devolutions-crypto'
 import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -95,5 +95,22 @@ describe('Conformity Tests', () => {
 
     assert.strictEqual(verifySignature(encoder.encode('this is a test'), public_key, signature), true)
     assert.strictEqual(verifySignature(encoder.encode('this is wrong'), public_key, signature), false)
+  })
+
+  test('DeriveSecretKey PBKDF2 V1 - Parameters format conformity', () => {
+    // Known PBKDF2 DerivationParameters bytes (password='testpassword', salt='fixed_salt_16byt', iterations=10)
+    const knownParamsBytes = base64decode('DQwIAAAAAQAKAAAAEAAAAGZpeGVkX3NhbHRfMTZieXQ=')
+    const params: DerivationParameters = DerivationParameters.fromBytes(knownParamsBytes)
+
+    // Parameters round-trip through bytes
+    assert.strictEqual(base64encode(params.bytes), base64encode(knownParamsBytes))
+  })
+
+  test('DeriveSecretKey Argon2 V2', () => {
+    // Derived with password='testpassword' and fixed argon2 parameters
+    const parameters: Argon2Parameters = Argon2Parameters.fromBytes(base64decode('AQAAACAAAAABAAAAIAAAAAEAAAACEwAAAAAQAAAAimFBkm3f8+f+YfLRnF5OoQ=='))
+    const result: KeyDerivationResult = deriveSecretKeyArgon2(encoder.encode('testpassword'), parameters)
+
+    assert.strictEqual(base64encode(result.secretKey.bytes), 'DQwBAAQAAQCoRRraZaLaR3nJn0E+1ZYBcM3DBCwINJpWAuA2tcvr6w==')
   })
 })
