@@ -22,12 +22,14 @@ Note that the Javascript version of the library is compiled using WebAssembly, s
 # Underlying algorithms
 As of the current version:
  * Symmetric cryptography uses XChaCha20Poly1305
- * Asymmetric cryptography uses Curve25519.
+ * Asymmetric cryptography uses Curve25519
  * Asymmetric encryption uses ECIES.
  * Key exchange uses x25519, or ECDH over Curve25519
+ * Key derivation uses Argon2id or PBKDF2-HMAC-SHA2-256
  * Password Hashing uses PBKDF2-HMAC-SHA2-256
  * Secret Sharing uses Shamir Secret sharing over GF256
  * Online Ciphertext uses XChaCha20-Poly1305
+
 
 # License
 
@@ -79,7 +81,8 @@ A Curve25519 private key from Devolutions Crypto
 |  Share              |  0x40  | A wrapped share. Used for secret sharing scheme.                             |
 |  SigningKey         |  0x50  | A wrapped key used to sign data.                                             |
 |  Signature          |  0x60  | A wrapped signature.                                                         |
-|  OnlineCiphertext   |  0x70  | A wrapped online ciphertext that can be encrypted/decrypted chunk by chunk  |
+|  OnlineCiphertext   |  0x70  | A wrapped online ciphertext that can be encrypted/decrypted chunk by chunk   |
+|  KeyDerivation      |  0x80  | Serialized key derivation parameters used to reproduce a derived secret key. |
 
 
 ## Sub types
@@ -142,6 +145,12 @@ A Curve25519 private key from Devolutions Crypto
 |-------------------|--------|--------------------------|
 |  Latest           |  0x00  | Uses the latest version. |
 |  V1               |  0x10  | Uses version 1: ed25519. |
+
+| Key Derivation Version | Value  | Description                                 |
+|------------------------|--------|---------------------------------------------|
+|  Latest                |  0x00  | Uses the latest version.                    |
+|  V1                    |  0x10  | Uses version 1: PBKDF2-HMAC-SHA256.         |
+|  V2                    |  0x20  | Uses version 2: Argon2id.                   |
 
 | Online Ciphertext Version | Value  | Description                                                          |
 |---------------------------|--------|----------------------------------------------------------------------|
