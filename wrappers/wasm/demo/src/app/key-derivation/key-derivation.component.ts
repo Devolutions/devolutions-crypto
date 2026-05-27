@@ -3,7 +3,6 @@ import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { EncryptionService } from '../service/encryption.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faKey } from '@fortawesome/free-solid-svg-icons';
-import { NgIf } from '@angular/common';
 import * as functions from '../shared/shared.component';
 
 type EncryptionServiceInner = typeof import('../service/encryption.inner.service');
@@ -11,7 +10,7 @@ type EncryptionServiceInner = typeof import('../service/encryption.inner.service
 @Component({
   selector: 'app-key-derivation',
   standalone: true,
-  imports: [ReactiveFormsModule, FaIconComponent, NgIf],
+  imports: [ReactiveFormsModule, FaIconComponent],
   templateUrl: './key-derivation.component.html',
 })
 export class KeyDerivationComponent implements OnInit {

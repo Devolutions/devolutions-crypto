@@ -42,15 +42,15 @@ use devolutions_crypto::{
 
 use devolutions_crypto::Result;
 
+#[cfg(test)]
+use devolutions_crypto::key_derivation::DerivationParameters;
+
 use std::borrow::Borrow;
 use std::ffi::c_void;
 use std::slice;
 use std::sync::Mutex;
 
 use zeroize::Zeroizing;
-
-#[cfg(test)]
-use devolutions_crypto::key_derivation::DerivationParameters;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 

@@ -42,7 +42,7 @@
         </div>
 
         <!-- Argon2 parameters -->
-        <ng-container *ngIf="algorithm === 'argon2'">
+        @if (algorithm === 'argon2') {
           <div class="field">
             <label>Memory (KiB) <span style="font-weight:normal;color:#888;">— default: 4096</span></label>
             <input type="number" formControlName="argon2Memory" min="8" placeholder="e.g. 4096">
@@ -58,10 +58,10 @@
           <p style="font-size:0.85rem;color:#888;margin:0.25rem 0 0.75rem;">
             A random salt is generated automatically on each derivation and embedded in the output parameters.
           </p>
-        </ng-container>
+        }
 
         <!-- PBKDF2 parameters -->
-        <ng-container *ngIf="algorithm === 'pbkdf2'">
+        @if (algorithm === 'pbkdf2') {
           <div class="field">
             <label>Iterations <span style="font-weight:normal;color:#888;">— default: 600 000</span></label>
             <input type="number" formControlName="pbkdf2Iterations" min="1" placeholder="e.g. 600000">
@@ -70,7 +70,7 @@
             <label>Salt <span style="font-weight:normal;color:#888;">— optional, leave blank to generate randomly</span></label>
             <input type="text" formControlName="pbkdf2Salt" placeholder="Custom salt (UTF-8 text)">
           </div>
-        </ng-container>
+        }
 
         <div class="field">
           <button type="submit" class="btn btn-primary">Derive</button>
