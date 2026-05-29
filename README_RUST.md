@@ -11,6 +11,7 @@ Cryptographic library used in Devolutions products. It is made to be fast, easy 
 * [Key Module](#key)
     * [Key Generation/Derivation](#generationderivation)
     * [Key Exchange](#key-exchange)
+* [Key Derivation Module](#key-derivation-module)
 * [PasswordHash Module](#passwordhash)
 * [SecretSharing Module](#secretsharing)
 * [Signature Module](#signature)
@@ -138,6 +139,33 @@ let alice_shared = mix_key_exchange(&alice_keypair.private_key, &bob_keypair.pub
 assert_eq!(bob_shared, alice_shared);
 ```
 
+## Key Derivation Module
+
+This module derives a managed `SecretKey` from a password or passphrase and returns serializable `DerivationParameters` that can be reused later to derive the same key again.
+
+By default, `KeyDerivationVersion::Latest` uses Argon2id. PBKDF2-HMAC-SHA256 is also available through `KeyDerivationVersion::V1`.
+
+```rust
+use devolutions_crypto::key_derivation::{derive_key, DerivationParameters};
+use devolutions_crypto::KeyDerivationVersion;
+
+let password = b"a very strong password";
+let (secret_key, params) = derive_key(password, KeyDerivationVersion::Latest)
+    .expect("derivation should not fail");
+
+let params_bytes: Vec<u8> = params.into();
+```
+
+You can also select a concrete derivation algorithm directly.
+
+```rust
+use devolutions_crypto::key_derivation::{Argon2, Pbkdf2};
+
+let password = b"a very strong password";
+let (argon2_key, argon2_params) = Argon2::new().derive(password).expect("derivation should not fail");
+let (pbkdf2_key, pbkdf2_params) = Pbkdf2::new().derive(password).expect("derivation should not fail");
+```
+
 ## PasswordHash
 You can use this module to hash a password and validate it afterward. This is the recommended way to verify a user password on login.
 
@@ -228,6 +256,7 @@ As of the current version:
  * Asymmetric cryptography uses Curve25519
  * Asymmetric encryption uses ECIES
  * Key exchange uses x25519, or ECDH over Curve25519
+ * Key derivation uses Argon2id by default and also supports PBKDF2-HMAC-SHA2-256 for compatibility
  * Password Hashing uses PBKDF2-HMAC-SHA2-256
  * Secret Sharing uses Shamir Secret sharing over GF256
 
