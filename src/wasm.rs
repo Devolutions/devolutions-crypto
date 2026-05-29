@@ -231,15 +231,18 @@ pub fn decrypt_asymmetric(
 #[wasm_bindgen(js_name = "hashPassword")]
 pub fn hash_password(
     password: &[u8],
-    iterations: Option<u32>,
     version: Option<PasswordHashVersion>,
 ) -> Result<Vec<u8>, JsValue> {
-    Ok(password_hash::hash_password(
-        &password,
-        iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS),
-        version.unwrap_or(PasswordHashVersion::Latest),
-    )?
-    .into())
+    Ok(
+        password_hash::hash_password(&password, version.unwrap_or(PasswordHashVersion::Latest))?
+            .into(),
+    )
+}
+
+#[wasm_bindgen(js_name = "hashPasswordWithParams")]
+pub fn hash_password_with_params(password: &[u8], params: &[u8]) -> Result<Vec<u8>, JsValue> {
+    let params = DerivationParameters::try_from(params)?;
+    Ok(password_hash::hash_password_with_parameters(password, params)?.into())
 }
 
 #[wasm_bindgen(js_name = "verifyPassword")]
@@ -450,6 +453,21 @@ pub fn derive_secret_key_argon2(
         secret_key,
         parameters: derivation_params,
     })
+}
+
+/// Build `DerivationParameters` from the given `Argon2Parameters` without performing any key
+/// derivation.  The result can be passed to `hashPasswordWithParams`.
+#[wasm_bindgen(js_name = "getArgon2DerivationParameters")]
+pub fn get_argon2_derivation_parameters(parameters: &Argon2Parameters) -> Vec<u8> {
+    Argon2::with_params(parameters.clone()).parameters().into()
+}
+
+/// Build `DerivationParameters` for PBKDF2 with the given iteration count without performing
+/// any key derivation.  The result can be passed to `hashPasswordWithParams`.
+#[wasm_bindgen(js_name = "getPbkdf2DerivationParameters")]
+pub fn get_pbkdf2_derivation_parameters(iterations: Option<u32>) -> Result<Vec<u8>, JsValue> {
+    let it = iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS);
+    Ok(Pbkdf2::with_params(it).parameters()?.into())
 }
 
 #[wasm_bindgen(js_name = "validateHeader")]

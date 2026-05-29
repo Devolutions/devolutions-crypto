@@ -3,6 +3,7 @@ import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { EncryptionService } from '../service/encryption.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faKey } from '@fortawesome/free-solid-svg-icons';
+import { CommonModule } from '@angular/common';
 import * as functions from '../shared/shared.component';
 
 type EncryptionServiceInner = typeof import('../service/encryption.inner.service');
@@ -10,7 +11,7 @@ type EncryptionServiceInner = typeof import('../service/encryption.inner.service
 @Component({
   selector: 'app-password',
   standalone: true,
-  imports: [ReactiveFormsModule, FaIconComponent],
+  imports: [ReactiveFormsModule, FaIconComponent, CommonModule],
   templateUrl: './password.component.html',
 })
 export class PasswordComponent implements OnInit {
@@ -27,7 +28,8 @@ export class PasswordComponent implements OnInit {
 
     this.passwordForm = new FormGroup({
       password: new FormControl(''),
-      iteration: new FormControl(''),
+      algorithm: new FormControl('argon2'),
+      iterations: new FormControl('600000'),
       hashResult: new FormControl('')
     });
 
@@ -52,20 +54,23 @@ export class PasswordComponent implements OnInit {
     const service: EncryptionServiceInner = await this.encryptionService.innerModule;
 
     const pwd: string = this.passwordForm.value.password;
-    const iterString: string = this.passwordForm.value.iteration;
     if (pwd === null || pwd === '') { return; }
 
     const pwdArray: Uint8Array = this.encoder.encode(pwd);
-    const iter: number | undefined = (iterString === null || iterString === '') ? undefined : Number(iterString);
+    const algorithm: string = this.passwordForm.value.algorithm;
 
-    const hash: Uint8Array = service.hashPassword(pwdArray, iter, service.PasswordHashVersion.Latest);
+    let hash: Uint8Array;
+    if (algorithm === 'pbkdf2') {
+      const iterString: string = this.passwordForm.value.iterations;
+      const iter: number = (iterString === null || iterString === '') ? 600000 : Number(iterString);
+      const params: Uint8Array = service.getPbkdf2DerivationParameters(iter);
+      hash = service.hashPasswordWithParams(pwdArray, params);
+    } else {
+      hash = service.hashPassword(pwdArray);
+    }
+
     const hashBase64: string = service.base64encode(hash);
-
-    this.passwordForm.setValue({
-      password: pwd,
-      iteration: iter,
-      hashResult: hashBase64
-    });
+    this.passwordForm.patchValue({ hashResult: hashBase64 });
   }
 
   async verify() {

@@ -39,6 +39,8 @@ use arbitrary::Arbitrary;
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::prelude::*;
 
+use zeroize::Zeroizing;
+
 use crate::key::SecretKey;
 #[cfg(feature = "fuzz")]
 use crate::Argon2Parameters;
@@ -131,6 +133,24 @@ impl From<DerivationParametersPayload> for Vec<u8> {
         match payload {
             DerivationParametersPayload::V1(v1) => Vec::from(&v1),
             DerivationParametersPayload::V2(v2) => Vec::from(&v2),
+        }
+    }
+}
+
+impl DerivationParameters {
+    /// Re-derives raw bytes from a password using the stored algorithm and parameters.
+    pub fn compute(&self, password: &[u8]) -> Result<Zeroizing<Vec<u8>>> {
+        match &self.payload {
+            DerivationParametersPayload::V1(v1) => Ok(v1.derive(password)),
+            DerivationParametersPayload::V2(v2) => v2.derive(password),
+        }
+    }
+
+    /// Returns the byte-length of the hash that [`compute`](Self::compute) will produce.
+    pub fn output_length(&self) -> usize {
+        match &self.payload {
+            DerivationParametersPayload::V1(_) => key_derivation_v1::KEY_LENGTH,
+            DerivationParametersPayload::V2(v2) => v2.params.length as usize,
         }
     }
 }

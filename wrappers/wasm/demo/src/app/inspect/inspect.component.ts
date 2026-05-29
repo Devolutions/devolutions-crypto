@@ -36,7 +36,7 @@ const SUBTYPE_NAMES: Record<number, Record<number, string>> = {
 const VERSION_NAMES: Record<number, Record<number, string>> = {
   1: { 0: 'Latest', 1: 'V1 – Curve25519 / x25519' },
   2: { 0: 'Latest', 1: 'V1 – AES256-CBC + HMAC-SHA256', 2: 'V2 – XChaCha20-Poly1305' },
-  3: { 0: 'Latest', 1: 'V1 – PBKDF2-HMAC-SHA256' },
+  3: { 0: 'Latest', 1: 'V1 – PBKDF2-HMAC-SHA256', 2: 'V2 – Argon2id' },
   4: { 0: 'Latest', 1: 'V1 – Shamir Secret Sharing over GF256' },
   5: { 0: 'Latest', 1: 'V1 – Ed25519' },
   6: { 0: 'Latest', 1: 'V1 – Ed25519' },
@@ -191,7 +191,7 @@ export class InspectComponent implements OnInit {
       case 1:
         return this.parseKeyPayload(payload, subtype, abs);
       case 3:
-        return this.parsePasswordHashPayload(payload, abs);
+        return this.parsePasswordHashPayload(payload, version, abs);
       case 4:
         return this.parseSharePayload(payload, abs);
       case 8:
@@ -368,17 +368,107 @@ export class InspectComponent implements OnInit {
 
   private parsePasswordHashPayload(
     payload: Uint8Array,
+    version: number,
     abs: (n: number) => number
   ): PayloadField[] {
-    return [
-      {
+    const fields: PayloadField[] = [];
+    const dv = new DataView(payload.buffer, payload.byteOffset, payload.byteLength);
+
+    if (version === 1) {
+      // V1: iterations(4 LE u32) + salt(32 bytes) + hash(32 bytes) = 68 bytes
+      if (payload.length < 68) {
+        fields.push({
+          name: 'Error',
+          offset: abs(0),
+          size: payload.length,
+          hex: toHex(payload),
+          description: `Payload too short for V1 password hash (expected 68 bytes, got ${payload.length})`,
+        });
+        return fields;
+      }
+      const iterations = dv.getUint32(0, true);
+      fields.push({ name: 'Iterations',  offset: abs(0),  size: 4,  hex: toHex(payload.slice(0, 4)),  description: `PBKDF2 iteration count: ${iterations.toLocaleString()}` });
+      fields.push({ name: 'Salt',        offset: abs(4),  size: 32, hex: toHex(payload.slice(4, 36)),  description: `PBKDF2 random salt (32 bytes)` });
+      fields.push({ name: 'Hash',        offset: abs(36), size: 32, hex: toHex(payload.slice(36, 68)), description: `PBKDF2-HMAC-SHA256 derived hash (32 bytes)` });
+    } else if (version === 2) {
+      // V2: params_len(4 LE u32) + DerivationParameters(params_len bytes, includes inner 8-byte header) + hash(remaining)
+      if (payload.length < 4) {
+        fields.push({
+          name: 'Error',
+          offset: abs(0),
+          size: payload.length,
+          hex: toHex(payload),
+          description: `Payload too short for V2 password hash (min 4 bytes, got ${payload.length})`,
+        });
+        return fields;
+      }
+      const paramsLen = dv.getUint32(0, true);
+      fields.push({
+        name: 'Parameters Length',
+        offset: abs(0),
+        size: 4,
+        hex: toHex(payload.slice(0, 4)),
+        description: `Serialized DerivationParameters size: ${paramsLen} bytes`,
+      });
+      if (4 + paramsLen > payload.length) {
+        fields.push({
+          name: 'Error',
+          offset: abs(4),
+          size: payload.length - 4,
+          hex: toHex(payload.slice(4)),
+          description: `Truncated: DerivationParameters claims ${paramsLen} bytes but only ${payload.length - 4} bytes remain`,
+        });
+        return fields;
+      }
+      const dpBytes = payload.slice(4, 4 + paramsLen);
+      if (dpBytes.length >= 8) {
+        // Inner DerivationParameters has its own 8-byte header
+        const dpDv = new DataView(dpBytes.buffer, dpBytes.byteOffset, dpBytes.byteLength);
+        const dpDataType = dpDv.getUint16(2, true);
+        const dpVersion = dpDv.getUint16(6, true);
+        fields.push({
+          name: 'DerivationParameters Header',
+          offset: abs(4),
+          size: 8,
+          hex: toHex(dpBytes.slice(0, 8)),
+          description: `Inner header — DataType: ${dpDataType} (KeyDerivation), Version: ${dpVersion}`,
+        });
+        const dpPayload = dpBytes.slice(8);
+        const dpFields = this.parseDerivationParametersPayload(
+          dpPayload,
+          dpVersion,
+          (n) => abs(4 + 8 + n)
+        );
+        fields.push(...dpFields);
+      } else {
+        fields.push({
+          name: 'DerivationParameters',
+          offset: abs(4),
+          size: paramsLen,
+          hex: toHex(dpBytes),
+          description: `Serialized DerivationParameters (${paramsLen} bytes)`,
+        });
+      }
+      const hashOffset = 4 + paramsLen;
+      const hashBytes = payload.slice(hashOffset);
+      fields.push({
+        name: 'Hash',
+        offset: abs(hashOffset),
+        size: hashBytes.length,
+        hex: toHex(hashBytes),
+        description: `Argon2id derived hash (${hashBytes.length} bytes)`,
+      });
+    } else {
+      fields.push({
         name: 'Hash Data',
         offset: abs(0),
         size: payload.length,
         hex: toHex(payload, 32),
         description: `Password hash payload (${payload.length} bytes)`,
-      },
-    ];
+      });
+    }
+
+    return fields;
   }
 
   private parseSharePayload(

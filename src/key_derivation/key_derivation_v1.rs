@@ -115,6 +115,26 @@ impl Pbkdf2 {
 
         Ok((secret_key, derivation_params))
     }
+
+    /// Returns a `DerivationParameters` capturing the current PBKDF2 settings with a freshly
+    /// generated random salt, without performing any derivation.
+    /// Useful for passing custom parameters to [`crate::password_hash::hash_password_with_parameters`].
+    pub fn parameters(self) -> Result<DerivationParameters> {
+        let mut salt = vec![0u8; 16];
+        rand::rngs::OsRng
+            .try_fill_bytes(&mut salt)
+            .map_err(|_| Error::RandomError)?;
+        let v1 = KeyDerivationV1 {
+            iterations: self.iterations,
+            salt,
+        };
+        let mut header: Header<DerivationParameters> = Header::default();
+        header.version = KeyDerivationVersion::V1;
+        Ok(DerivationParameters {
+            header,
+            payload: DerivationParametersPayload::V1(v1),
+        })
+    }
 }
 
 impl Default for Pbkdf2 {

@@ -60,6 +60,18 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "DeriveSecretKeyArgon2ParametersSize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long DeriveSecretKeyArgon2ParametersSizeNative(UIntPtr argon2ParametersLength);
 
+        [DllImport(LibName, EntryPoint = "GetArgon2DerivationParametersSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GetArgon2DerivationParametersSizeNative(UIntPtr argon2ParametersLength);
+
+        [DllImport(LibName, EntryPoint = "GetArgon2DerivationParameters", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GetArgon2DerivationParametersNative(byte[] argon2Parameters, UIntPtr argon2ParametersLength, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName, EntryPoint = "GetPbkdf2DerivationParametersSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GetPbkdf2DerivationParametersSizeNative();
+
+        [DllImport(LibName, EntryPoint = "GetPbkdf2DerivationParameters", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GetPbkdf2DerivationParametersNative(uint iterations, byte[] result, UIntPtr resultLength);
+
         [DllImport(LibName, EntryPoint = "DeriveSecretKeyPbkdf2WithSalt", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long DeriveSecretKeyPbkdf2WithSaltNative(byte[] key, UIntPtr keyLength, System.UInt32 iterations, byte[] salt, UIntPtr saltLength, byte[] secretKey, UIntPtr secretKeyLength, byte[] paramsOut, UIntPtr paramsOutLength);
 
@@ -110,7 +122,13 @@ namespace Devolutions.Cryptography
         internal static extern long HashPasswordLengthNative();
 
         [DllImport(LibName, EntryPoint = "HashPassword", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long HashPasswordNative(byte[] password, UIntPtr passwordLength, uint iterations, byte[] result, UIntPtr resultLength);
+        internal static extern long HashPasswordNative(byte[] password, UIntPtr passwordLength, byte[] result, UIntPtr resultLength);
+
+        [DllImport(LibName, EntryPoint = "HashPasswordWithParamsLength", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long HashPasswordWithParamsLengthNative(byte[] derivationParams, UIntPtr derivationParamsLength);
+
+        [DllImport(LibName, EntryPoint = "HashPasswordWithParams", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long HashPasswordWithParamsNative(byte[] password, UIntPtr passwordLength, byte[] derivationParams, UIntPtr derivationParamsLength, byte[] result, UIntPtr resultLength);
 
         [DllImport(LibName, EntryPoint = "KeySize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern uint KeySizeNative();

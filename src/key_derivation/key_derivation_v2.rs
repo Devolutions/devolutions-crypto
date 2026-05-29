@@ -62,6 +62,21 @@ impl Argon2 {
         Self { params }
     }
 
+    /// Returns a `DerivationParameters` capturing the current Argon2 settings (including a fresh
+    /// random salt from the embedded `Argon2Parameters`) without performing any derivation.
+    /// Useful for passing custom parameters to [`crate::password_hash::hash_password_with_parameters`].
+    pub fn parameters(self) -> DerivationParameters {
+        let v2 = KeyDerivationV2 {
+            params: self.params,
+        };
+        let mut header: Header<DerivationParameters> = Header::default();
+        header.version = KeyDerivationVersion::V2;
+        DerivationParameters {
+            header,
+            payload: DerivationParametersPayload::V2(v2),
+        }
+    }
+
     /// Derives the key using the configured Argon2 parameters.
     /// The salt is embedded in `Argon2Parameters` (generated at construction time when using `new()`).
     pub fn derive(&self, key: &[u8]) -> Result<(SecretKey, DerivationParameters)> {

@@ -45,3 +45,19 @@ pub fn derive_secret_key_argon2(
         parameters: params.into(),
     })
 }
+
+#[uniffi::export]
+pub fn get_argon2_derivation_parameters(parameters: &Arc<Argon2Parameters>) -> Vec<u8> {
+    devolutions_crypto::key_derivation::Argon2::with_params(parameters.inner.clone())
+        .parameters()
+        .into()
+}
+
+#[uniffi::export(default(iterations = 600000))]
+pub fn get_pbkdf2_derivation_parameters(iterations: u32) -> Result<Vec<u8>> {
+    Ok(
+        devolutions_crypto::key_derivation::Pbkdf2::with_params(iterations)
+            .parameters()?
+            .into(),
+    )
+}

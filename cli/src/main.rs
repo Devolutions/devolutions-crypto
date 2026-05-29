@@ -125,9 +125,10 @@ enum Commands {
         /// The password to hash
         password: String,
 
-        /// The number of iteration for the derivation algorithm
+        /// Serialized DerivationParameters in base64. When omitted, uses the latest default
+        /// algorithm (Argon2id with OWASP-recommended parameters).
         #[arg(short, long)]
-        iterations: Option<u32>,
+        params: Option<String>,
     },
 
     /// Verify a password from its hash
@@ -193,10 +194,7 @@ fn main() {
         }
         Commands::Decrypt { data, key } => decrypt(data, key),
         Commands::DecryptAsymmetric { data, key } => decrypt_asymmetric(data, key),
-        Commands::HashPassword {
-            password,
-            iterations,
-        } => hash_password(password, iterations),
+        Commands::HashPassword { password, params } => hash_password(password, params),
         Commands::VerifyPassword { password, hash } => verify_password(hash, password),
         Commands::MixKeyExchange { private, public } => mix_key_exchange(private, public),
         Commands::JoinShares { shares } => join_shares(shares),
@@ -401,14 +399,27 @@ fn decrypt_asymmetric(data: String, key: String) {
     println!("{}", String::from_utf8_lossy(&result));
 }
 
-fn hash_password(password: String, iterations: Option<u32>) {
-    let iterations = iterations.unwrap_or(DEFAULT_PBKDF2_ITERATIONS);
-
-    let hash: Vec<u8> = devolutions_crypto::password_hash::hash_password(
-        &password.as_bytes(),
-        iterations,
-        Default::default(),
-    )
+fn hash_password(password: String, params: Option<String>) {
+    let hash: Vec<u8> = match params {
+        Some(p) => {
+            let params_bytes = decode_base64_arg("--params", &p);
+            let params = devolutions_crypto::key_derivation::DerivationParameters::try_from(
+                params_bytes.as_slice(),
+            )
+            .unwrap_or_else(|e| {
+                eprintln!("Error: '--params' - invalid DerivationParameters: {}.", e);
+                std::process::exit(1);
+            });
+            devolutions_crypto::password_hash::hash_password_with_parameters(
+                password.as_bytes(),
+                params,
+            )
+        }
+        None => devolutions_crypto::password_hash::hash_password(
+            password.as_bytes(),
+            Default::default(),
+        ),
+    }
     .unwrap()
     .into();
     println!("{}", base64::encode(&hash));

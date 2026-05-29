@@ -11,6 +11,5 @@ struct Input {
 }
 
 fuzz_target!(|data: Input| {
-    // Hardcode 2 iterations so it won't be too CPU demanding.
-    let _ = hash_password(&data.data, 2, data.version);
+    let _ = hash_password(&data.data, data.version);
 });
