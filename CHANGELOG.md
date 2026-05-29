@@ -25,6 +25,8 @@ if your code depends on the iterations to stay the same : `derive_key_pbkdf2`, `
 
 ### Added
 
+- Added a managed `key_derivation` module to derive `SecretKey` values from passwords and serialize the derivation parameters for later reuse.
+
 - C#: Nullable annotations were added for nullable reference types.
 
 ### Removed
