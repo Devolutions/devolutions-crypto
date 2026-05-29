@@ -84,13 +84,14 @@ impl TryFrom<&[u8]> for PasswordHashV2 {
         let params_len = cursor.read_u32::<LittleEndian>()? as usize;
         let pos = cursor.position() as usize;
 
-        if data.len() < pos + params_len {
+        let params_end = pos.checked_add(params_len).ok_or(Error::InvalidLength)?;
+        if data.len() < params_end {
             return Err(Error::InvalidLength);
         }
-        let params = DerivationParameters::try_from(&data[pos..pos + params_len])?;
+        let params = DerivationParameters::try_from(&data[pos..params_end])?;
 
-        let hash_bytes = &data[pos + params_len..];
-        if hash_bytes.is_empty() {
+        let hash_bytes = &data[params_end..];
+        if hash_bytes.len() != params.output_length() {
             return Err(Error::InvalidLength);
         }
 

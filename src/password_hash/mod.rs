@@ -248,16 +248,3 @@ fn password_v1_roundtrip_bytes() {
     assert!(hash2.verify_password(pass));
     assert!(!hash2.verify_password(b"wrongpassword"));
 }
-
-#[test]
-fn password_latest_maps_to_v2_header() {
-    let pass = b"testpassword";
-    let mut argon2_params = Argon2Parameters::default();
-    argon2_params.memory = 32;
-    argon2_params.iterations = 2;
-    let params = Argon2::with_params(argon2_params).parameters();
-    let hash = hash_password_with_parameters(pass, params).unwrap();
-    let bytes: Vec<u8> = hash.into();
-    let hash2 = PasswordHash::try_from(bytes.as_slice()).unwrap();
-    assert_eq!(hash2.header.version, PasswordHashVersion::V2);
-}

@@ -62,8 +62,7 @@ impl Argon2 {
         Self { params }
     }
 
-    /// Returns a `DerivationParameters` capturing the current Argon2 settings (including a fresh
-    /// random salt from the embedded `Argon2Parameters`) without performing any derivation.
+    /// Returns a `DerivationParameters` capturing the current Argon2 settings.
     /// Useful for passing custom parameters to [`crate::password_hash::hash_password_with_parameters`].
     pub fn parameters(self) -> DerivationParameters {
         let v2 = KeyDerivationV2 {
