@@ -9,7 +9,7 @@ class HashingTest {
     @Test
     fun passwordHashTest() {
         val password = "password".toByteArray(Charsets.UTF_8)
-        val hash = hashPassword(password, 10u)
+        val hash = hashPassword(password)
 
         assert(verifyPassword(password, hash))
     }
@@ -17,7 +17,7 @@ class HashingTest {
     @Test
     fun wrongPasswordTest() {
         val password = "password".toByteArray(Charsets.UTF_8)
-        val hash = hashPassword(password, 10u)
+        val hash = hashPassword(password)
 
         assert(!verifyPassword("pa\$\$word".toByteArray(), hash))
         assert(!verifyPassword("Password".toByteArray(), hash))
