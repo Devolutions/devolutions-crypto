@@ -77,6 +77,8 @@ pub enum PasswordHashVersion {
     Latest = 0,
     /// Uses version 1: PBKDF2-HMAC-SHA2-256.
     V1 = 1,
+    /// Uses version 2: Argon2id.
+    V2 = 2,
 }
 
 /// The versions of the key scheme to use.

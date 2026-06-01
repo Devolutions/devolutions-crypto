@@ -104,9 +104,9 @@ namespace Devolutions.Cryptography
         }
 
         [Obsolete("This method has been deprecated. Use Managed.HashPassword instead.")]
-        public static byte[] HashPassword(byte[] password, uint iterations = 600000)
+        public static byte[] HashPassword(byte[] password)
         {
-            return Managed.HashPassword(password, iterations);
+            return Managed.HashPassword(password);
         }
 
         [Obsolete("This method has been deprecated. Use Managed.HashPassword instead.")]

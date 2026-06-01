@@ -173,8 +173,7 @@ You can use this module to hash a password and validate it afterward. This is th
 use devolutions_crypto::password_hash::{hash_password, PasswordHashVersion};
 
 let password = b"somesuperstrongpa$$w0rd!";
-
-let hashed_password = hash_password(password, 600000, PasswordHashVersion::Latest);
+let hashed_password = hash_password(password, PasswordHashVersion::Latest).unwrap();
 
 assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!"));
 assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));

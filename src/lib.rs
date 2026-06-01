@@ -164,7 +164,7 @@
 //!
 //! let password = b"somesuperstrongpa$$w0rd!";
 //!
-//! let hashed_password = hash_password(password, 600000, PasswordHashVersion::Latest).expect("hash password shouldn't fail");;
+//! let hashed_password = hash_password(password, PasswordHashVersion::Latest).expect("hash password shouldn't fail");
 //!
 //! assert!(hashed_password.verify_password(b"somesuperstrongpa$$w0rd!"));
 //! assert!(!hashed_password.verify_password(b"someweakpa$$w0rd!"));

@@ -45,8 +45,20 @@ export function generateKey(length?: number): Uint8Array {
     return devolutionsCrypto.generateKey(length);
 }
 
-export function hashPassword(password: Uint8Array, iterations?: number, version?: PasswordHashVersion): Uint8Array {
-    return devolutionsCrypto.hashPassword(password, iterations, version);
+export function hashPassword(password: Uint8Array, version?: PasswordHashVersion): Uint8Array {
+    return devolutionsCrypto.hashPassword(password, version);
+}
+
+export function hashPasswordWithParams(password: Uint8Array, params: Uint8Array): Uint8Array {
+    return devolutionsCrypto.hashPasswordWithParams(password, params);
+}
+
+export function getArgon2DerivationParameters(parameters: Argon2Parameters): Uint8Array {
+    return devolutionsCrypto.getArgon2DerivationParameters(parameters);
+}
+
+export function getPbkdf2DerivationParameters(iterations?: number): Uint8Array {
+    return devolutionsCrypto.getPbkdf2DerivationParameters(iterations);
 }
 
 export function verifyPassword(password: Uint8Array, hash: Uint8Array): boolean {

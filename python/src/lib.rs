@@ -96,13 +96,8 @@ fn encrypt_asymmetric(
 
 #[pyfunction]
 #[pyo3(name = "hash_password")]
-#[pyo3(signature = (password, iterations=600000, version=0))]
-fn hash_password(
-    py: Python,
-    password: &[u8],
-    iterations: u32,
-    version: u16,
-) -> Result<Py<PyBytes>> {
+#[pyo3(signature = (password, version=0))]
+fn hash_password(py: Python, password: &[u8], version: u16) -> Result<Py<PyBytes>> {
     let version = match devolutions_crypto::password_hash::PasswordHashVersion::try_from(version) {
         Ok(v) => v,
         Err(_) => {
@@ -111,8 +106,16 @@ fn hash_password(
         }
     };
 
+    let hash: Vec<u8> = devolutions_crypto::password_hash::hash_password(password, version)?.into();
+    Ok(PyBytes::new(py, &hash).into())
+}
+
+#[pyfunction]
+#[pyo3(name = "hash_password_with_params")]
+fn hash_password_with_params(py: Python, password: &[u8], params: &[u8]) -> Result<Py<PyBytes>> {
+    let dp = devolutions_crypto::key_derivation::DerivationParameters::try_from(params)?;
     let hash: Vec<u8> =
-        devolutions_crypto::password_hash::hash_password(password, iterations, version)?.into();
+        devolutions_crypto::password_hash::hash_password_with_parameters(password, dp)?.into();
     Ok(PyBytes::new(py, &hash).into())
 }
 
@@ -181,6 +184,30 @@ fn derive_key_argon2(py: Python, key: &[u8], parameters: &[u8]) -> Result<Py<PyB
 
     let key = utils::derive_key_argon2(key, &parameters)?;
     Ok(PyBytes::new(py, &key).into())
+}
+
+#[pyfunction]
+#[pyo3(name = "get_argon2_derivation_parameters")]
+#[pyo3(signature = (parameters=None))]
+fn get_argon2_derivation_parameters(py: Python, parameters: Option<&[u8]>) -> Result<Py<PyBytes>> {
+    let params = match parameters {
+        Some(p) => Argon2Parameters::try_from(p)?,
+        None => Argon2Parameters::default(),
+    };
+    let dp: Vec<u8> = devolutions_crypto::key_derivation::Argon2::with_params(params)
+        .parameters()
+        .into();
+    Ok(PyBytes::new(py, &dp).into())
+}
+
+#[pyfunction]
+#[pyo3(name = "get_pbkdf2_derivation_parameters")]
+#[pyo3(signature = (iterations=600000))]
+fn get_pbkdf2_derivation_parameters(py: Python, iterations: u32) -> Result<Py<PyBytes>> {
+    let dp: Vec<u8> = devolutions_crypto::key_derivation::Pbkdf2::with_params(iterations)
+        .parameters()?
+        .into();
+    Ok(PyBytes::new(py, &dp).into())
 }
 
 #[pyfunction]
@@ -336,9 +363,12 @@ fn devolutions_crypto_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(encrypt_asymmetric, m)?)?;
     m.add_function(wrap_pyfunction!(decrypt_asymmetric, m)?)?;
     m.add_function(wrap_pyfunction!(hash_password, m)?)?;
+    m.add_function(wrap_pyfunction!(hash_password_with_params, m)?)?;
     m.add_function(wrap_pyfunction!(verify_password, m)?)?;
     m.add_function(wrap_pyfunction!(derive_key_pbkdf2, m)?)?;
     m.add_function(wrap_pyfunction!(derive_key_argon2, m)?)?;
+    m.add_function(wrap_pyfunction!(get_argon2_derivation_parameters, m)?)?;
+    m.add_function(wrap_pyfunction!(get_pbkdf2_derivation_parameters, m)?)?;
     m.add_function(wrap_pyfunction!(sign, m)?)?;
     m.add_function(wrap_pyfunction!(verify_signature, m)?)?;
     m.add_function(wrap_pyfunction!(generate_keypair, m)?)?;

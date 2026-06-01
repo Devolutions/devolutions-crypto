@@ -60,6 +60,7 @@ pub enum KeyDerivationVersion {
 pub enum PasswordHashVersion {
     Latest,
     V1,
+    V2,
 }
 
 #[uniffi::remote(Enum)]

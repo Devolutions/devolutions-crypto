@@ -127,16 +127,17 @@ def decrypt_asymmetric(
 
 def hash_password(
     password: bytes,
-    iterations: int = 600000,
     version: int = 0
 ) -> bytes:
     """
-    Hash a password using a secure password hashing algorithm (PBKDF2).
+    Hash a password using a secure password hashing algorithm.
+
+    Uses Argon2id (V2) by default.
+    Use ``version=1`` for PBKDF2-SHA256.
 
     Args:
         password: The password to hash
-        iterations: Number of iterations for the KDF (default: 600000, higher is more secure)
-        version: Password hash version (default: 0)
+        version: Password hash version (default: 0 = Latest = Argon2id V2)
 
     Returns:
         The password hash as bytes (contains salt and parameters)
@@ -146,7 +147,32 @@ def hash_password(
 
     Example:
         >>> password = b'my_secure_password'
-        >>> hash_value = hash_password(password, iterations=600000)
+        >>> hash_value = hash_password(password)
+        >>> assert verify_password(password, hash_value)
+    """
+    ...
+
+def hash_password_with_params(
+    password: bytes,
+    params: bytes
+) -> bytes:
+    """
+    Hash a password using serialized DerivationParameters.
+
+    Args:
+        password: The password to hash
+        params: Serialized DerivationParameters bytes (Argon2id or PBKDF2)
+
+    Returns:
+        The password hash as bytes
+
+    Raises:
+        DevolutionsCryptoException: If hashing fails or invalid parameters
+
+    Example:
+        >>> result = derive_secret_key_argon2(b'seed')
+        >>> hash_value = hash_password_with_params(b'my_secure_password', result.parameters)
+        >>> assert verify_password(b'my_secure_password', hash_value)
     """
     ...
 
@@ -217,6 +243,46 @@ def derive_key_argon2(
 
     Example:
         >>> derived = derive_key_argon2(b'password', parameters)
+    """
+    ...
+
+def get_argon2_derivation_parameters(parameters: bytes | None = None) -> bytes:
+    """
+    Build serialized ``DerivationParameters`` from the given Argon2 parameters without
+    performing any key derivation.
+
+    Args:
+        parameters: Serialized Argon2Parameters bytes.  Uses library defaults when ``None``.
+
+    Returns:
+        Serialized DerivationParameters bytes suitable for :func:`hash_password_with_params`.
+
+    Raises:
+        DevolutionsCryptoException: If the parameters are invalid.
+
+    Example:
+        >>> dp = get_argon2_derivation_parameters()
+        >>> hashed = hash_password_with_params(b'my password', dp)
+    """
+    ...
+
+def get_pbkdf2_derivation_parameters(iterations: int = 600000) -> bytes:
+    """
+    Build serialized ``DerivationParameters`` for PBKDF2 with the given iteration count,
+    without performing any key derivation.
+
+    Args:
+        iterations: Number of PBKDF2 iterations (default: 600,000).
+
+    Returns:
+        Serialized DerivationParameters bytes suitable for :func:`hash_password_with_params`.
+
+    Raises:
+        DevolutionsCryptoException: If parameter generation fails.
+
+    Example:
+        >>> dp = get_pbkdf2_derivation_parameters(iterations=600000)
+        >>> hashed = hash_password_with_params(b'my password', dp)
     """
     ...
 

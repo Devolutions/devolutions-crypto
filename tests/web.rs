@@ -23,7 +23,7 @@ cfg_if! {
         fn test_hash_password() {
             let password = "ThisIsAGoodPassword123".as_bytes();
 
-            let hash = wasm::hash_password(password, Some(123), None).unwrap();
+            let hash = wasm::hash_password(password, None).unwrap();
             assert!(wasm::verify_password(password, &hash).unwrap());
 
             let bad_password = "thisisabadpassword1234".as_bytes();

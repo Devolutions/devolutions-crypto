@@ -1,14 +1,16 @@
 use crate::PasswordHashVersion;
 use crate::Result;
 
-#[uniffi::export(default(iterations = 10000, version = None))]
-pub fn hash_password(
-    password: &[u8],
-    iterations: u32,
-    version: Option<PasswordHashVersion>,
-) -> Result<Vec<u8>> {
+#[uniffi::export(default(version = None))]
+pub fn hash_password(password: &[u8], version: Option<PasswordHashVersion>) -> Result<Vec<u8>> {
     let version = version.unwrap_or(PasswordHashVersion::Latest);
-    Ok(devolutions_crypto::password_hash::hash_password(password, iterations, version)?.into())
+    Ok(devolutions_crypto::password_hash::hash_password(password, version)?.into())
+}
+
+#[uniffi::export]
+pub fn hash_password_with_params(password: &[u8], params: &[u8]) -> Result<Vec<u8>> {
+    let dp = devolutions_crypto::key_derivation::DerivationParameters::try_from(params)?;
+    Ok(devolutions_crypto::password_hash::hash_password_with_parameters(password, dp)?.into())
 }
 
 #[uniffi::export]

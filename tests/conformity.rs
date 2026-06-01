@@ -244,6 +244,22 @@ fn test_password_hashing_v1() {
 }
 
 #[test]
+fn test_password_hashing_v2() {
+    // Argon2id hash for "password1" with memory=65536 KiB, iterations=3, salt="conformity_salt!"
+    // Generated with: Argon2Parameters { memory: 65536, iterations: 3, salt: "conformity_salt!" }
+    let hash = PasswordHash::try_from(
+        general_purpose::STANDARD
+            .decode("DQwDAAAAAgA2AAAADQwIAAAAAgABAAAAIAAAAAEAAAAAAAEAAwAAAAITAAAAABAAAABjb25mb3JtaXR5X3NhbHQh0qPjrO8QR1p1wS+cThwEhBO+ouwFraKqpo0TVJLosMM=")
+            .unwrap()
+            .as_slice(),
+    )
+    .unwrap();
+
+    assert!(hash.verify_password(b"password1"));
+    assert!(!hash.verify_password(b"password2"));
+}
+
+#[test]
 fn test_signature_v1() {
     use devolutions_crypto::signature::Signature;
     use devolutions_crypto::signing_key::SigningPublicKey;

@@ -370,6 +370,24 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
+        public void HashPasswordWithParams()
+        {
+            Argon2Parameters parameters = new()
+            {
+                Memory = 32,
+                Iterations = 2,
+            };
+            byte[] derivationParams = Managed.GetArgon2DerivationParameters(parameters);
+
+            byte[] hash = Managed.HashPasswordWithParams(TestData.BytesTestKey, derivationParams);
+            Assert.IsNotNull(hash);
+            Assert.IsTrue(hash.Length > 0);
+
+            Assert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, hash));
+            Assert.IsFalse(Managed.VerifyPassword(TestData.BytesTestData, hash));
+        }
+
+        [TestMethod]
         public void JoinShares()
         {
             var shares = GetSharesKeys();

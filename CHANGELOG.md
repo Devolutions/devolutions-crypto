@@ -13,6 +13,12 @@ uses of the following methods. Specify the numbers iterations when calling the m
 if your code depends on the iterations to stay the same : `derive_key_pbkdf2`, `deriveKeyPbkdf2`, `DeriveKeyPbkdf2`,
 `EncryptWithPassword`, `EncryptWithPasswordAsBase64String`, `DecryptWithPassword`, `DecryptWithPasswordAsUtf8String`, `DeriveKey`
 
+- `hash_password` no longer accepts an `iterations` parameter. The function signature is now `hash_password(password, version)`. Callers that previously passed a custom iteration count must switch to the new `hash_password_with_parameters` / `HashPasswordWithParams` / `hash_password_with_params` APIs and supply explicit `DerivationParameters`.
+
+### Added
+
+- **`PasswordHashVersion::V2`**: new Argon2id-based password hashing using OWASP-recommended defaults (memory = 64 MiB, iterations = 3). This is now the default (`PasswordHashVersion::Latest`).
+
 ### Changed
 
 - Multiple functions, such as `generate_key` and `hash_password`, now return a `Result` due to the `rand` library upgrade.

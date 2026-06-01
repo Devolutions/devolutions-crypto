@@ -17,9 +17,9 @@ pip install devolutions-crypto
 
 - **Symmetric Encryption**: Fast AES-256-GCM encryption for shared-key scenarios
 - **Asymmetric Encryption**: X25519-based public-key encryption
-- **Password Hashing**: Secure password hashing with PBKDF2
+- **Password Hashing**: Secure password hashing with Argon2 and PBKDF2
 - **Digital Signatures**: Ed25519 signatures for data authentication
-- **Key Derivation**: PBKDF2 and Argon2 key derivation functions
+- **Key Derivation**: Argon2 and PBKDF2 key derivation functions
 - **Type Safety**: Full type hints and IDE support via stub files
 
 ## Quick Start
@@ -150,7 +150,6 @@ import devolutions_crypto
 password = b"my_secure_password123!"
 password_hash = devolutions_crypto.hash_password(
     password,
-    iterations=600000,  # Higher is more secure but slower
     version=0
 )
 

@@ -24,8 +24,10 @@ use devolutions_crypto::ciphertext::{
 use devolutions_crypto::key::{
     generate_keypair, generate_secret_key, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
 };
-use devolutions_crypto::key_derivation::{Argon2, Pbkdf2};
-use devolutions_crypto::password_hash::{hash_password, PasswordHash, PasswordHashVersion};
+use devolutions_crypto::key_derivation::{Argon2, DerivationParameters, Pbkdf2};
+use devolutions_crypto::password_hash::{
+    hash_password, hash_password_with_parameters, PasswordHash, PasswordHashVersion,
+};
 use devolutions_crypto::secret_sharing::{
     generate_shared_key, join_shares, SecretSharingVersion, Share,
 };
@@ -41,9 +43,6 @@ use devolutions_crypto::{
 };
 
 use devolutions_crypto::Result;
-
-#[cfg(test)]
-use devolutions_crypto::key_derivation::DerivationParameters;
 
 use std::borrow::Borrow;
 use std::ffi::c_void;
@@ -459,8 +458,6 @@ pub extern "C" fn SignSize(_version: u16) -> i64 {
 /// # Arguments
 ///  * `password` - Pointer to the password to hash.
 ///  * `password_length` - Length of the password to hash.
-///  * `iterations` - Number of iterations of the password hash.
-///                   A higher number is slower but harder to brute-force. The recommended value is 600000.
 ///  * `result` - Pointer to the buffer to write the hash to.
 ///  * `result_length` - Length of the buffer to write the hash to. You can get the value by
 ///                         calling HashPasswordLength() beforehand.
@@ -473,7 +470,6 @@ pub extern "C" fn SignSize(_version: u16) -> i64 {
 pub unsafe extern "C" fn HashPassword(
     password: *const u8,
     password_length: usize,
-    iterations: u32,
     result: *mut u8,
     result_length: usize,
 ) -> i64 {
@@ -488,23 +484,105 @@ pub unsafe extern "C" fn HashPassword(
     let password = slice::from_raw_parts(password, password_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    let res: Zeroizing<Vec<u8>> =
-        match hash_password(password, iterations, PasswordHashVersion::Latest) {
-            Ok(x) => Zeroizing::new(x.into()),
-            Err(e) => return e.error_code(),
-        };
+    let res: Zeroizing<Vec<u8>> = match hash_password(password, PasswordHashVersion::Latest) {
+        Ok(x) => Zeroizing::new(x.into()),
+        Err(e) => return e.error_code(),
+    };
 
     let length = res.len();
     result[0..length].copy_from_slice(&res);
     length as i64
 }
 
-/// Get the size of the resulting hash.
-/// # Returns
 /// Returns the length of the hash to input as `result_length` in `HashPassword()`.
+/// The size reflects the default Argon2id parameters.
+/// # Returns
+/// Returns the length of the hash.
 #[no_mangle]
 pub extern "C" fn HashPasswordLength() -> i64 {
-    8 + 4 + 32 + 32 // Header + iterations + salt + hash
+    // 8 (PasswordHash header)
+    // + 4 (u32 params_len)
+    // + 8 (DerivationParameters header)
+    // + GetDefaultArgon2ParametersSize() (Argon2Parameters default)
+    // + 32 (Argon2 default output length)
+    8 + 4 + 8 + GetDefaultArgon2ParametersSize() + 32
+}
+
+/// Hash a password using caller-supplied serialized [`DerivationParameters`].
+///
+/// This allows full control over the hashing algorithm (Argon2id or PBKDF2) and
+/// its parameters.  Use `HashPasswordWithParamsLength()` to obtain the required output buffer size.
+/// # Arguments
+///  * `password` - Pointer to the password to hash.
+///  * `password_length` - Length of the password.
+///  * `params` - Pointer to the serialized `DerivationParameters` bytes.
+///  * `params_length` - Length of the serialized `DerivationParameters`.
+///  * `result` - Pointer to the output buffer.
+///  * `result_length` - Length of the output buffer (use `HashPasswordWithParamsLength()`).
+/// # Returns
+/// Returns the number of bytes written, or a negative error code.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe.
+#[no_mangle]
+pub unsafe extern "C" fn HashPasswordWithParams(
+    password: *const u8,
+    password_length: usize,
+    params: *const u8,
+    params_length: usize,
+    result: *mut u8,
+    result_length: usize,
+) -> i64 {
+    if password.is_null() || params.is_null() || result.is_null() {
+        return Error::NullPointer.error_code();
+    };
+
+    let password = slice::from_raw_parts(password, password_length);
+    let params_slice = slice::from_raw_parts(params, params_length);
+    let result = slice::from_raw_parts_mut(result, result_length);
+
+    let dp = match DerivationParameters::try_from(params_slice) {
+        Ok(p) => p,
+        Err(e) => return e.error_code(),
+    };
+
+    let expected_len = HashPasswordWithParamsLength(params, params_length) as usize;
+    if result_length != expected_len {
+        return Error::InvalidOutputLength.error_code();
+    };
+
+    let res: Zeroizing<Vec<u8>> = match hash_password_with_parameters(password, dp) {
+        Ok(x) => Zeroizing::new(x.into()),
+        Err(e) => return e.error_code(),
+    };
+
+    let length = res.len();
+    result[0..length].copy_from_slice(&res);
+    length as i64
+}
+
+/// Returns the output buffer size required for `HashPasswordWithParams()`.
+/// # Arguments
+///  * `params` - Pointer to the serialized `DerivationParameters` bytes.
+///  * `params_length` - Length of the serialized `DerivationParameters`.
+/// # Returns
+/// Returns the required output length, or a negative error code.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe.
+#[no_mangle]
+pub unsafe extern "C" fn HashPasswordWithParamsLength(
+    params: *const u8,
+    params_length: usize,
+) -> i64 {
+    if params.is_null() {
+        return Error::NullPointer.error_code();
+    };
+    let params_slice = slice::from_raw_parts(params, params_length);
+    let dp = match DerivationParameters::try_from(params_slice) {
+        Ok(p) => p,
+        Err(e) => return e.error_code(),
+    };
+    // 8 (PasswordHash header) + 4 (u32 params_len) + params_length + hash_length
+    (8 + 4 + params_length + dp.output_length()) as i64
 }
 
 /// Verify a password against a hash with constant-time equality.
@@ -1619,6 +1697,97 @@ pub extern "C" fn DeriveSecretKeyArgon2ParametersSize(argon2_parameters_length: 
     (8 + argon2_parameters_length) as i64
 }
 
+/// Returns the required output buffer size for `GetArgon2DerivationParameters()`.
+/// The size is: 8 (header) + argon2_parameters_length (serialized Argon2Parameters bytes).
+/// # Arguments
+///  * argon2_parameters_length - The length of the Argon2Parameters bytes.
+#[no_mangle]
+pub extern "C" fn GetArgon2DerivationParametersSize(argon2_parameters_length: usize) -> i64 {
+    (8 + argon2_parameters_length) as i64
+}
+
+/// Build a serialized `DerivationParameters` from the given `Argon2Parameters` without
+/// performing any key derivation.  This is the low-cost counterpart to `DeriveSecretKeyArgon2()`.
+/// # Arguments
+///  * `argon2_parameters` - Pointer to the serialized `Argon2Parameters`.
+///  * `argon2_parameters_length` - Length of the `Argon2Parameters` buffer.
+///  * `result` - Pointer to the output buffer.
+///               Must be `GetArgon2DerivationParametersSize(argon2_parameters_length)` bytes.
+///  * `result_length` - Length of the output buffer.
+/// # Returns
+/// Returns the number of bytes written, or a negative error code.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe.
+#[no_mangle]
+pub unsafe extern "C" fn GetArgon2DerivationParameters(
+    argon2_parameters: *const u8,
+    argon2_parameters_length: usize,
+    result: *mut u8,
+    result_length: usize,
+) -> i64 {
+    if argon2_parameters.is_null() || result.is_null() {
+        return Error::NullPointer.error_code();
+    }
+
+    if result_length != GetArgon2DerivationParametersSize(argon2_parameters_length) as usize {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    let argon2_parameters_raw = slice::from_raw_parts(argon2_parameters, argon2_parameters_length);
+    let argon2_params = match Argon2Parameters::try_from(argon2_parameters_raw) {
+        Ok(x) => x,
+        Err(e) => return e.error_code(),
+    };
+
+    let dp_bytes: Vec<u8> = Argon2::with_params(argon2_params).parameters().into();
+    let result = slice::from_raw_parts_mut(result, result_length);
+    result.copy_from_slice(&dp_bytes);
+    result_length as i64
+}
+
+/// Returns the required output buffer size for `GetPbkdf2DerivationParameters()`.
+/// The size is always 32 bytes: 8 (header) + 4 (iterations) + 4 (salt length) + 16 (salt).
+#[no_mangle]
+pub extern "C" fn GetPbkdf2DerivationParametersSize() -> i64 {
+    32 // 8 header + 4 iterations + 4 salt_len + 16 salt
+}
+
+/// Build a serialized `DerivationParameters` for PBKDF2 with the given iteration count,
+/// without performing any key derivation.
+/// # Arguments
+///  * `iterations` - Number of PBKDF2 iterations.
+///  * `result` - Pointer to the output buffer.
+///               Must be `GetPbkdf2DerivationParametersSize()` bytes.
+///  * `result_length` - Length of the output buffer.
+/// # Returns
+/// Returns the number of bytes written, or a negative error code.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe.
+#[no_mangle]
+pub unsafe extern "C" fn GetPbkdf2DerivationParameters(
+    iterations: u32,
+    result: *mut u8,
+    result_length: usize,
+) -> i64 {
+    if result.is_null() {
+        return Error::NullPointer.error_code();
+    }
+
+    if result_length != GetPbkdf2DerivationParametersSize() as usize {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    let dp = match Pbkdf2::with_params(iterations).parameters() {
+        Ok(x) => x,
+        Err(e) => return e.error_code(),
+    };
+
+    let dp_bytes: Vec<u8> = dp.into();
+    let result = slice::from_raw_parts_mut(result, result_length);
+    result.copy_from_slice(&dp_bytes);
+    result_length as i64
+}
+
 /// # Arguments
 ///  * `data` - Pointer to the input buffer.
 ///  * `data_length` - Length of the input buffer.
@@ -1960,14 +2129,12 @@ fn test_hash_password_length() {
     let long_password = b"this is a very long and complicated password that is, I hope,\
      longer than the length of the actual hash. It also contains we1rd pa$$w0rd///s.\\";
 
-    let small_password_hash: Vec<u8> =
-        hash_password(small_password, 100, PasswordHashVersion::Latest)
-            .unwrap()
-            .into();
-    let long_password_hash: Vec<u8> =
-        hash_password(long_password, 2642, PasswordHashVersion::Latest)
-            .unwrap()
-            .into();
+    let small_password_hash: Vec<u8> = hash_password(small_password, PasswordHashVersion::Latest)
+        .unwrap()
+        .into();
+    let long_password_hash: Vec<u8> = hash_password(long_password, PasswordHashVersion::Latest)
+        .unwrap()
+        .into();
 
     assert_eq!(HashPasswordLength() as usize, small_password_hash.len());
     assert_eq!(HashPasswordLength() as usize, long_password_hash.len());

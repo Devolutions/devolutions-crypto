@@ -97,6 +97,63 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// Build serialized <see cref="DerivationParameters"/> from the given <see cref="Argon2Parameters"/>
+        /// without performing any key derivation.
+        /// </summary>
+        /// <param name="parameters">
+        /// The Argon2 parameters to use. Defaults to <see cref="GetDefaultArgon2Parameters"/> when <c>null</c>.
+        /// </param>
+        /// <returns>Serialized <see cref="DerivationParameters"/> bytes suitable for use with <see cref="HashPasswordWithParams"/>.</returns>
+        public static byte[] GetArgon2DerivationParameters(Argon2Parameters? parameters = null)
+        {
+            Argon2Parameters argon2Params = parameters ?? GetDefaultArgon2Parameters();
+            byte[] rawParams = argon2Params.ToByteArray();
+
+            long size = Native.GetArgon2DerivationParametersSizeNative((UIntPtr)rawParams.Length);
+
+            if (size < 0)
+            {
+                Utils.HandleError(size);
+            }
+
+            byte[] result = new byte[size];
+            long res = Native.GetArgon2DerivationParametersNative(rawParams, (UIntPtr)rawParams.Length, result, (UIntPtr)result.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Build serialized <see cref="DerivationParameters"/> for PBKDF2 with the given iteration count,
+        /// without performing any key derivation.
+        /// </summary>
+        /// <param name="iterations">Number of PBKDF2 iterations. Defaults to 600,000.</param>
+        /// <returns>Serialized <see cref="DerivationParameters"/> bytes suitable for use with <see cref="HashPasswordWithParams"/>.</returns>
+        public static byte[] GetPbkdf2DerivationParameters(uint iterations = DEFAULT_PBKDF2_ITERATIONS)
+        {
+            long size = Native.GetPbkdf2DerivationParametersSizeNative();
+
+            if (size < 0)
+            {
+                Utils.HandleError(size);
+            }
+
+            byte[] result = new byte[size];
+            long res = Native.GetPbkdf2DerivationParametersNative(iterations, result, (UIntPtr)result.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Encrypts the data (which will be encoded into a UTF8 byte array) with the provided key.
         /// </summary>
         /// <param name="data">The data to encrypt.</param>
@@ -614,11 +671,11 @@ namespace Devolutions.Cryptography
 
         /// <summary>
         /// Hash a password.
+        /// Use <see cref="HashPasswordWithParams"/> to supply custom <see cref="DerivationParameters"/>.
         /// </summary>
         /// <param name="password">The password to hash in bytes.</param>
-        /// <param name="iterations">The number of iterations used to hash the password (defaults to 600,000).</param>
         /// <returns>Returns the hashed password in bytes.</returns>
-        public static byte[] HashPassword(byte[] password, uint iterations = DEFAULT_PBKDF2_ITERATIONS)
+        public static byte[] HashPassword(byte[] password)
         {
             if (password == null || password.Length == 0)
             {
@@ -633,7 +690,39 @@ namespace Devolutions.Cryptography
             }
 
             byte[] result = new byte[hashLength];
-            long res = Native.HashPasswordNative(password, (UIntPtr)password.Length, iterations, result, (UIntPtr)result.Length);
+            long res = Native.HashPasswordNative(password, (UIntPtr)password.Length, result, (UIntPtr)result.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Hash a password using the supplied serialized <see cref="DerivationParameters"/>.
+        /// Use <see cref="HashPassword"/> for the default Argon2id behaviour.
+        /// </summary>
+        /// <param name="password">The password to hash in bytes.</param>
+        /// <param name="derivationParams">Serialized <see cref="DerivationParameters"/> bytes.</param>
+        /// <returns>Returns the hashed password in bytes.</returns>
+        public static byte[] HashPasswordWithParams(byte[] password, byte[] derivationParams)
+        {
+            if (password == null || password.Length == 0 || derivationParams == null || derivationParams.Length == 0)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            long hashLength = Native.HashPasswordWithParamsLengthNative(derivationParams, (UIntPtr)derivationParams.Length);
+
+            if (hashLength < 0)
+            {
+                Utils.HandleError(hashLength);
+            }
+
+            byte[] result = new byte[hashLength];
+            long res = Native.HashPasswordWithParamsNative(password, (UIntPtr)password.Length, derivationParams, (UIntPtr)derivationParams.Length, result, (UIntPtr)result.Length);
 
             if (res < 0)
             {
