@@ -77,8 +77,8 @@ pub(super) enum DerivationParametersPayload {
 }
 
 #[cfg(feature = "fuzz")]
-impl Arbitrary for KeyDerivationV1 {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+impl<'a> Arbitrary<'a> for KeyDerivationV1 {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         Ok(KeyDerivationV1 {
             iterations: u32::arbitrary(u)?,
             salt: Vec::<u8>::arbitrary(u)?,
@@ -87,8 +87,8 @@ impl Arbitrary for KeyDerivationV1 {
 }
 
 #[cfg(feature = "fuzz")]
-impl Arbitrary for KeyDerivationV2 {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+impl<'a> Arbitrary<'a> for KeyDerivationV2 {
+    fn arbitrary(_u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         Ok(KeyDerivationV2 {
             params: Argon2Parameters::default(),
         })

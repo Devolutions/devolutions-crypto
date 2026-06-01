@@ -5,7 +5,7 @@ use std::{
 
 use argon2::{Config, Variant, Version};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use rand::TryRngCore;
+use rand::TryRng;
 use typed_builder::TypedBuilder;
 
 #[cfg(feature = "wbindgen")]
@@ -19,7 +19,7 @@ pub mod defaults {
     use super::Result;
     use argon2::Variant;
     use argon2::Version;
-    use rand::TryRngCore;
+    use rand::TryRng;
 
     pub const LENGTH: u32 = 32;
     pub const LANES: u32 = 1;
@@ -31,7 +31,7 @@ pub mod defaults {
 
     pub fn salt() -> Result<Vec<u8>> {
         let mut salt = vec![0u8; 16];
-        rand::rngs::OsRng
+        rand::rngs::SysRng
             .try_fill_bytes(salt.as_mut_slice())
             .map_err(|_| Error::RandomError)?;
         Ok(salt)
@@ -98,7 +98,7 @@ impl Default for Argon2Parameters {
     fn default() -> Self {
         let mut salt = vec![0u8; 16];
 
-        rand::rngs::OsRng
+        rand::rngs::SysRng
             .try_fill_bytes(salt.as_mut_slice())
             .unwrap();
 

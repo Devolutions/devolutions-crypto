@@ -16,7 +16,7 @@ use sha2::{Digest, Sha256};
 use x25519_dalek::StaticSecret;
 use zeroize::{Zeroize, Zeroizing};
 
-use rand::TryRngCore;
+use rand::TryRng;
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -36,8 +36,8 @@ pub struct CiphertextV2Asymmetric {
 }
 
 #[cfg(feature = "fuzz")]
-impl Arbitrary for CiphertextV2Asymmetric {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+impl<'a> Arbitrary<'a> for CiphertextV2Asymmetric {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         let public_key: [u8; 32] = Arbitrary::arbitrary(u)?;
         let public_key = x25519_dalek::PublicKey::from(public_key);
         let ciphertext = CiphertextV2Symmetric::arbitrary(u)?;
@@ -93,7 +93,7 @@ impl CiphertextV2Symmetric {
         // Generate nonce
         let mut nonce_bytes = [0u8; 24];
 
-        rand::rngs::OsRng
+        rand::rngs::SysRng
             .try_fill_bytes(&mut nonce_bytes)
             .map_err(|_| Error::RandomError)?;
 

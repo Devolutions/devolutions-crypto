@@ -36,8 +36,8 @@ pub struct PasswordHashV2 {
 }
 
 #[cfg(feature = "fuzz")]
-impl Arbitrary for PasswordHashV2 {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+impl<'a> Arbitrary<'a> for PasswordHashV2 {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         Ok(Self {
             params: DerivationParameters::arbitrary(u)?,
             hash: Zeroizing::new(Vec::<u8>::arbitrary(u)?),

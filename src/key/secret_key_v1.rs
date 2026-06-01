@@ -22,8 +22,8 @@ impl core::fmt::Debug for SecretKeyV1 {
 }
 
 #[cfg(feature = "fuzz")]
-impl Arbitrary for SecretKeyV1 {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+impl<'a> Arbitrary<'a> for SecretKeyV1 {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         let key: [u8; 32] = Arbitrary::arbitrary(u)?;
         Ok(Self {
             key: Zeroizing::new(key),

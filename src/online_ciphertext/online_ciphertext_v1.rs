@@ -16,7 +16,7 @@ use chacha20poly1305::{KeyInit, XChaCha20Poly1305};
 use x25519_dalek::StaticSecret;
 use zeroize::Zeroizing;
 
-use rand::TryRngCore;
+use rand::TryRng;
 
 use paste::paste;
 
@@ -298,7 +298,7 @@ impl OnlineCiphertextV1Encryptor {
     pub fn new(key: &[u8], mut aad: Vec<u8>, chunk_size: u32) -> Result<Self> {
         // Generate a new nonce
         let mut nonce = [0u8; 20];
-        rand::rngs::OsRng
+        rand::rngs::SysRng
             .try_fill_bytes(&mut nonce)
             .map_err(|_| Error::RandomError)?;
 
@@ -337,7 +337,7 @@ impl OnlineCiphertextV1Encryptor {
 
         // Generate a new nonce
         let mut nonce = [0u8; 20];
-        rand::rngs::OsRng
+        rand::rngs::SysRng
             .try_fill_bytes(&mut nonce)
             .map_err(|_| Error::RandomError)?;
 

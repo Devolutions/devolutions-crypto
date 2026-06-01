@@ -1,5 +1,5 @@
 //! Possible errors in the library.
-use cbc::cipher::block_padding::UnpadError;
+use cbc::cipher::block_padding::Error as UnpadError;
 
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::JsValue;

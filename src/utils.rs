@@ -7,7 +7,7 @@ use base64::{
 };
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
-use rand::TryRngCore;
+use rand::TryRng;
 use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
 
@@ -32,7 +32,7 @@ use super::Result;
 /// ```
 pub fn generate_key(length: usize) -> Result<Vec<u8>> {
     let mut key = vec![0u8; length];
-    rand::rngs::OsRng
+    rand::rngs::SysRng
         .try_fill_bytes(&mut key)
         .map_err(|_| Error::RandomError)?;
     Ok(key)
@@ -143,7 +143,7 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
 pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) -> String {
     use byteorder::{ByteOrder, LittleEndian};
 
-    let params = scrypt::Params::new(log_n, r, p, 32).expect("params should be valid");
+    let params = scrypt::Params::new(log_n, r, p).expect("params should be valid");
 
     // 256-bit derived key
     let mut dk = [0u8; 32];
