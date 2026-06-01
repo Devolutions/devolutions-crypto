@@ -28,8 +28,8 @@ impl core::fmt::Debug for SigningKeyV1Pair {
 }
 
 #[cfg(feature = "fuzz")]
-impl Arbitrary for SigningKeyV1Pair {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+impl<'a> Arbitrary<'a> for SigningKeyV1Pair {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         let mut keypair = [0u8; 64];
         u.fill_buffer(&mut keypair)?;
 
@@ -46,8 +46,8 @@ pub struct SigningKeyV1Public {
 }
 
 #[cfg(feature = "fuzz")]
-impl Arbitrary for SigningKeyV1Public {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+impl<'a> Arbitrary<'a> for SigningKeyV1Public {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         let public_key: [u8; 32] = Arbitrary::arbitrary(u)?;
         match VerifyingKey::from_bytes(&public_key) {
             Ok(key) => Ok(Self { key }),

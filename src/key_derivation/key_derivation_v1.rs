@@ -5,7 +5,7 @@ use std::io::{Cursor, Read, Write};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use zeroize::Zeroizing;
 
-use rand::TryRngCore;
+use rand::TryRng;
 
 use crate::key::{secret_key_from_raw, SecretKey};
 use crate::utils::derive_key_pbkdf2;
@@ -86,7 +86,7 @@ impl Pbkdf2 {
     /// Derives the key using a randomly generated salt.
     pub fn derive(&self, key: &[u8]) -> Result<(SecretKey, DerivationParameters)> {
         let mut salt = vec![0u8; 16];
-        rand::rngs::OsRng
+        rand::rngs::SysRng
             .try_fill_bytes(&mut salt)
             .map_err(|_| Error::RandomError)?;
         self.derive_with_salt(key, &salt)
@@ -121,7 +121,7 @@ impl Pbkdf2 {
     /// Useful for passing custom parameters to [`crate::password_hash::hash_password_with_parameters`].
     pub fn parameters(self) -> Result<DerivationParameters> {
         let mut salt = vec![0u8; 16];
-        rand::rngs::OsRng
+        rand::rngs::SysRng
             .try_fill_bytes(&mut salt)
             .map_err(|_| Error::RandomError)?;
         let v1 = KeyDerivationV1 {

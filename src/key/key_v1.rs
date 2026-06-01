@@ -27,8 +27,8 @@ impl core::fmt::Debug for KeyV1Private {
 }
 
 #[cfg(feature = "fuzz")]
-impl Arbitrary for KeyV1Private {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+impl<'a> Arbitrary<'a> for KeyV1Private {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         let private_key: [u8; 32] = Arbitrary::arbitrary(u)?;
         Ok(Self {
             key: x25519_dalek::StaticSecret::from(private_key),
@@ -42,8 +42,8 @@ pub struct KeyV1Public {
 }
 
 #[cfg(feature = "fuzz")]
-impl Arbitrary for KeyV1Public {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+impl<'a> Arbitrary<'a> for KeyV1Public {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         let public_key: [u8; 32] = Arbitrary::arbitrary(u)?;
         Ok(Self {
             key: x25519_dalek::PublicKey::from(public_key),

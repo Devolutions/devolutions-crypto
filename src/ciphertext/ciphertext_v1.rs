@@ -8,13 +8,13 @@ use super::Ciphertext;
 use std::convert::TryFrom;
 
 use aes::Aes256;
-use cbc::cipher::{block_padding::Pkcs7, BlockDecryptMut, BlockEncryptMut, KeyIvInit};
-use hmac::{Hmac, Mac};
+use cbc::cipher::{block_padding::Pkcs7, BlockModeDecrypt, BlockModeEncrypt, KeyIvInit};
+use hmac::{Hmac, KeyInit, Mac};
 use pbkdf2::pbkdf2;
 use sha2::Sha256;
 use zeroize::{Zeroize, Zeroizing};
 
-use rand::TryRngCore;
+use rand::TryRng;
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -85,13 +85,13 @@ impl CiphertextV1 {
 
         // Generate IV
         let mut iv = [0u8; 16];
-        rand::rngs::OsRng
+        rand::rngs::SysRng
             .try_fill_bytes(&mut iv)
             .map_err(|_| Error::RandomError)?;
 
         // Create cipher object
         let cipher = cbc::Encryptor::<Aes256>::new_from_slices(&encryption_key, &iv)?;
-        let ciphertext = cipher.encrypt_padded_vec_mut::<Pkcs7>(data);
+        let ciphertext = cipher.encrypt_padded_vec::<Pkcs7>(data);
 
         // Append MAC data
         let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new(header.into());
@@ -129,7 +129,7 @@ impl CiphertextV1 {
         mac.verify_slice(&self.hmac)?;
 
         let cipher = cbc::Decryptor::<Aes256>::new_from_slices(&encryption_key, &self.iv)?;
-        let result = cipher.decrypt_padded_vec_mut::<Pkcs7>(&self.ciphertext)?;
+        let result = cipher.decrypt_padded_vec::<Pkcs7>(&self.ciphertext)?;
 
         Ok(result)
     }

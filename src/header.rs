@@ -18,8 +18,8 @@ const SIGNATURE: u16 = 0x0C0D;
 pub trait HeaderType {
     cfg_if! {
         if #[cfg(feature = "fuzz")] {
-            type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + Arbitrary;
-            type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + Arbitrary;
+            type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + for<'a> Arbitrary<'a>;
+            type Subtype: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug + for<'a> Arbitrary<'a>;
         }
         else {
             type Version: Into<u16> + TryFrom<u16> + Clone + Default + Zeroize + std::fmt::Debug;

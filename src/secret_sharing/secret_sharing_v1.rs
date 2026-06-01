@@ -13,11 +13,25 @@ use arbitrary::Arbitrary;
 // This will need some work in the Sharks crate to get the zeroize working.
 //#[derive(Zeroize)]
 //#[zeroize(drop)]
-#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[derive(Clone)]
 pub struct ShareV1 {
     threshold: u8,
     share: Share,
+}
+
+// `blahaj::Share` only implements `arbitrary` 0.4's `Arbitrary`, so it can't be
+// derived under `arbitrary` 1.x. Build the share from raw bytes instead, the same
+// way `TryFrom<&[u8]>` does, to avoid depending on `blahaj::Share: Arbitrary`.
+#[cfg(feature = "fuzz")]
+impl<'a> Arbitrary<'a> for ShareV1 {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
+        let threshold = u8::arbitrary(u)?;
+        let bytes = <Vec<u8>>::arbitrary(u)?;
+        let share =
+            Share::try_from(bytes.as_slice()).map_err(|_| arbitrary::Error::IncorrectFormat)?;
+
+        Ok(ShareV1 { threshold, share })
+    }
 }
 
 impl core::fmt::Debug for ShareV1 {

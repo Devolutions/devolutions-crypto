@@ -12,7 +12,7 @@ use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
 use zeroize::{Zeroize, Zeroizing};
 
-use rand::TryRngCore;
+use rand::TryRng;
 
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
@@ -26,8 +26,8 @@ pub struct PasswordHashV1 {
 }
 
 #[cfg(feature = "fuzz")]
-impl Arbitrary for PasswordHashV1 {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+impl<'a> Arbitrary<'a> for PasswordHashV1 {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         let salt: [u8; 32] = Arbitrary::arbitrary(u)?;
         let hash: [u8; 32] = Arbitrary::arbitrary(u)?;
         Ok(Self {
@@ -79,7 +79,7 @@ impl PasswordHashV1 {
     pub fn hash_password(pass: &[u8], iterations: u32) -> Result<PasswordHashV1> {
         // Generate salt
         let mut salt = [0u8; 32];
-        rand::rngs::OsRng
+        rand::rngs::SysRng
             .try_fill_bytes(&mut salt)
             .map_err(|_| Error::RandomError)?;
 
