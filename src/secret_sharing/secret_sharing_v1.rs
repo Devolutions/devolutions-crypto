@@ -27,7 +27,8 @@ impl<'a> Arbitrary<'a> for ShareV1 {
     fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         let threshold = u8::arbitrary(u)?;
         let bytes = <Vec<u8>>::arbitrary(u)?;
-        let share = Share::try_from(bytes.as_slice()).map_err(|_| arbitrary::Error::IncorrectFormat)?;
+        let share =
+            Share::try_from(bytes.as_slice()).map_err(|_| arbitrary::Error::IncorrectFormat)?;
 
         Ok(ShareV1 { threshold, share })
     }
