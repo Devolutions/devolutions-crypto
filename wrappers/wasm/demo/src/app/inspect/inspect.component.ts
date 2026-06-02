@@ -43,7 +43,7 @@ const VERSION_NAMES: Record<number, Record<number, string>> = {
   5: { 0: 'Latest', 1: 'V1 – Ed25519' },
   6: { 0: 'Latest', 1: 'V1 – Ed25519' },
   8: { 0: 'Latest', 1: 'V1 – PBKDF2-HMAC-SHA256', 2: 'V2 – Argon2id' },
-  9: { 0: 'Latest', 1: 'V1 – DerivationParameters + XChaCha20-Poly1305' },
+  9: { 0: 'Latest', 1: 'V1 – DerivationParameters + Ciphertext' },
 };
 
 export interface PayloadField {

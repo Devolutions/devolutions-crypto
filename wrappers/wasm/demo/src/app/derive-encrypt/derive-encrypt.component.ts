@@ -17,6 +17,7 @@ export class DeriveEncryptComponent implements OnInit {
   faShieldHalved = faShieldHalved;
 
   algorithm: 'argon2' | 'pbkdf2' = 'argon2';
+  cipherAlgorithm: 'xchacha20' | 'aes' = 'xchacha20';
 
   encryptForm: FormGroup;
   decryptForm: FormGroup;
@@ -55,6 +56,11 @@ export class DeriveEncryptComponent implements OnInit {
 
   setAlgorithm(algo: 'argon2' | 'pbkdf2') {
     this.algorithm = algo;
+    this.encryptForm.patchValue({ encryptResult: '' });
+  }
+
+  setCipherAlgorithm(cipher: 'xchacha20' | 'aes') {
+    this.cipherAlgorithm = cipher;
     this.encryptForm.patchValue({ encryptResult: '' });
   }
 
@@ -98,7 +104,8 @@ export class DeriveEncryptComponent implements OnInit {
         params = kdfResult.parameters;
       }
 
-      const blob = service.deriveEncryptWithPassword(plaintextBytes, passwordBytes, aad, params);
+      const version = this.cipherAlgorithm === 'aes' ? service.CiphertextVersion.V1 : service.CiphertextVersion.V2;
+      const blob = service.deriveEncryptWithPassword(plaintextBytes, passwordBytes, aad, params, version);
       this.encryptForm.patchValue({ encryptResult: service.base64encode(blob) });
     } catch (e: any) {
       this.encryptForm.patchValue({ encryptResult: `Error: ${e?.message ?? e}` });

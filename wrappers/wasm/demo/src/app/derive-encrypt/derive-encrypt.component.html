@@ -41,6 +41,25 @@
           </div>
         </div>
 
+        <!-- Cipher algorithm selector -->
+        <div class="field">
+          <label>Encryption Algorithm</label>
+          <div style="display:flex;gap:1rem;margin-top:0.25rem;">
+            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+              <input type="radio" name="encCipher" value="xchacha20"
+                [checked]="cipherAlgorithm === 'xchacha20'"
+                (change)="setCipherAlgorithm('xchacha20')">
+              XChaCha20-Poly1305 (recommended)
+            </label>
+            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+              <input type="radio" name="encCipher" value="aes"
+                [checked]="cipherAlgorithm === 'aes'"
+                (change)="setCipherAlgorithm('aes')">
+              AES-256-CBC
+            </label>
+          </div>
+        </div>
+
         <!-- Common inputs -->
         <div class="field">
           <label>Plaintext</label>
@@ -57,8 +76,8 @@
 
         <!-- Argon2 parameters -->
         @if (algorithm === 'argon2') {
-          <fieldset style="border:1px solid #ddd;border-radius:6px;padding:0.75rem 1rem;margin:0.5rem 0 0.75rem;">
-            <legend style="font-size:0.85rem;color:#666;padding:0 0.4rem;">Argon2 Parameters (optional)</legend>
+          <details style="border:1px solid #ddd;border-radius:6px;padding:0.75rem 1rem;margin:0.5rem 0 0.75rem;">
+            <summary style="font-size:0.85rem;color:#666;cursor:pointer;user-select:none;">Argon2 Parameters (optional)</summary>
             <div class="field">
               <label>Memory (KiB) <span style="font-weight:normal;color:#888;">— default: 4096</span></label>
               <input type="number" formControlName="argon2Memory" min="8" placeholder="e.g. 4096">
@@ -71,7 +90,7 @@
               <label>Lanes (parallelism) <span style="font-weight:normal;color:#888;">— default: 1</span></label>
               <input type="number" formControlName="argon2Lanes" min="1" placeholder="e.g. 1">
             </div>
-          </fieldset>
+          </details>
           <p style="font-size:0.85rem;color:#888;margin:0 0 0.75rem;">
             A random salt is generated automatically and embedded in the output blob.
           </p>
@@ -79,8 +98,8 @@
 
         <!-- PBKDF2 parameters -->
         @if (algorithm === 'pbkdf2') {
-          <fieldset style="border:1px solid #ddd;border-radius:6px;padding:0.75rem 1rem;margin:0.5rem 0 0.75rem;">
-            <legend style="font-size:0.85rem;color:#666;padding:0 0.4rem;">PBKDF2 Parameters (optional)</legend>
+          <details style="border:1px solid #ddd;border-radius:6px;padding:0.75rem 1rem;margin:0.5rem 0 0.75rem;">
+            <summary style="font-size:0.85rem;color:#666;cursor:pointer;user-select:none;">PBKDF2 Parameters (optional)</summary>
             <div class="field">
               <label>Iterations <span style="font-weight:normal;color:#888;">— default: 600 000</span></label>
               <input type="number" formControlName="pbkdf2Iterations" min="1" placeholder="e.g. 600000">
@@ -89,7 +108,7 @@
               <label>Salt <span style="font-weight:normal;color:#888;">— leave blank to generate randomly</span></label>
               <input type="text" formControlName="pbkdf2Salt" placeholder="Custom salt (UTF-8 text)">
             </div>
-          </fieldset>
+          </details>
         }
 
         <div class="field">

@@ -508,6 +508,7 @@ pub fn derive_encrypt_with_password(
     password: &[u8],
     aad: Option<Vec<u8>>,
     params: Option<DerivationParameters>,
+    version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>, JsValue> {
     let params = params.unwrap_or_else(|| Argon2::new().parameters());
     Ok(derive_encrypt::encrypt_with_password_and_aad(
@@ -515,7 +516,7 @@ pub fn derive_encrypt_with_password(
         password,
         &aad.unwrap_or_default(),
         params,
-        CiphertextVersion::Latest,
+        version.unwrap_or(CiphertextVersion::Latest),
     )?
     .into())
 }

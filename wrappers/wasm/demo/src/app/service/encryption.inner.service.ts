@@ -98,8 +98,8 @@ export function deriveSecretKeyArgon2(password: Uint8Array, parameters: Argon2Pa
     return devolutionsCrypto.deriveSecretKeyArgon2(password, parameters);
 }
 
-export function deriveEncryptWithPassword(data: Uint8Array, password: Uint8Array, aad?: Uint8Array, params?: DerivationParameters): Uint8Array {
-    return devolutionsCrypto.deriveEncryptWithPassword(data, password, aad, params);
+export function deriveEncryptWithPassword(data: Uint8Array, password: Uint8Array, aad?: Uint8Array, params?: DerivationParameters, version?: CiphertextVersion): Uint8Array {
+    return devolutionsCrypto.deriveEncryptWithPassword(data, password, aad, params, version);
 }
 
 export function deriveDecryptWithPassword(data: Uint8Array, password: Uint8Array, aad?: Uint8Array): Uint8Array {
