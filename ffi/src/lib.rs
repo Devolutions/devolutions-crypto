@@ -316,9 +316,11 @@ pub unsafe extern "C" fn DeriveEncryptData(
     let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    let derivation_parameters = match derive_key(&password, key_derivation_version) {
-        Ok((_, params)) => params,
-        Err(e) => return e.error_code(),
+    let derivation_parameters = match key_derivation_version {
+        KeyDerivationVersion::Latest | KeyDerivationVersion::V2 => Argon2::new().parameters(),
+        KeyDerivationVersion::V1 => Pbkdf2::new()
+            .parameters()
+            .expect("default PKBDF2 parameters shouldn't fail"),
     };
 
     match encrypt_with_password_and_aad(
