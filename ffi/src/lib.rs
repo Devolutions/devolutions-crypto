@@ -254,6 +254,10 @@ pub extern "C" fn DeriveEncryptSize(
         }
     };
 
+    // The length is calculated based on these values:
+    // 8  = KdfEncryptedData header
+    // 4  = u32 derivation_parameters length prefix
+    // 4  = u32 ciphertext length prefix
     (8 + 4 + derivation_parameters_size + 4 + ciphertext_size as usize) as i64
 }
 
