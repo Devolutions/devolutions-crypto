@@ -17,7 +17,8 @@ use devolutions_crypto::{
     signing_key,
     signing_key::{SigningKeyPair, SigningPublicKey},
 };
-use devolutions_crypto::{CiphertextVersion, KeyVersion, SignatureVersion, SigningKeyVersion};
+use devolutions_crypto::{CiphertextVersion, KeyDerivationVersion, KeyVersion, SignatureVersion, SigningKeyVersion};
+use devolutions_crypto::{derive_encrypt, derive_encrypt::KdfEncryptedData};
 
 enum DevolutionsCryptoError {
     DevolutionsCrypto(Error),
@@ -346,6 +347,47 @@ fn generate_signing_keypair(py: Python, version: u16) -> Result<Py<PyBytes>> {
 }
 
 #[pyfunction]
+#[pyo3(name = "derive_encrypt_with_password")]
+#[pyo3(signature = (data, password, aad=None, key_derivation_version=0, ciphertext_version=0))]
+fn derive_encrypt_with_password(
+    py: Python,
+    data: &[u8],
+    password: &[u8],
+    aad: Option<&[u8]>,
+    key_derivation_version: u16,
+    ciphertext_version: u16,
+) -> Result<Py<PyBytes>> {
+    let kdf_version = match KeyDerivationVersion::try_from(key_derivation_version) {
+        Ok(v) => v,
+        Err(_) => return Err(Error::UnknownVersion.into()),
+    };
+    let ct_version = match CiphertextVersion::try_from(ciphertext_version) {
+        Ok(v) => v,
+        Err(_) => return Err(Error::UnknownVersion.into()),
+    };
+    let aad = aad.unwrap_or(&[]);
+    let (_, params) = devolutions_crypto::key_derivation::derive_key(password, kdf_version)?;
+    let result: Vec<u8> =
+        derive_encrypt::encrypt_with_password_and_aad(data, password, aad, params, ct_version)?.into();
+    Ok(PyBytes::new(py, &result).into())
+}
+
+#[pyfunction]
+#[pyo3(name = "derive_decrypt_with_password")]
+#[pyo3(signature = (data, password, aad=None))]
+fn derive_decrypt_with_password(
+    py: Python,
+    data: &[u8],
+    password: &[u8],
+    aad: Option<&[u8]>,
+) -> Result<Py<PyBytes>> {
+    let aad = aad.unwrap_or(&[]);
+    let blob = KdfEncryptedData::try_from(data)?;
+    let plaintext = blob.decrypt_with_password_and_aad(password, aad)?;
+    Ok(PyBytes::new(py, &plaintext).into())
+}
+
+#[pyfunction]
 #[pyo3(name = "get_signing_public_key")]
 fn get_signing_public_key(py: Python, keypair: &[u8]) -> Result<Py<PyBytes>> {
     let keypair = SigningKeyPair::try_from(keypair)?;
@@ -377,6 +419,8 @@ fn devolutions_crypto_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_secret_key, m)?)?;
     m.add_function(wrap_pyfunction!(encrypt_with_secret_key, m)?)?;
     m.add_function(wrap_pyfunction!(decrypt_with_secret_key, m)?)?;
+    m.add_function(wrap_pyfunction!(derive_encrypt_with_password, m)?)?;
+    m.add_function(wrap_pyfunction!(derive_decrypt_with_password, m)?)?;
     m.add_class::<Keypair>()?;
     m.add(
         "DevolutionsCryptoException",

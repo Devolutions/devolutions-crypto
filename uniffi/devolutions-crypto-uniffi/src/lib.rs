@@ -1,5 +1,6 @@
 mod argon2parameters;
 mod ciphertext;
+mod derive_encrypt;
 mod key;
 mod key_derivation;
 mod password_hash;
@@ -10,6 +11,7 @@ mod utils;
 
 pub use argon2parameters::*;
 pub use ciphertext::*;
+pub use derive_encrypt::*;
 pub use key::*;
 pub use key_derivation::*;
 pub use password_hash::*;
@@ -19,8 +21,9 @@ pub use signing_key::*;
 pub use utils::*;
 
 pub use devolutions_crypto::{
-    CiphertextVersion, DataType, Error as DevolutionsCryptoError, KeyDerivationVersion, KeyVersion,
-    PasswordHashVersion, Result, SecretSharingVersion, SignatureVersion, SigningKeyVersion,
+    CiphertextVersion, DataType, KdfEncryptedDataVersion, Error as DevolutionsCryptoError,
+    KeyDerivationVersion, KeyVersion, PasswordHashVersion, Result, SecretSharingVersion,
+    SignatureVersion, SigningKeyVersion,
 };
 
 #[uniffi::remote(Enum)]
@@ -34,6 +37,7 @@ pub enum DataType {
     Signature,
     OnlineCiphertext,
     KeyDerivation,
+    KdfEncryptedData,
 }
 
 #[uniffi::remote(Enum)]
@@ -77,6 +81,12 @@ pub enum SignatureVersion {
 
 #[uniffi::remote(Enum)]
 pub enum SigningKeyVersion {
+    Latest,
+    V1,
+}
+
+#[uniffi::remote(Enum)]
+pub enum KdfEncryptedDataVersion {
     Latest,
     V1,
 }

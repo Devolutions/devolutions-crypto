@@ -41,7 +41,8 @@ use wasm_bindgen::prelude::*;
 
 use zeroize::Zeroizing;
 
-use crate::key::SecretKey;
+use crate::key::{secret_key_from_raw, SecretKey};
+
 #[cfg(feature = "fuzz")]
 use crate::Argon2Parameters;
 use crate::{DataType, Error, Header, HeaderType, KeyDerivationVersion, Result};
@@ -138,6 +139,16 @@ impl From<DerivationParametersPayload> for Vec<u8> {
 }
 
 impl DerivationParameters {
+    /// Derives a [`SecretKey`] from `password` using these derivation parameters.
+    pub fn derive(&self, password: &[u8]) -> Result<SecretKey> {
+        let raw = match &self.payload {
+            DerivationParametersPayload::V1(v1) => v1.derive(password),
+            DerivationParametersPayload::V2(v2) => v2.derive(password)?,
+        };
+
+        secret_key_from_raw(raw)
+    }
+    
     /// Re-derives raw bytes from a password using the stored algorithm and parameters.
     pub fn compute(&self, password: &[u8]) -> Result<Zeroizing<Vec<u8>>> {
         match &self.payload {
