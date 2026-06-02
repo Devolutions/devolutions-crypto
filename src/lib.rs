@@ -295,8 +295,8 @@ pub use argon2::Version as Argon2Version;
 pub use argon2parameters::defaults as argon2parameters_defaults;
 pub use argon2parameters::Argon2Parameters;
 pub use argon2parameters::Argon2ParametersBuilder;
-pub use error::{Error, Result};
 pub use derive_encrypt::{encrypt_with_password, encrypt_with_password_and_aad, KdfEncryptedData};
+pub use error::{Error, Result};
 pub use key_derivation::{derive_key, Argon2, DerivationParameters, Pbkdf2};
 
 pub const DEFAULT_KEY_SIZE: usize = 32;

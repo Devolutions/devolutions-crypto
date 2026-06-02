@@ -8,6 +8,7 @@ use devolutions_crypto::utils;
 use devolutions_crypto::Argon2Parameters;
 use devolutions_crypto::Error;
 use devolutions_crypto::{ciphertext, ciphertext::Ciphertext};
+use devolutions_crypto::{derive_encrypt, derive_encrypt::KdfEncryptedData};
 use devolutions_crypto::{
     key,
     key::{PrivateKey, PublicKey, SecretKey},
@@ -17,8 +18,9 @@ use devolutions_crypto::{
     signing_key,
     signing_key::{SigningKeyPair, SigningPublicKey},
 };
-use devolutions_crypto::{CiphertextVersion, KeyDerivationVersion, KeyVersion, SignatureVersion, SigningKeyVersion};
-use devolutions_crypto::{derive_encrypt, derive_encrypt::KdfEncryptedData};
+use devolutions_crypto::{
+    CiphertextVersion, KeyDerivationVersion, KeyVersion, SignatureVersion, SigningKeyVersion,
+};
 
 enum DevolutionsCryptoError {
     DevolutionsCrypto(Error),
@@ -368,7 +370,8 @@ fn derive_encrypt_with_password(
     let aad = aad.unwrap_or(&[]);
     let (_, params) = devolutions_crypto::key_derivation::derive_key(password, kdf_version)?;
     let result: Vec<u8> =
-        derive_encrypt::encrypt_with_password_and_aad(data, password, aad, params, ct_version)?.into();
+        derive_encrypt::encrypt_with_password_and_aad(data, password, aad, params, ct_version)?
+            .into();
     Ok(PyBytes::new(py, &result).into())
 }
 

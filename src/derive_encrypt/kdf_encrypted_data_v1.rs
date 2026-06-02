@@ -22,8 +22,7 @@ impl From<&KdfEncryptedDataV1> for Vec<u8> {
         let derivation_parameters: Vec<u8> = data.derivation_parameters.clone().into();
         let ciphertext: Vec<u8> = data.ciphertext.clone().into();
 
-        let mut serialized =
-            Vec::with_capacity(8 + derivation_parameters.len() + ciphertext.len());
+        let mut serialized = Vec::with_capacity(8 + derivation_parameters.len() + ciphertext.len());
 
         serialized
             .write_u32::<LittleEndian>(derivation_parameters.len() as u32)
@@ -67,7 +66,9 @@ impl TryFrom<&[u8]> for KdfEncryptedDataV1 {
         cursor.read_exact(&mut ciphertext_raw)?;
 
         Ok(Self {
-            derivation_parameters: DerivationParameters::try_from(derivation_parameters_raw.as_slice())?,
+            derivation_parameters: DerivationParameters::try_from(
+                derivation_parameters_raw.as_slice(),
+            )?,
             ciphertext: Ciphertext::try_from(ciphertext_raw.as_slice())?,
         })
     }

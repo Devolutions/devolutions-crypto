@@ -148,7 +148,7 @@ impl DerivationParameters {
 
         secret_key_from_raw(raw)
     }
-    
+
     /// Re-derives raw bytes from a password using the stored algorithm and parameters.
     pub fn compute(&self, password: &[u8]) -> Result<Zeroizing<Vec<u8>>> {
         match &self.payload {

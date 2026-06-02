@@ -25,15 +25,15 @@ use devolutions_crypto::derive_encrypt::{encrypt_with_password_and_aad, KdfEncry
 use devolutions_crypto::key::{
     generate_keypair, generate_secret_key, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
 };
-use devolutions_crypto::key_derivation::{Argon2, DerivationParameters, Pbkdf2};
+use devolutions_crypto::key_derivation::{derive_key, Argon2, DerivationParameters, Pbkdf2};
 use devolutions_crypto::password_hash::{
     hash_password, hash_password_with_parameters, PasswordHash, PasswordHashVersion,
 };
 use devolutions_crypto::secret_sharing::{
     generate_shared_key, join_shares, SecretSharingVersion, Share,
 };
-use devolutions_crypto::OnlineCiphertextVersion;
 use devolutions_crypto::KeyDerivationVersion;
+use devolutions_crypto::OnlineCiphertextVersion;
 use devolutions_crypto::{
     signature,
     signature::{Signature, SignatureVersion},
@@ -290,7 +290,9 @@ pub unsafe extern "C" fn DeriveEncryptData(
         return Error::NullPointer.error_code();
     }
 
-    if result_length != DeriveEncryptSize(data_length, key_derivation_version, ciphertext_version) as usize {
+    if result_length
+        != DeriveEncryptSize(data_length, key_derivation_version, ciphertext_version) as usize
+    {
         return Error::InvalidOutputLength.error_code();
     }
 

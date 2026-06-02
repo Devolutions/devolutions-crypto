@@ -222,8 +222,14 @@ fn main() {
         Commands::VerifyPassword { password, hash } => verify_password(hash, password),
         Commands::MixKeyExchange { private, public } => mix_key_exchange(private, public),
         Commands::JoinShares { shares } => join_shares(shares),
-        Commands::DeriveAndEncrypt { data, password, version } => derive_and_encrypt_password(data, password, version),
-        Commands::DeriveAndDecrypt { data, password } => derive_and_decrypt_password(data, password),
+        Commands::DeriveAndEncrypt {
+            data,
+            password,
+            version,
+        } => derive_and_encrypt_password(data, password, version),
+        Commands::DeriveAndDecrypt { data, password } => {
+            derive_and_decrypt_password(data, password)
+        }
         Commands::PrintHeader { data } => print_header(data),
     }
 }
@@ -292,9 +298,10 @@ fn derive_and_encrypt_password(data: String, password: String, version: Option<u
     let version = devolutions_crypto::CiphertextVersion::try_from(version).unwrap();
 
     let params = Argon2::new().parameters();
-    let result: Vec<u8> = encrypt_with_password(data.as_bytes(), password.as_bytes(), params, version)
-        .unwrap()
-        .into();
+    let result: Vec<u8> =
+        encrypt_with_password(data.as_bytes(), password.as_bytes(), params, version)
+            .unwrap()
+            .into();
     println!("{}", base64::encode(&result));
 }
 

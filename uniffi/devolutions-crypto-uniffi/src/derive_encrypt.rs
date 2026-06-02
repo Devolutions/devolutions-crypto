@@ -12,15 +12,10 @@ pub fn derive_encrypt_with_password(
     let kdf_version = kdf_version.unwrap_or(KeyDerivationVersion::Latest);
     let ct_version = ct_version.unwrap_or(CiphertextVersion::Latest);
     let (_, params) = derive_key(password, kdf_version)?;
-    Ok(
-        devolutions_crypto::derive_encrypt::encrypt_with_password(
-            data,
-            password,
-            params,
-            ct_version,
-        )?
-        .into(),
-    )
+    Ok(devolutions_crypto::derive_encrypt::encrypt_with_password(
+        data, password, params, ct_version,
+    )?
+    .into())
 }
 
 #[uniffi::export(default(kdf_version = None, ct_version = None))]
@@ -36,11 +31,7 @@ pub fn derive_encrypt_with_password_and_aad(
     let (_, params) = derive_key(password, kdf_version)?;
     Ok(
         devolutions_crypto::derive_encrypt::encrypt_with_password_and_aad(
-            data,
-            password,
-            aad,
-            params,
-            ct_version,
+            data, password, aad, params, ct_version,
         )?
         .into(),
     )

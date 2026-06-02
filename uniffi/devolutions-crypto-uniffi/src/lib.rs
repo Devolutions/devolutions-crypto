@@ -21,7 +21,7 @@ pub use signing_key::*;
 pub use utils::*;
 
 pub use devolutions_crypto::{
-    CiphertextVersion, DataType, KdfEncryptedDataVersion, Error as DevolutionsCryptoError,
+    CiphertextVersion, DataType, Error as DevolutionsCryptoError, KdfEncryptedDataVersion,
     KeyDerivationVersion, KeyVersion, PasswordHashVersion, Result, SecretSharingVersion,
     SignatureVersion, SigningKeyVersion,
 };

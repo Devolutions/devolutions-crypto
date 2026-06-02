@@ -7,7 +7,7 @@ use crate::ciphertext;
 use crate::enums::KdfEncryptedDataSubtype;
 use crate::key_derivation::DerivationParameters;
 use crate::{
-    CiphertextVersion, DataType, KdfEncryptedDataVersion, Error, Header, HeaderType, Result,
+    CiphertextVersion, DataType, Error, Header, HeaderType, KdfEncryptedDataVersion, Result,
 };
 
 use kdf_encrypted_data_v1::KdfEncryptedDataV1;
@@ -61,7 +61,7 @@ enum KdfEncryptedDataPayload {
 /// use devolutions_crypto::key_derivation::Argon2;
 /// use devolutions_crypto::CiphertextVersion;
 ///
-/// let (_, params) = Argon2::new().derive(b"password").unwrap();
+/// let params = Argon2::new().parameters();
 /// let blob = encrypt_with_password(b"secret", b"password", params, CiphertextVersion::Latest).unwrap();
 /// let plaintext = blob.decrypt_with_password(b"password").unwrap();
 /// assert_eq!(plaintext, b"secret");
@@ -72,7 +72,13 @@ pub fn encrypt_with_password(
     derivation_parameters: DerivationParameters,
     ciphertext_version: CiphertextVersion,
 ) -> Result<KdfEncryptedData> {
-    encrypt_with_password_and_aad(data, password, [].as_slice(), derivation_parameters, ciphertext_version)
+    encrypt_with_password_and_aad(
+        data,
+        password,
+        [].as_slice(),
+        derivation_parameters,
+        ciphertext_version,
+    )
 }
 
 /// Encrypts `data` with a key derived from `password` and authenticates `aad`.
@@ -97,12 +103,8 @@ pub fn encrypt_with_password_and_aad(
     header.version = KdfEncryptedDataVersion::V1;
 
     let secret_key = derivation_parameters.derive(password)?;
-    let ciphertext = ciphertext::encrypt_with_secret_key_and_aad(
-        data,
-        &secret_key,
-        aad,
-        ciphertext_version,
-    )?;
+    let ciphertext =
+        ciphertext::encrypt_with_secret_key_and_aad(data, &secret_key, aad, ciphertext_version)?;
 
     Ok(KdfEncryptedData {
         header,
@@ -188,9 +190,9 @@ impl TryFrom<&[u8]> for KdfEncryptedData {
 
 #[cfg(test)]
 mod tests {
-    use crate::Pbkdf2;
-use crate::key_derivation::Argon2;
+    use crate::key_derivation::Argon2;
     use crate::utils::validate_header;
+    use crate::Pbkdf2;
 
     use super::*;
 
@@ -200,19 +202,16 @@ use crate::key_derivation::Argon2;
         let password = b"a very strong password";
         let aad = b"public data";
 
-        let params= Argon2::new().parameters();
-        let wrapped = encrypt_with_password_and_aad(
-            data,
-            password,
-            aad,
-            params,
-            CiphertextVersion::Latest,
-        )
-        .unwrap();
+        let params = Argon2::new().parameters();
+        let wrapped =
+            encrypt_with_password_and_aad(data, password, aad, params, CiphertextVersion::Latest)
+                .unwrap();
 
         let wrapped_raw: Vec<u8> = wrapped.into();
         let wrapped = KdfEncryptedData::try_from(wrapped_raw.as_slice()).unwrap();
-        let decrypted = wrapped.decrypt_with_password_and_aad(password, aad).unwrap();
+        let decrypted = wrapped
+            .decrypt_with_password_and_aad(password, aad)
+            .unwrap();
 
         assert_eq!(decrypted, data);
     }
@@ -222,14 +221,9 @@ use crate::key_derivation::Argon2;
         let data = b"derive encrypt payload";
         let password = b"a very strong password";
 
-        let params= Pbkdf2::with_params(10).parameters().unwrap();
-        let wrapped = encrypt_with_password(
-            data,
-            password,
-            params,
-            CiphertextVersion::Latest,
-        )
-        .unwrap();
+        let params = Pbkdf2::with_params(10).parameters().unwrap();
+        let wrapped =
+            encrypt_with_password(data, password, params, CiphertextVersion::Latest).unwrap();
 
         assert!(wrapped.decrypt_with_password(b"wrong password").is_err());
     }
@@ -239,14 +233,9 @@ use crate::key_derivation::Argon2;
         let data = b"derive encrypt payload";
         let password = b"a very strong password";
 
-        let params= Argon2::new().parameters();
-        let wrapped = encrypt_with_password(
-            data,
-            password,
-            params,
-            CiphertextVersion::Latest,
-        )
-        .unwrap();
+        let params = Argon2::new().parameters();
+        let wrapped =
+            encrypt_with_password(data, password, params, CiphertextVersion::Latest).unwrap();
 
         assert!(wrapped.decrypt_with_password(b"wrong password").is_err());
     }
@@ -256,7 +245,7 @@ use crate::key_derivation::Argon2;
         let data = b"derive encrypt payload";
         let password = b"a very strong password";
 
-        let params= Argon2::new().parameters();
+        let params = Argon2::new().parameters();
         let wrapped = encrypt_with_password_and_aad(
             data,
             password,
@@ -274,7 +263,7 @@ use crate::key_derivation::Argon2;
     #[test]
     fn validate_header_accepts_derive_encrypt() {
         let password = b"a very strong password";
-        let params= Argon2::new().parameters();
+        let params = Argon2::new().parameters();
         let wrapped = encrypt_with_password(
             b"derive encrypt payload",
             password,
@@ -284,7 +273,13 @@ use crate::key_derivation::Argon2;
         .unwrap();
 
         let wrapped_raw: Vec<u8> = wrapped.into();
-        assert!(validate_header(wrapped_raw.as_slice(), DataType::KdfEncryptedData));
-        assert!(!validate_header(wrapped_raw.as_slice(), DataType::Ciphertext));
+        assert!(validate_header(
+            wrapped_raw.as_slice(),
+            DataType::KdfEncryptedData
+        ));
+        assert!(!validate_header(
+            wrapped_raw.as_slice(),
+            DataType::Ciphertext
+        ));
     }
 }

@@ -133,7 +133,9 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
             use super::key_derivation::DerivationParameters;
             Header::<DerivationParameters>::try_from(&data[0..Header::len()]).is_ok()
         }
-        DataType::KdfEncryptedData => Header::<KdfEncryptedData>::try_from(&data[0..Header::len()]).is_ok(),
+        DataType::KdfEncryptedData => {
+            Header::<KdfEncryptedData>::try_from(&data[0..Header::len()]).is_ok()
+        }
     }
 }
 
