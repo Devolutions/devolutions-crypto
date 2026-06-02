@@ -527,8 +527,6 @@ pub fn derive_decrypt_with_password(
     password: &[u8],
     aad: Option<Vec<u8>>,
 ) -> Result<Vec<u8>, JsValue> {
-    Ok(
-        derive_encrypt::KdfEncryptedData::try_from(data)?
-            .decrypt_with_password_and_aad(password, &aad.unwrap_or_default())?,
-    )
+    Ok(derive_encrypt::KdfEncryptedData::try_from(data)?
+        .decrypt_with_password_and_aad(password, &aad.unwrap_or_default())?)
 }

@@ -1,6 +1,6 @@
 use crate::{CiphertextVersion, KeyDerivationVersion, Result};
 use devolutions_crypto::derive_encrypt::KdfEncryptedData;
-use devolutions_crypto::key_derivation::derive_key;
+use devolutions_crypto::{Argon2, Pbkdf2};
 
 #[uniffi::export(default(kdf_version = None, ct_version = None))]
 pub fn derive_encrypt_with_password(
@@ -11,7 +11,12 @@ pub fn derive_encrypt_with_password(
 ) -> Result<Vec<u8>> {
     let kdf_version = kdf_version.unwrap_or(KeyDerivationVersion::Latest);
     let ct_version = ct_version.unwrap_or(CiphertextVersion::Latest);
-    let (_, params) = derive_key(password, kdf_version)?;
+    let params = match kdf_version {
+        KeyDerivationVersion::Latest | KeyDerivationVersion::V2 => Argon2::new().parameters(),
+        KeyDerivationVersion::V1 => Pbkdf2::new()
+            .parameters()
+            .expect("default PKBDF2 parameters shouldn't fail"),
+    };
     Ok(devolutions_crypto::derive_encrypt::encrypt_with_password(
         data, password, params, ct_version,
     )?
@@ -28,7 +33,13 @@ pub fn derive_encrypt_with_password_and_aad(
 ) -> Result<Vec<u8>> {
     let kdf_version = kdf_version.unwrap_or(KeyDerivationVersion::Latest);
     let ct_version = ct_version.unwrap_or(CiphertextVersion::Latest);
-    let (_, params) = derive_key(password, kdf_version)?;
+    let params = match kdf_version {
+        KeyDerivationVersion::Latest | KeyDerivationVersion::V2 => Argon2::new().parameters(),
+        KeyDerivationVersion::V1 => Pbkdf2::new()
+            .parameters()
+            .expect("default PKBDF2 parameters shouldn't fail"),
+    };
+
     Ok(
         devolutions_crypto::derive_encrypt::encrypt_with_password_and_aad(
             data, password, aad, params, ct_version,

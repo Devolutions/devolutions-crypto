@@ -171,7 +171,7 @@
 //! use devolutions_crypto::CiphertextVersion;
 //!
 //! let password = b"a very strong password";
-//! let (_, params) = Argon2::new().derive(password).expect("key derivation shouldn't fail");
+//! let params = Argon2::new().parameters();
 //! let blob = encrypt_with_password(
 //!     b"secret data",
 //!     password,

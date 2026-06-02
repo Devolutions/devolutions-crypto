@@ -50,8 +50,7 @@ enum KdfEncryptedDataPayload {
 /// # Arguments
 ///  * `data` - The plaintext data to encrypt.
 ///  * `password` - The password from which the encryption key is derived.
-///  * `derivation_parameters` - Pre-built key derivation parameters (includes the salt). Use
-///    [`Argon2::new().derive(password)`](crate::key_derivation::Argon2::derive) to generate them.
+///  * `derivation_parameters` - Pre-built key derivation parameters.
 ///  * `ciphertext_version` - Cipher to use. `CiphertextVersion::Latest` is recommended.
 /// # Returns
 /// Returns a [`KdfEncryptedData`] blob containing the key derivation parameters and the ciphertext.
@@ -160,7 +159,7 @@ impl From<KdfEncryptedData> for Vec<u8> {
 impl From<KdfEncryptedDataPayload> for Vec<u8> {
     fn from(data: KdfEncryptedDataPayload) -> Self {
         match data {
-            KdfEncryptedDataPayload::V1(v1) => v1.borrow().into(),
+            KdfEncryptedDataPayload::V1(v1) => v1.into(),
         }
     }
 }

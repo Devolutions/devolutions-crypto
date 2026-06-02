@@ -17,10 +17,10 @@ pub struct KdfEncryptedDataV1 {
     pub ciphertext: Ciphertext,
 }
 
-impl From<&KdfEncryptedDataV1> for Vec<u8> {
-    fn from(data: &KdfEncryptedDataV1) -> Self {
-        let derivation_parameters: Vec<u8> = data.derivation_parameters.clone().into();
-        let ciphertext: Vec<u8> = data.ciphertext.clone().into();
+impl From<KdfEncryptedDataV1> for Vec<u8> {
+    fn from(data: KdfEncryptedDataV1) -> Self {
+        let derivation_parameters: Vec<u8> = data.derivation_parameters.into();
+        let ciphertext: Vec<u8> = data.ciphertext.into();
 
         let mut serialized = Vec::with_capacity(8 + derivation_parameters.len() + ciphertext.len());
 

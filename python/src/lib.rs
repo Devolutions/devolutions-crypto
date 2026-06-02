@@ -5,7 +5,6 @@ use pyo3::types::{PyBool, PyBytes};
 use std::convert::TryFrom;
 
 use devolutions_crypto::utils;
-use devolutions_crypto::Argon2Parameters;
 use devolutions_crypto::Error;
 use devolutions_crypto::{ciphertext, ciphertext::Ciphertext};
 use devolutions_crypto::{derive_encrypt, derive_encrypt::KdfEncryptedData};
@@ -18,6 +17,7 @@ use devolutions_crypto::{
     signing_key,
     signing_key::{SigningKeyPair, SigningPublicKey},
 };
+use devolutions_crypto::{Argon2, Argon2Parameters, Pbkdf2};
 use devolutions_crypto::{
     CiphertextVersion, KeyDerivationVersion, KeyVersion, SignatureVersion, SigningKeyVersion,
 };
@@ -368,7 +368,13 @@ fn derive_encrypt_with_password(
         Err(_) => return Err(Error::UnknownVersion.into()),
     };
     let aad = aad.unwrap_or(&[]);
-    let (_, params) = devolutions_crypto::key_derivation::derive_key(password, kdf_version)?;
+
+    let params = match kdf_version {
+        KeyDerivationVersion::Latest | KeyDerivationVersion::V2 => Argon2::new().parameters(),
+        KeyDerivationVersion::V1 => Pbkdf2::new()
+            .parameters()
+            .expect("default PKBDF2 parameters shouldn't fail"),
+    };
     let result: Vec<u8> =
         derive_encrypt::encrypt_with_password_and_aad(data, password, aad, params, ct_version)?
             .into();
