@@ -97,3 +97,11 @@ export function deriveSecretKeyPbkdf2WithSalt(password: Uint8Array, salt: Uint8A
 export function deriveSecretKeyArgon2(password: Uint8Array, parameters: Argon2Parameters): KeyDerivationResult {
     return devolutionsCrypto.deriveSecretKeyArgon2(password, parameters);
 }
+
+export function deriveEncryptWithPassword(data: Uint8Array, password: Uint8Array, aad?: Uint8Array, params?: DerivationParameters, version?: CiphertextVersion): Uint8Array {
+    return devolutionsCrypto.deriveEncryptWithPassword(data, password, aad, params, version);
+}
+
+export function deriveDecryptWithPassword(data: Uint8Array, password: Uint8Array, aad?: Uint8Array): Uint8Array {
+    return devolutionsCrypto.deriveDecryptWithPassword(data, password, aad);
+}

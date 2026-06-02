@@ -3,6 +3,7 @@ use std::convert::{TryFrom as _, TryInto as _};
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
 
+use super::derive_encrypt;
 use super::key_derivation::{Argon2, DerivationParameters, Pbkdf2};
 use super::utils;
 use super::Argon2Parameters;
@@ -499,4 +500,33 @@ pub fn base64url_encode(data: &[u8]) -> String {
 #[wasm_bindgen(js_name = "base64urlDecode")]
 pub fn base64url_decode(data: &str) -> Result<Vec<u8>, JsValue> {
     Ok(utils::base64_decode_url(data)?)
+}
+
+#[wasm_bindgen(js_name = "deriveEncryptWithPassword")]
+pub fn derive_encrypt_with_password(
+    data: &[u8],
+    password: &[u8],
+    aad: Option<Vec<u8>>,
+    params: Option<DerivationParameters>,
+    version: Option<CiphertextVersion>,
+) -> Result<Vec<u8>, JsValue> {
+    let params = params.unwrap_or_else(|| Argon2::new().parameters());
+    Ok(derive_encrypt::encrypt_with_password_and_aad(
+        data,
+        password,
+        &aad.unwrap_or_default(),
+        params,
+        version.unwrap_or(CiphertextVersion::Latest),
+    )?
+    .into())
+}
+
+#[wasm_bindgen(js_name = "deriveDecryptWithPassword")]
+pub fn derive_decrypt_with_password(
+    data: &[u8],
+    password: &[u8],
+    aad: Option<Vec<u8>>,
+) -> Result<Vec<u8>, JsValue> {
+    Ok(derive_encrypt::KdfEncryptedData::try_from(data)?
+        .decrypt_with_password_and_aad(password, &aad.unwrap_or_default())?)
 }

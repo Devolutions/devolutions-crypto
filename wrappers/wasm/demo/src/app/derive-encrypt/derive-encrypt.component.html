@@ -1,0 +1,154 @@
+<!-- Mobile header -->
+<header class="mobile-header">
+  <button (click)="w3Open()">&#9776;</button>
+  <span>Devolutions Crypto</span>
+</header>
+
+<div class="page-inner">
+
+  <div class="page-heading">
+    <fa-icon size="3x" [icon]="faShieldHalved"></fa-icon>
+    <h1>Derive and Encrypt</h1>
+  </div>
+
+  <p style="margin-bottom:1.5rem;color:#555;">
+    Encrypts data with a key derived directly from a password. The derivation parameters
+    (including the random salt) are embedded in the output blob — only the password is needed to decrypt.
+  </p>
+
+  <!-- Encrypt card -->
+  <div class="card">
+    <div class="card-title">Encrypt</div>
+    <div class="card-body">
+      <form [formGroup]="encryptForm" (ngSubmit)="encrypt()">
+
+        <!-- Algorithm selector -->
+        <div class="field">
+          <label>Key Derivation Algorithm</label>
+          <div style="display:flex;gap:1rem;margin-top:0.25rem;">
+            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+              <input type="radio" name="encAlgorithm" value="argon2"
+                [checked]="algorithm === 'argon2'"
+                (change)="setAlgorithm('argon2')">
+              Argon2id (recommended)
+            </label>
+            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+              <input type="radio" name="encAlgorithm" value="pbkdf2"
+                [checked]="algorithm === 'pbkdf2'"
+                (change)="setAlgorithm('pbkdf2')">
+              PBKDF2
+            </label>
+          </div>
+        </div>
+
+        <!-- Cipher algorithm selector -->
+        <div class="field">
+          <label>Encryption Algorithm</label>
+          <div style="display:flex;gap:1rem;margin-top:0.25rem;">
+            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+              <input type="radio" name="encCipher" value="xchacha20"
+                [checked]="cipherAlgorithm === 'xchacha20'"
+                (change)="setCipherAlgorithm('xchacha20')">
+              XChaCha20-Poly1305 (recommended)
+            </label>
+            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+              <input type="radio" name="encCipher" value="aes"
+                [checked]="cipherAlgorithm === 'aes'"
+                (change)="setCipherAlgorithm('aes')">
+              AES-256-CBC
+            </label>
+          </div>
+        </div>
+
+        <!-- Common inputs -->
+        <div class="field">
+          <label>Plaintext</label>
+          <input type="text" formControlName="plaintext" required placeholder="Enter text to encrypt">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" formControlName="password" required placeholder="Enter password">
+        </div>
+        <div class="field">
+          <label>Additional Authenticated Data (AAD) <span style="font-weight:normal;color:#888;">— optional</span></label>
+          <input type="text" formControlName="aad" placeholder="Context string bound to this ciphertext">
+        </div>
+
+        <!-- Argon2 parameters -->
+        @if (algorithm === 'argon2') {
+          <details style="border:1px solid #ddd;border-radius:6px;padding:0.75rem 1rem;margin:0.5rem 0 0.75rem;">
+            <summary style="font-size:0.85rem;color:#666;cursor:pointer;user-select:none;">Argon2 Parameters (optional)</summary>
+            <div class="field">
+              <label>Memory (KiB) <span style="font-weight:normal;color:#888;">— default: 4096</span></label>
+              <input type="number" formControlName="argon2Memory" min="8" placeholder="e.g. 4096">
+            </div>
+            <div class="field">
+              <label>Iterations <span style="font-weight:normal;color:#888;">— default: 2</span></label>
+              <input type="number" formControlName="argon2Iterations" min="1" placeholder="e.g. 2">
+            </div>
+            <div class="field">
+              <label>Lanes (parallelism) <span style="font-weight:normal;color:#888;">— default: 1</span></label>
+              <input type="number" formControlName="argon2Lanes" min="1" placeholder="e.g. 1">
+            </div>
+          </details>
+          <p style="font-size:0.85rem;color:#888;margin:0 0 0.75rem;">
+            A random salt is generated automatically and embedded in the output blob.
+          </p>
+        }
+
+        <!-- PBKDF2 parameters -->
+        @if (algorithm === 'pbkdf2') {
+          <details style="border:1px solid #ddd;border-radius:6px;padding:0.75rem 1rem;margin:0.5rem 0 0.75rem;">
+            <summary style="font-size:0.85rem;color:#666;cursor:pointer;user-select:none;">PBKDF2 Parameters (optional)</summary>
+            <div class="field">
+              <label>Iterations <span style="font-weight:normal;color:#888;">— default: 600 000</span></label>
+              <input type="number" formControlName="pbkdf2Iterations" min="1" placeholder="e.g. 600000">
+            </div>
+            <div class="field">
+              <label>Salt <span style="font-weight:normal;color:#888;">— leave blank to generate randomly</span></label>
+              <input type="text" formControlName="pbkdf2Salt" placeholder="Custom salt (UTF-8 text)">
+            </div>
+          </details>
+        }
+
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Encrypt</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Result (base64)</span>
+          <textarea rows="5" formControlName="encryptResult" placeholder="Encrypted blob will appear here"></textarea>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Decrypt card -->
+  <div class="card">
+    <div class="card-title">Decrypt</div>
+    <div class="card-body">
+      <form [formGroup]="decryptForm" (ngSubmit)="decrypt()">
+        <div class="field">
+          <label>Encrypted blob (base64)</label>
+          <textarea rows="5" formControlName="ciphertext" required placeholder="Paste the encrypted blob"></textarea>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" formControlName="password" required placeholder="Enter password">
+        </div>
+        <div class="field">
+          <label>AAD <span style="font-weight:normal;color:#888;">— required if provided during encryption</span></label>
+          <input type="text" formControlName="aad" placeholder="Additional authenticated data">
+        </div>
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Decrypt</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Result</span>
+          <textarea rows="3" formControlName="decryptResult" placeholder="Decrypted plaintext will appear here"></textarea>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>

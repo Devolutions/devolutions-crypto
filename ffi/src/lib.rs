@@ -21,16 +21,18 @@ use base64::{engine::general_purpose, Engine as _};
 use devolutions_crypto::ciphertext::{
     encrypt_asymmetric_with_aad, encrypt_with_aad, Ciphertext, CiphertextVersion,
 };
+use devolutions_crypto::derive_encrypt::{encrypt_with_password_and_aad, KdfEncryptedData};
 use devolutions_crypto::key::{
     generate_keypair, generate_secret_key, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
 };
-use devolutions_crypto::key_derivation::{Argon2, DerivationParameters, Pbkdf2};
+use devolutions_crypto::key_derivation::{derive_key, Argon2, DerivationParameters, Pbkdf2};
 use devolutions_crypto::password_hash::{
     hash_password, hash_password_with_parameters, PasswordHash, PasswordHashVersion,
 };
 use devolutions_crypto::secret_sharing::{
     generate_shared_key, join_shares, SecretSharingVersion, Share,
 };
+use devolutions_crypto::KeyDerivationVersion;
 use devolutions_crypto::OnlineCiphertextVersion;
 use devolutions_crypto::{
     signature,
@@ -218,6 +220,183 @@ pub extern "C" fn EncryptAsymmetricSize(data_length: usize, version: u16) -> i64
             (8 + 32 + 24 + data_length + 16) as i64 // Header + public_key + nonce + data + Poly1305 tag
         }
         _ => Error::UnknownVersion.error_code(),
+    }
+}
+
+/// Get the size of the resulting derive_encrypt blob.
+/// # Arguments
+///  * data_length - Length of the plaintext.
+///  * key_derivation_version - Version for key derivation (0 latest, 1 PBKDF2, 2 Argon2).
+///  * ciphertext_version - Version for ciphertext (0 latest, 1 V1, 2 V2).
+/// # Returns
+/// Returns the exact output length expected by `DeriveEncryptData()`.
+#[no_mangle]
+pub extern "C" fn DeriveEncryptSize(
+    data_length: usize,
+    key_derivation_version: u16,
+    ciphertext_version: u16,
+) -> i64 {
+    let key_derivation_version = match KeyDerivationVersion::try_from(key_derivation_version) {
+        Ok(v) => v,
+        Err(_) => return Error::UnknownVersion.error_code(),
+    };
+
+    let ciphertext_size = EncryptSize(data_length, ciphertext_version);
+
+    if ciphertext_size < 0 {
+        return ciphertext_size;
+    }
+
+    let derivation_parameters_size: usize = match key_derivation_version {
+        KeyDerivationVersion::V1 => DeriveSecretKeyPbkdf2Size() as usize,
+        KeyDerivationVersion::V2 | KeyDerivationVersion::Latest => {
+            DeriveSecretKeyArgon2ParametersSize(GetDefaultArgon2ParametersSize() as usize) as usize
+        }
+    };
+
+    // The length is calculated based on these values:
+    // 8  = KdfEncryptedData header
+    // 4  = u32 derivation_parameters length prefix
+    // 4  = u32 ciphertext length prefix
+    (8 + 4 + derivation_parameters_size + 4 + ciphertext_size as usize) as i64
+}
+
+/// Derive a key from a password and encrypt data in one managed blob.
+/// # Arguments
+///  * `data` - Pointer to the plaintext data to encrypt.
+///  * `data_length` - Length of plaintext data.
+///  * `password` - Pointer to the password bytes.
+///  * `password_length` - Length of password bytes.
+///  * `aad` - Pointer to additional authenticated data, or null.
+///  * `aad_length` - Length of additional authenticated data.
+///  * `result` - Pointer to output buffer.
+///  * `result_length` - Length of output buffer, must equal `DeriveEncryptSize(...)`.
+///  * `key_derivation_version` - Key derivation version.
+///  * `ciphertext_version` - Ciphertext version.
+/// # Returns
+/// The number of bytes written on success, or a negative DevoCryptoError code on failure.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn DeriveEncryptData(
+    data: *const u8,
+    data_length: usize,
+    password: *const u8,
+    password_length: usize,
+    aad: *const u8,
+    aad_length: usize,
+    result: *mut u8,
+    result_length: usize,
+    key_derivation_version: u16,
+    ciphertext_version: u16,
+) -> i64 {
+    if data.is_null() || password.is_null() || result.is_null() {
+        return Error::NullPointer.error_code();
+    }
+
+    if result_length
+        != DeriveEncryptSize(data_length, key_derivation_version, ciphertext_version) as usize
+    {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    let key_derivation_version = match KeyDerivationVersion::try_from(key_derivation_version) {
+        Ok(v) => v,
+        Err(_) => return Error::UnknownVersion.error_code(),
+    };
+
+    let ciphertext_version = match CiphertextVersion::try_from(ciphertext_version) {
+        Ok(v) => v,
+        Err(_) => return Error::UnknownVersion.error_code(),
+    };
+
+    let aad = if aad.is_null() {
+        &[]
+    } else {
+        slice::from_raw_parts(aad, aad_length)
+    };
+
+    let data = slice::from_raw_parts(data, data_length);
+    let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
+    let result = slice::from_raw_parts_mut(result, result_length);
+
+    let derivation_parameters = match key_derivation_version {
+        KeyDerivationVersion::Latest | KeyDerivationVersion::V2 => Argon2::new().parameters(),
+        KeyDerivationVersion::V1 => Pbkdf2::new()
+            .parameters()
+            .expect("default PKBDF2 parameters shouldn't fail"),
+    };
+
+    match encrypt_with_password_and_aad(
+        data,
+        &password,
+        aad,
+        derivation_parameters,
+        ciphertext_version,
+    ) {
+        Ok(res) => {
+            let res: Vec<u8> = res.into();
+            let length = res.len();
+            result[0..length].copy_from_slice(&res);
+            length as i64
+        }
+        Err(e) => e.error_code(),
+    }
+}
+
+/// Decrypt a derive_encrypt blob using a password.
+/// # Arguments
+///  * `data` - Pointer to derive_encrypt bytes.
+///  * `data_length` - Length of derive_encrypt bytes.
+///  * `password` - Pointer to password bytes.
+///  * `password_length` - Length of password bytes.
+///  * `aad` - Pointer to additional authenticated data, or null.
+///  * `aad_length` - Length of additional authenticated data.
+///  * `result` - Pointer to output plaintext buffer.
+///  * `result_length` - Length of output plaintext buffer.
+/// # Returns
+/// The number of plaintext bytes written on success, or a negative DevoCryptoError code on failure.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn DeriveDecryptData(
+    data: *const u8,
+    data_length: usize,
+    password: *const u8,
+    password_length: usize,
+    aad: *const u8,
+    aad_length: usize,
+    result: *mut u8,
+    result_length: usize,
+) -> i64 {
+    if data.is_null() || password.is_null() || result.is_null() {
+        return Error::NullPointer.error_code();
+    }
+
+    let aad = if aad.is_null() {
+        &[]
+    } else {
+        slice::from_raw_parts(aad, aad_length)
+    };
+
+    let data = slice::from_raw_parts(data, data_length);
+    let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
+    let result = slice::from_raw_parts_mut(result, result_length);
+
+    match KdfEncryptedData::try_from(data) {
+        Ok(res) => match res.decrypt_with_password_and_aad(&password, aad) {
+            Ok(plaintext) => {
+                if result.len() >= plaintext.len() {
+                    let length = plaintext.len();
+                    result[0..length].copy_from_slice(&plaintext);
+                    length as i64
+                } else {
+                    Error::InvalidOutputLength.error_code()
+                }
+            }
+            Err(e) => e.error_code(),
+        },
+        Err(e) => e.error_code(),
     }
 }
 

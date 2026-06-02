@@ -33,6 +33,8 @@ pub enum DataType {
     OnlineCiphertext = 7,
     /// Serialized key derivation parameters.
     KeyDerivation = 8,
+    /// A wrapped payload combining key derivation parameters and ciphertext.
+    KdfEncryptedData = 9,
 }
 
 /// The versions of the encryption scheme to use.
@@ -203,11 +205,34 @@ pub enum KeyDerivationVersion {
     V2 = 2,
 }
 
+/// The versions of the KDF-encrypt scheme to use.
+#[cfg_attr(feature = "wbindgen", wasm_bindgen())]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+#[repr(u16)]
+#[derive(Default)]
+pub enum KdfEncryptedDataVersion {
+    /// Uses the latest version.
+    #[default]
+    Latest = 0,
+    /// Uses version 1.
+    V1 = 1,
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 #[repr(u16)]
 #[derive(Default)]
 pub enum KeyDerivationSubtype {
+    #[default]
+    None = 0,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[repr(u16)]
+#[derive(Default)]
+pub enum KdfEncryptedDataSubtype {
     #[default]
     None = 0,
 }

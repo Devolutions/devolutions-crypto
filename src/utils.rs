@@ -101,6 +101,7 @@ pub fn derive_key_argon2(key: &[u8], parameters: &Argon2Parameters) -> Result<Ve
 /// assert!(!validate_header(&key, DataType::Ciphertext);
 pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
     use super::ciphertext::Ciphertext;
+    use super::derive_encrypt::KdfEncryptedData;
     use super::key::{PrivateKey, PublicKey};
     use super::password_hash::PasswordHash;
     use super::secret_sharing::Share;
@@ -131,6 +132,9 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
         DataType::KeyDerivation => {
             use super::key_derivation::DerivationParameters;
             Header::<DerivationParameters>::try_from(&data[0..Header::len()]).is_ok()
+        }
+        DataType::KdfEncryptedData => {
+            Header::<KdfEncryptedData>::try_from(&data[0..Header::len()]).is_ok()
         }
     }
 }

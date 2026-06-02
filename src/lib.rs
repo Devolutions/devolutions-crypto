@@ -9,6 +9,7 @@
 //!     * [Key Generation](#generation)
 //!     * [Key Exchange](#key-exchange)
 //! * [Key Derivation](#key-derivation)
+//! * [Derive and Encrypt](#derive-and-encrypt)
 //! * [PasswordHash Module](#passwordhash)
 //! * [SecretSharing Module](#secretsharing)
 //! * [Utils Module](#utils)
@@ -157,6 +158,36 @@
 //! assert_eq!(bob_shared, alice_shared);
 //! ```
 //!
+//! ## Derive and Encrypt
+//!
+//! This module combines password-based key derivation and symmetric encryption into a single
+//! self-contained blob. The KDF parameters needed for decryption are stored alongside the
+//! ciphertext, so callers only need to supply the original password to decrypt.
+//!
+//! ```rust
+//! use std::convert::TryFrom as _;
+//! use devolutions_crypto::derive_encrypt::{encrypt_with_password, KdfEncryptedData};
+//! use devolutions_crypto::key_derivation::Argon2;
+//! use devolutions_crypto::CiphertextVersion;
+//!
+//! let password = b"a very strong password";
+//! let params = Argon2::new().parameters();
+//! let blob = encrypt_with_password(
+//!     b"secret data",
+//!     password,
+//!     params,
+//!     CiphertextVersion::Latest,
+//! ).expect("encryption shouldn't fail");
+//!
+//! // Serialize to bytes for storage or transport.
+//! let blob_bytes: Vec<u8> = blob.into();
+//!
+//! // Deserialize and decrypt.
+//! let blob = KdfEncryptedData::try_from(blob_bytes.as_slice()).expect("deserialization shouldn't fail");
+//! let plaintext = blob.decrypt_with_password(password).expect("decryption shouldn't fail");
+//! assert_eq!(plaintext, b"secret data");
+//! ```
+//!
 //! ## PasswordHash
 //! You can use this module to hash a password and validate it afterward. This is the recommended way to verify a user password on login.
 //! ```rust
@@ -240,6 +271,7 @@ mod error;
 mod header;
 
 pub mod ciphertext;
+pub mod derive_encrypt;
 pub mod key;
 pub mod key_derivation;
 pub mod online_ciphertext;
@@ -253,9 +285,9 @@ use enums::{CiphertextSubtype, PasswordHashSubtype, ShareSubtype, SignatureSubty
 pub use header::{Header, HeaderType};
 
 pub use enums::{
-    CiphertextVersion, DataType, KeyDerivationVersion, KeySubtype, KeyVersion,
-    OnlineCiphertextVersion, PasswordHashVersion, SecretSharingVersion, SignatureVersion,
-    SigningKeyVersion,
+    CiphertextVersion, DataType, KdfEncryptedDataVersion, KeyDerivationVersion, KeySubtype,
+    KeyVersion, OnlineCiphertextVersion, PasswordHashVersion, SecretSharingVersion,
+    SignatureVersion, SigningKeyVersion,
 };
 
 pub use argon2::Variant as Argon2Variant;
@@ -263,6 +295,7 @@ pub use argon2::Version as Argon2Version;
 pub use argon2parameters::defaults as argon2parameters_defaults;
 pub use argon2parameters::Argon2Parameters;
 pub use argon2parameters::Argon2ParametersBuilder;
+pub use derive_encrypt::{encrypt_with_password, encrypt_with_password_and_aad, KdfEncryptedData};
 pub use error::{Error, Result};
 pub use key_derivation::{derive_key, Argon2, DerivationParameters, Pbkdf2};
 

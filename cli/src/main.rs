@@ -158,6 +158,30 @@ enum Commands {
         shares: Vec<String>,
     },
 
+    /// Combine key derivation and encryption in a single operation
+    #[command(arg_required_else_help = true)]
+    DeriveAndEncrypt {
+        /// The plaintext to encrypt
+        data: String,
+
+        /// The password from which the encryption key is derived
+        password: String,
+
+        /// The cipher version to use (default: latest)
+        #[arg(short, long)]
+        version: Option<u16>,
+    },
+
+    /// Decrypt a KdfEncryptedData blob with a password
+    #[command(arg_required_else_help = true)]
+    DeriveAndDecrypt {
+        /// The KdfEncryptedData blob to decrypt, in base64
+        data: String,
+
+        /// The password used during encryption
+        password: String,
+    },
+
     /// Print the header information
     #[command(arg_required_else_help = true)]
     PrintHeader {
@@ -198,6 +222,14 @@ fn main() {
         Commands::VerifyPassword { password, hash } => verify_password(hash, password),
         Commands::MixKeyExchange { private, public } => mix_key_exchange(private, public),
         Commands::JoinShares { shares } => join_shares(shares),
+        Commands::DeriveAndEncrypt {
+            data,
+            password,
+            version,
+        } => derive_and_encrypt_password(data, password, version),
+        Commands::DeriveAndDecrypt { data, password } => {
+            derive_and_decrypt_password(data, password)
+        }
         Commands::PrintHeader { data } => print_header(data),
     }
 }
@@ -258,6 +290,42 @@ fn derive_key(data: String, salt: Option<String>, iterations: Option<u32>) {
     println!("DerivationParameters: {}", base64::encode(&params_bytes));
 }
 
+fn derive_and_encrypt_password(data: String, password: String, version: Option<u16>) {
+    use devolutions_crypto::derive_encrypt::encrypt_with_password;
+    use devolutions_crypto::key_derivation::Argon2;
+
+    let version = version.unwrap_or(0);
+    let version = devolutions_crypto::CiphertextVersion::try_from(version).unwrap();
+
+    let params = Argon2::new().parameters();
+    let result: Vec<u8> =
+        encrypt_with_password(data.as_bytes(), password.as_bytes(), params, version)
+            .unwrap()
+            .into();
+    println!("{}", base64::encode(&result));
+}
+
+fn derive_and_decrypt_password(data: String, password: String) {
+    use devolutions_crypto::derive_encrypt::KdfEncryptedData;
+
+    let data_bytes = decode_base64_arg("data", &data);
+    let blob = KdfEncryptedData::try_from(data_bytes.as_slice()).unwrap_or_else(|_| {
+        eprintln!(
+            "Error: 'data' - expected KdfEncryptedData, received {}.",
+            detect_dc_type(&data_bytes)
+        );
+        std::process::exit(1);
+    });
+
+    let result: Vec<u8> = blob
+        .decrypt_with_password(password.as_bytes())
+        .unwrap_or_else(|e| {
+            eprintln!("Error: decryption failed: {}.", e);
+            std::process::exit(1);
+        });
+    println!("{}", String::from_utf8_lossy(&result));
+}
+
 /// Returns a human-readable description of a managed type by inspecting its header.
 /// Returns "unknown" if the bytes are too short or contain an unrecognized type.
 fn detect_dc_type(bytes: &[u8]) -> String {
@@ -284,6 +352,7 @@ fn detect_dc_type(bytes: &[u8]) -> String {
         Ok(DataType::SigningKey) => "SigningKey".to_string(),
         Ok(DataType::Signature) => "Signature".to_string(),
         Ok(DataType::KeyDerivation) => "DerivationParameters".to_string(),
+        Ok(DataType::KdfEncryptedData) => "KdfEncryptedData".to_string(),
         _ => "unknown".to_string(),
     }
 }
@@ -537,6 +606,16 @@ fn print_header(data: String) {
                 )
             {
                 println!("{:?}", &h);
+            } else {
+                println!("Invalid Header");
+            }
+        }
+        Ok(devolutions_crypto::DataType::KdfEncryptedData) => {
+            if let Ok(header) = devolutions_crypto::Header::<
+                devolutions_crypto::derive_encrypt::KdfEncryptedData,
+            >::try_from(&data[0..8])
+            {
+                println!("{:?}", &header);
             } else {
                 println!("Invalid Header");
             }

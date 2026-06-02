@@ -394,6 +394,64 @@ def decrypt_with_secret_key(
     """
     ...
 
+def derive_encrypt_with_password(
+    data: bytes,
+    password: bytes,
+    aad: Optional[bytes] = None,
+    key_derivation_version: int = 0,
+    ciphertext_version: int = 0
+) -> bytes:
+    """
+    Derive a key from a password and encrypt data in a single blob.
+
+    The output contains the key derivation parameters and the ciphertext,
+    allowing decryption with only the password.
+
+    Args:
+        data: The plaintext data to encrypt
+        password: The password to derive the encryption key from
+        aad: Optional Additional Authenticated Data for AEAD
+        key_derivation_version: KDF version (0 = latest/Argon2, 1 = PBKDF2)
+        ciphertext_version: Ciphertext version (0 = latest)
+
+    Returns:
+        The DeriveEncrypt blob as bytes (KDF params + ciphertext)
+
+    Raises:
+        DevolutionsCryptoException: If encryption or key derivation fails
+
+    Example:
+        >>> blob = derive_encrypt_with_password(b'secret data', b'my password')
+    """
+    ...
+
+def derive_decrypt_with_password(
+    data: bytes,
+    password: bytes,
+    aad: Optional[bytes] = None
+) -> bytes:
+    """
+    Decrypt a DeriveEncrypt blob using the original password.
+
+    Re-derives the encryption key from the embedded KDF parameters and password,
+    then decrypts the embedded ciphertext.
+
+    Args:
+        data: The DeriveEncrypt blob (produced by derive_encrypt_with_password)
+        password: The password used during encryption
+        aad: Optional Additional Authenticated Data (must match encryption AAD)
+
+    Returns:
+        The decrypted plaintext as bytes
+
+    Raises:
+        DevolutionsCryptoException: If decryption fails, wrong password, or invalid blob
+
+    Example:
+        >>> plaintext = derive_decrypt_with_password(blob, b'my password')
+    """
+    ...
+
 def get_signing_public_key(keypair: bytes) -> bytes:
     """
     Extract the public key from a signing keypair.
@@ -481,4 +539,6 @@ __all__ = [
     'generate_secret_key',
     'encrypt_with_secret_key',
     'decrypt_with_secret_key',
+    'derive_encrypt_with_password',
+    'derive_decrypt_with_password',
 ]
