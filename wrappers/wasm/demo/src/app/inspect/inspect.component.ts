@@ -21,6 +21,7 @@ const DATA_TYPE_NAMES: Record<number, string> = {
   6: 'Signature',
   7: 'OnlineCiphertext',
   8: 'KeyDerivation',
+  9: 'KdfEncryptedData',
 };
 
 const SUBTYPE_NAMES: Record<number, Record<number, string>> = {
@@ -31,6 +32,7 @@ const SUBTYPE_NAMES: Record<number, Record<number, string>> = {
   5: { 0: 'None', 1: 'Pair', 2: 'Public' },
   6: { 0: 'None' },
   8: { 0: 'None' },
+  9: { 0: 'None' },
 };
 
 const VERSION_NAMES: Record<number, Record<number, string>> = {
@@ -41,6 +43,7 @@ const VERSION_NAMES: Record<number, Record<number, string>> = {
   5: { 0: 'Latest', 1: 'V1 – Ed25519' },
   6: { 0: 'Latest', 1: 'V1 – Ed25519' },
   8: { 0: 'Latest', 1: 'V1 – PBKDF2-HMAC-SHA256', 2: 'V2 – Argon2id' },
+  9: { 0: 'Latest', 1: 'V1 – DerivationParameters + XChaCha20-Poly1305' },
 };
 
 export interface PayloadField {
@@ -196,6 +199,8 @@ export class InspectComponent implements OnInit {
         return this.parseSharePayload(payload, abs);
       case 8:
         return this.parseDerivationParametersPayload(payload, version, abs);
+      case 9:
+        return this.parseKdfEncryptedDataPayload(payload, abs);
       default:
         return [
           {
@@ -711,6 +716,120 @@ export class InspectComponent implements OnInit {
         description: `${payload.length} bytes — unknown derivation parameters version`,
       },
     ];
+  }
+
+  private parseKdfEncryptedDataPayload(
+    payload: Uint8Array,
+    abs: (n: number) => number
+  ): PayloadField[] {
+    const fields: PayloadField[] = [];
+    if (payload.length < 8) {
+      fields.push({
+        name: 'Error',
+        offset: abs(0),
+        size: payload.length,
+        hex: toHex(payload),
+        description: `Payload too short for KdfEncryptedData V1 (min 8 bytes, got ${payload.length})`,
+      });
+      return fields;
+    }
+
+    const dv = new DataView(payload.buffer, payload.byteOffset, payload.byteLength);
+    const paramsLen = dv.getUint32(0, true);
+    const ctLen = dv.getUint32(4, true);
+
+    fields.push({
+      name: 'DerivationParameters Length',
+      offset: abs(0),
+      size: 4,
+      hex: toHex(payload.slice(0, 4)),
+      description: `Serialized DerivationParameters size: ${paramsLen} bytes`,
+    });
+    fields.push({
+      name: 'Ciphertext Length',
+      offset: abs(4),
+      size: 4,
+      hex: toHex(payload.slice(4, 8)),
+      description: `Serialized Ciphertext size: ${ctLen} bytes`,
+    });
+
+    let pos = 8;
+
+    // DerivationParameters (has its own 8-byte header)
+    if (pos + paramsLen > payload.length) {
+      fields.push({
+        name: 'Error',
+        offset: abs(pos),
+        size: payload.length - pos,
+        hex: toHex(payload.slice(pos)),
+        description: `Truncated: DerivationParameters claims ${paramsLen} bytes but only ${payload.length - pos} remain`,
+      });
+      return fields;
+    }
+
+    const dpBytes = payload.slice(pos, pos + paramsLen);
+    if (dpBytes.length >= 8) {
+      const dpDv = new DataView(dpBytes.buffer, dpBytes.byteOffset, dpBytes.byteLength);
+      const dpVersion = dpDv.getUint16(6, true);
+      fields.push({
+        name: 'DerivationParameters Header',
+        offset: abs(pos),
+        size: 8,
+        hex: toHex(dpBytes.slice(0, 8)),
+        description: `Inner header — KeyDerivation, version ${dpVersion}`,
+      });
+      const dpPayload = dpBytes.slice(8);
+      const dpFields = this.parseDerivationParametersPayload(dpPayload, dpVersion, (n) => abs(pos + 8 + n));
+      fields.push(...dpFields);
+    } else {
+      fields.push({
+        name: 'DerivationParameters',
+        offset: abs(pos),
+        size: paramsLen,
+        hex: toHex(dpBytes),
+        description: `Serialized DerivationParameters (${paramsLen} bytes)`,
+      });
+    }
+    pos += paramsLen;
+
+    // Ciphertext (has its own 8-byte header)
+    if (pos + ctLen > payload.length) {
+      fields.push({
+        name: 'Error',
+        offset: abs(pos),
+        size: payload.length - pos,
+        hex: toHex(payload.slice(pos)),
+        description: `Truncated: Ciphertext claims ${ctLen} bytes but only ${payload.length - pos} remain`,
+      });
+      return fields;
+    }
+
+    const ctBytes = payload.slice(pos, pos + ctLen);
+    if (ctBytes.length >= 8) {
+      const ctDv = new DataView(ctBytes.buffer, ctBytes.byteOffset, ctBytes.byteLength);
+      const ctSubtype = ctDv.getUint16(4, true);
+      const ctVersion = ctDv.getUint16(6, true);
+      fields.push({
+        name: 'Ciphertext Header',
+        offset: abs(pos),
+        size: 8,
+        hex: toHex(ctBytes.slice(0, 8)),
+        description: `Inner header — Ciphertext, subtype ${ctSubtype}, version ${ctVersion}`,
+      });
+      const ctPayload = ctBytes.slice(8);
+      const ctFields = this.parseCiphertextPayload(ctPayload, ctSubtype, ctVersion, (n) => abs(pos + 8 + n));
+      fields.push(...ctFields);
+    } else {
+      fields.push({
+        name: 'Ciphertext',
+        offset: abs(pos),
+        size: ctLen,
+        hex: toHex(ctBytes),
+        description: `Serialized Ciphertext (${ctLen} bytes)`,
+      });
+    }
+
+    return fields;
   }
 
   private errorResult(totalBytes: number, message: string): ParseResult {
