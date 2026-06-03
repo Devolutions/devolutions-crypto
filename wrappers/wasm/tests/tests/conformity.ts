@@ -1,6 +1,6 @@
 // These tests are there to make sure that the implementations are compatible between one language and another
 import {
-  KeyPair, deriveKeyPbkdf2, base64encode, base64decode, decrypt, Argon2Parameters, PrivateKey, SigningPublicKey, decryptAsymmetric, verifyPassword, verifySignature, deriveKeyArgon2, deriveSecretKeyPbkdf2, deriveSecretKeyArgon2, KeyDerivationResult, DerivationParameters
+  KeyPair, deriveKeyPbkdf2, base64encode, base64decode, decrypt, Argon2Parameters, PrivateKey, SigningPublicKey, decryptAsymmetric, verifyPassword, verifySignature, deriveKeyArgon2, deriveSecretKeyPbkdf2, deriveSecretKeyArgon2, KeyDerivationResult, DerivationParameters, deriveDecryptWithPassword
 } from 'devolutions-crypto'
 import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -112,5 +112,12 @@ describe('Conformity Tests', () => {
     const result: KeyDerivationResult = deriveSecretKeyArgon2(encoder.encode('testpassword'), parameters)
 
     assert.strictEqual(base64encode(result.secretKey.bytes), 'DQwBAAQAAQCoRRraZaLaR3nJn0E+1ZYBcM3DBCwINJpWAuA2tcvr6w==')
+  })
+
+  test('DeriveDecryptWithPassword V1', () => {
+    const data: Uint8Array = base64decode('DQwJAAAAAQA2AAAAQgAAAA0MCAAAAAIAAQAAACAAAAABAAAAABAAAAIAAAACEwAAAAAQAAAAToyZHBBdwMfQ/nSt8fAG2g0MAgABAAIAOy6I4UgmX2jX+ji691rHdSKa5r4X1ItGiT6BszvL1eagyovyr/0DPMM2eIOmctQzuiQHgQ2BXrULGQ==')
+    const result: Uint8Array = deriveDecryptWithPassword(data, encoder.encode('DevoCrypto!'))
+
+    assert.strictEqual(decoder.decode(result), 'Derive and Encrypt')
   })
 })

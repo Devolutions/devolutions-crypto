@@ -46,7 +46,12 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// TODO
         /// </summary>
-        OnlineCiphertext = 7
+        OnlineCiphertext = 7,
+
+        /// <summary>
+        /// A blob containing key derivation parameters and an encrypted ciphertext.
+        /// </summary>
+        KdfEncryptedData = 9
     }
 
     /// <summary>

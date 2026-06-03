@@ -127,4 +127,16 @@ class ConformityTests: XCTestCase {
       try verifySignature(
         data: Data("this is wrong".utf8), publicKey: publicKey, signature: signature))
   }
+
+  func testDeriveDecryptWithPasswordV1() throws {
+    let data = try base64Decode(
+      data:
+        "DQwJAAAAAQA2AAAAQgAAAA0MCAAAAAIAAQAAACAAAAABAAAAABAAAAIAAAACEwAAAAAQAAAAToyZHBBdwMfQ/nSt8fAG2g0MAgABAAIAOy6I4UgmX2jX+ji691rHdSKa5r4X1ItGiT6BszvL1eagyovyr/0DPMM2eIOmctQzuiQHgQ2BXrULGQ=="
+    )
+    let password = Data("DevoCrypto!".utf8)
+    let result = try deriveDecryptWithPassword(data: data, password: password)
+    let expected = Data("Derive and Encrypt".utf8)
+
+    XCTAssertEqual(result, expected)
+  }
 }

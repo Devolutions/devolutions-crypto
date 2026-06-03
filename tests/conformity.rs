@@ -4,7 +4,7 @@ use devolutions_crypto::{
     key::{PrivateKey, SecretKey},
     password_hash::PasswordHash,
     utils::{derive_key_argon2, derive_key_pbkdf2},
-    Argon2Parameters,
+    Argon2Parameters, KdfEncryptedData,
 };
 
 use std::convert::TryFrom as _;
@@ -309,6 +309,18 @@ fn test_utils_base64() {
     assert_eq!(base64_decode(base64_data_no_pad).unwrap(), data);
 
     assert_eq!(base64_encode(data), "QmFzZTY0VGVzdA==");
+}
+
+#[test]
+fn test_derive_decrypt_with_password_v1() {
+    let data = general_purpose::STANDARD
+        .decode("DQwJAAAAAQA2AAAAQgAAAA0MCAAAAAIAAQAAACAAAAABAAAAABAAAAIAAAACEwAAAAAQAAAAToyZHBBdwMfQ/nSt8fAG2g0MAgABAAIAOy6I4UgmX2jX+ji691rHdSKa5r4X1ItGiT6BszvL1eagyovyr/0DPMM2eIOmctQzuiQHgQ2BXrULGQ==")
+        .unwrap();
+
+    let blob = KdfEncryptedData::try_from(data.as_slice()).unwrap();
+    let result = blob.decrypt_with_password(b"DevoCrypto!").unwrap();
+
+    assert_eq!(result, b"Derive and Encrypt");
 }
 
 #[test]

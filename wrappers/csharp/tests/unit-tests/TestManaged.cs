@@ -506,6 +506,90 @@ namespace Devolutions.Crypto.Tests
             CollectionAssert.AreEqual(result1.Parameters.ToByteArray(), result2.Parameters.ToByteArray());
         }
 
+        [TestMethod]
+        public void DeriveEncryptDecryptWithPassword_RoundTrip()
+        {
+            byte[] data = "Hello, derive-encrypt!"u8.ToArray();
+            byte[] password = "s3cr3tPa$$w0rd"u8.ToArray();
+
+            byte[] blob = Managed.DeriveEncryptWithPassword(data, password);
+            Assert.IsNotNull(blob);
+            Assert.IsTrue(Utils.ValidateHeader(blob, DataType.KdfEncryptedData));
+
+            byte[]? decrypted = Managed.DeriveDecryptWithPassword(blob, password);
+            Assert.IsNotNull(decrypted);
+            CollectionAssert.AreEqual(data, decrypted);
+        }
+
+        [TestMethod]
+        public void DeriveEncryptDecryptWithPassword_WithAad_RoundTrip()
+        {
+            byte[] data = "sensitive payload"u8.ToArray();
+            byte[] password = "pa$$word"u8.ToArray();
+            byte[] aad = "public context"u8.ToArray();
+            byte[] wrongAad = "tampered context"u8.ToArray();
+
+            byte[] blob = Managed.DeriveEncryptWithPassword(data, password, aad);
+            Assert.IsNotNull(blob);
+
+            byte[]? decrypted = Managed.DeriveDecryptWithPassword(blob, password, aad);
+            Assert.IsNotNull(decrypted);
+            CollectionAssert.AreEqual(data, decrypted);
+
+            Assert.ThrowsException<DevolutionsCryptoException>(() => Managed.DeriveDecryptWithPassword(blob, password, wrongAad));
+        }
+
+        [TestMethod]
+        public void DeriveEncryptDecryptWithPassword_WrongPassword_Throws()
+        {
+            byte[] data = "secret"u8.ToArray();
+            byte[] password = "correct-password"u8.ToArray();
+            byte[] wrongPassword = "wrong-password"u8.ToArray();
+
+            byte[] blob = Managed.DeriveEncryptWithPassword(data, password);
+
+            Assert.ThrowsException<DevolutionsCryptoException>(() => Managed.DeriveDecryptWithPassword(blob, wrongPassword));
+        }
+
+        [TestMethod]
+        public void DeriveEncryptDecryptWithPassword_AesVersion_RoundTrip()
+        {
+            byte[] data = "AES-CBC encrypt test"u8.ToArray();
+            byte[] password = "aes-password"u8.ToArray();
+
+            byte[] blob = Managed.DeriveEncryptWithPassword(data, password, cipherTextVersion: CipherTextVersion.V1);
+            Assert.IsNotNull(blob);
+
+            byte[]? decrypted = Managed.DeriveDecryptWithPassword(blob, password);
+            Assert.IsNotNull(decrypted);
+            CollectionAssert.AreEqual(data, decrypted);
+        }
+
+        [TestMethod]
+        public void DeriveEncryptDecryptWithPassword_WithDerivationParameters_RoundTrip()
+        {
+            byte[] data = "using pre-built params"u8.ToArray();
+            byte[] password = "params-password"u8.ToArray();
+
+            // Generate derivation parameters first, then reuse them
+            KeyDerivationResult derivResult = Managed.DeriveSecretKeyArgon2(password, Managed.GetDefaultArgon2Parameters());
+            DerivationParameters derivParams = derivResult.Parameters;
+
+            byte[] blob = Managed.DeriveEncryptWithPassword(data, password, derivationParameters: derivParams);
+            Assert.IsNotNull(blob);
+
+            byte[]? decrypted = Managed.DeriveDecryptWithPassword(blob, password);
+            Assert.IsNotNull(decrypted);
+            CollectionAssert.AreEqual(data, decrypted);
+        }
+
+        [TestMethod]
+        public void DeriveDecryptWithPassword_NullData_ReturnsNull()
+        {
+            byte[]? result = Managed.DeriveDecryptWithPassword(null, "password"u8.ToArray());
+            Assert.IsNull(result);
+        }
+
         private static byte[][] GetSharesKeys()
         {
             const int nbShares = 3;
