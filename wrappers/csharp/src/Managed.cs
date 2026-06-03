@@ -1434,6 +1434,8 @@ namespace Devolutions.Cryptography
                     Utils.HandleError(res);
                 }
 
+                Array.Resize(ref result, (int)res);
+
                 return result;
             }
             else
@@ -1459,6 +1461,8 @@ namespace Devolutions.Cryptography
                 {
                     Utils.HandleError(res);
                 }
+
+                Array.Resize(ref result, (int)res);
 
                 return result;
             }
