@@ -20,7 +20,7 @@ pip install devolutions-crypto
 - **Password Hashing**: Secure password hashing with Argon2 and PBKDF2
 - **Digital Signatures**: Ed25519 signatures for data authentication
 - **Key Derivation**: Argon2 and PBKDF2 key derivation functions
-- **Type Safety**: Full type hints and IDE support via stub files
+- **Type Safety**: Full type hints and IDE support
 
 ## Quick Start
 
@@ -49,6 +49,7 @@ assert decrypted == plaintext
 * [Password Hashing](#password-hashing)
 * [Digital Signatures](#digital-signatures)
 * [Key Derivation](#key-derivation)
+* [Password-Based Encryption](#password-based-encryption)
 
 ### Symmetric Encryption
 
@@ -83,16 +84,16 @@ plaintext = b"Secret message"
 aad = b"user_id:12345"  # Context data (not encrypted, but authenticated)
 
 # Encrypt with AAD
-ciphertext = devolutions_crypto.encrypt(plaintext, key, aad=aad)
+ciphertext = devolutions_crypto.encrypt_with_aad(plaintext, key, aad)
 
 # Decrypt with AAD (must match encryption AAD)
-decrypted = devolutions_crypto.decrypt(ciphertext, key, aad=aad)
+decrypted = devolutions_crypto.decrypt_with_aad(ciphertext, key, aad)
 assert decrypted == plaintext
 
 # Decryption fails with wrong or missing AAD
 try:
-    devolutions_crypto.decrypt(ciphertext, key, aad=b"wrong_context")
-except devolutions_crypto.DevolutionsCryptoException:
+    devolutions_crypto.decrypt_with_aad(ciphertext, key, b"wrong_context")
+except devolutions_crypto.DevolutionsCryptoError:
     print("Authentication failed - AAD mismatch")
 ```
 
@@ -141,17 +142,14 @@ assert decrypted == message
 
 ### Password Hashing
 
-Securely hash and verify passwords using PBKDF2:
+Securely hash and verify passwords. The default uses Argon2id:
 
 ```python
 import devolutions_crypto
 
-# Hash a password (this is slow by design - use high iterations)
+# Hash a password (this is slow by design)
 password = b"my_secure_password123!"
-password_hash = devolutions_crypto.hash_password(
-    password,
-    version=0
-)
+password_hash = devolutions_crypto.hash_password(password)
 
 # Verify the password
 is_valid = devolutions_crypto.verify_password(password, password_hash)
@@ -175,7 +173,7 @@ import devolutions_crypto
 signing_keypair = devolutions_crypto.generate_signing_keypair()
 
 # Extract the public key
-public_key = devolutions_crypto.get_signing_public_key(signing_keypair)
+public_key = signing_keypair.get_public_key()
 ```
 
 #### Signing Data
@@ -185,7 +183,7 @@ import devolutions_crypto
 
 # Sign some data
 data = b"This is an important message"
-signature = devolutions_crypto.sign(data, signing_keypair)
+signature = devolutions_crypto.sign(data, signing_keypair.get_private_key())
 ```
 
 #### Verifying Signatures
@@ -234,10 +232,50 @@ ciphertext = devolutions_crypto.encrypt(plaintext, derived_key)
 ```python
 import devolutions_crypto
 
-# Derive a key using Argon2 (requires Argon2Parameters)
+# Derive a key using Argon2id
 password = b"user_password"
-# parameters should be serialized Argon2Parameters
+parameters = devolutions_crypto.Argon2ParametersBuilder().build()  # default Argon2id parameters
 derived_key = devolutions_crypto.derive_key_argon2(password, parameters)
+```
+
+### Password-Based Encryption
+
+Encrypt data directly with a password. The key is derived with Argon2id and the
+derivation parameters (including the random salt) are stored in the returned
+blob, so decryption only needs the password.
+
+```python
+import devolutions_crypto
+
+password = b"my_secure_password"
+plaintext = b"secret data"
+
+# Encrypt with a password
+blob = devolutions_crypto.derive_encrypt_with_password(plaintext, password)
+
+# Decrypt with the same password
+decrypted = devolutions_crypto.derive_decrypt_with_password(blob, password)
+assert decrypted == plaintext
+```
+
+#### With Additional Authenticated Data (AAD)
+
+```python
+import devolutions_crypto
+
+password = b"my_secure_password"
+plaintext = b"secret data"
+aad = b"context"
+
+blob = devolutions_crypto.derive_encrypt_with_password_and_aad(plaintext, password, aad)
+decrypted = devolutions_crypto.derive_decrypt_with_password_and_aad(blob, password, aad)
+assert decrypted == plaintext
+
+# Decryption fails with wrong or missing AAD
+try:
+    devolutions_crypto.derive_decrypt_with_password(blob, password)
+except devolutions_crypto.DevolutionsCryptoError:
+    print("Authentication failed - AAD required")
 ```
 
 ## Supported Python Versions
@@ -265,7 +303,7 @@ Pre-built wheels are available for:
 
 ## Exception Handling
 
-All functions may raise `DevolutionsCryptoException` on errors:
+All functions may raise `DevolutionsCryptoError` on errors:
 
 ```python
 import devolutions_crypto
@@ -273,7 +311,7 @@ import devolutions_crypto
 try:
     # Invalid key size
     result = devolutions_crypto.encrypt(b"data", b"short_key")
-except devolutions_crypto.DevolutionsCryptoException as e:
+except devolutions_crypto.DevolutionsCryptoError as e:
     print(f"Encryption error: {e}")
 ```
 

@@ -11,21 +11,21 @@ class TestSymmetric(unittest.TestCase):
         ciphertext = devolutions_crypto.encrypt(plaintext, key)
 
         self.assertEqual(devolutions_crypto.decrypt(ciphertext, key), plaintext)
-    
+
     def test_symmetric_with_aad(self):
         key = os.urandom(32)
         plaintext = b'Test plaintext'
         aad = b"Test AAD"
 
-        ciphertext = devolutions_crypto.encrypt(plaintext, key, aad)
+        ciphertext = devolutions_crypto.encrypt_with_aad(plaintext, key, aad)
 
-        self.assertEqual(devolutions_crypto.decrypt(ciphertext, key, aad), plaintext)
+        self.assertEqual(devolutions_crypto.decrypt_with_aad(ciphertext, key, aad), plaintext)
 
-        with self.assertRaises(devolutions_crypto.DevolutionsCryptoException):
+        with self.assertRaises(devolutions_crypto.DevolutionsCryptoError):
             devolutions_crypto.decrypt(ciphertext, key)
 
-        with self.assertRaises(devolutions_crypto.DevolutionsCryptoException):
-            devolutions_crypto.decrypt(ciphertext, key, aad = b"Wrong AAD")
+        with self.assertRaises(devolutions_crypto.DevolutionsCryptoError):
+            devolutions_crypto.decrypt_with_aad(ciphertext, key, b"Wrong AAD")
 
     def test_symmetric_with_secret_key(self):
         key = devolutions_crypto.generate_secret_key()
@@ -40,15 +40,15 @@ class TestSymmetric(unittest.TestCase):
         plaintext = b'Test plaintext'
         aad = b"Test AAD"
 
-        ciphertext = devolutions_crypto.encrypt_with_secret_key(plaintext, key, aad)
+        ciphertext = devolutions_crypto.encrypt_with_secret_key_and_aad(plaintext, key, aad)
 
-        self.assertEqual(devolutions_crypto.decrypt_with_secret_key(ciphertext, key, aad), plaintext)
+        self.assertEqual(devolutions_crypto.decrypt_with_secret_key_and_aad(ciphertext, key, aad), plaintext)
 
-        with self.assertRaises(devolutions_crypto.DevolutionsCryptoException):
+        with self.assertRaises(devolutions_crypto.DevolutionsCryptoError):
             devolutions_crypto.decrypt_with_secret_key(ciphertext, key)
 
-        with self.assertRaises(devolutions_crypto.DevolutionsCryptoException):
-            devolutions_crypto.decrypt_with_secret_key(ciphertext, key, aad = b"Wrong AAD")
+        with self.assertRaises(devolutions_crypto.DevolutionsCryptoError):
+            devolutions_crypto.decrypt_with_secret_key_and_aad(ciphertext, key, b"Wrong AAD")
 
 
 if __name__ == "__main__":

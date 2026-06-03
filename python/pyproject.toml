@@ -29,6 +29,6 @@ requires = ["maturin>=1.10"]
 build-backend = "maturin"
 
 [tool.maturin]
-bindings = "pyo3"
+bindings = "uniffi"
 module-name = "devolutions_crypto"
-include = ["devolutions_crypto.pyi"]
+manifest-path = "../uniffi/devolutions-crypto-uniffi/Cargo.toml"

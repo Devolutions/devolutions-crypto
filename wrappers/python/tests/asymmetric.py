@@ -16,15 +16,15 @@ class TestAsymmetric(unittest.TestCase):
         plaintext = b'Test plaintext'
         aad = b"Test AAD"
 
-        ciphertext = devolutions_crypto.encrypt_asymmetric(plaintext, keypair.public_key, aad)
+        ciphertext = devolutions_crypto.encrypt_asymmetric_with_aad(plaintext, keypair.public_key, aad)
 
-        self.assertEqual(devolutions_crypto.decrypt_asymmetric(ciphertext, keypair.private_key, aad), plaintext)
+        self.assertEqual(devolutions_crypto.decrypt_asymmetric_with_aad(ciphertext, keypair.private_key, aad), plaintext)
 
-        with self.assertRaises(devolutions_crypto.DevolutionsCryptoException):
+        with self.assertRaises(devolutions_crypto.DevolutionsCryptoError):
             devolutions_crypto.decrypt_asymmetric(ciphertext, keypair.private_key)
 
-        with self.assertRaises(devolutions_crypto.DevolutionsCryptoException):
-            devolutions_crypto.decrypt_asymmetric(ciphertext, keypair.private_key, aad = b"Wrong AAD")
+        with self.assertRaises(devolutions_crypto.DevolutionsCryptoError):
+            devolutions_crypto.decrypt_asymmetric_with_aad(ciphertext, keypair.private_key, b"Wrong AAD")
 
 
 if __name__ == "__main__":

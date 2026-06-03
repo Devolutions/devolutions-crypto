@@ -12,7 +12,7 @@ class TestPasswordHash(unittest.TestCase):
     def test_hash_password_v1_pbkdf2(self):
         """Explicit V1 uses PBKDF2-SHA256."""
         password = b'my_secure_password'
-        hash_value = devolutions_crypto.hash_password(password, version=1)
+        hash_value = devolutions_crypto.hash_password(password, version=devolutions_crypto.PasswordHashVersion.V1)
         self.assertTrue(devolutions_crypto.verify_password(password, hash_value))
 
     def test_verify_wrong_password(self):
@@ -32,7 +32,9 @@ class TestPasswordHash(unittest.TestCase):
     def test_hash_password_with_argon2_params(self):
         """hash_password_with_params works with default Argon2id parameters."""
         password = b'my_secure_password'
-        params = devolutions_crypto.get_argon2_derivation_parameters()
+        params = devolutions_crypto.get_argon2_derivation_parameters(
+            devolutions_crypto.Argon2ParametersBuilder().build()
+        )
         hash_value = devolutions_crypto.hash_password_with_params(password, params)
         self.assertTrue(devolutions_crypto.verify_password(password, hash_value))
         self.assertFalse(devolutions_crypto.verify_password(b'wrong_password', hash_value))
@@ -47,17 +49,12 @@ class TestPasswordHash(unittest.TestCase):
 
     def test_verify_invalid_hash_raises(self):
         """verify_password raises on invalid/truncated hash bytes."""
-        with self.assertRaises(devolutions_crypto.DevolutionsCryptoException):
+        with self.assertRaises(devolutions_crypto.DevolutionsCryptoError):
             devolutions_crypto.verify_password(b'password', b'not_a_valid_hash')
-
-    def test_hash_password_unknown_version_raises(self):
-        """hash_password raises on an unknown version number."""
-        with self.assertRaises(devolutions_crypto.DevolutionsCryptoException):
-            devolutions_crypto.hash_password(b'password', version=999)
 
     def test_hash_password_with_params_invalid_params_raises(self):
         """hash_password_with_params raises on invalid DerivationParameters bytes."""
-        with self.assertRaises(devolutions_crypto.DevolutionsCryptoException):
+        with self.assertRaises(devolutions_crypto.DevolutionsCryptoError):
             devolutions_crypto.hash_password_with_params(b'password', b'invalid_params')
 
 

@@ -8,6 +8,10 @@ members = [
   "uniffi/uniffi-bindgen",
   "uniffi/devolutions-crypto-uniffi",
   ]
+default-members = [
+  ".",
+  "python",
+  ]
 
 [workspace.dependencies]
 uniffi = "0.31.1"
