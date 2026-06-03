@@ -379,7 +379,9 @@ pub unsafe extern "C" fn DeriveEncryptDataWithParams(
         return Error::NullPointer.error_code();
     }
 
-    if result_length != DeriveEncryptDataWithParamsSize(data_length, params_length, ciphertext_version) as usize {
+    if result_length
+        != DeriveEncryptDataWithParamsSize(data_length, params_length, ciphertext_version) as usize
+    {
         return Error::InvalidOutputLength.error_code();
     }
 
@@ -404,7 +406,13 @@ pub unsafe extern "C" fn DeriveEncryptDataWithParams(
         Err(e) => return e.error_code(),
     };
 
-    match encrypt_with_password_and_aad(data, &password, aad, derivation_parameters, ciphertext_version) {
+    match encrypt_with_password_and_aad(
+        data,
+        &password,
+        aad,
+        derivation_parameters,
+        ciphertext_version,
+    ) {
         Ok(res) => {
             let res: Vec<u8> = res.into();
             let length = res.len();
