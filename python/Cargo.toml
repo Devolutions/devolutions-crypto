@@ -3,14 +3,9 @@ name = "devolutions-crypto-python"
 version.workspace = true
 edition = "2021"
 
-[lib]
-name = "devolutions_crypto_python"
-crate-type = ["cdylib"]
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/uniffi-bindgen.rs"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-devolutions-crypto = { path = "../" }
-zeroize = "1"
-base64 = "0.22"
-pyo3 = { version = "0.27", features = ["extension-module", "generate-import-lib"] }
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+uniffi = { workspace = true, features = ["cli"] }
