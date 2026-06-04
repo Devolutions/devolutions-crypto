@@ -1390,6 +1390,124 @@ namespace Devolutions.Cryptography
             return result;
         }
 
+        /// <summary>
+        /// Encrypts data with a key derived from a password and embeds the derivation parameters in the output blob.
+        /// Defaults to Argon2id with default parameters and XChaCha20-Poly1305 encryption.
+        /// </summary>
+        /// <param name="data">The data to encrypt.</param>
+        /// <param name="password">The password to derive the key from.</param>
+        /// <param name="aad">Additional authenticated data (optional).</param>
+        /// <param name="derivationParameters">Pre-built derivation parameters. Defaults to Argon2id when <c>null</c>.</param>
+        /// <param name="cipherTextVersion">The ciphertext version to use. Defaults to <see cref="CipherTextVersion.Latest"/> (XChaCha20-Poly1305).</param>
+        /// <returns>A self-contained blob containing the derivation parameters and the ciphertext.</returns>
+        public static byte[] DeriveEncryptWithPassword(byte[] data, byte[] password, byte[]? aad = null, DerivationParameters? derivationParameters = null, CipherTextVersion cipherTextVersion = CipherTextVersion.Latest)
+        {
+            if (data == null || data.Length == 0 || password == null || password.Length == 0)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            long aadLength = aad?.Length ?? 0;
+
+            if (derivationParameters != null)
+            {
+                byte[] paramsRaw = derivationParameters.ToByteArray();
+
+                long resultLength = Native.DeriveEncryptDataWithParamsSizeNative((UIntPtr)data.Length, (UIntPtr)paramsRaw.Length, (ushort)cipherTextVersion);
+
+                if (resultLength < 0)
+                {
+                    Utils.HandleError(resultLength);
+                }
+
+                byte[] result = new byte[resultLength];
+                long res = Native.DeriveEncryptDataWithParamsNative(
+                    data, (UIntPtr)data.Length,
+                    password, (UIntPtr)password.Length,
+                    paramsRaw, (UIntPtr)paramsRaw.Length,
+                    aad, (UIntPtr)aadLength,
+                    result, (UIntPtr)result.Length,
+                    (ushort)cipherTextVersion);
+
+                if (res < 0)
+                {
+                    Utils.HandleError(res);
+                }
+
+                Array.Resize(ref result, (int)res);
+
+                return result;
+            }
+            else
+            {
+                // Default: Argon2id with default parameters (key_derivation_version = 0 = Latest)
+                long resultLength = Native.DeriveEncryptSizeNative((UIntPtr)data.Length, 0, (ushort)cipherTextVersion);
+
+                if (resultLength < 0)
+                {
+                    Utils.HandleError(resultLength);
+                }
+
+                byte[] result = new byte[resultLength];
+                long res = Native.DeriveEncryptDataNative(
+                    data, (UIntPtr)data.Length,
+                    password, (UIntPtr)password.Length,
+                    aad, (UIntPtr)aadLength,
+                    result, (UIntPtr)result.Length,
+                    0,
+                    (ushort)cipherTextVersion);
+
+                if (res < 0)
+                {
+                    Utils.HandleError(res);
+                }
+
+                Array.Resize(ref result, (int)res);
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Decrypts a derive-encrypt blob created by <see cref="DeriveEncryptWithPassword"/>.
+        /// </summary>
+        /// <param name="data">The blob to decrypt (derivation parameters + ciphertext).</param>
+        /// <param name="password">The password that was used to encrypt the data.</param>
+        /// <param name="aad">Additional authenticated data (optional, must match the value used during encryption).</param>
+        /// <returns>The decrypted plaintext bytes, or <c>null</c> if <paramref name="data"/> is null or empty.</returns>
+        public static byte[]? DeriveDecryptWithPassword(byte[]? data, byte[] password, byte[]? aad = null)
+        {
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+
+            if (password == null || password.Length == 0)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            long aadLength = aad?.Length ?? 0;
+
+            // Allocate a buffer the size of the ciphertext blob; the FFI will return the actual plaintext length.
+            byte[] result = new byte[data.Length];
+            long res = Native.DeriveDecryptDataNative(
+                data, (UIntPtr)data.Length,
+                password, (UIntPtr)password.Length,
+                aad, (UIntPtr)aadLength,
+                result, (UIntPtr)result.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            // Trim to actual plaintext length.
+            Array.Resize(ref result, (int)res);
+
+            return result;
+        }
+
         private static bool SharesLengthAreValid(byte[][] shares)
         {
             if (shares.Length == 0)

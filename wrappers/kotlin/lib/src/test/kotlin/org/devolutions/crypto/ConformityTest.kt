@@ -127,4 +127,13 @@ class ConformityTest {
         assert(verifySignature("this is a test".toByteArray(), publicKey, signature))
         assertFalse(verifySignature("this is wrong".toByteArray(), publicKey, signature))
     }
+
+    @Test
+    fun deriveDecryptWithPasswordV1Test() {
+        val data = base64Decode("DQwJAAAAAQA2AAAAQgAAAA0MCAAAAAIAAQAAACAAAAABAAAAABAAAAIAAAACEwAAAAAQAAAAToyZHBBdwMfQ/nSt8fAG2g0MAgABAAIAOy6I4UgmX2jX+ji691rHdSKa5r4X1ItGiT6BszvL1eagyovyr/0DPMM2eIOmctQzuiQHgQ2BXrULGQ==")
+        val password = "DevoCrypto!".toByteArray()
+        val result = deriveDecryptWithPassword(data, password)
+
+        assertContentEquals("Derive and Encrypt".toByteArray(), result)
+    }
 }

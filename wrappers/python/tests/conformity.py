@@ -53,5 +53,10 @@ class TestComformity(unittest.TestCase):
         self.assertTrue(devolutions_crypto.verify_signature(b"this is a test", public_key, signature))
         self.assertFalse(devolutions_crypto.verify_signature(b"this is wrong", public_key, signature))
 
+    def test_derive_decrypt_with_password_v1(self):
+        data = b64decode(b'DQwJAAAAAQA2AAAAQgAAAA0MCAAAAAIAAQAAACAAAAABAAAAABAAAAIAAAACEwAAAAAQAAAAToyZHBBdwMfQ/nSt8fAG2g0MAgABAAIAOy6I4UgmX2jX+ji691rHdSKa5r4X1ItGiT6BszvL1eagyovyr/0DPMM2eIOmctQzuiQHgQ2BXrULGQ==')
+        password = b'DevoCrypto!'
+        self.assertEqual(devolutions_crypto.derive_decrypt_with_password(data, password), b'Derive and Encrypt')
+
 if __name__ == "__main__":
     unittest.main()

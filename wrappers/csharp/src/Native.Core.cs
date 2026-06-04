@@ -228,6 +228,21 @@ namespace Devolutions.Cryptography
 
         [DllImport(LibName, EntryPoint = "ConstantTimeEquals", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long ConstantTimeEquals(byte[] x, UIntPtr xLength, byte[] y, UIntPtr yLength);
+
+        [DllImport(LibName, EntryPoint = "DeriveEncryptSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DeriveEncryptSizeNative(UIntPtr dataLength, ushort keyDerivationVersion, ushort ciphertextVersion);
+
+        [DllImport(LibName, EntryPoint = "DeriveEncryptData", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DeriveEncryptDataNative(byte[] data, UIntPtr dataLength, byte[] password, UIntPtr passwordLength, byte[]? aad, UIntPtr aadLength, byte[] result, UIntPtr resultLength, ushort keyDerivationVersion, ushort ciphertextVersion);
+
+        [DllImport(LibName, EntryPoint = "DeriveEncryptDataWithParamsSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DeriveEncryptDataWithParamsSizeNative(UIntPtr dataLength, UIntPtr paramsLength, ushort ciphertextVersion);
+
+        [DllImport(LibName, EntryPoint = "DeriveEncryptDataWithParams", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DeriveEncryptDataWithParamsNative(byte[] data, UIntPtr dataLength, byte[] password, UIntPtr passwordLength, byte[] derivationParams, UIntPtr derivationParamsLength, byte[]? aad, UIntPtr aadLength, byte[] result, UIntPtr resultLength, ushort ciphertextVersion);
+
+        [DllImport(LibName, EntryPoint = "DeriveDecryptData", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DeriveDecryptDataNative(byte[] data, UIntPtr dataLength, byte[] password, UIntPtr passwordLength, byte[]? aad, UIntPtr aadLength, byte[] result, UIntPtr resultLength);
     }
 }
 #endif

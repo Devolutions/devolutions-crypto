@@ -25,7 +25,7 @@ use devolutions_crypto::derive_encrypt::{encrypt_with_password_and_aad, KdfEncry
 use devolutions_crypto::key::{
     generate_keypair, generate_secret_key, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
 };
-use devolutions_crypto::key_derivation::{derive_key, Argon2, DerivationParameters, Pbkdf2};
+use devolutions_crypto::key_derivation::{Argon2, DerivationParameters, Pbkdf2};
 use devolutions_crypto::password_hash::{
     hash_password, hash_password_with_parameters, PasswordHash, PasswordHashVersion,
 };
@@ -342,6 +342,110 @@ pub unsafe extern "C" fn DeriveEncryptData(
         }
         Err(e) => e.error_code(),
     }
+}
+
+/// Derive a key from a password using caller-supplied serialized [`DerivationParameters`] and encrypt data.
+/// # Arguments
+///  * `data` - Pointer to the plaintext data to encrypt.
+///  * `data_length` - Length of plaintext data.
+///  * `password` - Pointer to the password bytes.
+///  * `password_length` - Length of password bytes.
+///  * `params` - Pointer to serialized `DerivationParameters` bytes.
+///  * `params_length` - Length of serialized `DerivationParameters` bytes.
+///  * `aad` - Pointer to additional authenticated data, or null.
+///  * `aad_length` - Length of additional authenticated data.
+///  * `result` - Pointer to output buffer.
+///  * `result_length` - Length of output buffer, must equal `DeriveEncryptDataWithParamsSize(...)`.
+///  * `ciphertext_version` - Ciphertext version (0 latest, 1 AES-CBC, 2 XChaCha20).
+/// # Returns
+/// The number of bytes written on success, or a negative DevoCryptoError code on failure.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[no_mangle]
+pub unsafe extern "C" fn DeriveEncryptDataWithParams(
+    data: *const u8,
+    data_length: usize,
+    password: *const u8,
+    password_length: usize,
+    params: *const u8,
+    params_length: usize,
+    aad: *const u8,
+    aad_length: usize,
+    result: *mut u8,
+    result_length: usize,
+    ciphertext_version: u16,
+) -> i64 {
+    if data.is_null() || password.is_null() || params.is_null() || result.is_null() {
+        return Error::NullPointer.error_code();
+    }
+
+    if result_length
+        != DeriveEncryptDataWithParamsSize(data_length, params_length, ciphertext_version) as usize
+    {
+        return Error::InvalidOutputLength.error_code();
+    }
+
+    let ciphertext_version = match CiphertextVersion::try_from(ciphertext_version) {
+        Ok(v) => v,
+        Err(_) => return Error::UnknownVersion.error_code(),
+    };
+
+    let aad = if aad.is_null() {
+        &[]
+    } else {
+        slice::from_raw_parts(aad, aad_length)
+    };
+
+    let data = slice::from_raw_parts(data, data_length);
+    let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
+    let params_raw = slice::from_raw_parts(params, params_length);
+    let result = slice::from_raw_parts_mut(result, result_length);
+
+    let derivation_parameters = match DerivationParameters::try_from(params_raw) {
+        Ok(p) => p,
+        Err(e) => return e.error_code(),
+    };
+
+    match encrypt_with_password_and_aad(
+        data,
+        &password,
+        aad,
+        derivation_parameters,
+        ciphertext_version,
+    ) {
+        Ok(res) => {
+            let res: Vec<u8> = res.into();
+            let length = res.len();
+            result[0..length].copy_from_slice(&res);
+            length as i64
+        }
+        Err(e) => e.error_code(),
+    }
+}
+
+/// Get the size of the resulting derive_encrypt blob when using pre-built serialized [`DerivationParameters`].
+/// # Arguments
+///  * `data_length` - Length of the plaintext.
+///  * `params_length` - Length of the serialized `DerivationParameters`.
+///  * `ciphertext_version` - Version for ciphertext (0 latest, 1 AES-CBC, 2 XChaCha20).
+/// # Returns
+/// Returns the exact output length expected by `DeriveEncryptDataWithParams()`.
+#[no_mangle]
+pub extern "C" fn DeriveEncryptDataWithParamsSize(
+    data_length: usize,
+    params_length: usize,
+    ciphertext_version: u16,
+) -> i64 {
+    let ciphertext_size = EncryptSize(data_length, ciphertext_version);
+
+    if ciphertext_size < 0 {
+        return ciphertext_size;
+    }
+
+    // 8  = KdfEncryptedData header
+    // 4  = u32 derivation_parameters length prefix
+    // 4  = u32 ciphertext length prefix
+    (8 + 4 + params_length + 4 + ciphertext_size as usize) as i64
 }
 
 /// Decrypt a derive_encrypt blob using a password.
