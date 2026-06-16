@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [2026.6.16] - 2026-06-16
+
+### Breaking changes
+
+- The default PBKDF2 iterations has been increased from 10,000 to 600,000.
+
+### Added
+
+- **`PasswordHashVersion::V2`**: new Argon2id-based password hashing using OWASP-recommended defaults (memory = 64 MiB, iterations = 3). This is now the default (`PasswordHashVersion::Latest`).
+- Added a managed `key_derivation` module to derive `SecretKey` values from passwords and serialize the derivation parameters for later reuse.
+
 ## [2026.1.13] - 2026-01-13
 
 **Supported Python versions: 3.10 - 3.14**
