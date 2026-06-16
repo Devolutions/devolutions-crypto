@@ -252,7 +252,7 @@ jobs:
       with:
         api_key: ${{ secrets.DTRACK_AUTOMATION_API_KEY }}
         autocreate: 'true'
-        bom_filename: devolutions-crypto/bom.xml
+        bom_filename: bom.xml
         project_name: 'devolutions-crypto'
         project_version: ${{ github.event.inputs.version }}
         server_hostname: 'dtrack-api.devolutions.com'
