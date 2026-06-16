@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [Unreleased] - 
+## [Unreleased] -
+
+## [0.10.0] - 2026-06-16
 
 ### Breaking Changes
 
@@ -18,16 +20,12 @@ if your code depends on the iterations to stay the same : `derive_key_pbkdf2`, `
 ### Added
 
 - **`PasswordHashVersion::V2`**: new Argon2id-based password hashing using OWASP-recommended defaults (memory = 64 MiB, iterations = 3). This is now the default (`PasswordHashVersion::Latest`).
+- Added a managed `key_derivation` module to derive `SecretKey` values from passwords and serialize the derivation parameters for later reuse.
+- C#: Nullable annotations were added for nullable reference types.
 
 ### Changed
 
 - Multiple functions, such as `generate_key` and `hash_password`, now return a `Result` due to the `rand` library upgrade.
-
-### Added
-
-- Added a managed `key_derivation` module to derive `SecretKey` values from passwords and serialize the derivation parameters for later reuse.
-
-- C#: Nullable annotations were added for nullable reference types.
 
 ### Removed
 
