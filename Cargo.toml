@@ -24,8 +24,8 @@ authors = ["Philippe Dugre <pdugre@devolutions.net>", "Mathieu Morrissette <mmor
 edition = "2021"
 readme = "README_RUST.md"
 license = "MIT OR Apache-2.0"
-homepage = "https://github.com/devolutions/devolutions-crypto"
-repository = "https://github.com/devolutions/devolutions-crypto"
+homepage = "https://github.com/Devolutions/devolutions-crypto"
+repository = "https://github.com/Devolutions/devolutions-crypto"
 description = "An abstraction layer for the cryptography used by Devolutions"
 resolver = "2"
 
