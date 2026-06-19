@@ -17,7 +17,7 @@
       <form [formGroup]="encryptionForm" (ngSubmit)="encrypt()">
         <div class="field">
           <label>Text</label>
-          <input type="text" formControlName="encryptText" required placeholder="Enter text to encrypt">
+          <textarea rows="5" formControlName="encryptText" required placeholder="Enter text to encrypt"></textarea>
         </div>
         <div class="field">
           <label>Password</label>

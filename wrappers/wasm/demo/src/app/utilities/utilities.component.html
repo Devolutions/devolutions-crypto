@@ -17,7 +17,7 @@
       <form [formGroup]="encodeDecodeForm">
         <div class="field">
           <label>Text</label>
-          <input type="text" formControlName="enDecodeText" required placeholder="Enter text">
+          <textarea rows="5" formControlName="enDecodeText" required placeholder="Enter text"></textarea>
         </div>
         <div class="btn-row">
           <button type="button" class="btn btn-primary" (click)="encode()">Encode</button>
