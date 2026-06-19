@@ -13,7 +13,6 @@ struct Input {
     aad: Vec<u8>,
     decrypt_password: Vec<u8>,
     decrypt_aad: Vec<u8>,
-    length: u32,
     lanes: u32,
     memory: u32,
     iterations: u32,
@@ -22,7 +21,10 @@ struct Input {
 
 fuzz_target!(|input: Input| {
     // Clamp Argon2 parameters to keep key derivation cheap enough for fuzzing.
-    let length = input.length.clamp(1, 128);
+    // The derived key feeds a SecretKey, which requires exactly 32 bytes; any
+    // other length would fail in encrypt_with_password_and_aad before reaching
+    // the decrypt path. Arbitrary output lengths are covered by derive_key_argon2.
+    let length = 32;
     let lanes = input.lanes.clamp(1, 16);
     let memory = input.memory.clamp(8, 65536);
     let iterations = input.iterations.clamp(1, 10);
