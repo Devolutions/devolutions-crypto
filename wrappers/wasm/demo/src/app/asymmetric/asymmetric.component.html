@@ -55,7 +55,7 @@
       <form [formGroup]="encryptAsymmetricForm" (ngSubmit)="encryptAsymmetric()">
         <div class="field">
           <label>Text</label>
-          <input type="text" formControlName="textToEncrypt" required placeholder="Enter text to encrypt">
+          <textarea rows="5" formControlName="textToEncrypt" required placeholder="Enter text to encrypt"></textarea>
         </div>
         <div class="field">
           <label>Public key</label>
