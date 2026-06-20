@@ -370,6 +370,24 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
+        public void HashPasswordV1()
+        {
+            byte[] hash = Managed.HashPassword(TestData.BytesTestKey, PasswordHashVersion.V1);
+
+            Assert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, hash));
+            Assert.IsFalse(Managed.VerifyPassword(TestData.BytesTestData, hash));
+        }
+
+        [TestMethod]
+        public void HashPasswordV2()
+        {
+            byte[] hash = Managed.HashPassword(TestData.BytesTestKey, PasswordHashVersion.V2);
+
+            Assert.IsTrue(Managed.VerifyPassword(TestData.BytesTestKey, hash));
+            Assert.IsFalse(Managed.VerifyPassword(TestData.BytesTestData, hash));
+        }
+
+        [TestMethod]
         public void HashPasswordWithParams()
         {
             Argon2Parameters parameters = new()

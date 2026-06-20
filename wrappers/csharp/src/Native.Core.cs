@@ -119,10 +119,10 @@ namespace Devolutions.Cryptography
         internal static extern long GetDefaultArgon2ParametersSizeNative();
 
         [DllImport(LibName, EntryPoint = "HashPasswordLength", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long HashPasswordLengthNative();
+        internal static extern long HashPasswordLengthNative(ushort version);
 
         [DllImport(LibName, EntryPoint = "HashPassword", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long HashPasswordNative(byte[] password, UIntPtr passwordLength, byte[] result, UIntPtr resultLength);
+        internal static extern long HashPasswordNative(byte[] password, UIntPtr passwordLength, byte[] result, UIntPtr resultLength, ushort version);
 
         [DllImport(LibName, EntryPoint = "HashPasswordWithParamsLength", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long HashPasswordWithParamsLengthNative(byte[] derivationParams, UIntPtr derivationParamsLength);

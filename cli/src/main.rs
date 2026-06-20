@@ -6,7 +6,7 @@ use std::{borrow::Borrow, convert::TryFrom};
 #[derive(Debug, Parser)]
 #[command(name = "devolutions-crypto-cli")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
-#[command(author = "Philippe Dugre <pdugre@devolutions.net>")]
+#[command(author = "Devolutions <network@devolutions.net>")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

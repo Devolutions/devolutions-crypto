@@ -1,5 +1,5 @@
 [workspace]
-package.version = "0.10.0"
+package.version = "0.10.1"
 members = [
   "cli",
   "ffi",
@@ -20,7 +20,7 @@ rust-argon2 = { version = "3.0", default-features = false }
 [package]
 name = "devolutions-crypto"
 version.workspace = true
-authors = ["Philippe Dugre <pdugre@devolutions.net>", "Mathieu Morrissette <mmorrissette@devolutions.net>"]
+authors = ["Mathieu Morrissette <mmorrissette@devolutions.net>", "Sebastien Duquette <sduquette@devolutions.net>"]
 edition = "2021"
 readme = "README_RUST.md"
 license = "MIT OR Apache-2.0"

@@ -1,11 +1,11 @@
 [project]
 name = "devolutions-crypto"
-version = "2026.6.16"
+version = "2026.6.22"
 description = "An abstraction layer for the cryptography used by Devolutions"
 readme = "PYPI_README.md"
 authors = [
-    { name = "Philippe Dugre", email = "pdugre@devolutions.net" },
-    { name = "Mathieu Morrissette", email = "mmorrissette@devolutions.net" }
+    { name = "Mathieu Morrissette", email = "mmorrissette@devolutions.net" },
+    { name = "Sebastien Duquette", email = "sduquette@devolutions.net" },
 ]
 license = { text = "MIT OR Apache-2.0" }
 requires-python = ">=3.10"
