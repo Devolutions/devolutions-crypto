@@ -57,7 +57,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub const PASSWORD_HASH_LATEST: u16 = 0;
 pub const PASSWORD_HASH_V1: u16 = 1;
-pub const PASSWORD_HASH_V2: u16 = 1;
+pub const PASSWORD_HASH_V2: u16 = 2;
 
 /// Encrypt a data blob
 /// # Arguments
