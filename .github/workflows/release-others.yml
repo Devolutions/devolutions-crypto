@@ -119,9 +119,9 @@ jobs:
       working-directory: ./rust-release
       run: |
         if [ '${{ inputs.publish_dry_run }}' == 'true' ]; then
-          cargo publish --dry-run
+          cargo publish -p devolutions-crypto --dry-run
         else
-          cargo publish
+          cargo publish -p devolutions-crypto
 
           git tag "rust-v${{ steps.version.outputs.version_native }}"
           git push origin "rust-v${{ steps.version.outputs.version_native }}"
