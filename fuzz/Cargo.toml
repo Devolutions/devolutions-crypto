@@ -168,3 +168,15 @@ path = "fuzz_targets/key/generate_keypair.rs"
 [[bin]]
 name = "constant_time_equals"
 path = "fuzz_targets/utils/constant_time_equals.rs"
+
+[[bin]]
+name = "kdf_encrypted_data_deserialization"
+path = "fuzz_targets/derive_encrypt/kdf_encrypted_data_deserialization.rs"
+
+[[bin]]
+name = "derivation_parameters_deserialization"
+path = "fuzz_targets/key_derivation/derivation_parameters_deserialization.rs"
+
+[[bin]]
+name = "decrypt_with_password"
+path = "fuzz_targets/derive_encrypt/decrypt_with_password.rs"
