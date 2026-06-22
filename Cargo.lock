@@ -598,7 +598,7 @@ dependencies = [
 
 [[package]]
 name = "devolutions-crypto"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "aead",
  "aes",
@@ -637,7 +637,7 @@ dependencies = [
 
 [[package]]
 name = "devolutions-crypto-cli"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "base64 0.11.0",
  "clap",
@@ -646,7 +646,7 @@ dependencies = [
 
 [[package]]
 name = "devolutions-crypto-ffi"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "base64 0.22.1",
  "devolutions-crypto",
@@ -655,7 +655,7 @@ dependencies = [
 
 [[package]]
 name = "devolutions-crypto-fuzz"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "arbitrary 1.4.2",
  "devolutions-crypto",
@@ -664,14 +664,14 @@ dependencies = [
 
 [[package]]
 name = "devolutions-crypto-python"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "uniffi",
 ]
 
 [[package]]
 name = "devolutions-crypto-uniffi"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "devolutions-crypto",
  "rust-argon2",

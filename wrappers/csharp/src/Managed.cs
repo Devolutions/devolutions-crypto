@@ -674,15 +674,16 @@ namespace Devolutions.Cryptography
         /// Use <see cref="HashPasswordWithParams"/> to supply custom <see cref="DerivationParameters"/>.
         /// </summary>
         /// <param name="password">The password to hash in bytes.</param>
+        /// <param name="version">The version of the password hashing algorithm to use. Defaults to <see cref="PasswordHashVersion.Latest"/>.</param>
         /// <returns>Returns the hashed password in bytes.</returns>
-        public static byte[] HashPassword(byte[] password)
+        public static byte[] HashPassword(byte[] password, PasswordHashVersion version = PasswordHashVersion.Latest)
         {
             if (password == null || password.Length == 0)
             {
                 throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
             }
 
-            long hashLength = Native.HashPasswordLengthNative();
+            long hashLength = Native.HashPasswordLengthNative((ushort)version);
 
             if (hashLength < 0)
             {
@@ -690,7 +691,7 @@ namespace Devolutions.Cryptography
             }
 
             byte[] result = new byte[hashLength];
-            long res = Native.HashPasswordNative(password, (UIntPtr)password.Length, result, (UIntPtr)result.Length);
+            long res = Native.HashPasswordNative(password, (UIntPtr)password.Length, result, (UIntPtr)result.Length, (ushort)version);
 
             if (res < 0)
             {

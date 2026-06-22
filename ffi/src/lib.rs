@@ -55,6 +55,10 @@ use zeroize::Zeroizing;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+pub const PASSWORD_HASH_LATEST: u16 = 0;
+pub const PASSWORD_HASH_V1: u16 = 1;
+pub const PASSWORD_HASH_V2: u16 = 2;
+
 /// Encrypt a data blob
 /// # Arguments
 ///  * `data` - Pointer to the data to encrypt.
@@ -743,7 +747,8 @@ pub extern "C" fn SignSize(_version: u16) -> i64 {
 ///  * `password_length` - Length of the password to hash.
 ///  * `result` - Pointer to the buffer to write the hash to.
 ///  * `result_length` - Length of the buffer to write the hash to. You can get the value by
-///                         calling HashPasswordLength() beforehand.
+///                         calling HashPasswordLength(version) beforehand.
+///  * `version` - Version to use. Use PASSWORD_HASH_LATEST for the latest one.
 /// # Returns
 /// This returns the length of the hash. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
@@ -755,19 +760,25 @@ pub unsafe extern "C" fn HashPassword(
     password_length: usize,
     result: *mut u8,
     result_length: usize,
+    version: u16,
 ) -> i64 {
     if password.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     };
 
-    if result_length != HashPasswordLength() as usize {
+    let version = match PasswordHashVersion::try_from(version) {
+        Ok(v) => v,
+        Err(_) => return Error::UnknownVersion.error_code(),
+    };
+
+    if result_length != HashPasswordLength(version as u16) as usize {
         return Error::InvalidOutputLength.error_code();
     };
 
     let password = slice::from_raw_parts(password, password_length);
     let result = slice::from_raw_parts_mut(result, result_length);
 
-    let res: Zeroizing<Vec<u8>> = match hash_password(password, PasswordHashVersion::Latest) {
+    let res: Zeroizing<Vec<u8>> = match hash_password(password, version) {
         Ok(x) => Zeroizing::new(x.into()),
         Err(e) => return e.error_code(),
     };
@@ -778,17 +789,21 @@ pub unsafe extern "C" fn HashPassword(
 }
 
 /// Returns the length of the hash to input as `result_length` in `HashPassword()`.
-/// The size reflects the default Argon2id parameters.
+/// # Arguments
+///  * `version` - Version to use. Use 0 for the latest one.
 /// # Returns
-/// Returns the length of the hash.
+/// Returns the length of the hash, or a negative error code for an unknown version.
 #[no_mangle]
-pub extern "C" fn HashPasswordLength() -> i64 {
-    // 8 (PasswordHash header)
-    // + 4 (u32 params_len)
-    // + 8 (DerivationParameters header)
-    // + GetDefaultArgon2ParametersSize() (Argon2Parameters default)
-    // + 32 (Argon2 default output length)
-    8 + 4 + 8 + GetDefaultArgon2ParametersSize() + 32
+pub extern "C" fn HashPasswordLength(version: u16) -> i64 {
+    match version {
+        // V1: PBKDF2 — fixed layout: 4 (iterations) + 32 (salt) + 32 (hash) = 68, plus 8-byte header
+        PASSWORD_HASH_V1 => 8 + 68,
+        // V2 / Latest: Argon2id — header + params_len field + DerivationParameters + hash
+        PASSWORD_HASH_LATEST | PASSWORD_HASH_V2 => {
+            8 + 4 + 8 + GetDefaultArgon2ParametersSize() + 32
+        }
+        _ => Error::UnknownVersion.error_code(),
+    }
 }
 
 /// Hash a password using caller-supplied serialized [`DerivationParameters`].
@@ -2419,8 +2434,14 @@ fn test_hash_password_length() {
         .unwrap()
         .into();
 
-    assert_eq!(HashPasswordLength() as usize, small_password_hash.len());
-    assert_eq!(HashPasswordLength() as usize, long_password_hash.len());
+    assert_eq!(
+        HashPasswordLength(PASSWORD_HASH_LATEST) as usize,
+        small_password_hash.len()
+    );
+    assert_eq!(
+        HashPasswordLength(PASSWORD_HASH_LATEST) as usize,
+        long_password_hash.len()
+    );
 }
 
 #[test]

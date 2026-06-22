@@ -17,4 +17,20 @@ class HashingTests: XCTestCase {
     XCTAssertFalse(try verifyPassword(password: Data("Password".utf8), hash: hash))
     XCTAssertFalse(try verifyPassword(password: Data("password1".utf8), hash: hash))
   }
+
+  func testPasswordHashV1() throws {
+    let password = Data("password".utf8)
+    let hash = try hashPassword(password: password, version: PasswordHashVersion.v1)
+
+    XCTAssertTrue(try verifyPassword(password: password, hash: hash))
+    XCTAssertFalse(try verifyPassword(password: Data("wrongpassword".utf8), hash: hash))
+  }
+
+  func testPasswordHashV2() throws {
+    let password = Data("password".utf8)
+    let hash = try hashPassword(password: password, version: PasswordHashVersion.v2)
+
+    XCTAssertTrue(try verifyPassword(password: password, hash: hash))
+    XCTAssertFalse(try verifyPassword(password: Data("wrongpassword".utf8), hash: hash))
+  }
 }

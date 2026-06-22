@@ -23,4 +23,22 @@ class HashingTest {
         assert(!verifyPassword("Password".toByteArray(), hash))
         assert(!verifyPassword("password1".toByteArray(), hash))
     }
+
+    @Test
+    fun passwordHashV1Test() {
+        val password = "password".toByteArray(Charsets.UTF_8)
+        val hash = hashPassword(password, version = PasswordHashVersion.V1)
+
+        assert(verifyPassword(password, hash))
+        assert(!verifyPassword("wrongpassword".toByteArray(), hash))
+    }
+
+    @Test
+    fun passwordHashV2Test() {
+        val password = "password".toByteArray(Charsets.UTF_8)
+        val hash = hashPassword(password, version = PasswordHashVersion.V2)
+
+        assert(verifyPassword(password, hash))
+        assert(!verifyPassword("wrongpassword".toByteArray(), hash))
+    }
 }

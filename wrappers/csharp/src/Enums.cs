@@ -55,6 +55,27 @@ namespace Devolutions.Cryptography
     }
 
     /// <summary>
+    /// Devolutions Crypto Password Hash Version.
+    /// </summary>
+    public enum PasswordHashVersion
+    {
+        /// <summary>
+        /// This is the latest version. (Currently Argon2id)
+        /// </summary>
+        Latest = 0,
+
+        /// <summary>
+        /// PBKDF2-HMAC-SHA256.
+        /// </summary>
+        V1 = 1,
+
+        /// <summary>
+        /// Argon2id.
+        /// </summary>
+        V2 = 2,
+    }
+
+    /// <summary>
     /// Devolutions Crypto Cipher Version.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "V2_5 is not version 25")]
