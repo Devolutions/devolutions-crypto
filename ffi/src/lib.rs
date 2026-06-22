@@ -747,7 +747,7 @@ pub extern "C" fn SignSize(_version: u16) -> i64 {
 ///  * `password_length` - Length of the password to hash.
 ///  * `result` - Pointer to the buffer to write the hash to.
 ///  * `result_length` - Length of the buffer to write the hash to. You can get the value by
-///                         calling HashPasswordLength() beforehand.
+///                         calling HashPasswordLength(version) beforehand.
 ///  * `version` - Version to use. Use PASSWORD_HASH_LATEST for the latest one.
 /// # Returns
 /// This returns the length of the hash. If there is an error, it will return the
@@ -797,9 +797,11 @@ pub unsafe extern "C" fn HashPassword(
 pub extern "C" fn HashPasswordLength(version: u16) -> i64 {
     match version {
         // V1: PBKDF2 — fixed layout: 4 (iterations) + 32 (salt) + 32 (hash) = 68, plus 8-byte header
-        1 => 8 + 68,
+        PASSWORD_HASH_V1 => 8 + 68,
         // V2 / Latest: Argon2id — header + params_len field + DerivationParameters + hash
-        0 | 2 => 8 + 4 + 8 + GetDefaultArgon2ParametersSize() + 32,
+        PASSWORD_HASH_LATEST | PASSWORD_HASH_V2 => {
+            8 + 4 + 8 + GetDefaultArgon2ParametersSize() + 32
+        }
         _ => Error::UnknownVersion.error_code(),
     }
 }
