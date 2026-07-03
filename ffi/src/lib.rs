@@ -1473,8 +1473,8 @@ pub unsafe extern "C" fn OnlineEncryptorNextChunk(
         return Error::NullPointer.error_code();
     };
 
-    let encryptor = &mut *(ptr as *mut Mutex<OnlineCiphertextEncryptor>);
-    let encryptor = match encryptor.get_mut() {
+    let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
+    let mut encryptor = match encryptor.lock() {
         Ok(c) => c,
         Err(_) => return Error::PoisonedMutex.error_code(),
     };
@@ -1523,8 +1523,8 @@ pub unsafe extern "C" fn OnlineDecryptorNextChunk(
         return Error::NullPointer.error_code();
     };
 
-    let decryptor = &mut *(ptr as *mut Mutex<OnlineCiphertextDecryptor>);
-    let decryptor = match decryptor.get_mut() {
+    let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
+    let mut decryptor = match decryptor.lock() {
         Ok(c) => c,
         Err(_) => return Error::PoisonedMutex.error_code(),
     };
