@@ -66,11 +66,11 @@ pub const PASSWORD_HASH_V2: u16 = 2;
 ///  * `key` - Pointer to the key to use to encrypt.
 ///  * `key_length` - Length of the key to use to encrypt.
 ///  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
-///             Pass null if there is not additionnal data to authenticate.
+///    Pass null if there is not additionnal data to authenticate.
 ///  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
 ///  * `result` - Pointer to the buffer to write the ciphertext to.
 ///  * `result_length` - Length of the buffer to write the ciphertext to. You can get the value by
-///                         calling EncryptSize() beforehand.
+///    calling EncryptSize() beforehand.
 ///  * `version` - Version to use. Use 0 for the latest one.
 /// # Returns
 /// This returns the length of the ciphertext. If there is an error, it will return the
@@ -130,11 +130,11 @@ pub unsafe extern "C" fn Encrypt(
 ///  * `public_key` - Pointer to the public key to use to encrypt.
 ///  * `public_key_length` - Length of the public key to use to encrypt.
 ///  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
-///             Pass null if there is not additionnal data to authenticate.
+///    Pass null if there is not additionnal data to authenticate.
 ///  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
 ///  * `result` - Pointer to the buffer to write the ciphertext to.
 ///  * `result_length` - Length of the buffer to write the ciphertext to. You can get the value by
-///                         calling EncryptAsymmetricSize() beforehand.
+///    calling EncryptAsymmetricSize() beforehand.
 ///  * `version` - Version to use. Use 0 for the latest one.
 /// # Returns
 /// This returns the length of the asymmetric ciphertext. If there is an error, it will return the
@@ -515,11 +515,11 @@ pub unsafe extern "C" fn DeriveDecryptData(
 ///  * `key` - Pointer to the key to use to decrypt.
 ///  * `key_length` - Length of the key to use to decrypt.
 ///  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
-///             Pass null if there is not additionnal data to authenticate.
+///    Pass null if there is not additionnal data to authenticate.
 ///  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
 ///  * `result` - Pointer to the buffer to write the plaintext to.
 ///  * `result_length` - Length of the buffer to write the plaintext to.
-///                     The safest size is the same size as the ciphertext.
+///    The safest size is the same size as the ciphertext.
 /// # Returns
 /// This returns the length of the plaintext. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
@@ -576,11 +576,11 @@ pub unsafe extern "C" fn Decrypt(
 ///  * `private_key` - Pointer to the private key to use to decrypt.
 ///  * `private_key_length` - Length of the private key to use to decrypt.
 ///  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
-///             Pass null if there is not additionnal data to authenticate.
+///    Pass null if there is not additionnal data to authenticate.
 ///  * `aad_length` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
 ///  * `result` - Pointer to the buffer to write the plaintext to.
 ///  * `result_length` - Length of the buffer to write the plaintext to.
-///                     The safest size is the same size as the ciphertext.
+///    The safest size is the same size as the ciphertext.
 /// # Returns
 /// This returns the length of the plaintext. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
@@ -643,7 +643,7 @@ pub unsafe extern "C" fn DecryptAsymmetric(
 ///  * `keypair_length` - Length of the keypair to use to sign the data.
 ///  * `result` - Pointer to the buffer to write the signature to.
 ///  * `result_length` - Length of the buffer to write the signature to. You can get the value by
-///                         calling SignSize() beforehand.
+///    calling SignSize() beforehand.
 /// # Returns
 /// This returns 0 if the operation worked. If there is an error, it will return the
 ///     appropriate error code defined in DevoCryptoError.
@@ -747,7 +747,7 @@ pub extern "C" fn SignSize(_version: u16) -> i64 {
 ///  * `password_length` - Length of the password to hash.
 ///  * `result` - Pointer to the buffer to write the hash to.
 ///  * `result_length` - Length of the buffer to write the hash to. You can get the value by
-///                         calling HashPasswordLength(version) beforehand.
+///    calling HashPasswordLength(version) beforehand.
 ///  * `version` - Version to use. Use PASSWORD_HASH_LATEST for the latest one.
 /// # Returns
 /// This returns the length of the hash. If there is an error, it will return the
@@ -924,10 +924,10 @@ pub unsafe extern "C" fn VerifyPassword(
 /// # Arguments
 ///  * `private` - Pointer to the buffer to write the private key to.
 ///  * `private_length` - Length of the buffer to write the private key to.
-///                         You can get the value by calling `GenerateKeyPairSize()` beforehand.
+///    You can get the value by calling `GenerateKeyPairSize()` beforehand.
 ///  * `public` - Pointer to the buffer to write the public key to.
 ///  * `public_length` - Length of the buffer to write the public key to.
-///                         You can get the value by calling `GenerateKeyPairSize()` beforehand.
+///    You can get the value by calling `GenerateKeyPairSize()` beforehand.
 /// # Returns
 /// Returns 0 if the generation worked. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
@@ -967,7 +967,7 @@ pub unsafe extern "C" fn GenerateKeyPair(
 /// # Arguments
 ///  * `keypair` - Pointer to the buffer to write the keypair to.
 ///  * `keypair_length` - Length of the buffer to write the keypair to.
-///                         You can get the value by calling `GenerateSigningKeyPairSize()` beforehand.
+///    You can get the value by calling `GenerateSigningKeyPairSize()` beforehand.
 ///  * `version` - Version to use. Use 0 for the latest one.
 /// # Returns
 /// Returns 0 if the generation worked. If there is an error,
@@ -1010,7 +1010,7 @@ pub unsafe extern "C" fn GenerateSigningKeyPair(
 ///  * `keypair_length` - Length of the buffer containing the keypair.
 ///  * `public` - Pointer to the buffer to write the public key to.
 ///  * `public_length` - Length of the buffer to write the public key to.
-///                         You can get the value by calling `GetSigningPublicKeySize()` beforehand.
+///    You can get the value by calling `GetSigningPublicKeySize()` beforehand.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
@@ -1056,7 +1056,7 @@ pub extern "C" fn GenerateKeyPairSize() -> i64 {
 /// # Arguments
 ///  * `result` - Pointer to the buffer to write the secret key to.
 ///  * `result_length` - Length of the buffer to write the secret key to.
-///                       You can get the value by calling `GenerateSecretKeySize()` beforehand.
+///    You can get the value by calling `GenerateSecretKeySize()` beforehand.
 /// # Returns
 /// Returns 0 if the generation worked. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
@@ -1092,7 +1092,7 @@ pub extern "C" fn GenerateSecretKeySize() -> i64 {
 /// Get the size of the keypair used for signing.
 /// # Returns
 /// Returns the length of the keypair to input as `keypair_length`
-///   in `GenerateSigningKeyPair()`.
+///    in `GenerateSigningKeyPair()`.
 #[no_mangle]
 pub extern "C" fn GenerateSigningKeyPairSize(_version: u16) -> i64 {
     8 + 64 // header + keypair length
@@ -1101,7 +1101,7 @@ pub extern "C" fn GenerateSigningKeyPairSize(_version: u16) -> i64 {
 /// Get the size of the public key used for signing.
 /// # Returns
 /// Returns the length of the public key to input as `public_length`
-///   in `GetSigningPublicKey()`.
+///    in `GetSigningPublicKey()`.
 #[no_mangle]
 pub extern "C" fn GetSigningPublicKeySize(_keypair: *const u8, _keypair_length: usize) -> i64 {
     8 + 32 // header + public key length
@@ -1262,6 +1262,20 @@ pub unsafe extern "C" fn JoinShares(
     }
 }
 
+/// Creates a new online (chunked) encryptor and writes an opaque handle to it in `output`.
+/// # Arguments
+///  * `key` - Pointer to the symmetric key or, if `asymmetric` is true, the public key.
+///  * `key_size` - Length of the key.
+///  * `aad` - Pointer to additionnal data to authenticate alongside the ciphertext.
+///  * `aad_size` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
+///  * `chunk_size` - Size of the chunks to encrypt.
+///  * `asymmetric` - Whether to use asymmetric encryption.
+///  * `version` - Version to use. Use 0 for the latest one.
+///  * `output` - Pointer receiving the opaque encryptor handle. Free it with `OnlineEncryptorLastChunk` or `FreeOnlineEncryptor`.
+/// # Returns
+/// 0 on success, otherwise the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn NewOnlineEncryptor(
     key: *const u8,
@@ -1303,6 +1317,20 @@ pub unsafe extern "C" fn NewOnlineEncryptor(
     0
 }
 
+/// Creates a new online (chunked) decryptor from a serialized header and writes an opaque handle to it in `output`.
+/// # Arguments
+///  * `key` - Pointer to the symmetric key or, if `asymmetric` is true, the private key.
+///  * `key_size` - Length of the key.
+///  * `aad` - Pointer to the additionnal data to authenticate alongside the ciphertext.
+///  * `aad_size` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
+///  * `header` - Pointer to the serialized online ciphertext header.
+///  * `header_size` - Length of the serialized header.
+///  * `asymmetric` - Whether to use asymmetric encryption.
+///  * `output` - Pointer receiving the opaque decryptor handle. Free it with `OnlineDecryptorLastChunk` or `FreeOnlineDecryptor`.
+/// # Returns
+/// 0 on success, otherwise the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn NewOnlineDecryptor(
     key: *const u8,
@@ -1350,6 +1378,15 @@ pub unsafe extern "C" fn NewOnlineDecryptor(
     0
 }
 
+/// Writes the serialized header of the encryptor to the result buffer.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineEncryptor`.
+///  * `result` - Pointer to the buffer to write the serialized header to.
+///  * `result_size` - Length of the buffer. Must be `OnlineEncryptorGetHeaderSize()` bytes.
+/// # Returns
+/// The length of the serialized header, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineEncryptorGetHeader(
     ptr: *const c_void,
@@ -1370,11 +1407,20 @@ pub unsafe extern "C" fn OnlineEncryptorGetHeader(
         return Error::InvalidOutputLength.error_code();
     }
 
-    result.copy_from(header.as_slice().as_ptr() as *const u8, result_size);
+    result.copy_from(header.as_slice().as_ptr(), result_size);
 
     result_size as i64
 }
 
+/// Writes the serialized header of the decryptor to the result buffer.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineDecryptor`.
+///  * `result` - Pointer to the buffer to write the serialized header to.
+///  * `result_size` - Length of the buffer. Must be `OnlineDecryptorGetHeaderSize()` bytes.
+/// # Returns
+/// The length of the serialized header, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineDecryptorGetHeader(
     ptr: *const c_void,
@@ -1395,11 +1441,24 @@ pub unsafe extern "C" fn OnlineDecryptorGetHeader(
         return Error::InvalidOutputLength.error_code();
     }
 
-    result.copy_from(header.as_slice().as_ptr() as *const u8, result_size);
+    result.copy_from(header.as_slice().as_ptr(), result_size);
 
     result_size as i64
 }
 
+/// Encrypts the next chunk of data.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineEncryptor`.
+///  * `data` - Pointer to the chunk to encrypt.
+///  * `data_size` - Length of the chunk to encrypt.
+///  * `aad` - Pointer to additionnal data to authenticate alongside this chunk.
+///  * `aad_size` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
+///  * `result` - Pointer to the buffer to write the encrypted chunk to.
+///  * `result_size` - Length of the buffer to write the encrypted chunk to.
+/// # Returns
+/// The length of the encrypted chunk, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineEncryptorNextChunk(
     ptr: *mut c_void,
@@ -1415,7 +1474,7 @@ pub unsafe extern "C" fn OnlineEncryptorNextChunk(
     };
 
     let encryptor = &mut *(ptr as *mut Mutex<OnlineCiphertextEncryptor>);
-    let mut encryptor = match encryptor.lock() {
+    let encryptor = match encryptor.get_mut() {
         Ok(c) => c,
         Err(_) => return Error::PoisonedMutex.error_code(),
     };
@@ -1432,11 +1491,24 @@ pub unsafe extern "C" fn OnlineEncryptorNextChunk(
         return Error::InvalidOutputLength.error_code();
     }
 
-    result.copy_from(encrypted.as_slice().as_ptr() as *const u8, result_size);
+    result.copy_from(encrypted.as_slice().as_ptr(), result_size);
 
     result_size as i64
 }
 
+/// Decrypts the next chunk of data.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineDecryptor`.
+///  * `data` - Pointer to the chunk to decrypt.
+///  * `data_size` - Length of the chunk to decrypt.
+///  * `aad` - Pointer to the additionnal data to authenticate alongside this chunk.
+///  * `aad_size` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
+///  * `result` - Pointer to the buffer to write the decrypted chunk to.
+///  * `result_size` - Length of the buffer to write the decrypted chunk to.
+/// # Returns
+/// The length of the decrypted chunk, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineDecryptorNextChunk(
     ptr: *mut c_void,
@@ -1452,7 +1524,7 @@ pub unsafe extern "C" fn OnlineDecryptorNextChunk(
     };
 
     let decryptor = &mut *(ptr as *mut Mutex<OnlineCiphertextDecryptor>);
-    let mut decryptor = match decryptor.lock() {
+    let decryptor = match decryptor.get_mut() {
         Ok(c) => c,
         Err(_) => return Error::PoisonedMutex.error_code(),
     };
@@ -1469,11 +1541,25 @@ pub unsafe extern "C" fn OnlineDecryptorNextChunk(
         return Error::InvalidOutputLength.error_code();
     }
 
-    result.copy_from(decrypted.as_slice().as_ptr() as *const u8, result_size);
+    result.copy_from(decrypted.as_slice().as_ptr(), result_size);
 
     result_size as i64
 }
 
+/// Encrypts the last chunk of data and consumes the encryptor.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineEncryptor`.
+///  * `data` - Pointer to the chunk to encrypt.
+///  * `data_size` - Length of the chunk to encrypt.
+///  * `aad` - Pointer to additionnal data to authenticate alongside this chunk.
+///  * `aad_size` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
+///  * `result` - Pointer to the buffer to write the encrypted chunk to.
+///  * `result_size` - Length of the buffer to write the encrypted chunk to.
+/// # Returns
+/// The length of the encrypted chunk, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+/// This call frees the encryptor: `ptr` must not be used again afterwards.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineEncryptorLastChunk(
     ptr: *mut c_void,
@@ -1507,11 +1593,25 @@ pub unsafe extern "C" fn OnlineEncryptorLastChunk(
         return Error::InvalidOutputLength.error_code();
     }
 
-    result.copy_from(encrypted.as_slice().as_ptr() as *const u8, encrypted.len());
+    result.copy_from(encrypted.as_slice().as_ptr(), encrypted.len());
 
     encrypted.len() as i64
 }
 
+/// Decrypts the last chunk of data and consumes the decryptor.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineDecryptor`.
+///  * `data` - Pointer to the chunk to decrypt.
+///  * `data_size` - Length of the chunk to decrypt.
+///  * `aad` - Pointer to the additionnal data to authenticate alongside this chunk.
+///  * `aad_size` - Length of the additionnal data to authenticate. Pass 0 if there is no data.
+///  * `result` - Pointer to the buffer to write the decrypted chunk to.
+///  * `result_size` - Length of the buffer to write the decrypted chunk to.
+/// # Returns
+/// The length of the decrypted chunk, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+/// This call frees the decryptor: `ptr` must not be used again afterwards.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineDecryptorLastChunk(
     ptr: *mut c_void,
@@ -1544,11 +1644,18 @@ pub unsafe extern "C" fn OnlineDecryptorLastChunk(
         return Error::InvalidOutputLength.error_code();
     }
 
-    result.copy_from(decrypted.as_slice().as_ptr() as *const u8, decrypted.len());
+    result.copy_from(decrypted.as_slice().as_ptr(), decrypted.len());
 
     decrypted.len() as i64
 }
 
+/// The size, in bytes, of the encryptor's serialized header.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineEncryptor`.
+/// # Returns
+/// The length of the serialized header, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64 {
     if ptr.is_null() {
@@ -1564,6 +1671,13 @@ pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64
     header.get_serialized_size() as i64
 }
 
+/// The size, in bytes, of the decryptor's serialized header.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineDecryptor`.
+/// # Returns
+/// The length of the serialized header, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64 {
     if ptr.is_null() {
@@ -1579,6 +1693,13 @@ pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64
     header.get_serialized_size() as i64
 }
 
+/// The size, in bytes, of the chunks the encryptor works with.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineEncryptor`.
+/// # Returns
+/// The chunk size, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 {
     if ptr.is_null() {
@@ -1592,6 +1713,13 @@ pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 
     }
 }
 
+/// The size, in bytes, of the chunks the decryptor works with.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineDecryptor`.
+/// # Returns
+/// The chunk size, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 {
     if ptr.is_null() {
@@ -1605,6 +1733,13 @@ pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 
     }
 }
 
+/// The size, in bytes, of the authentication tag appended to each chunk by the encryptor.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineEncryptor`.
+/// # Returns
+/// The tag size, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 {
     if ptr.is_null() {
@@ -1618,6 +1753,13 @@ pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 {
     }
 }
 
+/// The size, in bytes, of the authentication tag expected at the end of each chunk by the decryptor.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineDecryptor`.
+/// # Returns
+/// The tag size, or the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[no_mangle]
 pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 {
     if ptr.is_null() {
@@ -1631,6 +1773,14 @@ pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 {
     }
 }
 
+/// Frees an encryptor without finalizing the encryption.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineEncryptor`.
+/// # Returns
+/// 0 on success, otherwise the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+/// `ptr` must not be used again afterwards.
 #[no_mangle]
 pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 {
     if ptr.is_null() {
@@ -1642,6 +1792,14 @@ pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 {
     0
 }
 
+/// Frees a decryptor without finalizing the decryption.
+/// # Arguments
+///  * `ptr` - Opaque handle returned by `NewOnlineDecryptor`.
+/// # Returns
+/// 0 on success, otherwise the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+/// `ptr` must not be used again afterwards.
 #[no_mangle]
 pub unsafe extern "C" fn FreeOnlineDecryptor(ptr: *mut c_void) -> i64 {
     if ptr.is_null() {
@@ -1787,10 +1945,10 @@ pub unsafe extern "C" fn DeriveKeyPbkdf2(
 ///  * password_length - Length of the password to derive.
 ///  * iterations - Number of PBKDF2 iterations.
 ///  * secret_key - Pointer to the buffer to write the derived SecretKey to.
-///                 Must be `GenerateSecretKeySize()` bytes.
+///    Must be `GenerateSecretKeySize()` bytes.
 ///  * secret_key_length - Length of the secret key output buffer.
 ///  * params_out - Pointer to the buffer to write the DerivationParameters to.
-///                 Must be `DeriveSecretKeyPbkdf2Size()` bytes.
+///    Must be `DeriveSecretKeyPbkdf2Size()` bytes.
 ///  * params_out_length - Length of the params output buffer.
 /// # Returns
 /// Returns 0 if the operation is successful. If there is an error,
@@ -1851,10 +2009,10 @@ pub extern "C" fn DeriveSecretKeyPbkdf2Size() -> i64 {
 ///  * argon2_parameters - Pointer to the buffer containing the serialized Argon2Parameters.
 ///  * argon2_parameters_length - Length of the Argon2Parameters buffer.
 ///  * secret_key - Pointer to the buffer to write the derived SecretKey to.
-///                 Must be `GenerateSecretKeySize()` bytes.
+///    Must be `GenerateSecretKeySize()` bytes.
 ///  * secret_key_length - Length of the secret key output buffer.
 ///  * params_out - Pointer to the buffer to write the DerivationParameters to.
-///                 Must be `DeriveSecretKeyArgon2ParametersSize(argon2_parameters_length)` bytes.
+///    Must be `DeriveSecretKeyArgon2ParametersSize(argon2_parameters_length)` bytes.
 ///  * params_out_length - Length of the params output buffer.
 /// # Returns
 /// Returns 0 if the operation is successful. If there is an error,
@@ -1924,10 +2082,10 @@ pub unsafe extern "C" fn DeriveSecretKeyArgon2(
 ///  * salt - Pointer to the salt to use for derivation.
 ///  * salt_length - Length of the salt.
 ///  * secret_key - Pointer to the buffer to write the derived SecretKey to.
-///                 Must be `GenerateSecretKeySize()` bytes.
+///    Must be `GenerateSecretKeySize()` bytes.
 ///  * secret_key_length - Length of the secret key output buffer.
 ///  * params_out - Pointer to the buffer to write the DerivationParameters to.
-///                 Must be `DeriveSecretKeyPbkdf2WithSaltSize(salt_length)` bytes.
+///    Must be `DeriveSecretKeyPbkdf2WithSaltSize(salt_length)` bytes.
 ///  * params_out_length - Length of the params output buffer.
 /// # Returns
 /// Returns 0 if the operation is successful. If there is an error,
@@ -2010,7 +2168,7 @@ pub extern "C" fn GetArgon2DerivationParametersSize(argon2_parameters_length: us
 ///  * `argon2_parameters` - Pointer to the serialized `Argon2Parameters`.
 ///  * `argon2_parameters_length` - Length of the `Argon2Parameters` buffer.
 ///  * `result` - Pointer to the output buffer.
-///               Must be `GetArgon2DerivationParametersSize(argon2_parameters_length)` bytes.
+///    Must be `GetArgon2DerivationParametersSize(argon2_parameters_length)` bytes.
 ///  * `result_length` - Length of the output buffer.
 /// # Returns
 /// Returns the number of bytes written, or a negative error code.
@@ -2055,7 +2213,7 @@ pub extern "C" fn GetPbkdf2DerivationParametersSize() -> i64 {
 /// # Arguments
 ///  * `iterations` - Number of PBKDF2 iterations.
 ///  * `result` - Pointer to the output buffer.
-///               Must be `GetPbkdf2DerivationParametersSize()` bytes.
+///    Must be `GetPbkdf2DerivationParametersSize()` bytes.
 ///  * `result_length` - Length of the output buffer.
 /// # Returns
 /// Returns the number of bytes written, or a negative error code.
@@ -2505,7 +2663,7 @@ fn test_get_default_argon2parameters() {
 #[test]
 fn test_decode() {
     fn get_decoded_base64_string_length(base64: &str) -> usize {
-        if base64.is_empty() || base64.len() % 4 != 0 {
+        if base64.is_empty() || !base64.len().is_multiple_of(4) {
             return 0;
         }
 

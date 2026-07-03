@@ -20,4 +20,4 @@ runs:
     - name: Check Clippy
       working-directory: ./
       shell: bash
-      run: cargo clippy -- --D warnings
+      run: cargo clippy --workspace --all-targets -- -D warnings

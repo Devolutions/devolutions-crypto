@@ -189,6 +189,19 @@ jobs:
       - uses: actions/checkout@v6
       - uses: ./.github/workflows/formatting/rust
 
+  #### DEPENDENCY AUDIT ####
+  cargo_deny:
+    runs-on: "ubuntu-22.04"
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install cargo-deny
+        run: cargo install cargo-deny --locked
+
+      - name: Check dependencies
+        run: cargo deny check
+
   #### FUZZ TESTING ####
   quick_fuzz:
     runs-on: "ubuntu-22.04"
