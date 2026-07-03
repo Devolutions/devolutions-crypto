@@ -190,12 +190,6 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
 name = "base64"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b41b7ea54a0c9d92199de89e20e58d49f02f8e699814ef3fdf266f6f748d15c7"
-
-[[package]]
-name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
@@ -615,7 +609,7 @@ dependencies = [
  "aead",
  "aes",
  "arbitrary 1.4.2",
- "base64 0.22.1",
+ "base64",
  "blahaj",
  "blake3",
  "byteorder",
@@ -651,7 +645,6 @@ dependencies = [
 name = "devolutions-crypto-cli"
 version = "0.10.1"
 dependencies = [
- "base64 0.11.0",
  "clap",
  "devolutions-crypto",
 ]
@@ -660,7 +653,7 @@ dependencies = [
 name = "devolutions-crypto-ffi"
 version = "0.10.1"
 dependencies = [
- "base64 0.22.1",
+ "base64",
  "devolutions-crypto",
  "zeroize",
 ]
@@ -1274,7 +1267,7 @@ version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ae76b7506744d254fd0eb2c0ff5c5d108201ccbb083111ac04a44eeda105680"
 dependencies = [
- "base64 0.22.1",
+ "base64",
  "blake2b_simd",
  "constant_time_eq",
 ]

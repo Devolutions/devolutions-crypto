@@ -9,4 +9,3 @@ edition = "2018"
 [dependencies]
 devolutions-crypto = {path = ".."}
 clap = { version = "4", features = ["derive"] }
-base64 = "0.11.0"
