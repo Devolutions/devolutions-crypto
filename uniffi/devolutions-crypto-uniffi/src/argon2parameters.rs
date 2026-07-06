@@ -122,8 +122,8 @@ pub struct Argon2Parameters {
 #[uniffi::export]
 impl Argon2Parameters {
     #[uniffi::constructor]
-    pub fn new_from_bytes(data: &[u8]) -> Result<Arc<Self>> {
-        let inner = data.try_into()?;
+    pub fn new_from_bytes(data: Vec<u8>) -> Result<Arc<Self>> {
+        let inner = data.as_slice().try_into()?;
         Ok(Arc::new(Self { inner }))
     }
 

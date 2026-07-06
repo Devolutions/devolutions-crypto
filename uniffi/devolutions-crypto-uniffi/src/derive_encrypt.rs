@@ -4,8 +4,8 @@ use devolutions_crypto::{Argon2, Pbkdf2};
 
 #[uniffi::export(default(kdf_version = None, ct_version = None))]
 pub fn derive_encrypt_with_password(
-    data: &[u8],
-    password: &[u8],
+    data: Vec<u8>,
+    password: Vec<u8>,
     kdf_version: Option<KeyDerivationVersion>,
     ct_version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>> {
@@ -18,16 +18,16 @@ pub fn derive_encrypt_with_password(
             .expect("default PKBDF2 parameters shouldn't fail"),
     };
     Ok(devolutions_crypto::derive_encrypt::encrypt_with_password(
-        data, password, params, ct_version,
+        &data, &password, params, ct_version,
     )?
     .into())
 }
 
 #[uniffi::export(default(kdf_version = None, ct_version = None))]
 pub fn derive_encrypt_with_password_and_aad(
-    data: &[u8],
-    password: &[u8],
-    aad: &[u8],
+    data: Vec<u8>,
+    password: Vec<u8>,
+    aad: Vec<u8>,
     kdf_version: Option<KeyDerivationVersion>,
     ct_version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>> {
@@ -42,22 +42,22 @@ pub fn derive_encrypt_with_password_and_aad(
 
     Ok(
         devolutions_crypto::derive_encrypt::encrypt_with_password_and_aad(
-            data, password, aad, params, ct_version,
+            &data, &password, &aad, params, ct_version,
         )?
         .into(),
     )
 }
 
 #[uniffi::export]
-pub fn derive_decrypt_with_password(data: &[u8], password: &[u8]) -> Result<Vec<u8>> {
-    KdfEncryptedData::try_from(data)?.decrypt_with_password(password)
+pub fn derive_decrypt_with_password(data: Vec<u8>, password: Vec<u8>) -> Result<Vec<u8>> {
+    KdfEncryptedData::try_from(data.as_slice())?.decrypt_with_password(&password)
 }
 
 #[uniffi::export]
 pub fn derive_decrypt_with_password_and_aad(
-    data: &[u8],
-    password: &[u8],
-    aad: &[u8],
+    data: Vec<u8>,
+    password: Vec<u8>,
+    aad: Vec<u8>,
 ) -> Result<Vec<u8>> {
-    KdfEncryptedData::try_from(data)?.decrypt_with_password_and_aad(password, aad)
+    KdfEncryptedData::try_from(data.as_slice())?.decrypt_with_password_and_aad(&password, &aad)
 }

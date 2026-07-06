@@ -9,9 +9,9 @@ pub struct KeyDerivationResult {
 }
 
 #[uniffi::export(default(iterations = 600000))]
-pub fn derive_secret_key_pbkdf2(key: &[u8], iterations: u32) -> Result<KeyDerivationResult> {
+pub fn derive_secret_key_pbkdf2(key: Vec<u8>, iterations: u32) -> Result<KeyDerivationResult> {
     let (sk, params) =
-        devolutions_crypto::key_derivation::Pbkdf2::with_params(iterations).derive(key)?;
+        devolutions_crypto::key_derivation::Pbkdf2::with_params(iterations).derive(&key)?;
     Ok(KeyDerivationResult {
         secret_key: sk.into(),
         parameters: params.into(),
@@ -20,12 +20,12 @@ pub fn derive_secret_key_pbkdf2(key: &[u8], iterations: u32) -> Result<KeyDeriva
 
 #[uniffi::export(default(iterations = 600000))]
 pub fn derive_secret_key_pbkdf2_with_salt(
-    key: &[u8],
-    salt: &[u8],
+    key: Vec<u8>,
+    salt: Vec<u8>,
     iterations: u32,
 ) -> Result<KeyDerivationResult> {
     let (sk, params) = devolutions_crypto::key_derivation::Pbkdf2::with_params(iterations)
-        .derive_with_salt(key, salt)?;
+        .derive_with_salt(&key, &salt)?;
     Ok(KeyDerivationResult {
         secret_key: sk.into(),
         parameters: params.into(),
@@ -34,12 +34,12 @@ pub fn derive_secret_key_pbkdf2_with_salt(
 
 #[uniffi::export]
 pub fn derive_secret_key_argon2(
-    key: &[u8],
+    key: Vec<u8>,
     parameters: &Arc<Argon2Parameters>,
 ) -> Result<KeyDerivationResult> {
     let (sk, params) =
         devolutions_crypto::key_derivation::Argon2::with_params(parameters.inner.clone())
-            .derive(key)?;
+            .derive(&key)?;
     Ok(KeyDerivationResult {
         secret_key: sk.into(),
         parameters: params.into(),
