@@ -29,9 +29,9 @@ pub fn generate_secret_key(version: Option<KeyVersion>) -> Vec<u8> {
 }
 
 #[uniffi::export]
-pub fn mix_key_exchange(private_key: &[u8], public_key: &[u8]) -> Result<Vec<u8>> {
-    let private_key = private_key.try_into()?;
-    let public_key = public_key.try_into()?;
+pub fn mix_key_exchange(private_key: Vec<u8>, public_key: Vec<u8>) -> Result<Vec<u8>> {
+    let private_key = private_key.as_slice().try_into()?;
+    let public_key = public_key.as_slice().try_into()?;
 
     devolutions_crypto::key::mix_key_exchange(&private_key, &public_key)
 }

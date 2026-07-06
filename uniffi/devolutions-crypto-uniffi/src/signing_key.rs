@@ -10,8 +10,8 @@ pub struct SigningKeyPair(devolutions_crypto::signing_key::SigningKeyPair);
 #[uniffi::export]
 impl SigningKeyPair {
     #[uniffi::constructor]
-    pub fn new_from_bytes(data: &[u8]) -> Result<Arc<Self>> {
-        let inner = data.try_into()?;
+    pub fn new_from_bytes(data: Vec<u8>) -> Result<Arc<Self>> {
+        let inner = data.as_slice().try_into()?;
         Ok(Arc::new(Self(inner)))
     }
 

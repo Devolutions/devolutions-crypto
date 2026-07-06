@@ -14,7 +14,7 @@ default-members = [
   ]
 
 [workspace.dependencies]
-uniffi = "0.31.1"
+uniffi = "0.32.0"
 rust-argon2 = { version = "3.0", default-features = false }
 
 [package]

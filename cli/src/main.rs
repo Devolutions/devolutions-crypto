@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use devolutions_crypto::utils::{base64_decode, base64_encode};
 use devolutions_crypto::DEFAULT_PBKDF2_ITERATIONS;
 use std::{borrow::Borrow, convert::TryFrom};
 
@@ -238,7 +239,7 @@ fn generate_key() {
     use devolutions_crypto::key::{generate_secret_key, KeyVersion};
 
     let key: Vec<u8> = generate_secret_key(KeyVersion::Latest).into();
-    println!("{}", base64::encode(&key));
+    println!("{}", base64_encode(&key));
 }
 
 fn generate_argon2parameters(
@@ -266,7 +267,7 @@ fn generate_argon2parameters(
     };
 
     let parameters: Vec<u8> = parameters.borrow().into();
-    println!("{}", base64::encode(&parameters));
+    println!("{}", base64_encode(&parameters));
 }
 
 fn derive_key(data: String, salt: Option<String>, iterations: Option<u32>) {
@@ -286,8 +287,8 @@ fn derive_key(data: String, salt: Option<String>, iterations: Option<u32>) {
 
     let params_bytes: Vec<u8> = params.into();
     let key_bytes: Vec<u8> = secret_key.into();
-    println!("Key: {}", base64::encode(&key_bytes));
-    println!("DerivationParameters: {}", base64::encode(&params_bytes));
+    println!("Key: {}", base64_encode(&key_bytes));
+    println!("DerivationParameters: {}", base64_encode(&params_bytes));
 }
 
 fn derive_and_encrypt_password(data: String, password: String, version: Option<u16>) {
@@ -302,7 +303,7 @@ fn derive_and_encrypt_password(data: String, password: String, version: Option<u
         encrypt_with_password(data.as_bytes(), password.as_bytes(), params, version)
             .unwrap()
             .into();
-    println!("{}", base64::encode(&result));
+    println!("{}", base64_encode(&result));
 }
 
 fn derive_and_decrypt_password(data: String, password: String) {
@@ -358,7 +359,7 @@ fn detect_dc_type(bytes: &[u8]) -> String {
 }
 
 fn decode_base64_arg(arg_name: &str, value: &str) -> Vec<u8> {
-    base64::decode(value).unwrap_or_else(|_| {
+    base64_decode(value).unwrap_or_else(|_| {
         eprintln!("Error: '{}' is not valid base64.", arg_name);
         std::process::exit(1);
     })
@@ -383,7 +384,7 @@ fn encrypt(data: String, key: String, version: Option<u16>) {
     let data: Vec<u8> = encrypt_with_secret_key(data.as_bytes(), &key, version)
         .unwrap()
         .into();
-    println!("{}", base64::encode(&data));
+    println!("{}", base64_encode(&data));
 }
 
 fn encrypt_asymmetric(data: String, key: String, version: Option<u16>) {
@@ -405,7 +406,7 @@ fn encrypt_asymmetric(data: String, key: String, version: Option<u16>) {
         devolutions_crypto::ciphertext::encrypt_asymmetric(data.as_bytes(), &key, version)
             .unwrap()
             .into();
-    println!("{}", base64::encode(&data));
+    println!("{}", base64_encode(&data));
 }
 
 fn decrypt(data: String, key: String) {
@@ -491,12 +492,12 @@ fn hash_password(password: String, params: Option<String>) {
     }
     .unwrap()
     .into();
-    println!("{}", base64::encode(&hash));
+    println!("{}", base64_encode(&hash));
 }
 
 fn verify_password(hash: String, password: String) {
     let hash = devolutions_crypto::password_hash::PasswordHash::try_from(
-        base64::decode(&hash).unwrap().as_slice(),
+        base64_decode(&hash).unwrap().as_slice(),
     )
     .unwrap();
 
@@ -508,22 +509,22 @@ fn generate_keypair() {
 
     println!(
         "Private Key: {}\nPublic Key: {}",
-        base64::encode(&Vec::<u8>::from(keypair.private_key)),
-        base64::encode(&Vec::<u8>::from(keypair.public_key))
+        base64_encode(&Vec::<u8>::from(keypair.private_key)),
+        base64_encode(&Vec::<u8>::from(keypair.public_key))
     );
 }
 
 fn mix_key_exchange(private: String, public: String) {
     let private =
-        devolutions_crypto::key::PrivateKey::try_from(base64::decode(&private).unwrap().as_slice())
+        devolutions_crypto::key::PrivateKey::try_from(base64_decode(&private).unwrap().as_slice())
             .unwrap();
     let public =
-        devolutions_crypto::key::PublicKey::try_from(base64::decode(&public).unwrap().as_slice())
+        devolutions_crypto::key::PublicKey::try_from(base64_decode(&public).unwrap().as_slice())
             .unwrap();
 
     println!(
         "{}",
-        base64::encode(&devolutions_crypto::key::mix_key_exchange(&private, &public).unwrap())
+        base64_encode(&devolutions_crypto::key::mix_key_exchange(&private, &public).unwrap())
     )
 }
 
@@ -539,7 +540,7 @@ fn generate_shared_key(shares: u8, threshold: u8, length: Option<usize>) {
     .unwrap();
 
     for (i, s) in shares.into_iter().map(Into::<Vec<u8>>::into).enumerate() {
-        let s = base64::encode(&s);
+        let s = base64_encode(&s);
         println!("Share {}: {}", i, s);
     }
 }
@@ -549,18 +550,18 @@ fn join_shares(shares: Vec<String>) {
         .into_iter()
         .map(|s| {
             devolutions_crypto::secret_sharing::Share::try_from(
-                base64::decode(&s).unwrap().as_slice(),
+                base64_decode(&s).unwrap().as_slice(),
             )
             .unwrap()
         })
         .collect();
     let secret_key = devolutions_crypto::secret_sharing::join_shares(&shares).unwrap();
 
-    println!("{}", base64::encode(&secret_key));
+    println!("{}", base64_encode(&secret_key));
 }
 
 fn print_header(data: String) {
-    let data = base64::decode(&data).unwrap();
+    let data = base64_decode(&data).unwrap();
 
     match devolutions_crypto::DataType::try_from(data[2] as u16) {
         Ok(devolutions_crypto::DataType::Ciphertext) => {
