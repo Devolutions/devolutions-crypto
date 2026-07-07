@@ -7,10 +7,8 @@ use super::Result;
 
 use std::borrow::Borrow;
 
-use chacha20poly1305::aead::{
-    stream::{DecryptorLE31, EncryptorLE31},
-    Payload,
-};
+use aead_stream::{DecryptorLE31, EncryptorLE31};
+use chacha20poly1305::aead::Payload;
 use chacha20poly1305::{KeyInit, XChaCha20Poly1305};
 
 use x25519_dalek::StaticSecret;
@@ -304,7 +302,8 @@ impl OnlineCiphertextV1Encryptor {
 
         // Derive the key
         let key = Zeroizing::new(blake3::derive_key(CONTEXT, key));
-        let cipher = XChaCha20Poly1305::new(key.as_ref().into());
+        let cipher = XChaCha20Poly1305::new_from_slice(key.as_ref())
+            .expect("derived key length is hardcoded and correct");
 
         // Create the STREAM encryptor
         let cipher = EncryptorLE31::from_aead(cipher, &nonce.into());
@@ -330,7 +329,7 @@ impl OnlineCiphertextV1Encryptor {
         // Perform a ECDH exchange as per ECIES
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
-        let ephemeral_private_key = StaticSecret::random_from_rng(rand_08::rngs::OsRng);
+        let ephemeral_private_key = StaticSecret::from(*crate::utils::random_bytes::<32>()?);
         let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
 
         let key = ephemeral_private_key.diffie_hellman(&public_key);
@@ -343,7 +342,8 @@ impl OnlineCiphertextV1Encryptor {
 
         // Derive the key
         let key = Zeroizing::new(blake3::derive_key(CONTEXT, key.as_bytes()));
-        let cipher = XChaCha20Poly1305::new(key.as_ref().into());
+        let cipher = XChaCha20Poly1305::new_from_slice(key.as_ref())
+            .expect("derived key length is hardcoded and correct");
 
         // Create the STREAM encryptor
         let cipher = EncryptorLE31::from_aead(cipher, &nonce.into());
@@ -369,7 +369,8 @@ impl OnlineCiphertextV1Decryptor {
     pub fn new(key: &[u8], mut aad: Vec<u8>, header: OnlineCiphertextV1HeaderSymmetric) -> Self {
         // Derive the key
         let key = Zeroizing::new(blake3::derive_key(CONTEXT, key));
-        let cipher = XChaCha20Poly1305::new(key.as_ref().into());
+        let cipher = XChaCha20Poly1305::new_from_slice(key.as_ref())
+            .expect("derived key length is hardcoded and correct");
 
         // Create the STREAM decryptor
         let cipher = DecryptorLE31::from_aead(cipher, &header.nonce.into());
@@ -396,7 +397,8 @@ impl OnlineCiphertextV1Decryptor {
 
         // Derive the key
         let key = Zeroizing::new(blake3::derive_key(CONTEXT, key.as_bytes()));
-        let cipher = XChaCha20Poly1305::new(key.as_ref().into());
+        let cipher = XChaCha20Poly1305::new_from_slice(key.as_ref())
+            .expect("derived key length is hardcoded and correct");
 
         // Create the STREAM decryptor
         let cipher = DecryptorLE31::from_aead(cipher, &header.nonce.into());

@@ -34,30 +34,30 @@ name = "devolutions_crypto"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-aead = { version = "0.5", features = ["stream"] }
+aead-stream = { version = "0.6", features = ["alloc"] }
 aes = "0.9"
 base64 = "0.22"
 cbc = { version = "0.2", features = ["block-padding", "alloc"] }
 byteorder = "1"
-chacha20poly1305 = "0.10"
+chacha20poly1305 = { version = "0.11", features = ["zeroize"] }
 cfg-if = "1"
 hmac = "0.13"
 num_enum = "0.7"
 pbkdf2 = { version = "0.13", default-features = false }
 scrypt = { version = "0.12", default-features = false }
-blahaj = { version = "0.6", default-features = false }
+blahaj = { version = "0.6", default-features = false, features = ["zeroize_memory"] }
 sha2 = "0.11"
 strum = { version = "0.28", features = ["derive"] }
 subtle = "2"
-zeroize = { version = "1.8" }
+zeroize = { version = "1.8", features = ["derive"] }
 rand = "0.10"
 rand_08 = { package = "rand", version = "0.8" }
 thiserror = "2.0.12"
 typed-builder = "0.23.2"
 rust-argon2 = { workspace = true }
 
-ed25519-dalek = { version = "2", features = [ "rand_core" ] }
-x25519-dalek = { version = "2", features = [ "static_secrets" ] }
+ed25519-dalek = { version = "3", features = [ "rand_core" ] }
+x25519-dalek = { version = "3", features = [ "static_secrets" ] }
 
 # used for fuzzing
 arbitrary = { version = "1", features = ["derive"], optional = true }

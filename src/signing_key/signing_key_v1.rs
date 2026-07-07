@@ -3,6 +3,7 @@ use super::Error;
 use super::Result;
 
 use ed25519_dalek::{SigningKey, VerifyingKey};
+use zeroize::Zeroizing;
 
 use std::convert::TryFrom;
 
@@ -58,7 +59,7 @@ impl<'a> Arbitrary<'a> for SigningKeyV1Public {
 
 impl From<SigningKeyV1Pair> for Vec<u8> {
     fn from(key: SigningKeyV1Pair) -> Self {
-        key.keypair.to_keypair_bytes().to_vec()
+        Zeroizing::new(key.keypair.to_keypair_bytes()).to_vec()
     }
 }
 
@@ -99,9 +100,10 @@ impl TryFrom<&[u8]> for SigningKeyV1Public {
 }
 
 pub fn generate_signing_keypair() -> SigningKeyV1Pair {
-    let mut csprng = rand_08::rngs::OsRng;
+    let secret =
+        crate::utils::random_bytes::<32>().expect("the OS entropy source should be available");
 
-    let keypair = SigningKey::generate(&mut csprng);
+    let keypair = SigningKey::from_bytes(&secret);
 
     SigningKeyV1Pair { keypair }
 }

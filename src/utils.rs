@@ -10,6 +10,7 @@ use pbkdf2::pbkdf2;
 use rand::TryRng;
 use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
+use zeroize::Zeroizing;
 
 use crate::online_ciphertext::OnlineCiphertextHeader;
 
@@ -36,6 +37,19 @@ pub fn generate_key(length: usize) -> Result<Vec<u8>> {
         .try_fill_bytes(&mut key)
         .map_err(|_| Error::RandomError)?;
     Ok(key)
+}
+
+/// Fills a fixed-size buffer directly from the operating system's CSPRNG.
+///
+/// Used for private key generation: drawing the bytes straight from the OS
+/// avoids any intermediate userspace CSPRNG state that could be used to
+/// reconstruct the key. The buffer is zeroized on drop.
+pub(crate) fn random_bytes<const N: usize>() -> Result<Zeroizing<[u8; N]>> {
+    let mut bytes = Zeroizing::new([0u8; N]);
+    rand::rngs::SysRng
+        .try_fill_bytes(bytes.as_mut_slice())
+        .map_err(|_| Error::RandomError)?;
+    Ok(bytes)
 }
 
 /// Derives a password or key into a new one using PBKDF2.
