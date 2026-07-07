@@ -3,6 +3,7 @@ use super::Error;
 use super::Result;
 
 use x25519_dalek::{PublicKey, StaticSecret};
+use zeroize::Zeroizing;
 
 use std::convert::TryFrom;
 
@@ -53,7 +54,7 @@ impl<'a> Arbitrary<'a> for KeyV1Public {
 
 impl From<KeyV1Private> for Vec<u8> {
     fn from(key: KeyV1Private) -> Self {
-        key.key.to_bytes().to_vec()
+        Zeroizing::new(key.key.to_bytes()).to_vec()
     }
 }
 
@@ -71,10 +72,10 @@ impl TryFrom<&[u8]> for KeyV1Private {
             return Err(Error::InvalidLength);
         }
 
-        let mut key_bytes = [0u8; 32];
+        let mut key_bytes = Zeroizing::new([0u8; 32]);
         key_bytes.copy_from_slice(&key[0..32]);
         Ok(Self {
-            key: StaticSecret::from(key_bytes),
+            key: StaticSecret::from(*key_bytes),
         })
     }
 }
@@ -96,7 +97,9 @@ impl TryFrom<&[u8]> for KeyV1Public {
 }
 
 pub fn generate_keypair() -> KeyV1Pair {
-    let private = StaticSecret::random_from_rng(rand_08::rngs::OsRng);
+    let bytes =
+        crate::utils::random_bytes::<32>().expect("the OS entropy source should be available");
+    let private = StaticSecret::from(*bytes);
     let public = PublicKey::from(&private);
 
     KeyV1Pair {

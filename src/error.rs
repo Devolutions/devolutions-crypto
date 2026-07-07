@@ -125,8 +125,8 @@ impl From<UnpadError> for Error {
     }
 }
 
-impl From<aead::Error> for Error {
-    fn from(_error: aead::Error) -> Error {
+impl From<chacha20poly1305::aead::Error> for Error {
+    fn from(_error: chacha20poly1305::aead::Error) -> Error {
         Error::InvalidMac
     }
 }

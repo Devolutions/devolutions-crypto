@@ -1,43 +1,82 @@
-//! Module for symmetric/asymmetric encryption/decryption.
+//! Module for chunked, streaming symmetric/asymmetric encryption/decryption.
 //!
-//! This module contains everything related to encryption. You can use it to encrypt and decrypt data using either a shared key of a keypair.
-//! Either way, the encryption will give you a `Ciphertext`, which has a method to decrypt it.
+//! Unlike the [`ciphertext`](super::ciphertext) module, which encrypts a whole buffer at
+//! once, this module processes the data one chunk at a time using the STREAM construction.
+//! This lets you encrypt or decrypt data that does not fit in memory, or that arrives
+//! progressively, without ever holding the full plaintext at once.
+//!
+//! You start by creating an `OnlineCiphertextEncryptor`, which produces an
+//! `OnlineCiphertextHeader`. That header is not secret but is required to decrypt: keep it
+//! alongside the ciphertext. You then feed each chunk to `encrypt_next_chunk`, and the final
+//! (possibly smaller) chunk to `encrypt_last_chunk`. Every chunk fed to `encrypt_next_chunk`
+//! must be exactly `chunk_size` bytes; the last chunk may be smaller. Each produced chunk is
+//! `get_tag_size()` bytes larger than its input because of the authentication tag.
 //!
 //! ### Symmetric
 //!
 //! ```rust
 //! use devolutions_crypto::utils::generate_key;
-//! use devolutions_crypto::ciphertext::{ encrypt, CiphertextVersion, Ciphertext };
+//! use devolutions_crypto::online_ciphertext::{
+//!     OnlineCiphertextEncryptor, OnlineCiphertextHeader, OnlineCiphertextVersion,
+//! };
+//! use std::convert::TryFrom;
 //!
 //! let key: Vec<u8> = generate_key(32).expect("generate key shouldn't fail");
+//! let chunk_size = 16u32;
 //!
-//! let data = b"somesecretdata";
+//! // Encrypt the data one chunk at a time.
+//! let mut encryptor =
+//!     OnlineCiphertextEncryptor::new(&key, b"", chunk_size, OnlineCiphertextVersion::Latest)
+//!         .expect("creating the encryptor shouldn't fail");
 //!
-//! let encrypted_data: Ciphertext = encrypt(data, &key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
+//! // The header is required to decrypt; store or transmit it alongside the ciphertext.
+//! let header: Vec<u8> = (&encryptor.get_header()).into();
 //!
-//! let decrypted_data = encrypted_data.decrypt(&key).expect("The decryption shouldn't fail");
+//! // Each `_next_chunk` input must be exactly `chunk_size` bytes; the last chunk may be smaller.
+//! let chunk1 = encryptor.encrypt_next_chunk(b"0123456789abcdef", b"").expect("encrypting a chunk shouldn't fail");
+//! let chunk2 = encryptor.encrypt_last_chunk(b"the last chunk", b"").expect("encrypting the last chunk shouldn't fail");
 //!
-//! assert_eq!(decrypted_data, data);
+//! // Decrypt using the header.
+//! let header = OnlineCiphertextHeader::try_from(header.as_slice()).expect("the header should be valid");
+//! let mut decryptor = header.into_decryptor(&key, b"").expect("creating the decryptor shouldn't fail");
+//!
+//! let mut decrypted = decryptor.decrypt_next_chunk(&chunk1, b"").expect("decrypting a chunk shouldn't fail");
+//! decrypted.extend_from_slice(&decryptor.decrypt_last_chunk(&chunk2, b"").expect("decrypting the last chunk shouldn't fail"));
+//!
+//! assert_eq!(decrypted, b"0123456789abcdefthe last chunk");
 //! ```
 //!
 //! ### Asymmetric
 //! Here, you will need a `PublicKey` to encrypt data and the corresponding
 //! `PrivateKey` to decrypt it. You can generate them by using `generate_keypair`
-//! in the [Key module](#key).
+//! in the [Key module](super::key).
 //!
 //! ```rust
 //! use devolutions_crypto::key::{generate_keypair, KeyVersion, KeyPair};
-//! use devolutions_crypto::ciphertext::{ encrypt_asymmetric, CiphertextVersion, Ciphertext };
+//! use devolutions_crypto::online_ciphertext::{
+//!     OnlineCiphertextEncryptor, OnlineCiphertextHeader, OnlineCiphertextVersion,
+//! };
+//! use std::convert::TryFrom;
 //!
 //! let keypair: KeyPair = generate_keypair(KeyVersion::Latest);
+//! let chunk_size = 16u32;
 //!
-//! let data = b"somesecretdata";
+//! let mut encryptor = OnlineCiphertextEncryptor::new_asymmetric(
+//!     &keypair.public_key, b"", chunk_size, OnlineCiphertextVersion::Latest,
+//! ).expect("creating the encryptor shouldn't fail");
 //!
-//! let encrypted_data: Ciphertext = encrypt_asymmetric(data, &keypair.public_key, CiphertextVersion::Latest).expect("encryption shouldn't fail");
+//! let header: Vec<u8> = (&encryptor.get_header()).into();
 //!
-//! let decrypted_data = encrypted_data.decrypt_asymmetric(&keypair.private_key).expect("The decryption shouldn't fail");
+//! let chunk1 = encryptor.encrypt_next_chunk(b"0123456789abcdef", b"").expect("encrypting a chunk shouldn't fail");
+//! let chunk2 = encryptor.encrypt_last_chunk(b"the last chunk", b"").expect("encrypting the last chunk shouldn't fail");
 //!
-//! assert_eq!(decrypted_data, data);
+//! let header = OnlineCiphertextHeader::try_from(header.as_slice()).expect("the header should be valid");
+//! let mut decryptor = header.into_decryptor_asymmetric(&keypair.private_key, b"").expect("creating the decryptor shouldn't fail");
+//!
+//! let mut decrypted = decryptor.decrypt_next_chunk(&chunk1, b"").expect("decrypting a chunk shouldn't fail");
+//! decrypted.extend_from_slice(&decryptor.decrypt_last_chunk(&chunk2, b"").expect("decrypting the last chunk shouldn't fail"));
+//!
+//! assert_eq!(decrypted, b"0123456789abcdefthe last chunk");
 //! ```
 
 mod online_ciphertext_v1;

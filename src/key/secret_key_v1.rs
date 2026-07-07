@@ -2,7 +2,6 @@
 use super::Error;
 use super::Result;
 
-use rand_08::RngCore;
 use zeroize::Zeroizing;
 
 use std::convert::TryFrom;
@@ -33,8 +32,8 @@ impl<'a> Arbitrary<'a> for SecretKeyV1 {
 
 impl SecretKeyV1 {
     pub fn generate() -> Self {
-        let mut key = Zeroizing::new([0u8; 32]);
-        rand_08::rngs::OsRng.fill_bytes(key.as_mut());
+        let key =
+            crate::utils::random_bytes::<32>().expect("the OS entropy source should be available");
         Self { key }
     }
 
@@ -57,10 +56,8 @@ impl TryFrom<&[u8]> for SecretKeyV1 {
             return Err(Error::InvalidLength);
         }
 
-        let mut key = [0u8; 32];
+        let mut key = Zeroizing::new([0u8; 32]);
         key.copy_from_slice(data);
-        Ok(Self {
-            key: Zeroizing::new(key),
-        })
+        Ok(Self { key })
     }
 }

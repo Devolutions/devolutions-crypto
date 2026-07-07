@@ -10,9 +10,7 @@ use zeroize::Zeroizing;
 #[cfg(feature = "fuzz")]
 use arbitrary::Arbitrary;
 
-// This will need some work in the Sharks crate to get the zeroize working.
-//#[derive(Zeroize)]
-//#[zeroize(drop)]
+// `blahaj::Share` zeroizes on drop (`zeroize_memory` feature); `threshold` is not secret.
 #[derive(Clone)]
 pub struct ShareV1 {
     threshold: u8,
@@ -42,8 +40,11 @@ impl core::fmt::Debug for ShareV1 {
 
 impl From<ShareV1> for Vec<u8> {
     fn from(share: ShareV1) -> Vec<u8> {
-        let mut data: Vec<u8> = vec![share.threshold];
-        data.append(&mut (&share.share).into());
+        let share_bytes: Zeroizing<Vec<u8>> = Zeroizing::new((&share.share).into());
+
+        let mut data: Vec<u8> = Vec::with_capacity(1 + share_bytes.len());
+        data.push(share.threshold);
+        data.extend_from_slice(&share_bytes);
 
         data
     }

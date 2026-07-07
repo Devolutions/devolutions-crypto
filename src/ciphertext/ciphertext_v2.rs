@@ -10,7 +10,7 @@ use super::Ciphertext;
 use std::convert::TryFrom;
 
 use chacha20poly1305::aead::{Aead, Payload};
-use chacha20poly1305::{Key, KeyInit, XChaCha20Poly1305, XNonce};
+use chacha20poly1305::{KeyInit, XChaCha20Poly1305, XNonce};
 
 use sha2::{Digest, Sha256};
 use x25519_dalek::StaticSecret;
@@ -97,7 +97,7 @@ impl CiphertextV2Symmetric {
             .try_fill_bytes(&mut nonce_bytes)
             .map_err(|_| Error::RandomError)?;
 
-        let nonce = XNonce::from_slice(&nonce_bytes);
+        let nonce = XNonce::from(nonce_bytes);
 
         // Authenticate the header
         let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new(header.into());
@@ -110,9 +110,9 @@ impl CiphertextV2Symmetric {
 
         // Encrypt
         let ciphertext = {
-            let key = Key::from_slice(key.as_slice());
-            let cipher = XChaCha20Poly1305::new(key);
-            cipher.encrypt(nonce, payload)?
+            let cipher = XChaCha20Poly1305::new_from_slice(key.as_slice())
+                .expect("key length is hardcoded and correct");
+            cipher.encrypt(&nonce, payload)?
         };
 
         Ok(CiphertextV2Symmetric {
@@ -136,11 +136,11 @@ impl CiphertextV2Symmetric {
 
         let result = {
             // Decrypt
-            let key = Key::from_slice(key.as_slice());
-            let nonce = XNonce::from_slice(&self.nonce);
+            let nonce = XNonce::from(self.nonce);
 
-            let cipher = XChaCha20Poly1305::new(key);
-            cipher.decrypt(nonce, payload)?
+            let cipher = XChaCha20Poly1305::new_from_slice(key.as_slice())
+                .expect("key length is hardcoded and correct");
+            cipher.decrypt(&nonce, payload)?
         };
 
         Ok(result)
@@ -186,7 +186,7 @@ impl CiphertextV2Asymmetric {
     ) -> Result<Self> {
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
-        let ephemeral_private_key = StaticSecret::random_from_rng(rand_08::rngs::OsRng);
+        let ephemeral_private_key = StaticSecret::from(*crate::utils::random_bytes::<32>()?);
         let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
 
         let key = ephemeral_private_key.diffie_hellman(&public_key);
