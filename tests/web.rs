@@ -60,7 +60,7 @@ cfg_if! {
             assert_eq!(decoded.as_slice(), plain.as_bytes());
 
             let encoded_no_pad = "VGhJczFzYVRlc1Q";
-            let decoded_no_pad = wasm::base64decode(&encoded_no_pad).unwrap();
+            let decoded_no_pad = wasm::base64decode(encoded_no_pad).unwrap();
             assert_eq!(decoded_no_pad.as_slice(), plain.as_bytes());
         }
 

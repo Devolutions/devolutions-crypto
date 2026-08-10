@@ -73,7 +73,8 @@ pub(crate) fn random_bytes<const N: usize>() -> Result<Zeroizing<[u8; N]>> {
 /// ```
 pub fn derive_key_pbkdf2(key: &[u8], salt: &[u8], iterations: u32, length: usize) -> Vec<u8> {
     let mut new_key = vec![0u8; length];
-    let _ = pbkdf2::<Hmac<Sha256>>(key, salt, iterations, &mut new_key);
+    pbkdf2::<Hmac<Sha256>>(key, salt, iterations, &mut new_key)
+        .expect("HMAC-SHA256 accepts keys of any length, so this cannot fail");
     new_key
 }
 
@@ -103,16 +104,20 @@ pub fn derive_key_argon2(key: &[u8], parameters: &Argon2Parameters) -> Result<Ve
 /// # Returns
 /// `true` if the header is valid, `false` if it is not.
 /// # Example
+/// ```
 /// use devolutions_crypto::DataType;
 /// use devolutions_crypto::ciphertext::{encrypt, CiphertextVersion};
 /// use devolutions_crypto::utils::{generate_key, validate_header};
 ///
-/// let key = generate_key(32);
-/// let ciphertext: `Vec<u8>` = encrypt(b"test", &key, CiphertextVersion::Latest).unwrap().into();
+/// let key = generate_key(32).expect("generate key shouldn't fail");
+/// let ciphertext: Vec<u8> = encrypt(b"test", &key, CiphertextVersion::Latest)
+///     .expect("encryption shouldn't fail")
+///     .into();
 ///
-/// assert!(validate_header(&ciphertext, DataType::Ciphertext);
-/// assert!(!validate_header(&ciphertext, DataType::PasswordHash);
-/// assert!(!validate_header(&key, DataType::Ciphertext);
+/// assert!(validate_header(&ciphertext, DataType::Ciphertext));
+/// assert!(!validate_header(&ciphertext, DataType::PasswordHash));
+/// assert!(!validate_header(&key, DataType::Ciphertext));
+/// ```
 pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
     use super::ciphertext::Ciphertext;
     use super::derive_encrypt::KdfEncryptedData;

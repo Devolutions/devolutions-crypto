@@ -189,9 +189,9 @@ pub fn encrypt(
     version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>, JsValue> {
     Ok(ciphertext::encrypt_with_aad(
-        &data,
-        &key,
-        &aad.unwrap_or(Vec::new()),
+        data,
+        key,
+        &aad.unwrap_or_default(),
         version.unwrap_or(CiphertextVersion::Latest),
     )?
     .into())
@@ -205,9 +205,9 @@ pub fn encrypt_asymmetric(
     version: Option<CiphertextVersion>,
 ) -> Result<Vec<u8>, JsValue> {
     Ok(ciphertext::encrypt_asymmetric_with_aad(
-        &data,
+        data,
         &public_key,
-        &aad.unwrap_or(Vec::new()),
+        &aad.unwrap_or_default(),
         version.unwrap_or(CiphertextVersion::Latest),
     )?
     .into())
@@ -216,7 +216,7 @@ pub fn encrypt_asymmetric(
 #[wasm_bindgen]
 pub fn decrypt(data: &[u8], key: &[u8], aad: Option<Vec<u8>>) -> Result<Vec<u8>, JsValue> {
     let data_blob = Ciphertext::try_from(data)?;
-    Ok(data_blob.decrypt_with_aad(&key, &aad.unwrap_or(Vec::new()))?)
+    Ok(data_blob.decrypt_with_aad(key, &aad.unwrap_or_default())?)
 }
 
 #[wasm_bindgen(js_name = "decryptAsymmetric")]
@@ -226,7 +226,7 @@ pub fn decrypt_asymmetric(
     aad: Option<Vec<u8>>,
 ) -> Result<Vec<u8>, JsValue> {
     let data_blob = Ciphertext::try_from(data)?;
-    Ok(data_blob.decrypt_asymmetric_with_aad(&private_key, &aad.unwrap_or(Vec::new()))?)
+    Ok(data_blob.decrypt_asymmetric_with_aad(&private_key, &aad.unwrap_or_default())?)
 }
 
 #[wasm_bindgen(js_name = "hashPassword")]
@@ -235,7 +235,7 @@ pub fn hash_password(
     version: Option<PasswordHashVersion>,
 ) -> Result<Vec<u8>, JsValue> {
     Ok(
-        password_hash::hash_password(&password, version.unwrap_or(PasswordHashVersion::Latest))?
+        password_hash::hash_password(password, version.unwrap_or(PasswordHashVersion::Latest))?
             .into(),
     )
 }
@@ -249,7 +249,7 @@ pub fn hash_password_with_params(password: &[u8], params: &[u8]) -> Result<Vec<u
 #[wasm_bindgen(js_name = "verifyPassword")]
 pub fn verify_password(password: &[u8], hash: &[u8]) -> Result<bool, JsValue> {
     let password_hash = PasswordHash::try_from(hash)?;
-    Ok(password_hash.verify_password(&password))
+    Ok(password_hash.verify_password(password))
 }
 
 #[wasm_bindgen(js_name = "generateKeyPair")]
@@ -303,7 +303,7 @@ pub fn decrypt_with_secret_key(
 
 #[wasm_bindgen(js_name = "generateSigningKeyPair")]
 pub fn generate_signing_keypair(version: Option<SigningKeyVersion>) -> SigningKeyPair {
-    signing_key::generate_signing_keypair(version.unwrap_or(SigningKeyVersion::Latest)).into()
+    signing_key::generate_signing_keypair(version.unwrap_or(SigningKeyVersion::Latest))
 }
 
 #[wasm_bindgen(js_name = "mixKeyExchange")]
