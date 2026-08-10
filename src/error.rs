@@ -10,17 +10,6 @@ use hmac::digest::MacError;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-// Doesn't work because Result is a type alias, keeping the commented code just in case we revisit someday
-// impl<T, E> From<std::result::Result<T, E>> for Result<T>
-// where E: Into<Error> {
-//    fn from(value: std::result::Result<T, E>) -> Self {
-//         match value {
-//             Ok(t) => Ok(t),
-//             Err(e) => Err(e.into()),
-//         }
-//     }
-// }
-
 /// This crate's error type.
 #[derive(Debug, IntoStaticStr, thiserror::Error)]
 pub enum Error {

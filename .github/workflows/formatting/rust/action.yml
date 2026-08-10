@@ -11,6 +11,7 @@ runs:
       shell: bash
       run: |
         rustup update
+        rustup target add wasm32-unknown-unknown
 
     - name: Check Format
       working-directory: ./
@@ -21,3 +22,15 @@ runs:
       working-directory: ./
       shell: bash
       run: cargo clippy --workspace --all-targets -- -D warnings
+
+    - name: Check Clippy (fuzz feature)
+      working-directory: ./
+      shell: bash
+      run: cargo clippy --all-targets --features fuzz -- -D warnings
+
+    # The wbindgen deps live under [target.wasm32-unknown-unknown.dependencies],
+    # so this feature only resolves against the wasm target.
+    - name: Check Clippy (wasm bindings)
+      working-directory: ./
+      shell: bash
+      run: cargo clippy --target wasm32-unknown-unknown --features wbindgen --all-targets -- -D warnings

@@ -20,163 +20,286 @@ features = ["fuzz"]
 [[bin]]
 name = "ciphertext_deserialization"
 path = "fuzz_targets/ciphertext/ciphertext_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "encrypt"
 path = "fuzz_targets/ciphertext/encrypt.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "encrypt_asymmetric"
 path = "fuzz_targets/ciphertext/encrypt_asymmetric.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "decrypt"
 path = "fuzz_targets/ciphertext/decrypt.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "decrypt_asymmetric"
 path = "fuzz_targets/ciphertext/decrypt_asymmetric.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "password_hash_deserialization"
 path = "fuzz_targets/password_hash/password_hash_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "public_key_deserialization"
 path = "fuzz_targets/key/public_key_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "private_key_deserialization"
 path = "fuzz_targets/key/private_key_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "argon2parameters_deserialization"
 path = "fuzz_targets/key/argon2parameters_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "mix_key_exchange"
 path = "fuzz_targets/key/mix_key_exchange.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "share_deserialization"
 path = "fuzz_targets/secret_sharing/share_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "generate_shared_key"
 path = "fuzz_targets/secret_sharing/generate_shared_key.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "join_shares"
 path = "fuzz_targets/secret_sharing/join_shares.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "generate_key"
 path = "fuzz_targets/utils/generate_key.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "derive_key"
 path = "fuzz_targets/utils/derive_key.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "validate_header"
 path = "fuzz_targets/utils/validate_header.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "base64_encode"
 path = "fuzz_targets/utils/base64_encode.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "base64_encode_url"
 path = "fuzz_targets/utils/base64_encode_url.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "base64_decode"
 path = "fuzz_targets/utils/base64_decode.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "base64_decode_url"
 path = "fuzz_targets/utils/base64_decode_url.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "derive_key_argon2"
 path = "fuzz_targets/utils/derive_key_argon2.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "scrypt_simple"
 path = "fuzz_targets/utils/scrypt_simple.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "signature_deserialization"
 path = "fuzz_targets/signature/signature_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "sign"
 path = "fuzz_targets/signature/sign.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "verify"
 path = "fuzz_targets/signature/verify.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "signing_keypair_deserialization"
 path = "fuzz_targets/signing_key/signing_keypair_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "signing_public_key_deserialization"
 path = "fuzz_targets/signing_key/signing_public_key_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "online_ciphertext_header_deserialization"
 path = "fuzz_targets/online_ciphertext/header_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "online_encrypt_symmetric"
 path = "fuzz_targets/online_ciphertext/encrypt_symmetric.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "online_encrypt_asymmetric"
 path = "fuzz_targets/online_ciphertext/encrypt_asymmetric.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "online_decrypt_symmetric"
 path = "fuzz_targets/online_ciphertext/decrypt_symmetric.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "online_decrypt_asymmetric"
 path = "fuzz_targets/online_ciphertext/decrypt_asymmetric.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "encrypt_with_aad"
 path = "fuzz_targets/ciphertext/encrypt_with_aad.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "decrypt_with_aad"
 path = "fuzz_targets/ciphertext/decrypt_with_aad.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "encrypt_asymmetric_with_aad"
 path = "fuzz_targets/ciphertext/encrypt_asymmetric_with_aad.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "decrypt_asymmetric_with_aad"
 path = "fuzz_targets/ciphertext/decrypt_asymmetric_with_aad.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "generate_keypair"
 path = "fuzz_targets/key/generate_keypair.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "constant_time_equals"
 path = "fuzz_targets/utils/constant_time_equals.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "kdf_encrypted_data_deserialization"
 path = "fuzz_targets/derive_encrypt/kdf_encrypted_data_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "derivation_parameters_deserialization"
 path = "fuzz_targets/key_derivation/derivation_parameters_deserialization.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "decrypt_with_password"
 path = "fuzz_targets/derive_encrypt/decrypt_with_password.rs"
+test = false
+doc = false
+bench = false

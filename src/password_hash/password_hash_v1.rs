@@ -85,7 +85,8 @@ impl PasswordHashV1 {
 
         // Generate hash
         let mut hash = [0u8; 32];
-        let _ = pbkdf2::<Hmac<Sha256>>(pass, &salt, iterations, &mut hash);
+        pbkdf2::<Hmac<Sha256>>(pass, &salt, iterations, &mut hash)
+            .expect("HMAC-SHA256 accepts keys of any length, so this cannot fail");
 
         Ok(PasswordHashV1 {
             iterations,
@@ -96,7 +97,8 @@ impl PasswordHashV1 {
 
     pub fn verify_password(&self, pass: &[u8]) -> bool {
         let mut res = Zeroizing::new(vec![0u8; 32]);
-        let _ = pbkdf2::<Hmac<Sha256>>(pass, &self.salt, self.iterations, &mut res);
+        pbkdf2::<Hmac<Sha256>>(pass, &self.salt, self.iterations, &mut res)
+            .expect("HMAC-SHA256 accepts keys of any length, so this cannot fail");
 
         res.ct_eq(&self.hash).into()
     }
