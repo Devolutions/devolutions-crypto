@@ -12,6 +12,9 @@ on:
         required: false
         type: string
 
+permissions:
+  contents: read
+
 env:
   XCODE_VERSION: 26.5
 

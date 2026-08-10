@@ -569,7 +569,7 @@ fn print_header(data: String) {
                 devolutions_crypto::ciphertext::Ciphertext,
             >::try_from(&data[0..8])
             {
-                println!("{:?}", &header);
+                println!("{:?}", header);
             } else {
                 println!("Invalid Header");
             }
@@ -579,7 +579,7 @@ fn print_header(data: String) {
                 devolutions_crypto::password_hash::PasswordHash,
             >::try_from(&data[0..8])
             {
-                println!("{:?}", &header);
+                println!("{:?}", header);
             } else {
                 println!("Invalid Header");
             }
@@ -589,7 +589,7 @@ fn print_header(data: String) {
                 devolutions_crypto::secret_sharing::Share,
             >::try_from(&data[0..8])
             {
-                println!("{:?}", &header);
+                println!("{:?}", header);
             } else {
                 println!("Invalid Header");
             }
@@ -600,13 +600,13 @@ fn print_header(data: String) {
                     &data[0..8],
                 )
             {
-                println!("{:?}", &h);
+                println!("{:?}", h);
             } else if let Ok(h) =
                 devolutions_crypto::Header::<devolutions_crypto::key::PrivateKey>::try_from(
                     &data[0..8],
                 )
             {
-                println!("{:?}", &h);
+                println!("{:?}", h);
             } else {
                 println!("Invalid Header");
             }
@@ -616,7 +616,7 @@ fn print_header(data: String) {
                 devolutions_crypto::derive_encrypt::KdfEncryptedData,
             >::try_from(&data[0..8])
             {
-                println!("{:?}", &header);
+                println!("{:?}", header);
             } else {
                 println!("Invalid Header");
             }
