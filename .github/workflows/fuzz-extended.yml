@@ -12,6 +12,9 @@ on:
         default: '480'
         type: string
 
+permissions:
+  contents: read
+
 jobs:
   extended_fuzz:
     runs-on: ubuntu-22.04
