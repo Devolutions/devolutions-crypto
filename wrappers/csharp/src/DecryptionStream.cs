@@ -101,6 +101,8 @@ namespace Devolutions.Cryptography
                 throw new NotSupportedException();
             }
 
+            _finalBlockTransformed = true;
+
             if (_inputBufferOffset > 0)
             {
                 byte[] outputBuffer = DecryptLastChunk();
@@ -109,8 +111,6 @@ namespace Devolutions.Cryptography
             }
 
             Array.Clear(_inputBuffer, 0, _inputBuffer.Length);
-
-            _finalBlockTransformed = true;
         }
 
         public override void Flush()
@@ -188,13 +188,12 @@ namespace Devolutions.Cryptography
 
             long result = Native.OnlineDecryptorLastChunk(_native_ptr, _inputBuffer, (UIntPtr)_inputBufferOffset, aad, UIntPtr.Zero, outputBuffer, (UIntPtr)outputBuffer.Length);
 
+            _native_ptr = UIntPtr.Zero;
+
             if (result < 0)
             {
                 Utils.HandleError(result);
             }
-
-            // Here, the pointer is freed, so let's set it to 0
-            _native_ptr = UIntPtr.Zero;
 
             return outputBuffer;
         }

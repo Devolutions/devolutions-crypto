@@ -56,5 +56,41 @@ namespace Devolutions.Crypto.Tests
             Assert.IsTrue(result.Length == 1689);
             Assert.IsTrue(Utils.EncodeToBase64String(result) == TestData.Base64TestDataStream);
         }
+
+        [TestMethod]
+        public void DecryptStreamTruncatedCiphertext()
+        {
+            const int ChunkLength = 8;
+            const int EncryptedChunkLength = ChunkLength + 16;
+
+            byte[] plaintext = new byte[3 * ChunkLength];
+            byte[] header;
+            byte[] ciphertext;
+
+            using (MemoryStream encrypted = new MemoryStream())
+            {
+                using (EncryptionStream ec =
+                       new EncryptionStream(TestData.BytesTestKey, [], ChunkLength, false, 0, encrypted, true))
+                {
+                    header = ec.GetHeader();
+
+                    ec.Write(plaintext, 0, plaintext.Length);
+                    ec.FlushFinalBlock();
+                }
+
+                ciphertext = encrypted.ToArray();
+            }
+
+            using MemoryStream ms = new MemoryStream();
+
+            Assert.ThrowsException<DevolutionsCryptoException>(() =>
+            {
+                using DecryptionStream dc =
+                      new DecryptionStream(TestData.BytesTestKey, [], header, false, ms, true);
+
+                dc.Write(ciphertext, 0, ciphertext.Length - EncryptedChunkLength);
+                dc.FlushFinalBlock();
+            });
+        }
     }
 }
