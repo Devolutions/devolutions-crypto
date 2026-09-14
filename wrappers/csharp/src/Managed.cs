@@ -11,17 +11,11 @@ namespace Devolutions.Cryptography
     /// </summary>
     public static class Managed
     {
-#if RDM
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:Field names should not contain underscore", Justification =
- "Preprocessor directive")]
-        private const CipherTextVersion CIPHERTEXT_VERSION = CipherTextVersion.V1;
-#else
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "StyleCop.CSharp.NamingRules",
             "SA1310:Field names should not contain underscore",
             Justification = "Preprocessor directive")]
         private const CipherTextVersion CIPHERTEXT_VERSION = CipherTextVersion.Latest;
-#endif
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "StyleCop.CSharp.NamingRules",
