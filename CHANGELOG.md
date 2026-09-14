@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased] -
 
+## [0.10.2] - 2026-09-14
+
+- Fix a double free in the C# wrapper
+- Update dependencies chacha20poly1305 and dalek
+
 ## [0.10.0] - 2026-06-16
 
 ### Breaking Changes
