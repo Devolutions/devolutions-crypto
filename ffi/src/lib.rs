@@ -77,7 +77,7 @@ pub const PASSWORD_HASH_V2: u16 = 2;
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn Encrypt(
     data: *const u8,
     data_length: usize,
@@ -88,7 +88,7 @@ pub unsafe extern "C" fn Encrypt(
     result: *mut u8,
     result_length: usize,
     version: u16,
-) -> i64 {
+) -> i64 { unsafe {
     if data.is_null() || key.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -121,7 +121,7 @@ pub unsafe extern "C" fn Encrypt(
         }
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Encrypt a data blob
 /// # Arguments
@@ -141,7 +141,7 @@ pub unsafe extern "C" fn Encrypt(
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn EncryptAsymmetric(
     data: *const u8,
     data_length: usize,
@@ -152,7 +152,7 @@ pub unsafe extern "C" fn EncryptAsymmetric(
     result: *mut u8,
     result_length: usize,
     version: u16,
-) -> i64 {
+) -> i64 { unsafe {
     if data.is_null() || public_key.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -192,14 +192,14 @@ pub unsafe extern "C" fn EncryptAsymmetric(
         }
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Get the size of the resulting ciphertext.
 /// # Arguments
 ///  * data_length - Length of the plaintext.
 /// # Returns
 /// Returns the length of the ciphertext to input as `result_length` in `Encrypt()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn EncryptSize(data_length: usize, version: u16) -> i64 {
     match version {
         1 => {
@@ -217,7 +217,7 @@ pub extern "C" fn EncryptSize(data_length: usize, version: u16) -> i64 {
 ///  * data_length - Length of the plaintext.
 /// # Returns
 /// Returns the length of the asymmetric ciphertext to input as `result_length` in `EncryptAsymmetric()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn EncryptAsymmetricSize(data_length: usize, version: u16) -> i64 {
     match version {
         0 | 2 => {
@@ -234,7 +234,7 @@ pub extern "C" fn EncryptAsymmetricSize(data_length: usize, version: u16) -> i64
 ///  * ciphertext_version - Version for ciphertext (0 latest, 1 V1, 2 V2).
 /// # Returns
 /// Returns the exact output length expected by `DeriveEncryptData()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn DeriveEncryptSize(
     data_length: usize,
     key_derivation_version: u16,
@@ -281,7 +281,7 @@ pub extern "C" fn DeriveEncryptSize(
 /// The number of bytes written on success, or a negative DevoCryptoError code on failure.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn DeriveEncryptData(
     data: *const u8,
     data_length: usize,
@@ -293,7 +293,7 @@ pub unsafe extern "C" fn DeriveEncryptData(
     result_length: usize,
     key_derivation_version: u16,
     ciphertext_version: u16,
-) -> i64 {
+) -> i64 { unsafe {
     if data.is_null() || password.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     }
@@ -346,7 +346,7 @@ pub unsafe extern "C" fn DeriveEncryptData(
         }
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Derive a key from a password using caller-supplied serialized [`DerivationParameters`] and encrypt data.
 /// # Arguments
@@ -365,7 +365,7 @@ pub unsafe extern "C" fn DeriveEncryptData(
 /// The number of bytes written on success, or a negative DevoCryptoError code on failure.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn DeriveEncryptDataWithParams(
     data: *const u8,
     data_length: usize,
@@ -378,7 +378,7 @@ pub unsafe extern "C" fn DeriveEncryptDataWithParams(
     result: *mut u8,
     result_length: usize,
     ciphertext_version: u16,
-) -> i64 {
+) -> i64 { unsafe {
     if data.is_null() || password.is_null() || params.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     }
@@ -425,7 +425,7 @@ pub unsafe extern "C" fn DeriveEncryptDataWithParams(
         }
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Get the size of the resulting derive_encrypt blob when using pre-built serialized [`DerivationParameters`].
 /// # Arguments
@@ -434,7 +434,7 @@ pub unsafe extern "C" fn DeriveEncryptDataWithParams(
 ///  * `ciphertext_version` - Version for ciphertext (0 latest, 1 AES-CBC, 2 XChaCha20).
 /// # Returns
 /// Returns the exact output length expected by `DeriveEncryptDataWithParams()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn DeriveEncryptDataWithParamsSize(
     data_length: usize,
     params_length: usize,
@@ -466,7 +466,7 @@ pub extern "C" fn DeriveEncryptDataWithParamsSize(
 /// The number of plaintext bytes written on success, or a negative DevoCryptoError code on failure.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn DeriveDecryptData(
     data: *const u8,
     data_length: usize,
@@ -476,7 +476,7 @@ pub unsafe extern "C" fn DeriveDecryptData(
     aad_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if data.is_null() || password.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     }
@@ -506,7 +506,7 @@ pub unsafe extern "C" fn DeriveDecryptData(
         },
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Decrypt a data blob
 /// # Arguments
@@ -525,7 +525,7 @@ pub unsafe extern "C" fn DeriveDecryptData(
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn Decrypt(
     data: *const u8,
     data_length: usize,
@@ -535,7 +535,7 @@ pub unsafe extern "C" fn Decrypt(
     aad_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if data.is_null() || key.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -567,7 +567,7 @@ pub unsafe extern "C" fn Decrypt(
         },
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Decrypt a data blob
 /// # Arguments
@@ -586,7 +586,7 @@ pub unsafe extern "C" fn Decrypt(
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn DecryptAsymmetric(
     data: *const u8,
     data_length: usize,
@@ -596,7 +596,7 @@ pub unsafe extern "C" fn DecryptAsymmetric(
     aad_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if data.is_null() || private_key.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -633,7 +633,7 @@ pub unsafe extern "C" fn DecryptAsymmetric(
         }
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Sign data using a keypair to certify its authenticity.
 /// # Arguments
@@ -649,7 +649,7 @@ pub unsafe extern "C" fn DecryptAsymmetric(
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn Sign(
     data: *const u8,
     data_length: usize,
@@ -658,7 +658,7 @@ pub unsafe extern "C" fn Sign(
     result: *mut u8,
     result_length: usize,
     version: u16,
-) -> i64 {
+) -> i64 { unsafe {
     if data.is_null() || keypair.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -686,7 +686,7 @@ pub unsafe extern "C" fn Sign(
         }
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Verify some data using a signature and the corresponding public key.
 /// # Arguments
@@ -701,7 +701,7 @@ pub unsafe extern "C" fn Sign(
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn VerifySignature(
     data: *const u8,
     data_length: usize,
@@ -709,7 +709,7 @@ pub unsafe extern "C" fn VerifySignature(
     public_key_length: usize,
     signature: *const u8,
     signature_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if data.is_null() || public_key.is_null() || signature.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -731,12 +731,12 @@ pub unsafe extern "C" fn VerifySignature(
         },
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Get the size of the resulting signature.
 /// # Returns
 /// Returns the length of the signature to input as `result_length` in `Sign()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn SignSize(_version: u16) -> i64 {
     8 + 64 // header + signature
 }
@@ -754,14 +754,14 @@ pub extern "C" fn SignSize(_version: u16) -> i64 {
 ///     appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn HashPassword(
     password: *const u8,
     password_length: usize,
     result: *mut u8,
     result_length: usize,
     version: u16,
-) -> i64 {
+) -> i64 { unsafe {
     if password.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -786,14 +786,14 @@ pub unsafe extern "C" fn HashPassword(
     let length = res.len();
     result[0..length].copy_from_slice(&res);
     length as i64
-}
+}}
 
 /// Returns the length of the hash to input as `result_length` in `HashPassword()`.
 /// # Arguments
 ///  * `version` - Version to use. Use 0 for the latest one.
 /// # Returns
 /// Returns the length of the hash, or a negative error code for an unknown version.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn HashPasswordLength(version: u16) -> i64 {
     match version {
         // V1: PBKDF2 — fixed layout: 4 (iterations) + 32 (salt) + 32 (hash) = 68, plus 8-byte header
@@ -821,7 +821,7 @@ pub extern "C" fn HashPasswordLength(version: u16) -> i64 {
 /// Returns the number of bytes written, or a negative error code.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn HashPasswordWithParams(
     password: *const u8,
     password_length: usize,
@@ -829,7 +829,7 @@ pub unsafe extern "C" fn HashPasswordWithParams(
     params_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if password.is_null() || params.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -856,7 +856,7 @@ pub unsafe extern "C" fn HashPasswordWithParams(
     let length = res.len();
     result[0..length].copy_from_slice(&res);
     length as i64
-}
+}}
 
 /// Returns the output buffer size required for `HashPasswordWithParams()`.
 /// # Arguments
@@ -866,11 +866,11 @@ pub unsafe extern "C" fn HashPasswordWithParams(
 /// Returns the required output length, or a negative error code.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn HashPasswordWithParamsLength(
     params: *const u8,
     params_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if params.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -881,7 +881,7 @@ pub unsafe extern "C" fn HashPasswordWithParamsLength(
     };
     // 8 (PasswordHash header) + 4 (u32 params_len) + params_length + hash_length
     (8 + 4 + params_length + dp.output_length()) as i64
-}
+}}
 
 /// Verify a password against a hash with constant-time equality.
 /// # Arguments
@@ -894,13 +894,13 @@ pub unsafe extern "C" fn HashPasswordWithParamsLength(
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn VerifyPassword(
     password: *const u8,
     password_length: usize,
     hash: *const u8,
     hash_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if password.is_null() || hash.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -918,7 +918,7 @@ pub unsafe extern "C" fn VerifyPassword(
         }
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Generate a key pair to perform a key exchange. Must be used with MixKey()
 /// # Arguments
@@ -933,13 +933,13 @@ pub unsafe extern "C" fn VerifyPassword(
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn GenerateKeyPair(
     private: *mut u8,
     private_length: usize,
     public: *mut u8,
     public_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if private.is_null() || public.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -961,7 +961,7 @@ pub unsafe extern "C" fn GenerateKeyPair(
     public[0..pub_res.len()].copy_from_slice(&pub_res);
     private[0..priv_res.len()].copy_from_slice(&priv_res);
     0
-}
+}}
 
 /// Generate a key pair to sign and verify data with.
 /// # Arguments
@@ -974,12 +974,12 @@ pub unsafe extern "C" fn GenerateKeyPair(
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn GenerateSigningKeyPair(
     keypair: *mut u8,
     keypair_length: usize,
     version: u16,
-) -> i64 {
+) -> i64 { unsafe {
     if keypair.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1002,7 +1002,7 @@ pub unsafe extern "C" fn GenerateSigningKeyPair(
     keypair[0..keypair_bytes.len()].copy_from_slice(&keypair_bytes);
 
     0
-}
+}}
 
 /// Get the public part of a keypair used to sign data.
 /// # Arguments
@@ -1013,13 +1013,13 @@ pub unsafe extern "C" fn GenerateSigningKeyPair(
 ///    You can get the value by calling `GetSigningPublicKeySize()` beforehand.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn GetSigningPublicKey(
     keypair: *const u8,
     keypair_length: usize,
     public: *mut u8,
     public_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if keypair.is_null() || public.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1041,13 +1041,13 @@ pub unsafe extern "C" fn GetSigningPublicKey(
         }
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Get the size of the keys in the key exchange key pair.
 /// # Returns
 /// Returns the length of the keys to input as `private_length`
 ///     and `public_length` in `GenerateKeyPair()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn GenerateKeyPairSize() -> i64 {
     8 + 32 // header + key length
 }
@@ -1062,8 +1062,8 @@ pub extern "C" fn GenerateKeyPairSize() -> i64 {
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
-pub unsafe extern "C" fn GenerateSecretKey(result: *mut u8, result_length: usize) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn GenerateSecretKey(result: *mut u8, result_length: usize) -> i64 { unsafe {
     if result.is_null() {
         return Error::NullPointer.error_code();
     }
@@ -1079,12 +1079,12 @@ pub unsafe extern "C" fn GenerateSecretKey(result: *mut u8, result_length: usize
 
     result[0..key_bytes.len()].copy_from_slice(&key_bytes);
     0
-}
+}}
 
 /// Get the size of a serialized secret key.
 /// # Returns
 /// Returns the length of the buffer to pass as `result_length` in `GenerateSecretKey()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn GenerateSecretKeySize() -> i64 {
     8 + 32 // header + key length
 }
@@ -1093,7 +1093,7 @@ pub extern "C" fn GenerateSecretKeySize() -> i64 {
 /// # Returns
 /// Returns the length of the keypair to input as `keypair_length`
 ///    in `GenerateSigningKeyPair()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn GenerateSigningKeyPairSize(_version: u16) -> i64 {
     8 + 64 // header + keypair length
 }
@@ -1102,7 +1102,7 @@ pub extern "C" fn GenerateSigningKeyPairSize(_version: u16) -> i64 {
 /// # Returns
 /// Returns the length of the public key to input as `public_length`
 ///    in `GetSigningPublicKey()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn GetSigningPublicKeySize(_keypair: *const u8, _keypair_length: usize) -> i64 {
     8 + 32 // header + public key length
 }
@@ -1120,7 +1120,7 @@ pub extern "C" fn GetSigningPublicKeySize(_keypair: *const u8, _keypair_length: 
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn MixKeyExchange(
     private: *const u8,
     private_size: usize,
@@ -1128,7 +1128,7 @@ pub unsafe extern "C" fn MixKeyExchange(
     public_size: usize,
     shared: *mut u8,
     shared_size: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if private.is_null() || public.is_null() || shared.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1154,12 +1154,12 @@ pub unsafe extern "C" fn MixKeyExchange(
         (Err(e), Ok(_)) => e.error_code(),
         (Err(e), Err(_)) => e.error_code(),
     }
-}
+}}
 
 /// Get the size of the keys in the key exchange key pair.
 /// # Returns
 /// Returns the length of the keys to input as `shared_length` in `MixKeyExchange()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn MixKeyExchangeSize() -> i64 {
     32
 }
@@ -1175,13 +1175,13 @@ pub extern "C" fn MixKeyExchangeSize() -> i64 {
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn GenerateSharedKey(
     n_shares: u8,
     threshold: u8,
     length: usize,
     shares: *const *mut u8,
-) -> i64 {
+) -> i64 { unsafe {
     if shares.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1204,14 +1204,14 @@ pub unsafe extern "C" fn GenerateSharedKey(
         }
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// The size, in bytes, of each resulting shares
 /// # Arguments
 ///  * secret_length - The length of the desired secret
 /// # Returns
 /// Returns the size, in bytes, of each resulting shares.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn GenerateSharedKeySize(secret_length: usize) -> i64 {
     (secret_length + 10) as i64
 }
@@ -1228,14 +1228,14 @@ pub extern "C" fn GenerateSharedKeySize(secret_length: usize) -> i64 {
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn JoinShares(
     n_shares: usize,
     share_length: usize,
     shares: *const *const u8,
     secret: *mut u8,
     secret_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if shares.is_null() || secret.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1260,7 +1260,7 @@ pub unsafe extern "C" fn JoinShares(
         },
         Err(e) => e.error_code(),
     }
-}
+}}
 
 /// Creates a new online (chunked) encryptor and writes an opaque handle to it in `output`.
 /// # Arguments
@@ -1276,7 +1276,7 @@ pub unsafe extern "C" fn JoinShares(
 /// 0 on success, otherwise the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn NewOnlineEncryptor(
     key: *const u8,
     key_size: usize,
@@ -1286,7 +1286,7 @@ pub unsafe extern "C" fn NewOnlineEncryptor(
     asymmetric: bool,
     version: u16,
     output: *mut *mut c_void,
-) -> i64 {
+) -> i64 { unsafe {
     if key.is_null() || aad.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1315,7 +1315,7 @@ pub unsafe extern "C" fn NewOnlineEncryptor(
     *output = Box::into_raw(encryptor) as *mut c_void;
 
     0
-}
+}}
 
 /// Creates a new online (chunked) decryptor from a serialized header and writes an opaque handle to it in `output`.
 /// # Arguments
@@ -1331,7 +1331,7 @@ pub unsafe extern "C" fn NewOnlineEncryptor(
 /// 0 on success, otherwise the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn NewOnlineDecryptor(
     key: *const u8,
     key_size: usize,
@@ -1341,7 +1341,7 @@ pub unsafe extern "C" fn NewOnlineDecryptor(
     header_size: usize,
     asymmetric: bool,
     output: *mut *mut c_void,
-) -> i64 {
+) -> i64 { unsafe {
     if key.is_null() | aad.is_null() | header.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1376,7 +1376,7 @@ pub unsafe extern "C" fn NewOnlineDecryptor(
     *output = Box::into_raw(decryptor) as *mut c_void;
 
     0
-}
+}}
 
 /// Writes the serialized header of the encryptor to the result buffer.
 /// # Arguments
@@ -1387,12 +1387,12 @@ pub unsafe extern "C" fn NewOnlineDecryptor(
 /// The length of the serialized header, or the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn OnlineEncryptorGetHeader(
     ptr: *const c_void,
     result: *mut u8,
     result_size: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if ptr.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1410,7 +1410,7 @@ pub unsafe extern "C" fn OnlineEncryptorGetHeader(
     result.copy_from(header.as_slice().as_ptr(), result_size);
 
     result_size as i64
-}
+}}
 
 /// Writes the serialized header of the decryptor to the result buffer.
 /// # Arguments
@@ -1421,12 +1421,12 @@ pub unsafe extern "C" fn OnlineEncryptorGetHeader(
 /// The length of the serialized header, or the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn OnlineDecryptorGetHeader(
     ptr: *const c_void,
     result: *mut u8,
     result_size: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if ptr.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1444,7 +1444,7 @@ pub unsafe extern "C" fn OnlineDecryptorGetHeader(
     result.copy_from(header.as_slice().as_ptr(), result_size);
 
     result_size as i64
-}
+}}
 
 /// Encrypts the next chunk of data.
 /// # Arguments
@@ -1459,7 +1459,7 @@ pub unsafe extern "C" fn OnlineDecryptorGetHeader(
 /// The length of the encrypted chunk, or the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn OnlineEncryptorNextChunk(
     ptr: *mut c_void,
     data: *const u8,
@@ -1468,7 +1468,7 @@ pub unsafe extern "C" fn OnlineEncryptorNextChunk(
     aad_size: usize,
     result: *mut u8,
     result_size: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1494,7 +1494,7 @@ pub unsafe extern "C" fn OnlineEncryptorNextChunk(
     result.copy_from(encrypted.as_slice().as_ptr(), result_size);
 
     result_size as i64
-}
+}}
 
 /// Decrypts the next chunk of data.
 /// # Arguments
@@ -1509,7 +1509,7 @@ pub unsafe extern "C" fn OnlineEncryptorNextChunk(
 /// The length of the decrypted chunk, or the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn OnlineDecryptorNextChunk(
     ptr: *mut c_void,
     data: *const u8,
@@ -1518,7 +1518,7 @@ pub unsafe extern "C" fn OnlineDecryptorNextChunk(
     aad_size: usize,
     result: *mut u8,
     result_size: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1544,7 +1544,7 @@ pub unsafe extern "C" fn OnlineDecryptorNextChunk(
     result.copy_from(decrypted.as_slice().as_ptr(), result_size);
 
     result_size as i64
-}
+}}
 
 /// Encrypts the last chunk of data and consumes the encryptor.
 /// # Arguments
@@ -1560,7 +1560,7 @@ pub unsafe extern "C" fn OnlineDecryptorNextChunk(
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 /// This call frees the encryptor: `ptr` must not be used again afterwards.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn OnlineEncryptorLastChunk(
     ptr: *mut c_void,
     data: *const u8,
@@ -1569,7 +1569,7 @@ pub unsafe extern "C" fn OnlineEncryptorLastChunk(
     aad_size: usize,
     result: *mut u8,
     result_size: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1596,7 +1596,7 @@ pub unsafe extern "C" fn OnlineEncryptorLastChunk(
     result.copy_from(encrypted.as_slice().as_ptr(), encrypted.len());
 
     encrypted.len() as i64
-}
+}}
 
 /// Decrypts the last chunk of data and consumes the decryptor.
 /// # Arguments
@@ -1612,7 +1612,7 @@ pub unsafe extern "C" fn OnlineEncryptorLastChunk(
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 /// This call frees the decryptor: `ptr` must not be used again afterwards.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn OnlineDecryptorLastChunk(
     ptr: *mut c_void,
     data: *const u8,
@@ -1621,7 +1621,7 @@ pub unsafe extern "C" fn OnlineDecryptorLastChunk(
     aad_size: usize,
     result: *mut u8,
     result_size: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1647,7 +1647,7 @@ pub unsafe extern "C" fn OnlineDecryptorLastChunk(
     result.copy_from(decrypted.as_slice().as_ptr(), decrypted.len());
 
     decrypted.len() as i64
-}
+}}
 
 /// The size, in bytes, of the encryptor's serialized header.
 /// # Arguments
@@ -1656,8 +1656,8 @@ pub unsafe extern "C" fn OnlineDecryptorLastChunk(
 /// The length of the serialized header, or the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
-pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64 { unsafe {
     if ptr.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1669,7 +1669,7 @@ pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64
     };
 
     header.get_serialized_size() as i64
-}
+}}
 
 /// The size, in bytes, of the decryptor's serialized header.
 /// # Arguments
@@ -1678,8 +1678,8 @@ pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64
 /// The length of the serialized header, or the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
-pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64 { unsafe {
     if ptr.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1691,7 +1691,7 @@ pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64
     };
 
     header.get_serialized_size() as i64
-}
+}}
 
 /// The size, in bytes, of the chunks the encryptor works with.
 /// # Arguments
@@ -1700,8 +1700,8 @@ pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64
 /// The chunk size, or the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
-pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 { unsafe {
     if ptr.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1711,7 +1711,7 @@ pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 
         Ok(c) => c.get_chunk_size() as i64,
         Err(_) => Error::PoisonedMutex.error_code(),
     }
-}
+}}
 
 /// The size, in bytes, of the chunks the decryptor works with.
 /// # Arguments
@@ -1720,8 +1720,8 @@ pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 
 /// The chunk size, or the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
-pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 { unsafe {
     if ptr.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1731,7 +1731,7 @@ pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 
         Ok(c) => c.get_chunk_size() as i64,
         Err(_) => Error::PoisonedMutex.error_code(),
     }
-}
+}}
 
 /// The size, in bytes, of the authentication tag appended to each chunk by the encryptor.
 /// # Arguments
@@ -1740,8 +1740,8 @@ pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 
 /// The tag size, or the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
-pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 { unsafe {
     if ptr.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1751,7 +1751,7 @@ pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 {
         Ok(c) => c.get_tag_size() as i64,
         Err(_) => Error::PoisonedMutex.error_code(),
     }
-}
+}}
 
 /// The size, in bytes, of the authentication tag expected at the end of each chunk by the decryptor.
 /// # Arguments
@@ -1760,8 +1760,8 @@ pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 {
 /// The tag size, or the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
-pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 { unsafe {
     if ptr.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1771,7 +1771,7 @@ pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 {
         Ok(c) => c.get_tag_size() as i64,
         Err(_) => Error::PoisonedMutex.error_code(),
     }
-}
+}}
 
 /// Frees an encryptor without finalizing the encryption.
 /// # Arguments
@@ -1781,8 +1781,8 @@ pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 {
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 /// `ptr` must not be used again afterwards.
-#[no_mangle]
-pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 { unsafe {
     if ptr.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1790,7 +1790,7 @@ pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 {
     drop(Box::from_raw(ptr as *mut Mutex<OnlineCiphertextEncryptor>));
 
     0
-}
+}}
 
 /// Frees a decryptor without finalizing the decryption.
 /// # Arguments
@@ -1800,8 +1800,8 @@ pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 {
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 /// `ptr` must not be used again afterwards.
-#[no_mangle]
-pub unsafe extern "C" fn FreeOnlineDecryptor(ptr: *mut c_void) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn FreeOnlineDecryptor(ptr: *mut c_void) -> i64 { unsafe {
     if ptr.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1809,14 +1809,14 @@ pub unsafe extern "C" fn FreeOnlineDecryptor(ptr: *mut c_void) -> i64 {
     drop(Box::from_raw(ptr as *mut Mutex<OnlineCiphertextDecryptor>));
 
     0
-}
+}}
 
 /// The size, in bytes, of the resulting secret
 /// # Arguments
 ///  * share_length - The length of a share
 /// # Returns
 /// Returns the size, in bytes, of each resulting secret.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn JoinSharesSize(share_length: usize) -> i64 {
     (share_length - 10) as i64
 }
@@ -1830,8 +1830,8 @@ pub extern "C" fn JoinSharesSize(share_length: usize) -> i64 {
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
-pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 { unsafe {
     if key.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1845,7 +1845,7 @@ pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
 
     key.copy_from_slice(&k);
     0
-}
+}}
 
 /// Derive a key with Argon2 to create a new one. Can be used with a password.
 /// # Arguments
@@ -1860,7 +1860,7 @@ pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn DeriveKeyArgon2(
     key: *const u8,
     key_length: usize,
@@ -1868,7 +1868,7 @@ pub unsafe extern "C" fn DeriveKeyArgon2(
     argon2_parameters_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if key.is_null() || result.is_null() || argon2_parameters.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1891,7 +1891,7 @@ pub unsafe extern "C" fn DeriveKeyArgon2(
 
     result.copy_from_slice(&native_result);
     0
-}
+}}
 
 /// Derive a key with PBKDF2 to create a new one. Can be used with a password.
 /// # Arguments
@@ -1906,7 +1906,7 @@ pub unsafe extern "C" fn DeriveKeyArgon2(
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn DeriveKeyPbkdf2(
     key: *const u8,
     key_length: usize,
@@ -1915,7 +1915,7 @@ pub unsafe extern "C" fn DeriveKeyPbkdf2(
     niterations: u32,
     result: *mut u8,
     result_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if key.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -1937,7 +1937,7 @@ pub unsafe extern "C" fn DeriveKeyPbkdf2(
     ));
     result.copy_from_slice(&native_result);
     0
-}
+}}
 
 /// Derive a key with PBKDF2 and return both the SecretKey and the DerivationParameters.
 /// # Arguments
@@ -1955,7 +1955,7 @@ pub unsafe extern "C" fn DeriveKeyPbkdf2(
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn DeriveSecretKeyPbkdf2(
     password: *const u8,
     password_length: usize,
@@ -1964,7 +1964,7 @@ pub unsafe extern "C" fn DeriveSecretKeyPbkdf2(
     secret_key_length: usize,
     params_out: *mut u8,
     params_out_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if password.is_null() || secret_key.is_null() || params_out.is_null() {
         return Error::NullPointer.error_code();
     }
@@ -1993,11 +1993,11 @@ pub unsafe extern "C" fn DeriveSecretKeyPbkdf2(
     secret_key.copy_from_slice(&sk_bytes);
     params_out.copy_from_slice(&params_bytes);
     0
-}
+}}
 
 /// Returns the size of the DerivationParameters output buffer for `DeriveSecretKeyPbkdf2()`.
 /// The size is fixed: 8 (header) + 4 (iterations) + 4 (salt length) + 16 (salt) = 32 bytes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn DeriveSecretKeyPbkdf2Size() -> i64 {
     32 // 8 header + 4 iterations + 4 salt_len + 16 salt
 }
@@ -2019,7 +2019,7 @@ pub extern "C" fn DeriveSecretKeyPbkdf2Size() -> i64 {
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn DeriveSecretKeyArgon2(
     password: *const u8,
     password_length: usize,
@@ -2029,7 +2029,7 @@ pub unsafe extern "C" fn DeriveSecretKeyArgon2(
     secret_key_length: usize,
     params_out: *mut u8,
     params_out_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if password.is_null()
         || argon2_parameters.is_null()
         || secret_key.is_null()
@@ -2072,7 +2072,7 @@ pub unsafe extern "C" fn DeriveSecretKeyArgon2(
     secret_key.copy_from_slice(&sk_bytes);
     params_out.copy_from_slice(&params_bytes);
     0
-}
+}}
 
 /// Derive a key with PBKDF2 and return both the SecretKey and the DerivationParameters.
 /// # Arguments
@@ -2092,7 +2092,7 @@ pub unsafe extern "C" fn DeriveSecretKeyArgon2(
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn DeriveSecretKeyPbkdf2WithSalt(
     password: *const u8,
     password_length: usize,
@@ -2103,7 +2103,7 @@ pub unsafe extern "C" fn DeriveSecretKeyPbkdf2WithSalt(
     secret_key_length: usize,
     params_out: *mut u8,
     params_out_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if password.is_null() || salt.is_null() || secret_key.is_null() || params_out.is_null() {
         return Error::NullPointer.error_code();
     }
@@ -2133,13 +2133,13 @@ pub unsafe extern "C" fn DeriveSecretKeyPbkdf2WithSalt(
     secret_key.copy_from_slice(&sk_bytes);
     params_out.copy_from_slice(&params_bytes);
     0
-}
+}}
 
 /// Returns the size of the DerivationParameters output buffer for `DeriveSecretKeyPbkdf2WithSalt()`.
 /// The size is: 8 (header) + 4 (iterations) + 4 (salt length field) + salt_length (salt bytes).
 /// # Arguments
 ///  * salt_length - The length of the salt that will be passed to `DeriveSecretKeyPbkdf2WithSalt()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn DeriveSecretKeyPbkdf2WithSaltSize(salt_length: usize) -> i64 {
     (8 + 4 + 4 + salt_length) as i64
 }
@@ -2148,7 +2148,7 @@ pub extern "C" fn DeriveSecretKeyPbkdf2WithSaltSize(salt_length: usize) -> i64 {
 /// The size is: 8 (header) + argon2_parameters_length (serialized Argon2Parameters bytes).
 /// # Arguments
 ///  * argon2_parameters_length - The length of the Argon2Parameters that will be passed to `DeriveSecretKeyArgon2()`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn DeriveSecretKeyArgon2ParametersSize(argon2_parameters_length: usize) -> i64 {
     (8 + argon2_parameters_length) as i64
 }
@@ -2157,7 +2157,7 @@ pub extern "C" fn DeriveSecretKeyArgon2ParametersSize(argon2_parameters_length: 
 /// The size is: 8 (header) + argon2_parameters_length (serialized Argon2Parameters bytes).
 /// # Arguments
 ///  * argon2_parameters_length - The length of the Argon2Parameters bytes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn GetArgon2DerivationParametersSize(argon2_parameters_length: usize) -> i64 {
     (8 + argon2_parameters_length) as i64
 }
@@ -2174,13 +2174,13 @@ pub extern "C" fn GetArgon2DerivationParametersSize(argon2_parameters_length: us
 /// Returns the number of bytes written, or a negative error code.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn GetArgon2DerivationParameters(
     argon2_parameters: *const u8,
     argon2_parameters_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if argon2_parameters.is_null() || result.is_null() {
         return Error::NullPointer.error_code();
     }
@@ -2199,11 +2199,11 @@ pub unsafe extern "C" fn GetArgon2DerivationParameters(
     let result = slice::from_raw_parts_mut(result, result_length);
     result.copy_from_slice(&dp_bytes);
     result_length as i64
-}
+}}
 
 /// Returns the required output buffer size for `GetPbkdf2DerivationParameters()`.
 /// The size is always 32 bytes: 8 (header) + 4 (iterations) + 4 (salt length) + 16 (salt).
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn GetPbkdf2DerivationParametersSize() -> i64 {
     32 // 8 header + 4 iterations + 4 salt_len + 16 salt
 }
@@ -2219,12 +2219,12 @@ pub extern "C" fn GetPbkdf2DerivationParametersSize() -> i64 {
 /// Returns the number of bytes written, or a negative error code.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn GetPbkdf2DerivationParameters(
     iterations: u32,
     result: *mut u8,
     result_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if result.is_null() {
         return Error::NullPointer.error_code();
     }
@@ -2242,7 +2242,7 @@ pub unsafe extern "C" fn GetPbkdf2DerivationParameters(
     let result = slice::from_raw_parts_mut(result, result_length);
     result.copy_from_slice(&dp_bytes);
     result_length as i64
-}
+}}
 
 /// # Arguments
 ///  * `data` - Pointer to the input buffer.
@@ -2252,12 +2252,12 @@ pub unsafe extern "C" fn GetPbkdf2DerivationParameters(
 /// 1 if the header is valid, 0 if it's not, and a negative value if there is an error.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ValidateHeader(
     data: *const u8,
     data_length: usize,
     data_type: u16,
-) -> i64 {
+) -> i64 { unsafe {
     if data.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -2274,12 +2274,12 @@ pub unsafe extern "C" fn ValidateHeader(
         }
         Err(_) => Error::UnknownType.error_code(),
     }
-}
+}}
 
 /// This is binded here for one specific use case, do not use it if you don't know what you're doing.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ScryptSimple(
     password: *const u8,
     password_length: usize,
@@ -2290,7 +2290,7 @@ pub unsafe extern "C" fn ScryptSimple(
     p: u32,
     output: *mut u8,
     output_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if password.is_null() && salt.is_null() && output.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -2303,12 +2303,12 @@ pub unsafe extern "C" fn ScryptSimple(
     let output = slice::from_raw_parts_mut(output, output_length);
     output[..hash.len()].copy_from_slice(hash.as_bytes());
     hash.len() as i64
-}
+}}
 
 /// This is binded here for one specific use case, do not use it if you don't know what you're doing.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ScryptSimpleSize() -> i64 {
     256
 }
@@ -2321,22 +2321,22 @@ pub unsafe extern "C" fn ScryptSimpleSize() -> i64 {
 /// Returns 0 if the operation is successful.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn GetDefaultArgon2Parameters(
     argon2_parameters: *mut u8,
     argon2_parameters_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     let argon2_parameters = slice::from_raw_parts_mut(argon2_parameters, argon2_parameters_length);
 
     let argon2_parameters_raw: Vec<u8> = (&Argon2Parameters::default()).into();
     argon2_parameters.copy_from_slice(&argon2_parameters_raw);
     0
-}
+}}
 
 /// Size of the Argon2Parameters struct.
 /// # Returns
 /// Returns 0 if the operation is successful.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn GetDefaultArgon2ParametersSize() -> i64 {
     // Length is calculated this way:
     // 5 * u32 + 2 * u8(enums) + 2 * u32(lengths) + 2 * vec.len();
@@ -2347,7 +2347,7 @@ pub extern "C" fn GetDefaultArgon2ParametersSize() -> i64 {
 ///  Size, in bits, of the key used for the current Encrypt() implementation.
 /// # Returns
 /// Returns the size, in bits, of the key used fot the current Encrypt() implementation.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn KeySize() -> u32 {
     256
 }
@@ -2362,13 +2362,13 @@ pub extern "C" fn KeySize() -> u32 {
 /// Returns the size of the decoded string.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn Decode(
     input: *const u8,
     input_length: usize,
     output: *mut u8,
     output_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if input.is_null() || output.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -2383,7 +2383,7 @@ pub unsafe extern "C" fn Decode(
         }
         Err(_err) => -1,
     }
-}
+}}
 
 /// Encode a byte array to a base64 string.
 /// # Arguments
@@ -2395,13 +2395,13 @@ pub unsafe extern "C" fn Decode(
 /// Returns the size, in bytes, of the output buffer.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn Encode(
     input: *const u8,
     input_length: usize,
     output: *mut u8,
     output_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if input.is_null() || output.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -2414,7 +2414,7 @@ pub unsafe extern "C" fn Encode(
     output.copy_from_slice(&encode_res);
 
     encode_res.len() as i64
-}
+}}
 
 /// Decode a base64 string to bytes using base64url.
 /// # Arguments
@@ -2426,13 +2426,13 @@ pub unsafe extern "C" fn Encode(
 /// Returns the size of the decoded string.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn DecodeUrl(
     input: *const u8,
     input_length: usize,
     output: *mut u8,
     output_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if input.is_null() || output.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -2444,7 +2444,7 @@ pub unsafe extern "C" fn DecodeUrl(
         Ok(res) => res as i64,
         Err(_e) => -1,
     }
-}
+}}
 
 /// Encode a byte array to a base64 string using base64url.
 /// # Arguments
@@ -2456,13 +2456,13 @@ pub unsafe extern "C" fn DecodeUrl(
 /// Returns the size, in bytes, of the output buffer.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn EncodeUrl(
     input: *const u8,
     input_length: usize,
     output: *mut u8,
     output_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if input.is_null() || output.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -2474,7 +2474,7 @@ pub unsafe extern "C" fn EncodeUrl(
         Ok(res) => res as i64,
         Err(_err) => -1,
     }
-}
+}}
 
 /// Compare two byte arrays with constant-time equality.
 /// # Arguments
@@ -2487,13 +2487,13 @@ pub unsafe extern "C" fn EncodeUrl(
 ///     it will return the appropriate error code defined in DevoCryptoError.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn ConstantTimeEquals(
     x: *const u8,
     x_length: usize,
     y: *const u8,
     y_length: usize,
-) -> i64 {
+) -> i64 { unsafe {
     if x.is_null() || y.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -2506,12 +2506,12 @@ pub unsafe extern "C" fn ConstantTimeEquals(
     } else {
         0
     }
-}
+}}
 
 ///  Size of the version string
 /// # Returns
 /// Returns the size of the version string
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn VersionSize() -> i64 {
     VERSION.len() as i64
 }
@@ -2524,8 +2524,8 @@ pub extern "C" fn VersionSize() -> i64 {
 /// Returns the size, in bytes, of the output buffer.
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
-#[no_mangle]
-pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 { unsafe {
     if output.is_null() {
         return Error::NullPointer.error_code();
     };
@@ -2534,7 +2534,7 @@ pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
     output.copy_from_slice(VERSION.as_bytes());
 
     output.len() as i64
-}
+}}
 
 #[test]
 fn test_encrypt_length() {
