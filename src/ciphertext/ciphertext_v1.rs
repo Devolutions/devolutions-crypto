@@ -8,7 +8,7 @@ use super::Ciphertext;
 use std::convert::TryFrom;
 
 use aes::Aes256;
-use cbc::cipher::{block_padding::Pkcs7, BlockModeDecrypt, BlockModeEncrypt, KeyIvInit};
+use cbc::cipher::{BlockModeDecrypt, BlockModeEncrypt, KeyIvInit, block_padding::Pkcs7};
 use hmac::{Hmac, KeyInit, Mac};
 use pbkdf2::pbkdf2;
 use sha2::Sha256;

@@ -2,8 +2,8 @@
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 
-use devolutions_crypto::utils::validate_header;
 use devolutions_crypto::DataType;
+use devolutions_crypto::utils::validate_header;
 
 #[derive(Arbitrary, Clone, Debug)]
 struct Input {

@@ -8,32 +8,32 @@
 //! The Size functions must be called to get the required length of the returned array before
 //!     calling it.
 
+use devolutions_crypto::Argon2Parameters;
+use devolutions_crypto::DataType;
+use devolutions_crypto::Error;
 use devolutions_crypto::online_ciphertext::OnlineCiphertextDecryptor;
 use devolutions_crypto::online_ciphertext::OnlineCiphertextEncryptor;
 use devolutions_crypto::online_ciphertext::OnlineCiphertextHeader;
 use devolutions_crypto::utils;
-use devolutions_crypto::Argon2Parameters;
-use devolutions_crypto::DataType;
-use devolutions_crypto::Error;
 
-use base64::{engine::general_purpose, Engine as _};
+use base64::{Engine as _, engine::general_purpose};
 
+use devolutions_crypto::KeyDerivationVersion;
+use devolutions_crypto::OnlineCiphertextVersion;
 use devolutions_crypto::ciphertext::{
-    encrypt_asymmetric_with_aad, encrypt_with_aad, Ciphertext, CiphertextVersion,
+    Ciphertext, CiphertextVersion, encrypt_asymmetric_with_aad, encrypt_with_aad,
 };
-use devolutions_crypto::derive_encrypt::{encrypt_with_password_and_aad, KdfEncryptedData};
+use devolutions_crypto::derive_encrypt::{KdfEncryptedData, encrypt_with_password_and_aad};
 use devolutions_crypto::key::{
-    generate_keypair, generate_secret_key, mix_key_exchange, KeyVersion, PrivateKey, PublicKey,
+    KeyVersion, PrivateKey, PublicKey, generate_keypair, generate_secret_key, mix_key_exchange,
 };
 use devolutions_crypto::key_derivation::{Argon2, DerivationParameters, Pbkdf2};
 use devolutions_crypto::password_hash::{
-    hash_password, hash_password_with_parameters, PasswordHash, PasswordHashVersion,
+    PasswordHash, PasswordHashVersion, hash_password, hash_password_with_parameters,
 };
 use devolutions_crypto::secret_sharing::{
-    generate_shared_key, join_shares, SecretSharingVersion, Share,
+    SecretSharingVersion, Share, generate_shared_key, join_shares,
 };
-use devolutions_crypto::KeyDerivationVersion;
-use devolutions_crypto::OnlineCiphertextVersion;
 use devolutions_crypto::{
     signature,
     signature::{Signature, SignatureVersion},
@@ -88,40 +88,42 @@ pub unsafe extern "C" fn Encrypt(
     result: *mut u8,
     result_length: usize,
     version: u16,
-) -> i64 { unsafe {
-    if data.is_null() || key.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if data.is_null() || key.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    if result_length != EncryptSize(data_length, version) as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let aad = if aad.is_null() {
-        &[]
-    } else {
-        slice::from_raw_parts(aad, aad_length)
-    };
-
-    let data = slice::from_raw_parts(data, data_length);
-    let key = slice::from_raw_parts(key, key_length);
-    let result = slice::from_raw_parts_mut(result, result_length);
-
-    let version = match CiphertextVersion::try_from(version) {
-        Ok(v) => v,
-        Err(_) => return Error::UnknownVersion.error_code(),
-    };
-
-    match encrypt_with_aad(data, key, aad, version) {
-        Ok(res) => {
-            let res: Zeroizing<Vec<u8>> = Zeroizing::new(res.into());
-            let length = res.len();
-            result[0..length].copy_from_slice(&res);
-            length as i64
+        if result_length != EncryptSize(data_length, version) as usize {
+            return Error::InvalidOutputLength.error_code();
         }
-        Err(e) => e.error_code(),
+
+        let aad = if aad.is_null() {
+            &[]
+        } else {
+            slice::from_raw_parts(aad, aad_length)
+        };
+
+        let data = slice::from_raw_parts(data, data_length);
+        let key = slice::from_raw_parts(key, key_length);
+        let result = slice::from_raw_parts_mut(result, result_length);
+
+        let version = match CiphertextVersion::try_from(version) {
+            Ok(v) => v,
+            Err(_) => return Error::UnknownVersion.error_code(),
+        };
+
+        match encrypt_with_aad(data, key, aad, version) {
+            Ok(res) => {
+                let res: Zeroizing<Vec<u8>> = Zeroizing::new(res.into());
+                let length = res.len();
+                result[0..length].copy_from_slice(&res);
+                length as i64
+            }
+            Err(e) => e.error_code(),
+        }
     }
-}}
+}
 
 /// Encrypt a data blob
 /// # Arguments
@@ -152,47 +154,49 @@ pub unsafe extern "C" fn EncryptAsymmetric(
     result: *mut u8,
     result_length: usize,
     version: u16,
-) -> i64 { unsafe {
-    if data.is_null() || public_key.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if data.is_null() || public_key.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    if result_length != EncryptAsymmetricSize(data_length, version) as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let aad = if aad.is_null() {
-        &[]
-    } else {
-        slice::from_raw_parts(aad, aad_length)
-    };
-
-    let data = slice::from_raw_parts(data, data_length);
-    let public_key = PublicKey::try_from(slice::from_raw_parts(public_key, public_key_length));
-
-    match public_key {
-        Ok(public_key) => {
-            let result = slice::from_raw_parts_mut(result, result_length);
-
-            let version = match CiphertextVersion::try_from(version) {
-                Ok(v) => v,
-                Err(_) => return Error::UnknownVersion.error_code(),
-            };
-
-            match encrypt_asymmetric_with_aad(data, &public_key, aad, version) {
-                Ok(res) => {
-                    let res: Zeroizing<Vec<u8>> = Zeroizing::new(res.into());
-                    let length = res.len();
-
-                    result[0..length].copy_from_slice(&res);
-                    length as i64
-                }
-                Err(e) => e.error_code(),
-            }
+        if result_length != EncryptAsymmetricSize(data_length, version) as usize {
+            return Error::InvalidOutputLength.error_code();
         }
-        Err(e) => e.error_code(),
+
+        let aad = if aad.is_null() {
+            &[]
+        } else {
+            slice::from_raw_parts(aad, aad_length)
+        };
+
+        let data = slice::from_raw_parts(data, data_length);
+        let public_key = PublicKey::try_from(slice::from_raw_parts(public_key, public_key_length));
+
+        match public_key {
+            Ok(public_key) => {
+                let result = slice::from_raw_parts_mut(result, result_length);
+
+                let version = match CiphertextVersion::try_from(version) {
+                    Ok(v) => v,
+                    Err(_) => return Error::UnknownVersion.error_code(),
+                };
+
+                match encrypt_asymmetric_with_aad(data, &public_key, aad, version) {
+                    Ok(res) => {
+                        let res: Zeroizing<Vec<u8>> = Zeroizing::new(res.into());
+                        let length = res.len();
+
+                        result[0..length].copy_from_slice(&res);
+                        length as i64
+                    }
+                    Err(e) => e.error_code(),
+                }
+            }
+            Err(e) => e.error_code(),
+        }
     }
-}}
+}
 
 /// Get the size of the resulting ciphertext.
 /// # Arguments
@@ -293,60 +297,62 @@ pub unsafe extern "C" fn DeriveEncryptData(
     result_length: usize,
     key_derivation_version: u16,
     ciphertext_version: u16,
-) -> i64 { unsafe {
-    if data.is_null() || password.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    }
-
-    if result_length
-        != DeriveEncryptSize(data_length, key_derivation_version, ciphertext_version) as usize
-    {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let key_derivation_version = match KeyDerivationVersion::try_from(key_derivation_version) {
-        Ok(v) => v,
-        Err(_) => return Error::UnknownVersion.error_code(),
-    };
-
-    let ciphertext_version = match CiphertextVersion::try_from(ciphertext_version) {
-        Ok(v) => v,
-        Err(_) => return Error::UnknownVersion.error_code(),
-    };
-
-    let aad = if aad.is_null() {
-        &[]
-    } else {
-        slice::from_raw_parts(aad, aad_length)
-    };
-
-    let data = slice::from_raw_parts(data, data_length);
-    let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
-    let result = slice::from_raw_parts_mut(result, result_length);
-
-    let derivation_parameters = match key_derivation_version {
-        KeyDerivationVersion::Latest | KeyDerivationVersion::V2 => Argon2::new().parameters(),
-        KeyDerivationVersion::V1 => Pbkdf2::new()
-            .parameters()
-            .expect("default PKBDF2 parameters shouldn't fail"),
-    };
-
-    match encrypt_with_password_and_aad(
-        data,
-        &password,
-        aad,
-        derivation_parameters,
-        ciphertext_version,
-    ) {
-        Ok(res) => {
-            let res: Vec<u8> = res.into();
-            let length = res.len();
-            result[0..length].copy_from_slice(&res);
-            length as i64
+) -> i64 {
+    unsafe {
+        if data.is_null() || password.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
         }
-        Err(e) => e.error_code(),
+
+        if result_length
+            != DeriveEncryptSize(data_length, key_derivation_version, ciphertext_version) as usize
+        {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let key_derivation_version = match KeyDerivationVersion::try_from(key_derivation_version) {
+            Ok(v) => v,
+            Err(_) => return Error::UnknownVersion.error_code(),
+        };
+
+        let ciphertext_version = match CiphertextVersion::try_from(ciphertext_version) {
+            Ok(v) => v,
+            Err(_) => return Error::UnknownVersion.error_code(),
+        };
+
+        let aad = if aad.is_null() {
+            &[]
+        } else {
+            slice::from_raw_parts(aad, aad_length)
+        };
+
+        let data = slice::from_raw_parts(data, data_length);
+        let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
+        let result = slice::from_raw_parts_mut(result, result_length);
+
+        let derivation_parameters = match key_derivation_version {
+            KeyDerivationVersion::Latest | KeyDerivationVersion::V2 => Argon2::new().parameters(),
+            KeyDerivationVersion::V1 => Pbkdf2::new()
+                .parameters()
+                .expect("default PKBDF2 parameters shouldn't fail"),
+        };
+
+        match encrypt_with_password_and_aad(
+            data,
+            &password,
+            aad,
+            derivation_parameters,
+            ciphertext_version,
+        ) {
+            Ok(res) => {
+                let res: Vec<u8> = res.into();
+                let length = res.len();
+                result[0..length].copy_from_slice(&res);
+                length as i64
+            }
+            Err(e) => e.error_code(),
+        }
     }
-}}
+}
 
 /// Derive a key from a password using caller-supplied serialized [`DerivationParameters`] and encrypt data.
 /// # Arguments
@@ -378,54 +384,57 @@ pub unsafe extern "C" fn DeriveEncryptDataWithParams(
     result: *mut u8,
     result_length: usize,
     ciphertext_version: u16,
-) -> i64 { unsafe {
-    if data.is_null() || password.is_null() || params.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    }
-
-    if result_length
-        != DeriveEncryptDataWithParamsSize(data_length, params_length, ciphertext_version) as usize
-    {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let ciphertext_version = match CiphertextVersion::try_from(ciphertext_version) {
-        Ok(v) => v,
-        Err(_) => return Error::UnknownVersion.error_code(),
-    };
-
-    let aad = if aad.is_null() {
-        &[]
-    } else {
-        slice::from_raw_parts(aad, aad_length)
-    };
-
-    let data = slice::from_raw_parts(data, data_length);
-    let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
-    let params_raw = slice::from_raw_parts(params, params_length);
-    let result = slice::from_raw_parts_mut(result, result_length);
-
-    let derivation_parameters = match DerivationParameters::try_from(params_raw) {
-        Ok(p) => p,
-        Err(e) => return e.error_code(),
-    };
-
-    match encrypt_with_password_and_aad(
-        data,
-        &password,
-        aad,
-        derivation_parameters,
-        ciphertext_version,
-    ) {
-        Ok(res) => {
-            let res: Vec<u8> = res.into();
-            let length = res.len();
-            result[0..length].copy_from_slice(&res);
-            length as i64
+) -> i64 {
+    unsafe {
+        if data.is_null() || password.is_null() || params.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
         }
-        Err(e) => e.error_code(),
+
+        if result_length
+            != DeriveEncryptDataWithParamsSize(data_length, params_length, ciphertext_version)
+                as usize
+        {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let ciphertext_version = match CiphertextVersion::try_from(ciphertext_version) {
+            Ok(v) => v,
+            Err(_) => return Error::UnknownVersion.error_code(),
+        };
+
+        let aad = if aad.is_null() {
+            &[]
+        } else {
+            slice::from_raw_parts(aad, aad_length)
+        };
+
+        let data = slice::from_raw_parts(data, data_length);
+        let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
+        let params_raw = slice::from_raw_parts(params, params_length);
+        let result = slice::from_raw_parts_mut(result, result_length);
+
+        let derivation_parameters = match DerivationParameters::try_from(params_raw) {
+            Ok(p) => p,
+            Err(e) => return e.error_code(),
+        };
+
+        match encrypt_with_password_and_aad(
+            data,
+            &password,
+            aad,
+            derivation_parameters,
+            ciphertext_version,
+        ) {
+            Ok(res) => {
+                let res: Vec<u8> = res.into();
+                let length = res.len();
+                result[0..length].copy_from_slice(&res);
+                length as i64
+            }
+            Err(e) => e.error_code(),
+        }
     }
-}}
+}
 
 /// Get the size of the resulting derive_encrypt blob when using pre-built serialized [`DerivationParameters`].
 /// # Arguments
@@ -476,37 +485,39 @@ pub unsafe extern "C" fn DeriveDecryptData(
     aad_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 { unsafe {
-    if data.is_null() || password.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    }
+) -> i64 {
+    unsafe {
+        if data.is_null() || password.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
+        }
 
-    let aad = if aad.is_null() {
-        &[]
-    } else {
-        slice::from_raw_parts(aad, aad_length)
-    };
+        let aad = if aad.is_null() {
+            &[]
+        } else {
+            slice::from_raw_parts(aad, aad_length)
+        };
 
-    let data = slice::from_raw_parts(data, data_length);
-    let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
-    let result = slice::from_raw_parts_mut(result, result_length);
+        let data = slice::from_raw_parts(data, data_length);
+        let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
+        let result = slice::from_raw_parts_mut(result, result_length);
 
-    match KdfEncryptedData::try_from(data) {
-        Ok(res) => match res.decrypt_with_password_and_aad(&password, aad) {
-            Ok(plaintext) => {
-                if result.len() >= plaintext.len() {
-                    let length = plaintext.len();
-                    result[0..length].copy_from_slice(&plaintext);
-                    length as i64
-                } else {
-                    Error::InvalidOutputLength.error_code()
+        match KdfEncryptedData::try_from(data) {
+            Ok(res) => match res.decrypt_with_password_and_aad(&password, aad) {
+                Ok(plaintext) => {
+                    if result.len() >= plaintext.len() {
+                        let length = plaintext.len();
+                        result[0..length].copy_from_slice(&plaintext);
+                        length as i64
+                    } else {
+                        Error::InvalidOutputLength.error_code()
+                    }
                 }
-            }
+                Err(e) => e.error_code(),
+            },
             Err(e) => e.error_code(),
-        },
-        Err(e) => e.error_code(),
+        }
     }
-}}
+}
 
 /// Decrypt a data blob
 /// # Arguments
@@ -535,39 +546,41 @@ pub unsafe extern "C" fn Decrypt(
     aad_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 { unsafe {
-    if data.is_null() || key.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if data.is_null() || key.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let aad = if aad.is_null() {
-        &[]
-    } else {
-        slice::from_raw_parts(aad, aad_length)
-    };
+        let aad = if aad.is_null() {
+            &[]
+        } else {
+            slice::from_raw_parts(aad, aad_length)
+        };
 
-    let data = slice::from_raw_parts(data, data_length);
-    let key = slice::from_raw_parts(key, key_length);
-    let result = slice::from_raw_parts_mut(result, result_length);
+        let data = slice::from_raw_parts(data, data_length);
+        let key = slice::from_raw_parts(key, key_length);
+        let result = slice::from_raw_parts_mut(result, result_length);
 
-    match Ciphertext::try_from(data) {
-        Ok(res) => match res.decrypt_with_aad(key, aad) {
-            Ok(res) => {
-                let res = Zeroizing::new(res);
+        match Ciphertext::try_from(data) {
+            Ok(res) => match res.decrypt_with_aad(key, aad) {
+                Ok(res) => {
+                    let res = Zeroizing::new(res);
 
-                if result.len() >= res.len() {
-                    let length = res.len();
-                    result[0..length].copy_from_slice(&res);
-                    length as i64
-                } else {
-                    Error::InvalidOutputLength.error_code()
+                    if result.len() >= res.len() {
+                        let length = res.len();
+                        result[0..length].copy_from_slice(&res);
+                        length as i64
+                    } else {
+                        Error::InvalidOutputLength.error_code()
+                    }
                 }
-            }
+                Err(e) => e.error_code(),
+            },
             Err(e) => e.error_code(),
-        },
-        Err(e) => e.error_code(),
+        }
     }
-}}
+}
 
 /// Decrypt a data blob
 /// # Arguments
@@ -596,44 +609,47 @@ pub unsafe extern "C" fn DecryptAsymmetric(
     aad_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 { unsafe {
-    if data.is_null() || private_key.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if data.is_null() || private_key.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let aad = if aad.is_null() {
-        &[]
-    } else {
-        slice::from_raw_parts(aad, aad_length)
-    };
+        let aad = if aad.is_null() {
+            &[]
+        } else {
+            slice::from_raw_parts(aad, aad_length)
+        };
 
-    let data = slice::from_raw_parts(data, data_length);
-    let private_key = PrivateKey::try_from(slice::from_raw_parts(private_key, private_key_length));
+        let data = slice::from_raw_parts(data, data_length);
+        let private_key =
+            PrivateKey::try_from(slice::from_raw_parts(private_key, private_key_length));
 
-    match private_key {
-        Ok(private_key) => {
-            let result = slice::from_raw_parts_mut(result, result_length);
+        match private_key {
+            Ok(private_key) => {
+                let result = slice::from_raw_parts_mut(result, result_length);
 
-            match Ciphertext::try_from(data) {
-                Ok(res) => match res.decrypt_asymmetric_with_aad(&private_key, aad) {
-                    Ok(res) => {
-                        let res = Zeroizing::new(res);
-                        if result.len() >= res.len() {
-                            let length = res.len();
-                            result[0..length].copy_from_slice(&res);
-                            length as i64
-                        } else {
-                            Error::InvalidOutputLength.error_code()
+                match Ciphertext::try_from(data) {
+                    Ok(res) => match res.decrypt_asymmetric_with_aad(&private_key, aad) {
+                        Ok(res) => {
+                            let res = Zeroizing::new(res);
+                            if result.len() >= res.len() {
+                                let length = res.len();
+                                result[0..length].copy_from_slice(&res);
+                                length as i64
+                            } else {
+                                Error::InvalidOutputLength.error_code()
+                            }
                         }
-                    }
+                        Err(e) => e.error_code(),
+                    },
                     Err(e) => e.error_code(),
-                },
-                Err(e) => e.error_code(),
+                }
             }
+            Err(e) => e.error_code(),
         }
-        Err(e) => e.error_code(),
     }
-}}
+}
 
 /// Sign data using a keypair to certify its authenticity.
 /// # Arguments
@@ -658,35 +674,37 @@ pub unsafe extern "C" fn Sign(
     result: *mut u8,
     result_length: usize,
     version: u16,
-) -> i64 { unsafe {
-    if data.is_null() || keypair.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if data.is_null() || keypair.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    if result_length != SignSize(version) as usize {
-        return Error::InvalidOutputLength.error_code();
-    };
+        if result_length != SignSize(version) as usize {
+            return Error::InvalidOutputLength.error_code();
+        };
 
-    let data = slice::from_raw_parts(data, data_length);
-    let keypair = slice::from_raw_parts(keypair, keypair_length);
-    let result = slice::from_raw_parts_mut(result, result_length);
+        let data = slice::from_raw_parts(data, data_length);
+        let keypair = slice::from_raw_parts(keypair, keypair_length);
+        let result = slice::from_raw_parts_mut(result, result_length);
 
-    match SigningKeyPair::try_from(keypair) {
-        Ok(keypair) => {
-            let version = match SignatureVersion::try_from(version) {
-                Ok(v) => v,
-                Err(_) => return Error::UnknownVersion.error_code(),
-            };
+        match SigningKeyPair::try_from(keypair) {
+            Ok(keypair) => {
+                let version = match SignatureVersion::try_from(version) {
+                    Ok(v) => v,
+                    Err(_) => return Error::UnknownVersion.error_code(),
+                };
 
-            let signature: Vec<u8> = signature::sign(data, &keypair, version).into();
+                let signature: Vec<u8> = signature::sign(data, &keypair, version).into();
 
-            result[0..signature.len()].copy_from_slice(&signature);
+                result[0..signature.len()].copy_from_slice(&signature);
 
-            0
+                0
+            }
+            Err(e) => e.error_code(),
         }
-        Err(e) => e.error_code(),
     }
-}}
+}
 
 /// Verify some data using a signature and the corresponding public key.
 /// # Arguments
@@ -709,29 +727,31 @@ pub unsafe extern "C" fn VerifySignature(
     public_key_length: usize,
     signature: *const u8,
     signature_length: usize,
-) -> i64 { unsafe {
-    if data.is_null() || public_key.is_null() || signature.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if data.is_null() || public_key.is_null() || signature.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let data = slice::from_raw_parts(data, data_length);
-    let public_key = slice::from_raw_parts(public_key, public_key_length);
-    let signature = slice::from_raw_parts(signature, signature_length);
+        let data = slice::from_raw_parts(data, data_length);
+        let public_key = slice::from_raw_parts(public_key, public_key_length);
+        let signature = slice::from_raw_parts(signature, signature_length);
 
-    match SigningPublicKey::try_from(public_key) {
-        Ok(public_key) => match Signature::try_from(signature) {
-            Ok(signature) => {
-                if signature.verify(data, &public_key) {
-                    1
-                } else {
-                    0
+        match SigningPublicKey::try_from(public_key) {
+            Ok(public_key) => match Signature::try_from(signature) {
+                Ok(signature) => {
+                    if signature.verify(data, &public_key) {
+                        1
+                    } else {
+                        0
+                    }
                 }
-            }
+                Err(e) => e.error_code(),
+            },
             Err(e) => e.error_code(),
-        },
-        Err(e) => e.error_code(),
+        }
     }
-}}
+}
 
 /// Get the size of the resulting signature.
 /// # Returns
@@ -761,32 +781,34 @@ pub unsafe extern "C" fn HashPassword(
     result: *mut u8,
     result_length: usize,
     version: u16,
-) -> i64 { unsafe {
-    if password.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if password.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let version = match PasswordHashVersion::try_from(version) {
-        Ok(v) => v,
-        Err(_) => return Error::UnknownVersion.error_code(),
-    };
+        let version = match PasswordHashVersion::try_from(version) {
+            Ok(v) => v,
+            Err(_) => return Error::UnknownVersion.error_code(),
+        };
 
-    if result_length != HashPasswordLength(version as u16) as usize {
-        return Error::InvalidOutputLength.error_code();
-    };
+        if result_length != HashPasswordLength(version as u16) as usize {
+            return Error::InvalidOutputLength.error_code();
+        };
 
-    let password = slice::from_raw_parts(password, password_length);
-    let result = slice::from_raw_parts_mut(result, result_length);
+        let password = slice::from_raw_parts(password, password_length);
+        let result = slice::from_raw_parts_mut(result, result_length);
 
-    let res: Zeroizing<Vec<u8>> = match hash_password(password, version) {
-        Ok(x) => Zeroizing::new(x.into()),
-        Err(e) => return e.error_code(),
-    };
+        let res: Zeroizing<Vec<u8>> = match hash_password(password, version) {
+            Ok(x) => Zeroizing::new(x.into()),
+            Err(e) => return e.error_code(),
+        };
 
-    let length = res.len();
-    result[0..length].copy_from_slice(&res);
-    length as i64
-}}
+        let length = res.len();
+        result[0..length].copy_from_slice(&res);
+        length as i64
+    }
+}
 
 /// Returns the length of the hash to input as `result_length` in `HashPassword()`.
 /// # Arguments
@@ -829,34 +851,36 @@ pub unsafe extern "C" fn HashPasswordWithParams(
     params_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 { unsafe {
-    if password.is_null() || params.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if password.is_null() || params.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let password = slice::from_raw_parts(password, password_length);
-    let params_slice = slice::from_raw_parts(params, params_length);
-    let result = slice::from_raw_parts_mut(result, result_length);
+        let password = slice::from_raw_parts(password, password_length);
+        let params_slice = slice::from_raw_parts(params, params_length);
+        let result = slice::from_raw_parts_mut(result, result_length);
 
-    let dp = match DerivationParameters::try_from(params_slice) {
-        Ok(p) => p,
-        Err(e) => return e.error_code(),
-    };
+        let dp = match DerivationParameters::try_from(params_slice) {
+            Ok(p) => p,
+            Err(e) => return e.error_code(),
+        };
 
-    let expected_len = HashPasswordWithParamsLength(params, params_length) as usize;
-    if result_length != expected_len {
-        return Error::InvalidOutputLength.error_code();
-    };
+        let expected_len = HashPasswordWithParamsLength(params, params_length) as usize;
+        if result_length != expected_len {
+            return Error::InvalidOutputLength.error_code();
+        };
 
-    let res: Zeroizing<Vec<u8>> = match hash_password_with_parameters(password, dp) {
-        Ok(x) => Zeroizing::new(x.into()),
-        Err(e) => return e.error_code(),
-    };
+        let res: Zeroizing<Vec<u8>> = match hash_password_with_parameters(password, dp) {
+            Ok(x) => Zeroizing::new(x.into()),
+            Err(e) => return e.error_code(),
+        };
 
-    let length = res.len();
-    result[0..length].copy_from_slice(&res);
-    length as i64
-}}
+        let length = res.len();
+        result[0..length].copy_from_slice(&res);
+        length as i64
+    }
+}
 
 /// Returns the output buffer size required for `HashPasswordWithParams()`.
 /// # Arguments
@@ -870,18 +894,20 @@ pub unsafe extern "C" fn HashPasswordWithParams(
 pub unsafe extern "C" fn HashPasswordWithParamsLength(
     params: *const u8,
     params_length: usize,
-) -> i64 { unsafe {
-    if params.is_null() {
-        return Error::NullPointer.error_code();
-    };
-    let params_slice = slice::from_raw_parts(params, params_length);
-    let dp = match DerivationParameters::try_from(params_slice) {
-        Ok(p) => p,
-        Err(e) => return e.error_code(),
-    };
-    // 8 (PasswordHash header) + 4 (u32 params_len) + params_length + hash_length
-    (8 + 4 + params_length + dp.output_length()) as i64
-}}
+) -> i64 {
+    unsafe {
+        if params.is_null() {
+            return Error::NullPointer.error_code();
+        };
+        let params_slice = slice::from_raw_parts(params, params_length);
+        let dp = match DerivationParameters::try_from(params_slice) {
+            Ok(p) => p,
+            Err(e) => return e.error_code(),
+        };
+        // 8 (PasswordHash header) + 4 (u32 params_len) + params_length + hash_length
+        (8 + 4 + params_length + dp.output_length()) as i64
+    }
+}
 
 /// Verify a password against a hash with constant-time equality.
 /// # Arguments
@@ -900,25 +926,27 @@ pub unsafe extern "C" fn VerifyPassword(
     password_length: usize,
     hash: *const u8,
     hash_length: usize,
-) -> i64 { unsafe {
-    if password.is_null() || hash.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if password.is_null() || hash.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let password = slice::from_raw_parts(password, password_length);
-    let hash = slice::from_raw_parts(hash, hash_length);
+        let password = slice::from_raw_parts(password, password_length);
+        let hash = slice::from_raw_parts(hash, hash_length);
 
-    match PasswordHash::try_from(hash) {
-        Ok(res) => {
-            if res.verify_password(password) {
-                1
-            } else {
-                0
+        match PasswordHash::try_from(hash) {
+            Ok(res) => {
+                if res.verify_password(password) {
+                    1
+                } else {
+                    0
+                }
             }
+            Err(e) => e.error_code(),
         }
-        Err(e) => e.error_code(),
     }
-}}
+}
 
 /// Generate a key pair to perform a key exchange. Must be used with MixKey()
 /// # Arguments
@@ -939,29 +967,31 @@ pub unsafe extern "C" fn GenerateKeyPair(
     private_length: usize,
     public: *mut u8,
     public_length: usize,
-) -> i64 { unsafe {
-    if private.is_null() || public.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if private.is_null() || public.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    if private_length != GenerateKeyPairSize() as usize
-        || public_length != GenerateKeyPairSize() as usize
-    {
-        return Error::InvalidOutputLength.error_code();
+        if private_length != GenerateKeyPairSize() as usize
+            || public_length != GenerateKeyPairSize() as usize
+        {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let private = slice::from_raw_parts_mut(private, private_length);
+        let public = slice::from_raw_parts_mut(public, public_length);
+
+        let keypair = generate_keypair(KeyVersion::Latest);
+
+        let priv_res: Zeroizing<Vec<u8>> = Zeroizing::new(keypair.private_key.into());
+        let pub_res: Zeroizing<Vec<u8>> = Zeroizing::new(keypair.public_key.into());
+
+        public[0..pub_res.len()].copy_from_slice(&pub_res);
+        private[0..priv_res.len()].copy_from_slice(&priv_res);
+        0
     }
-
-    let private = slice::from_raw_parts_mut(private, private_length);
-    let public = slice::from_raw_parts_mut(public, public_length);
-
-    let keypair = generate_keypair(KeyVersion::Latest);
-
-    let priv_res: Zeroizing<Vec<u8>> = Zeroizing::new(keypair.private_key.into());
-    let pub_res: Zeroizing<Vec<u8>> = Zeroizing::new(keypair.public_key.into());
-
-    public[0..pub_res.len()].copy_from_slice(&pub_res);
-    private[0..priv_res.len()].copy_from_slice(&priv_res);
-    0
-}}
+}
 
 /// Generate a key pair to sign and verify data with.
 /// # Arguments
@@ -979,30 +1009,32 @@ pub unsafe extern "C" fn GenerateSigningKeyPair(
     keypair: *mut u8,
     keypair_length: usize,
     version: u16,
-) -> i64 { unsafe {
-    if keypair.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if keypair.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    if keypair_length != GenerateSigningKeyPairSize(version) as usize {
-        return Error::InvalidOutputLength.error_code();
+        if keypair_length != GenerateSigningKeyPairSize(version) as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let keypair = slice::from_raw_parts_mut(keypair, keypair_length);
+
+        let version = match SigningKeyVersion::try_from(version) {
+            Ok(v) => v,
+            Err(_) => return Error::UnknownVersion.error_code(),
+        };
+
+        let generated_keypair = signing_key::generate_signing_keypair(version);
+
+        let keypair_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(generated_keypair.into());
+
+        keypair[0..keypair_bytes.len()].copy_from_slice(&keypair_bytes);
+
+        0
     }
-
-    let keypair = slice::from_raw_parts_mut(keypair, keypair_length);
-
-    let version = match SigningKeyVersion::try_from(version) {
-        Ok(v) => v,
-        Err(_) => return Error::UnknownVersion.error_code(),
-    };
-
-    let generated_keypair = signing_key::generate_signing_keypair(version);
-
-    let keypair_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(generated_keypair.into());
-
-    keypair[0..keypair_bytes.len()].copy_from_slice(&keypair_bytes);
-
-    0
-}}
+}
 
 /// Get the public part of a keypair used to sign data.
 /// # Arguments
@@ -1019,29 +1051,31 @@ pub unsafe extern "C" fn GetSigningPublicKey(
     keypair_length: usize,
     public: *mut u8,
     public_length: usize,
-) -> i64 { unsafe {
-    if keypair.is_null() || public.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if keypair.is_null() || public.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    if public_length != GetSigningPublicKeySize(keypair, keypair_length) as usize {
-        return Error::InvalidOutputLength.error_code();
-    };
+        if public_length != GetSigningPublicKeySize(keypair, keypair_length) as usize {
+            return Error::InvalidOutputLength.error_code();
+        };
 
-    let keypair = slice::from_raw_parts(keypair, keypair_length);
-    let public = slice::from_raw_parts_mut(public, public_length);
+        let keypair = slice::from_raw_parts(keypair, keypair_length);
+        let public = slice::from_raw_parts_mut(public, public_length);
 
-    let keypair = SigningKeyPair::try_from(keypair);
-    match keypair {
-        Ok(keypair) => {
-            let public_key: Vec<u8> = keypair.get_public_key().into();
-            public[..public_key.len()].copy_from_slice(&public_key);
+        let keypair = SigningKeyPair::try_from(keypair);
+        match keypair {
+            Ok(keypair) => {
+                let public_key: Vec<u8> = keypair.get_public_key().into();
+                public[..public_key.len()].copy_from_slice(&public_key);
 
-            0
+                0
+            }
+            Err(e) => e.error_code(),
         }
-        Err(e) => e.error_code(),
     }
-}}
+}
 
 /// Get the size of the keys in the key exchange key pair.
 /// # Returns
@@ -1063,23 +1097,25 @@ pub extern "C" fn GenerateKeyPairSize() -> i64 {
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn GenerateSecretKey(result: *mut u8, result_length: usize) -> i64 { unsafe {
-    if result.is_null() {
-        return Error::NullPointer.error_code();
+pub unsafe extern "C" fn GenerateSecretKey(result: *mut u8, result_length: usize) -> i64 {
+    unsafe {
+        if result.is_null() {
+            return Error::NullPointer.error_code();
+        }
+
+        if result_length != GenerateSecretKeySize() as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let result = slice::from_raw_parts_mut(result, result_length);
+
+        let key = generate_secret_key(KeyVersion::Latest);
+        let key_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(key.into());
+
+        result[0..key_bytes.len()].copy_from_slice(&key_bytes);
+        0
     }
-
-    if result_length != GenerateSecretKeySize() as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let result = slice::from_raw_parts_mut(result, result_length);
-
-    let key = generate_secret_key(KeyVersion::Latest);
-    let key_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(key.into());
-
-    result[0..key_bytes.len()].copy_from_slice(&key_bytes);
-    0
-}}
+}
 
 /// Get the size of a serialized secret key.
 /// # Returns
@@ -1128,33 +1164,35 @@ pub unsafe extern "C" fn MixKeyExchange(
     public_size: usize,
     shared: *mut u8,
     shared_size: usize,
-) -> i64 { unsafe {
-    if private.is_null() || public.is_null() || shared.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if private.is_null() || public.is_null() || shared.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    if shared_size != MixKeyExchangeSize() as usize {
-        return Error::InvalidOutputLength.error_code();
+        if shared_size != MixKeyExchangeSize() as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let public = slice::from_raw_parts(public, public_size);
+        let private = slice::from_raw_parts(private, private_size);
+        let shared = slice::from_raw_parts_mut(shared, shared_size);
+
+        match (PrivateKey::try_from(private), PublicKey::try_from(public)) {
+            (Ok(private), Ok(public)) => match mix_key_exchange(&private, &public) {
+                Ok(res) => {
+                    let res = Zeroizing::new(res);
+                    shared[0..res.len()].copy_from_slice(&res);
+                    0
+                }
+                Err(e) => e.error_code(),
+            },
+            (Ok(_), Err(e)) => e.error_code(),
+            (Err(e), Ok(_)) => e.error_code(),
+            (Err(e), Err(_)) => e.error_code(),
+        }
     }
-
-    let public = slice::from_raw_parts(public, public_size);
-    let private = slice::from_raw_parts(private, private_size);
-    let shared = slice::from_raw_parts_mut(shared, shared_size);
-
-    match (PrivateKey::try_from(private), PublicKey::try_from(public)) {
-        (Ok(private), Ok(public)) => match mix_key_exchange(&private, &public) {
-            Ok(res) => {
-                let res = Zeroizing::new(res);
-                shared[0..res.len()].copy_from_slice(&res);
-                0
-            }
-            Err(e) => e.error_code(),
-        },
-        (Ok(_), Err(e)) => e.error_code(),
-        (Err(e), Ok(_)) => e.error_code(),
-        (Err(e), Err(_)) => e.error_code(),
-    }
-}}
+}
 
 /// Get the size of the keys in the key exchange key pair.
 /// # Returns
@@ -1181,30 +1219,32 @@ pub unsafe extern "C" fn GenerateSharedKey(
     threshold: u8,
     length: usize,
     shares: *const *mut u8,
-) -> i64 { unsafe {
-    if shares.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if shares.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    match generate_shared_key(n_shares, threshold, length, SecretSharingVersion::Latest) {
-        Ok(s) => {
-            let shares = slice::from_raw_parts(shares, n_shares as usize);
+        match generate_shared_key(n_shares, threshold, length, SecretSharingVersion::Latest) {
+            Ok(s) => {
+                let shares = slice::from_raw_parts(shares, n_shares as usize);
 
-            for (s, res_s) in s.into_iter().zip(shares) {
-                if res_s.is_null() {
-                    return Error::NullPointer.error_code();
-                };
+                for (s, res_s) in s.into_iter().zip(shares) {
+                    if res_s.is_null() {
+                        return Error::NullPointer.error_code();
+                    };
 
-                let s: Vec<u8> = s.into();
-                let res_s =
-                    slice::from_raw_parts_mut(*res_s, GenerateSharedKeySize(length) as usize);
-                res_s.copy_from_slice(&s);
+                    let s: Vec<u8> = s.into();
+                    let res_s =
+                        slice::from_raw_parts_mut(*res_s, GenerateSharedKeySize(length) as usize);
+                    res_s.copy_from_slice(&s);
+                }
+                0
             }
-            0
+            Err(e) => e.error_code(),
         }
-        Err(e) => e.error_code(),
     }
-}}
+}
 
 /// The size, in bytes, of each resulting shares
 /// # Arguments
@@ -1235,32 +1275,34 @@ pub unsafe extern "C" fn JoinShares(
     shares: *const *const u8,
     secret: *mut u8,
     secret_length: usize,
-) -> i64 { unsafe {
-    if shares.is_null() || secret.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if shares.is_null() || secret.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    if secret_length != JoinSharesSize(share_length) as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
+        if secret_length != JoinSharesSize(share_length) as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
 
-    let shares: Result<Vec<Share>> = slice::from_raw_parts(shares, n_shares)
-        .iter()
-        .map(|s| Share::try_from(slice::from_raw_parts(*s, share_length)))
-        .collect();
+        let shares: Result<Vec<Share>> = slice::from_raw_parts(shares, n_shares)
+            .iter()
+            .map(|s| Share::try_from(slice::from_raw_parts(*s, share_length)))
+            .collect();
 
-    match shares {
-        Ok(shares) => match join_shares(&shares) {
-            Ok(s) => {
-                let secret = slice::from_raw_parts_mut(secret, secret_length);
-                secret.copy_from_slice(&s);
-                0
-            }
+        match shares {
+            Ok(shares) => match join_shares(&shares) {
+                Ok(s) => {
+                    let secret = slice::from_raw_parts_mut(secret, secret_length);
+                    secret.copy_from_slice(&s);
+                    0
+                }
+                Err(e) => e.error_code(),
+            },
             Err(e) => e.error_code(),
-        },
-        Err(e) => e.error_code(),
+        }
     }
-}}
+}
 
 /// Creates a new online (chunked) encryptor and writes an opaque handle to it in `output`.
 /// # Arguments
@@ -1286,36 +1328,38 @@ pub unsafe extern "C" fn NewOnlineEncryptor(
     asymmetric: bool,
     version: u16,
     output: *mut *mut c_void,
-) -> i64 { unsafe {
-    if key.is_null() || aad.is_null() {
-        return Error::NullPointer.error_code();
-    };
-
-    let key = slice::from_raw_parts(key, key_size);
-    let aad = slice::from_raw_parts(aad, aad_size);
-
-    let version = match OnlineCiphertextVersion::try_from(version) {
-        Ok(v) => v,
-        Err(_) => return Error::UnknownVersion.error_code(),
-    };
-
-    let encryptor = if asymmetric {
-        let public_key = match PublicKey::try_from(key) {
-            Ok(pk) => pk,
-            Err(e) => return e.error_code(),
+) -> i64 {
+    unsafe {
+        if key.is_null() || aad.is_null() {
+            return Error::NullPointer.error_code();
         };
 
-        OnlineCiphertextEncryptor::new_asymmetric(&public_key, aad, chunk_size, version)
-    } else {
-        OnlineCiphertextEncryptor::new(key, aad, chunk_size, version)
-    };
+        let key = slice::from_raw_parts(key, key_size);
+        let aad = slice::from_raw_parts(aad, aad_size);
 
-    let encryptor = Box::new(Mutex::new(encryptor));
+        let version = match OnlineCiphertextVersion::try_from(version) {
+            Ok(v) => v,
+            Err(_) => return Error::UnknownVersion.error_code(),
+        };
 
-    *output = Box::into_raw(encryptor) as *mut c_void;
+        let encryptor = if asymmetric {
+            let public_key = match PublicKey::try_from(key) {
+                Ok(pk) => pk,
+                Err(e) => return e.error_code(),
+            };
 
-    0
-}}
+            OnlineCiphertextEncryptor::new_asymmetric(&public_key, aad, chunk_size, version)
+        } else {
+            OnlineCiphertextEncryptor::new(key, aad, chunk_size, version)
+        };
+
+        let encryptor = Box::new(Mutex::new(encryptor));
+
+        *output = Box::into_raw(encryptor) as *mut c_void;
+
+        0
+    }
+}
 
 /// Creates a new online (chunked) decryptor from a serialized header and writes an opaque handle to it in `output`.
 /// # Arguments
@@ -1341,42 +1385,44 @@ pub unsafe extern "C" fn NewOnlineDecryptor(
     header_size: usize,
     asymmetric: bool,
     output: *mut *mut c_void,
-) -> i64 { unsafe {
-    if key.is_null() | aad.is_null() | header.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if key.is_null() | aad.is_null() | header.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let key = slice::from_raw_parts(key, key_size);
-    let aad = slice::from_raw_parts(aad, aad_size);
-    let header = slice::from_raw_parts(header, header_size);
+        let key = slice::from_raw_parts(key, key_size);
+        let aad = slice::from_raw_parts(aad, aad_size);
+        let header = slice::from_raw_parts(header, header_size);
 
-    let header = match OnlineCiphertextHeader::try_from(header) {
-        Ok(h) => h,
-        Err(e) => return e.error_code(),
-    };
-
-    let decryptor = if asymmetric {
-        let private_key = match PrivateKey::try_from(key) {
-            Ok(pk) => pk,
+        let header = match OnlineCiphertextHeader::try_from(header) {
+            Ok(h) => h,
             Err(e) => return e.error_code(),
         };
 
-        header.into_decryptor_asymmetric(&private_key, aad)
-    } else {
-        header.into_decryptor(key, aad)
-    };
+        let decryptor = if asymmetric {
+            let private_key = match PrivateKey::try_from(key) {
+                Ok(pk) => pk,
+                Err(e) => return e.error_code(),
+            };
 
-    let decryptor = match decryptor {
-        Ok(d) => d,
-        Err(e) => return e.error_code(),
-    };
+            header.into_decryptor_asymmetric(&private_key, aad)
+        } else {
+            header.into_decryptor(key, aad)
+        };
 
-    let decryptor = Box::new(Mutex::new(decryptor));
+        let decryptor = match decryptor {
+            Ok(d) => d,
+            Err(e) => return e.error_code(),
+        };
 
-    *output = Box::into_raw(decryptor) as *mut c_void;
+        let decryptor = Box::new(Mutex::new(decryptor));
 
-    0
-}}
+        *output = Box::into_raw(decryptor) as *mut c_void;
+
+        0
+    }
+}
 
 /// Writes the serialized header of the encryptor to the result buffer.
 /// # Arguments
@@ -1392,25 +1438,27 @@ pub unsafe extern "C" fn OnlineEncryptorGetHeader(
     ptr: *const c_void,
     result: *mut u8,
     result_size: usize,
-) -> i64 { unsafe {
-    if ptr.is_null() | result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if ptr.is_null() | result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
-    let header: Vec<u8> = match encryptor.lock() {
-        Ok(c) => c.get_header().borrow().into(),
-        Err(_) => return Error::PoisonedMutex.error_code(),
-    };
+        let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
+        let header: Vec<u8> = match encryptor.lock() {
+            Ok(c) => c.get_header().borrow().into(),
+            Err(_) => return Error::PoisonedMutex.error_code(),
+        };
 
-    if header.len() != result_size {
-        return Error::InvalidOutputLength.error_code();
+        if header.len() != result_size {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        result.copy_from(header.as_slice().as_ptr(), result_size);
+
+        result_size as i64
     }
-
-    result.copy_from(header.as_slice().as_ptr(), result_size);
-
-    result_size as i64
-}}
+}
 
 /// Writes the serialized header of the decryptor to the result buffer.
 /// # Arguments
@@ -1426,25 +1474,27 @@ pub unsafe extern "C" fn OnlineDecryptorGetHeader(
     ptr: *const c_void,
     result: *mut u8,
     result_size: usize,
-) -> i64 { unsafe {
-    if ptr.is_null() | result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if ptr.is_null() | result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
-    let header: Vec<u8> = match decryptor.lock() {
-        Ok(c) => c.get_header().borrow().into(),
-        Err(_) => return Error::PoisonedMutex.error_code(),
-    };
+        let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
+        let header: Vec<u8> = match decryptor.lock() {
+            Ok(c) => c.get_header().borrow().into(),
+            Err(_) => return Error::PoisonedMutex.error_code(),
+        };
 
-    if header.len() != result_size {
-        return Error::InvalidOutputLength.error_code();
+        if header.len() != result_size {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        result.copy_from(header.as_slice().as_ptr(), result_size);
+
+        result_size as i64
     }
-
-    result.copy_from(header.as_slice().as_ptr(), result_size);
-
-    result_size as i64
-}}
+}
 
 /// Encrypts the next chunk of data.
 /// # Arguments
@@ -1468,33 +1518,35 @@ pub unsafe extern "C" fn OnlineEncryptorNextChunk(
     aad_size: usize,
     result: *mut u8,
     result_size: usize,
-) -> i64 { unsafe {
-    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
-    let mut encryptor = match encryptor.lock() {
-        Ok(c) => c,
-        Err(_) => return Error::PoisonedMutex.error_code(),
-    };
+        let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
+        let mut encryptor = match encryptor.lock() {
+            Ok(c) => c,
+            Err(_) => return Error::PoisonedMutex.error_code(),
+        };
 
-    let data = slice::from_raw_parts(data, data_size);
-    let aad = slice::from_raw_parts(aad, aad_size);
+        let data = slice::from_raw_parts(data, data_size);
+        let aad = slice::from_raw_parts(aad, aad_size);
 
-    let encrypted = match encryptor.encrypt_next_chunk(data, aad) {
-        Ok(e) => e,
-        Err(e) => return e.error_code(),
-    };
+        let encrypted = match encryptor.encrypt_next_chunk(data, aad) {
+            Ok(e) => e,
+            Err(e) => return e.error_code(),
+        };
 
-    if encrypted.len() != result_size {
-        return Error::InvalidOutputLength.error_code();
+        if encrypted.len() != result_size {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        result.copy_from(encrypted.as_slice().as_ptr(), result_size);
+
+        result_size as i64
     }
-
-    result.copy_from(encrypted.as_slice().as_ptr(), result_size);
-
-    result_size as i64
-}}
+}
 
 /// Decrypts the next chunk of data.
 /// # Arguments
@@ -1518,33 +1570,35 @@ pub unsafe extern "C" fn OnlineDecryptorNextChunk(
     aad_size: usize,
     result: *mut u8,
     result_size: usize,
-) -> i64 { unsafe {
-    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
-    let mut decryptor = match decryptor.lock() {
-        Ok(c) => c,
-        Err(_) => return Error::PoisonedMutex.error_code(),
-    };
+        let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
+        let mut decryptor = match decryptor.lock() {
+            Ok(c) => c,
+            Err(_) => return Error::PoisonedMutex.error_code(),
+        };
 
-    let data = slice::from_raw_parts(data, data_size);
-    let aad = slice::from_raw_parts(aad, aad_size);
+        let data = slice::from_raw_parts(data, data_size);
+        let aad = slice::from_raw_parts(aad, aad_size);
 
-    let decrypted = match decryptor.decrypt_next_chunk(data, aad) {
-        Ok(e) => e,
-        Err(e) => return e.error_code(),
-    };
+        let decrypted = match decryptor.decrypt_next_chunk(data, aad) {
+            Ok(e) => e,
+            Err(e) => return e.error_code(),
+        };
 
-    if decrypted.len() != result_size {
-        return Error::InvalidOutputLength.error_code();
+        if decrypted.len() != result_size {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        result.copy_from(decrypted.as_slice().as_ptr(), result_size);
+
+        result_size as i64
     }
-
-    result.copy_from(decrypted.as_slice().as_ptr(), result_size);
-
-    result_size as i64
-}}
+}
 
 /// Encrypts the last chunk of data and consumes the encryptor.
 /// # Arguments
@@ -1569,34 +1623,36 @@ pub unsafe extern "C" fn OnlineEncryptorLastChunk(
     aad_size: usize,
     result: *mut u8,
     result_size: usize,
-) -> i64 { unsafe {
-    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let encryptor = Box::from_raw(ptr as *mut Mutex<OnlineCiphertextEncryptor>);
+        let encryptor = Box::from_raw(ptr as *mut Mutex<OnlineCiphertextEncryptor>);
 
-    let encryptor = match encryptor.into_inner() {
-        Ok(c) => c,
-        Err(_) => return Error::PoisonedMutex.error_code(),
-    };
+        let encryptor = match encryptor.into_inner() {
+            Ok(c) => c,
+            Err(_) => return Error::PoisonedMutex.error_code(),
+        };
 
-    let data = slice::from_raw_parts(data, data_size);
-    let aad = slice::from_raw_parts(aad, aad_size);
+        let data = slice::from_raw_parts(data, data_size);
+        let aad = slice::from_raw_parts(aad, aad_size);
 
-    let encrypted = match encryptor.encrypt_last_chunk(data, aad) {
-        Ok(e) => e,
-        Err(e) => return e.error_code(),
-    };
+        let encrypted = match encryptor.encrypt_last_chunk(data, aad) {
+            Ok(e) => e,
+            Err(e) => return e.error_code(),
+        };
 
-    if result_size < encrypted.len() {
-        return Error::InvalidOutputLength.error_code();
+        if result_size < encrypted.len() {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        result.copy_from(encrypted.as_slice().as_ptr(), encrypted.len());
+
+        encrypted.len() as i64
     }
-
-    result.copy_from(encrypted.as_slice().as_ptr(), encrypted.len());
-
-    encrypted.len() as i64
-}}
+}
 
 /// Decrypts the last chunk of data and consumes the decryptor.
 /// # Arguments
@@ -1621,33 +1677,35 @@ pub unsafe extern "C" fn OnlineDecryptorLastChunk(
     aad_size: usize,
     result: *mut u8,
     result_size: usize,
-) -> i64 { unsafe {
-    if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if ptr.is_null() | aad.is_null() | data.is_null() | result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let decryptor = Box::from_raw(ptr as *mut Mutex<OnlineCiphertextDecryptor>);
-    let decryptor = match decryptor.into_inner() {
-        Ok(c) => c,
-        Err(_) => return Error::PoisonedMutex.error_code(),
-    };
+        let decryptor = Box::from_raw(ptr as *mut Mutex<OnlineCiphertextDecryptor>);
+        let decryptor = match decryptor.into_inner() {
+            Ok(c) => c,
+            Err(_) => return Error::PoisonedMutex.error_code(),
+        };
 
-    let data = slice::from_raw_parts(data, data_size);
-    let aad = slice::from_raw_parts(aad, aad_size);
+        let data = slice::from_raw_parts(data, data_size);
+        let aad = slice::from_raw_parts(aad, aad_size);
 
-    let decrypted = match decryptor.decrypt_last_chunk(data, aad) {
-        Ok(e) => e,
-        Err(e) => return e.error_code(),
-    };
+        let decrypted = match decryptor.decrypt_last_chunk(data, aad) {
+            Ok(e) => e,
+            Err(e) => return e.error_code(),
+        };
 
-    if result_size < decrypted.len() {
-        return Error::InvalidOutputLength.error_code();
+        if result_size < decrypted.len() {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        result.copy_from(decrypted.as_slice().as_ptr(), decrypted.len());
+
+        decrypted.len() as i64
     }
-
-    result.copy_from(decrypted.as_slice().as_ptr(), decrypted.len());
-
-    decrypted.len() as i64
-}}
+}
 
 /// The size, in bytes, of the encryptor's serialized header.
 /// # Arguments
@@ -1657,19 +1715,21 @@ pub unsafe extern "C" fn OnlineDecryptorLastChunk(
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64 { unsafe {
-    if ptr.is_null() {
-        return Error::NullPointer.error_code();
-    };
+pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64 {
+    unsafe {
+        if ptr.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
-    let header = match encryptor.lock() {
-        Ok(c) => c.get_header(),
-        Err(_) => return Error::PoisonedMutex.error_code(),
-    };
+        let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
+        let header = match encryptor.lock() {
+            Ok(c) => c.get_header(),
+            Err(_) => return Error::PoisonedMutex.error_code(),
+        };
 
-    header.get_serialized_size() as i64
-}}
+        header.get_serialized_size() as i64
+    }
+}
 
 /// The size, in bytes, of the decryptor's serialized header.
 /// # Arguments
@@ -1679,19 +1739,21 @@ pub unsafe extern "C" fn OnlineEncryptorGetHeaderSize(ptr: *const c_void) -> i64
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64 { unsafe {
-    if ptr.is_null() {
-        return Error::NullPointer.error_code();
-    };
+pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64 {
+    unsafe {
+        if ptr.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
-    let header = match decryptor.lock() {
-        Ok(c) => c.get_header(),
-        Err(_) => return Error::PoisonedMutex.error_code(),
-    };
+        let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
+        let header = match decryptor.lock() {
+            Ok(c) => c.get_header(),
+            Err(_) => return Error::PoisonedMutex.error_code(),
+        };
 
-    header.get_serialized_size() as i64
-}}
+        header.get_serialized_size() as i64
+    }
+}
 
 /// The size, in bytes, of the chunks the encryptor works with.
 /// # Arguments
@@ -1701,17 +1763,19 @@ pub unsafe extern "C" fn OnlineDecryptorGetHeaderSize(ptr: *const c_void) -> i64
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 { unsafe {
-    if ptr.is_null() {
-        return Error::NullPointer.error_code();
-    };
+pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 {
+    unsafe {
+        if ptr.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
-    match encryptor.lock() {
-        Ok(c) => c.get_chunk_size() as i64,
-        Err(_) => Error::PoisonedMutex.error_code(),
+        let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
+        match encryptor.lock() {
+            Ok(c) => c.get_chunk_size() as i64,
+            Err(_) => Error::PoisonedMutex.error_code(),
+        }
     }
-}}
+}
 
 /// The size, in bytes, of the chunks the decryptor works with.
 /// # Arguments
@@ -1721,17 +1785,19 @@ pub unsafe extern "C" fn OnlineEncryptorGetChunkSize(ptr: *const c_void) -> i64 
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 { unsafe {
-    if ptr.is_null() {
-        return Error::NullPointer.error_code();
-    };
+pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 {
+    unsafe {
+        if ptr.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
-    match decryptor.lock() {
-        Ok(c) => c.get_chunk_size() as i64,
-        Err(_) => Error::PoisonedMutex.error_code(),
+        let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
+        match decryptor.lock() {
+            Ok(c) => c.get_chunk_size() as i64,
+            Err(_) => Error::PoisonedMutex.error_code(),
+        }
     }
-}}
+}
 
 /// The size, in bytes, of the authentication tag appended to each chunk by the encryptor.
 /// # Arguments
@@ -1741,17 +1807,19 @@ pub unsafe extern "C" fn OnlineDecryptorGetChunkSize(ptr: *const c_void) -> i64 
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 { unsafe {
-    if ptr.is_null() {
-        return Error::NullPointer.error_code();
-    };
+pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 {
+    unsafe {
+        if ptr.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
-    match encryptor.lock() {
-        Ok(c) => c.get_tag_size() as i64,
-        Err(_) => Error::PoisonedMutex.error_code(),
+        let encryptor = &*(ptr as *const Mutex<OnlineCiphertextEncryptor>);
+        match encryptor.lock() {
+            Ok(c) => c.get_tag_size() as i64,
+            Err(_) => Error::PoisonedMutex.error_code(),
+        }
     }
-}}
+}
 
 /// The size, in bytes, of the authentication tag expected at the end of each chunk by the decryptor.
 /// # Arguments
@@ -1761,17 +1829,19 @@ pub unsafe extern "C" fn OnlineEncryptorGetTagSize(ptr: *const c_void) -> i64 { 
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 { unsafe {
-    if ptr.is_null() {
-        return Error::NullPointer.error_code();
-    };
+pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 {
+    unsafe {
+        if ptr.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
-    match decryptor.lock() {
-        Ok(c) => c.get_tag_size() as i64,
-        Err(_) => Error::PoisonedMutex.error_code(),
+        let decryptor = &*(ptr as *const Mutex<OnlineCiphertextDecryptor>);
+        match decryptor.lock() {
+            Ok(c) => c.get_tag_size() as i64,
+            Err(_) => Error::PoisonedMutex.error_code(),
+        }
     }
-}}
+}
 
 /// Frees an encryptor without finalizing the encryption.
 /// # Arguments
@@ -1782,15 +1852,17 @@ pub unsafe extern "C" fn OnlineDecryptorGetTagSize(ptr: *const c_void) -> i64 { 
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 /// `ptr` must not be used again afterwards.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 { unsafe {
-    if ptr.is_null() {
-        return Error::NullPointer.error_code();
-    };
+pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 {
+    unsafe {
+        if ptr.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    drop(Box::from_raw(ptr as *mut Mutex<OnlineCiphertextEncryptor>));
+        drop(Box::from_raw(ptr as *mut Mutex<OnlineCiphertextEncryptor>));
 
-    0
-}}
+        0
+    }
+}
 
 /// Frees a decryptor without finalizing the decryption.
 /// # Arguments
@@ -1801,15 +1873,17 @@ pub unsafe extern "C" fn FreeOnlineEncryptor(ptr: *mut c_void) -> i64 { unsafe {
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 /// `ptr` must not be used again afterwards.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn FreeOnlineDecryptor(ptr: *mut c_void) -> i64 { unsafe {
-    if ptr.is_null() {
-        return Error::NullPointer.error_code();
-    };
+pub unsafe extern "C" fn FreeOnlineDecryptor(ptr: *mut c_void) -> i64 {
+    unsafe {
+        if ptr.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    drop(Box::from_raw(ptr as *mut Mutex<OnlineCiphertextDecryptor>));
+        drop(Box::from_raw(ptr as *mut Mutex<OnlineCiphertextDecryptor>));
 
-    0
-}}
+        0
+    }
+}
 
 /// The size, in bytes, of the resulting secret
 /// # Arguments
@@ -1831,21 +1905,23 @@ pub extern "C" fn JoinSharesSize(share_length: usize) -> i64 {
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 { unsafe {
-    if key.is_null() {
-        return Error::NullPointer.error_code();
-    };
+pub unsafe extern "C" fn GenerateKey(key: *mut u8, key_length: usize) -> i64 {
+    unsafe {
+        if key.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let key = slice::from_raw_parts_mut(key, key_length);
+        let key = slice::from_raw_parts_mut(key, key_length);
 
-    let k = match utils::generate_key(key_length) {
-        Ok(x) => Zeroizing::new(x),
-        Err(e) => return e.error_code(),
-    };
+        let k = match utils::generate_key(key_length) {
+            Ok(x) => Zeroizing::new(x),
+            Err(e) => return e.error_code(),
+        };
 
-    key.copy_from_slice(&k);
-    0
-}}
+        key.copy_from_slice(&k);
+        0
+    }
+}
 
 /// Derive a key with Argon2 to create a new one. Can be used with a password.
 /// # Arguments
@@ -1868,30 +1944,33 @@ pub unsafe extern "C" fn DeriveKeyArgon2(
     argon2_parameters_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 { unsafe {
-    if key.is_null() || result.is_null() || argon2_parameters.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if key.is_null() || result.is_null() || argon2_parameters.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let key = slice::from_raw_parts(key, key_length);
+        let key = slice::from_raw_parts(key, key_length);
 
-    let argon2_parameters_raw = slice::from_raw_parts(argon2_parameters, argon2_parameters_length);
+        let argon2_parameters_raw =
+            slice::from_raw_parts(argon2_parameters, argon2_parameters_length);
 
-    let argon2_parameters = match Argon2Parameters::try_from(argon2_parameters_raw) {
-        Ok(x) => x,
-        Err(e) => return e.error_code(),
-    };
+        let argon2_parameters = match Argon2Parameters::try_from(argon2_parameters_raw) {
+            Ok(x) => x,
+            Err(e) => return e.error_code(),
+        };
 
-    let native_result = match utils::derive_key_argon2(key, &argon2_parameters) {
-        Ok(x) => Zeroizing::new(x),
-        Err(e) => return e.error_code(),
-    };
+        let native_result = match utils::derive_key_argon2(key, &argon2_parameters) {
+            Ok(x) => Zeroizing::new(x),
+            Err(e) => return e.error_code(),
+        };
 
-    let result = slice::from_raw_parts_mut(result, result_length);
+        let result = slice::from_raw_parts_mut(result, result_length);
 
-    result.copy_from_slice(&native_result);
-    0
-}}
+        result.copy_from_slice(&native_result);
+        0
+    }
+}
 
 /// Derive a key with PBKDF2 to create a new one. Can be used with a password.
 /// # Arguments
@@ -1915,29 +1994,31 @@ pub unsafe extern "C" fn DeriveKeyPbkdf2(
     niterations: u32,
     result: *mut u8,
     result_length: usize,
-) -> i64 { unsafe {
-    if key.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if key.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let salt = if salt.is_null() || salt_length == 0 {
-        b""
-    } else {
-        slice::from_raw_parts(salt, salt_length)
-    };
+        let salt = if salt.is_null() || salt_length == 0 {
+            b""
+        } else {
+            slice::from_raw_parts(salt, salt_length)
+        };
 
-    let key = slice::from_raw_parts(key, key_length);
-    let result = slice::from_raw_parts_mut(result, result_length);
+        let key = slice::from_raw_parts(key, key_length);
+        let result = slice::from_raw_parts_mut(result, result_length);
 
-    let native_result = Zeroizing::new(utils::derive_key_pbkdf2(
-        key,
-        salt,
-        niterations,
-        result_length,
-    ));
-    result.copy_from_slice(&native_result);
-    0
-}}
+        let native_result = Zeroizing::new(utils::derive_key_pbkdf2(
+            key,
+            salt,
+            niterations,
+            result_length,
+        ));
+        result.copy_from_slice(&native_result);
+        0
+    }
+}
 
 /// Derive a key with PBKDF2 and return both the SecretKey and the DerivationParameters.
 /// # Arguments
@@ -1964,36 +2045,38 @@ pub unsafe extern "C" fn DeriveSecretKeyPbkdf2(
     secret_key_length: usize,
     params_out: *mut u8,
     params_out_length: usize,
-) -> i64 { unsafe {
-    if password.is_null() || secret_key.is_null() || params_out.is_null() {
-        return Error::NullPointer.error_code();
+) -> i64 {
+    unsafe {
+        if password.is_null() || secret_key.is_null() || params_out.is_null() {
+            return Error::NullPointer.error_code();
+        }
+
+        if secret_key_length != GenerateSecretKeySize() as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        if params_out_length != DeriveSecretKeyPbkdf2Size() as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let password = slice::from_raw_parts(password, password_length);
+
+        let (sk, params) = match Pbkdf2::with_params(iterations).derive(password) {
+            Ok(x) => x,
+            Err(e) => return e.error_code(),
+        };
+
+        let sk_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(sk.into());
+        let params_bytes: Vec<u8> = params.into();
+
+        let secret_key = slice::from_raw_parts_mut(secret_key, secret_key_length);
+        let params_out = slice::from_raw_parts_mut(params_out, params_out_length);
+
+        secret_key.copy_from_slice(&sk_bytes);
+        params_out.copy_from_slice(&params_bytes);
+        0
     }
-
-    if secret_key_length != GenerateSecretKeySize() as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    if params_out_length != DeriveSecretKeyPbkdf2Size() as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let password = slice::from_raw_parts(password, password_length);
-
-    let (sk, params) = match Pbkdf2::with_params(iterations).derive(password) {
-        Ok(x) => x,
-        Err(e) => return e.error_code(),
-    };
-
-    let sk_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(sk.into());
-    let params_bytes: Vec<u8> = params.into();
-
-    let secret_key = slice::from_raw_parts_mut(secret_key, secret_key_length);
-    let params_out = slice::from_raw_parts_mut(params_out, params_out_length);
-
-    secret_key.copy_from_slice(&sk_bytes);
-    params_out.copy_from_slice(&params_bytes);
-    0
-}}
+}
 
 /// Returns the size of the DerivationParameters output buffer for `DeriveSecretKeyPbkdf2()`.
 /// The size is fixed: 8 (header) + 4 (iterations) + 4 (salt length) + 16 (salt) = 32 bytes.
@@ -2029,50 +2112,55 @@ pub unsafe extern "C" fn DeriveSecretKeyArgon2(
     secret_key_length: usize,
     params_out: *mut u8,
     params_out_length: usize,
-) -> i64 { unsafe {
-    if password.is_null()
-        || argon2_parameters.is_null()
-        || secret_key.is_null()
-        || params_out.is_null()
-    {
-        return Error::NullPointer.error_code();
+) -> i64 {
+    unsafe {
+        if password.is_null()
+            || argon2_parameters.is_null()
+            || secret_key.is_null()
+            || params_out.is_null()
+        {
+            return Error::NullPointer.error_code();
+        }
+
+        if secret_key_length != GenerateSecretKeySize() as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        if params_out_length
+            != DeriveSecretKeyArgon2ParametersSize(argon2_parameters_length) as usize
+        {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let password = slice::from_raw_parts(password, password_length);
+        let argon2_parameters_raw =
+            slice::from_raw_parts(argon2_parameters, argon2_parameters_length);
+
+        let argon2_params = match Argon2Parameters::try_from(argon2_parameters_raw) {
+            Ok(x) => x,
+            Err(e) => return e.error_code(),
+        };
+
+        let (sk, params) = match Argon2::with_params(argon2_params).derive(password) {
+            Ok(x) => x,
+            Err(e) => return e.error_code(),
+        };
+
+        let sk_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(sk.into());
+        let params_bytes: Vec<u8> = params.into();
+
+        if params_bytes.len() != params_out_length {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let secret_key = slice::from_raw_parts_mut(secret_key, secret_key_length);
+        let params_out = slice::from_raw_parts_mut(params_out, params_out_length);
+
+        secret_key.copy_from_slice(&sk_bytes);
+        params_out.copy_from_slice(&params_bytes);
+        0
     }
-
-    if secret_key_length != GenerateSecretKeySize() as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    if params_out_length != DeriveSecretKeyArgon2ParametersSize(argon2_parameters_length) as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let password = slice::from_raw_parts(password, password_length);
-    let argon2_parameters_raw = slice::from_raw_parts(argon2_parameters, argon2_parameters_length);
-
-    let argon2_params = match Argon2Parameters::try_from(argon2_parameters_raw) {
-        Ok(x) => x,
-        Err(e) => return e.error_code(),
-    };
-
-    let (sk, params) = match Argon2::with_params(argon2_params).derive(password) {
-        Ok(x) => x,
-        Err(e) => return e.error_code(),
-    };
-
-    let sk_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(sk.into());
-    let params_bytes: Vec<u8> = params.into();
-
-    if params_bytes.len() != params_out_length {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let secret_key = slice::from_raw_parts_mut(secret_key, secret_key_length);
-    let params_out = slice::from_raw_parts_mut(params_out, params_out_length);
-
-    secret_key.copy_from_slice(&sk_bytes);
-    params_out.copy_from_slice(&params_bytes);
-    0
-}}
+}
 
 /// Derive a key with PBKDF2 and return both the SecretKey and the DerivationParameters.
 /// # Arguments
@@ -2103,37 +2191,39 @@ pub unsafe extern "C" fn DeriveSecretKeyPbkdf2WithSalt(
     secret_key_length: usize,
     params_out: *mut u8,
     params_out_length: usize,
-) -> i64 { unsafe {
-    if password.is_null() || salt.is_null() || secret_key.is_null() || params_out.is_null() {
-        return Error::NullPointer.error_code();
+) -> i64 {
+    unsafe {
+        if password.is_null() || salt.is_null() || secret_key.is_null() || params_out.is_null() {
+            return Error::NullPointer.error_code();
+        }
+
+        if secret_key_length != GenerateSecretKeySize() as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        if params_out_length != DeriveSecretKeyPbkdf2WithSaltSize(salt_length) as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let password = slice::from_raw_parts(password, password_length);
+        let salt = slice::from_raw_parts(salt, salt_length);
+
+        let (sk, params) = match Pbkdf2::with_params(iterations).derive_with_salt(password, salt) {
+            Ok(x) => x,
+            Err(e) => return e.error_code(),
+        };
+
+        let sk_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(sk.into());
+        let params_bytes: Vec<u8> = params.into();
+
+        let secret_key = slice::from_raw_parts_mut(secret_key, secret_key_length);
+        let params_out = slice::from_raw_parts_mut(params_out, params_out_length);
+
+        secret_key.copy_from_slice(&sk_bytes);
+        params_out.copy_from_slice(&params_bytes);
+        0
     }
-
-    if secret_key_length != GenerateSecretKeySize() as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    if params_out_length != DeriveSecretKeyPbkdf2WithSaltSize(salt_length) as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let password = slice::from_raw_parts(password, password_length);
-    let salt = slice::from_raw_parts(salt, salt_length);
-
-    let (sk, params) = match Pbkdf2::with_params(iterations).derive_with_salt(password, salt) {
-        Ok(x) => x,
-        Err(e) => return e.error_code(),
-    };
-
-    let sk_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(sk.into());
-    let params_bytes: Vec<u8> = params.into();
-
-    let secret_key = slice::from_raw_parts_mut(secret_key, secret_key_length);
-    let params_out = slice::from_raw_parts_mut(params_out, params_out_length);
-
-    secret_key.copy_from_slice(&sk_bytes);
-    params_out.copy_from_slice(&params_bytes);
-    0
-}}
+}
 
 /// Returns the size of the DerivationParameters output buffer for `DeriveSecretKeyPbkdf2WithSalt()`.
 /// The size is: 8 (header) + 4 (iterations) + 4 (salt length field) + salt_length (salt bytes).
@@ -2180,26 +2270,29 @@ pub unsafe extern "C" fn GetArgon2DerivationParameters(
     argon2_parameters_length: usize,
     result: *mut u8,
     result_length: usize,
-) -> i64 { unsafe {
-    if argon2_parameters.is_null() || result.is_null() {
-        return Error::NullPointer.error_code();
+) -> i64 {
+    unsafe {
+        if argon2_parameters.is_null() || result.is_null() {
+            return Error::NullPointer.error_code();
+        }
+
+        if result_length != GetArgon2DerivationParametersSize(argon2_parameters_length) as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let argon2_parameters_raw =
+            slice::from_raw_parts(argon2_parameters, argon2_parameters_length);
+        let argon2_params = match Argon2Parameters::try_from(argon2_parameters_raw) {
+            Ok(x) => x,
+            Err(e) => return e.error_code(),
+        };
+
+        let dp_bytes: Vec<u8> = Argon2::with_params(argon2_params).parameters().into();
+        let result = slice::from_raw_parts_mut(result, result_length);
+        result.copy_from_slice(&dp_bytes);
+        result_length as i64
     }
-
-    if result_length != GetArgon2DerivationParametersSize(argon2_parameters_length) as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let argon2_parameters_raw = slice::from_raw_parts(argon2_parameters, argon2_parameters_length);
-    let argon2_params = match Argon2Parameters::try_from(argon2_parameters_raw) {
-        Ok(x) => x,
-        Err(e) => return e.error_code(),
-    };
-
-    let dp_bytes: Vec<u8> = Argon2::with_params(argon2_params).parameters().into();
-    let result = slice::from_raw_parts_mut(result, result_length);
-    result.copy_from_slice(&dp_bytes);
-    result_length as i64
-}}
+}
 
 /// Returns the required output buffer size for `GetPbkdf2DerivationParameters()`.
 /// The size is always 32 bytes: 8 (header) + 4 (iterations) + 4 (salt length) + 16 (salt).
@@ -2224,25 +2317,27 @@ pub unsafe extern "C" fn GetPbkdf2DerivationParameters(
     iterations: u32,
     result: *mut u8,
     result_length: usize,
-) -> i64 { unsafe {
-    if result.is_null() {
-        return Error::NullPointer.error_code();
+) -> i64 {
+    unsafe {
+        if result.is_null() {
+            return Error::NullPointer.error_code();
+        }
+
+        if result_length != GetPbkdf2DerivationParametersSize() as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let dp = match Pbkdf2::with_params(iterations).parameters() {
+            Ok(x) => x,
+            Err(e) => return e.error_code(),
+        };
+
+        let dp_bytes: Vec<u8> = dp.into();
+        let result = slice::from_raw_parts_mut(result, result_length);
+        result.copy_from_slice(&dp_bytes);
+        result_length as i64
     }
-
-    if result_length != GetPbkdf2DerivationParametersSize() as usize {
-        return Error::InvalidOutputLength.error_code();
-    }
-
-    let dp = match Pbkdf2::with_params(iterations).parameters() {
-        Ok(x) => x,
-        Err(e) => return e.error_code(),
-    };
-
-    let dp_bytes: Vec<u8> = dp.into();
-    let result = slice::from_raw_parts_mut(result, result_length);
-    result.copy_from_slice(&dp_bytes);
-    result_length as i64
-}}
+}
 
 /// # Arguments
 ///  * `data` - Pointer to the input buffer.
@@ -2257,24 +2352,26 @@ pub unsafe extern "C" fn ValidateHeader(
     data: *const u8,
     data_length: usize,
     data_type: u16,
-) -> i64 { unsafe {
-    if data.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if data.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let data = slice::from_raw_parts(data, data_length);
+        let data = slice::from_raw_parts(data, data_length);
 
-    match DataType::try_from(data_type) {
-        Ok(t) => {
-            if utils::validate_header(data, t) {
-                1
-            } else {
-                0
+        match DataType::try_from(data_type) {
+            Ok(t) => {
+                if utils::validate_header(data, t) {
+                    1
+                } else {
+                    0
+                }
             }
+            Err(_) => Error::UnknownType.error_code(),
         }
-        Err(_) => Error::UnknownType.error_code(),
     }
-}}
+}
 
 /// This is binded here for one specific use case, do not use it if you don't know what you're doing.
 /// # Safety
@@ -2290,20 +2387,22 @@ pub unsafe extern "C" fn ScryptSimple(
     p: u32,
     output: *mut u8,
     output_length: usize,
-) -> i64 { unsafe {
-    if password.is_null() && salt.is_null() && output.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if password.is_null() && salt.is_null() && output.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let password = slice::from_raw_parts(password, password_length);
-    let salt = slice::from_raw_parts(salt, salt_length);
+        let password = slice::from_raw_parts(password, password_length);
+        let salt = slice::from_raw_parts(salt, salt_length);
 
-    let hash = utils::scrypt_simple(password, salt, log_n, r, p);
+        let hash = utils::scrypt_simple(password, salt, log_n, r, p);
 
-    let output = slice::from_raw_parts_mut(output, output_length);
-    output[..hash.len()].copy_from_slice(hash.as_bytes());
-    hash.len() as i64
-}}
+        let output = slice::from_raw_parts_mut(output, output_length);
+        output[..hash.len()].copy_from_slice(hash.as_bytes());
+        hash.len() as i64
+    }
+}
 
 /// This is binded here for one specific use case, do not use it if you don't know what you're doing.
 /// # Safety
@@ -2325,13 +2424,16 @@ pub unsafe extern "C" fn ScryptSimpleSize() -> i64 {
 pub unsafe extern "C" fn GetDefaultArgon2Parameters(
     argon2_parameters: *mut u8,
     argon2_parameters_length: usize,
-) -> i64 { unsafe {
-    let argon2_parameters = slice::from_raw_parts_mut(argon2_parameters, argon2_parameters_length);
+) -> i64 {
+    unsafe {
+        let argon2_parameters =
+            slice::from_raw_parts_mut(argon2_parameters, argon2_parameters_length);
 
-    let argon2_parameters_raw: Vec<u8> = (&Argon2Parameters::default()).into();
-    argon2_parameters.copy_from_slice(&argon2_parameters_raw);
-    0
-}}
+        let argon2_parameters_raw: Vec<u8> = (&Argon2Parameters::default()).into();
+        argon2_parameters.copy_from_slice(&argon2_parameters_raw);
+        0
+    }
+}
 
 /// Size of the Argon2Parameters struct.
 /// # Returns
@@ -2368,22 +2470,24 @@ pub unsafe extern "C" fn Decode(
     input_length: usize,
     output: *mut u8,
     output_length: usize,
-) -> i64 { unsafe {
-    if input.is_null() || output.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if input.is_null() || output.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
-    let output = slice::from_raw_parts_mut(output, output_length);
+        let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
+        let output = slice::from_raw_parts_mut(output, output_length);
 
-    match devolutions_crypto::utils::base64_decode(input) {
-        Ok(res) => {
-            output.copy_from_slice(&res);
-            res.len() as i64
+        match devolutions_crypto::utils::base64_decode(input) {
+            Ok(res) => {
+                output.copy_from_slice(&res);
+                res.len() as i64
+            }
+            Err(_err) => -1,
         }
-        Err(_err) => -1,
     }
-}}
+}
 
 /// Encode a byte array to a base64 string.
 /// # Arguments
@@ -2401,20 +2505,22 @@ pub unsafe extern "C" fn Encode(
     input_length: usize,
     output: *mut u8,
     output_length: usize,
-) -> i64 { unsafe {
-    if input.is_null() || output.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if input.is_null() || output.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let input = slice::from_raw_parts(input, input_length);
-    let output = slice::from_raw_parts_mut(output, output_length);
+        let input = slice::from_raw_parts(input, input_length);
+        let output = slice::from_raw_parts_mut(output, output_length);
 
-    let encode_res = devolutions_crypto::utils::base64_encode(input).into_bytes();
+        let encode_res = devolutions_crypto::utils::base64_encode(input).into_bytes();
 
-    output.copy_from_slice(&encode_res);
+        output.copy_from_slice(&encode_res);
 
-    encode_res.len() as i64
-}}
+        encode_res.len() as i64
+    }
+}
 
 /// Decode a base64 string to bytes using base64url.
 /// # Arguments
@@ -2432,19 +2538,21 @@ pub unsafe extern "C" fn DecodeUrl(
     input_length: usize,
     output: *mut u8,
     output_length: usize,
-) -> i64 { unsafe {
-    if input.is_null() || output.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if input.is_null() || output.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
-    let output = slice::from_raw_parts_mut(output, output_length);
+        let input = std::str::from_utf8_unchecked(slice::from_raw_parts(input, input_length));
+        let output = slice::from_raw_parts_mut(output, output_length);
 
-    match general_purpose::URL_SAFE_NO_PAD.decode_slice_unchecked(input, output) {
-        Ok(res) => res as i64,
-        Err(_e) => -1,
+        match general_purpose::URL_SAFE_NO_PAD.decode_slice_unchecked(input, output) {
+            Ok(res) => res as i64,
+            Err(_e) => -1,
+        }
     }
-}}
+}
 
 /// Encode a byte array to a base64 string using base64url.
 /// # Arguments
@@ -2462,19 +2570,21 @@ pub unsafe extern "C" fn EncodeUrl(
     input_length: usize,
     output: *mut u8,
     output_length: usize,
-) -> i64 { unsafe {
-    if input.is_null() || output.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if input.is_null() || output.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let input = slice::from_raw_parts(input, input_length);
-    let output = slice::from_raw_parts_mut(output, output_length);
+        let input = slice::from_raw_parts(input, input_length);
+        let output = slice::from_raw_parts_mut(output, output_length);
 
-    match general_purpose::URL_SAFE_NO_PAD.encode_slice(input, output) {
-        Ok(res) => res as i64,
-        Err(_err) => -1,
+        match general_purpose::URL_SAFE_NO_PAD.encode_slice(input, output) {
+            Ok(res) => res as i64,
+            Err(_err) => -1,
+        }
     }
-}}
+}
 
 /// Compare two byte arrays with constant-time equality.
 /// # Arguments
@@ -2493,20 +2603,22 @@ pub unsafe extern "C" fn ConstantTimeEquals(
     x_length: usize,
     y: *const u8,
     y_length: usize,
-) -> i64 { unsafe {
-    if x.is_null() || y.is_null() {
-        return Error::NullPointer.error_code();
-    };
+) -> i64 {
+    unsafe {
+        if x.is_null() || y.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let x = slice::from_raw_parts(x, x_length);
-    let y = slice::from_raw_parts(y, y_length);
+        let x = slice::from_raw_parts(x, x_length);
+        let y = slice::from_raw_parts(y, y_length);
 
-    if utils::constant_time_equals(x, y) {
-        1
-    } else {
-        0
+        if utils::constant_time_equals(x, y) {
+            1
+        } else {
+            0
+        }
     }
-}}
+}
 
 ///  Size of the version string
 /// # Returns
@@ -2525,16 +2637,18 @@ pub extern "C" fn VersionSize() -> i64 {
 /// # Safety
 /// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 { unsafe {
-    if output.is_null() {
-        return Error::NullPointer.error_code();
-    };
+pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
+    unsafe {
+        if output.is_null() {
+            return Error::NullPointer.error_code();
+        };
 
-    let output = slice::from_raw_parts_mut(output, output_length);
-    output.copy_from_slice(VERSION.as_bytes());
+        let output = slice::from_raw_parts_mut(output, output_length);
+        output.copy_from_slice(VERSION.as_bytes());
 
-    output.len() as i64
-}}
+        output.len() as i64
+    }
+}
 
 #[test]
 fn test_encrypt_length() {

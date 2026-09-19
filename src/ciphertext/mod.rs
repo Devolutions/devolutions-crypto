@@ -642,7 +642,7 @@ fn encrypt_decrypt_aad_v2_test() {
 
 #[test]
 fn asymmetric_test() {
-    use super::key::{generate_keypair, KeyVersion};
+    use super::key::{KeyVersion, generate_keypair};
 
     let test_plaintext = b"this is a test data";
 
@@ -670,7 +670,7 @@ fn asymmetric_test() {
 
 #[test]
 fn asymmetric_aad_test() {
-    use super::key::{generate_keypair, KeyVersion};
+    use super::key::{KeyVersion, generate_keypair};
 
     let test_plaintext = b"this is a test data";
     let aad = b"This is some public data that we want to authenticate";
@@ -709,7 +709,7 @@ fn asymmetric_aad_test() {
 
 #[test]
 fn asymmetric_test_v2() {
-    use super::key::{generate_keypair, KeyVersion};
+    use super::key::{KeyVersion, generate_keypair};
 
     let test_plaintext = b"this is a test data";
 
@@ -734,7 +734,7 @@ fn asymmetric_test_v2() {
 
 #[test]
 fn asymmetric_aad_test_v2() {
-    use super::key::{generate_keypair, KeyVersion};
+    use super::key::{KeyVersion, generate_keypair};
 
     let test_plaintext = b"this is a test data";
     let aad = b"This is some public data that we want to authenticate";
@@ -773,7 +773,7 @@ fn asymmetric_aad_test_v2() {
 
 #[test]
 fn encrypt_decrypt_with_secret_key() {
-    use super::key::{generate_secret_key, KeyVersion};
+    use super::key::{KeyVersion, generate_secret_key};
 
     let data = b"somesecretdata";
     let key = generate_secret_key(KeyVersion::Latest);
@@ -786,7 +786,7 @@ fn encrypt_decrypt_with_secret_key() {
 
 #[test]
 fn encrypt_decrypt_with_secret_key_aad() {
-    use super::key::{generate_secret_key, KeyVersion};
+    use super::key::{KeyVersion, generate_secret_key};
 
     let data = b"somesecretdata";
     let aad = b"somepublicdata";
@@ -801,15 +801,17 @@ fn encrypt_decrypt_with_secret_key_aad() {
 
     assert_eq!(decrypted, data);
 
-    assert!(encrypted
-        .decrypt_with_secret_key_and_aad(&key, wrong_aad)
-        .is_err());
+    assert!(
+        encrypted
+            .decrypt_with_secret_key_and_aad(&key, wrong_aad)
+            .is_err()
+    );
     assert!(encrypted.decrypt_with_secret_key(&key).is_err());
 }
 
 #[test]
 fn encrypt_decrypt_with_secret_key_v1() {
-    use super::key::{generate_secret_key, KeyVersion};
+    use super::key::{KeyVersion, generate_secret_key};
 
     let data = b"somesecretdata";
     let key = generate_secret_key(KeyVersion::Latest);
@@ -827,7 +829,7 @@ fn encrypt_decrypt_with_secret_key_v1() {
 
 #[test]
 fn encrypt_decrypt_with_secret_key_v2() {
-    use super::key::{generate_secret_key, KeyVersion};
+    use super::key::{KeyVersion, generate_secret_key};
 
     let data = b"somesecretdata";
     let key = generate_secret_key(KeyVersion::Latest);

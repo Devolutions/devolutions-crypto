@@ -2,7 +2,7 @@
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 
-use devolutions_crypto::ciphertext::{encrypt, CiphertextVersion};
+use devolutions_crypto::ciphertext::{CiphertextVersion, encrypt};
 
 #[derive(Arbitrary, Clone, Debug)]
 struct Input {

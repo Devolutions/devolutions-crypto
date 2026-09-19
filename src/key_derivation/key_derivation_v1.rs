@@ -7,9 +7,9 @@ use zeroize::Zeroizing;
 
 use rand::TryRng;
 
-use crate::key::{secret_key_from_raw, SecretKey};
+use crate::key::{SecretKey, secret_key_from_raw};
 use crate::utils::derive_key_pbkdf2;
-use crate::{Error, Header, KeyDerivationVersion, Result, DEFAULT_PBKDF2_ITERATIONS};
+use crate::{DEFAULT_PBKDF2_ITERATIONS, Error, Header, KeyDerivationVersion, Result};
 
 use super::{DerivationParameters, DerivationParametersPayload};
 

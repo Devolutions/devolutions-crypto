@@ -2,8 +2,8 @@
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 
-use devolutions_crypto::utils::derive_key_argon2;
 use devolutions_crypto::Argon2Parameters;
+use devolutions_crypto::utils::derive_key_argon2;
 
 #[derive(Arbitrary, Clone, Debug)]
 struct Input {

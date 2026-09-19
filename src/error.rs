@@ -62,7 +62,9 @@ pub enum Error {
     #[error("The version is not the same for all the data.")]
     InconsistentVersion,
     /// The length of the data to encrypt/decrypt during online encryption is not the same as the chunk size: -43
-    #[error("The length of the data to encrypt/decrypt during online encryption is not the same as the chunk size")]
+    #[error(
+        "The length of the data to encrypt/decrypt during online encryption is not the same as the chunk size"
+    )]
     InvalidChunkLength,
     /// The mutex is poisoned and cannot be locked: -44
     #[error("The mutex is poisoned and cannot be locked")]

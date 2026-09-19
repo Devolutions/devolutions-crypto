@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
-use devolutions_crypto::utils::{base64_decode, base64_encode};
 use devolutions_crypto::DEFAULT_PBKDF2_ITERATIONS;
+use devolutions_crypto::utils::{base64_decode, base64_encode};
 use std::{borrow::Borrow, convert::TryFrom};
 
 /// Gives a CLI interface to Devolutions Crypto Library
@@ -236,7 +236,7 @@ fn main() {
 }
 
 fn generate_key() {
-    use devolutions_crypto::key::{generate_secret_key, KeyVersion};
+    use devolutions_crypto::key::{KeyVersion, generate_secret_key};
 
     let key: Vec<u8> = generate_secret_key(KeyVersion::Latest).into();
     println!("{}", base64_encode(&key));

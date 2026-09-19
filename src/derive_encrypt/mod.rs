@@ -189,9 +189,9 @@ impl TryFrom<&[u8]> for KdfEncryptedData {
 
 #[cfg(test)]
 mod tests {
+    use crate::Pbkdf2;
     use crate::key_derivation::Argon2;
     use crate::utils::validate_header;
-    use crate::Pbkdf2;
 
     use super::*;
 
@@ -254,9 +254,11 @@ mod tests {
         )
         .unwrap();
 
-        assert!(wrapped
-            .decrypt_with_password_and_aad(password, b"wrong aad")
-            .is_err());
+        assert!(
+            wrapped
+                .decrypt_with_password_and_aad(password, b"wrong aad")
+                .is_err()
+        );
     }
 
     #[test]

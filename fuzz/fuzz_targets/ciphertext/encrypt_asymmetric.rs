@@ -2,7 +2,7 @@
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 
-use devolutions_crypto::ciphertext::{encrypt_asymmetric, CiphertextVersion};
+use devolutions_crypto::ciphertext::{CiphertextVersion, encrypt_asymmetric};
 use devolutions_crypto::key::PublicKey;
 
 #[derive(Arbitrary, Clone, Debug)]

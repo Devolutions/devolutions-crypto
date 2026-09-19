@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 
 use zeroize::Zeroizing;
 
-use crate::key::{secret_key_from_raw, SecretKey};
+use crate::key::{SecretKey, secret_key_from_raw};
 use crate::{Argon2Parameters, Error, Header, KeyDerivationVersion, Result};
 
 use super::{DerivationParameters, DerivationParametersPayload};

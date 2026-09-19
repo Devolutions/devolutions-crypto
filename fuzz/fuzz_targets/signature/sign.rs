@@ -2,7 +2,7 @@
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 
-use devolutions_crypto::signature::{sign, SignatureVersion};
+use devolutions_crypto::signature::{SignatureVersion, sign};
 use devolutions_crypto::signing_key::SigningKeyPair;
 
 #[derive(Arbitrary, Clone, Debug)]
