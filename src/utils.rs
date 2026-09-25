@@ -1,9 +1,8 @@
 //! Module for utils that does not use any of the Devolutions custom data types.
 
 use base64::{
-    alphabet,
+    Engine as _, alphabet,
     engine::{DecodePaddingMode, GeneralPurpose, GeneralPurposeConfig},
-    Engine as _,
 };
 use hmac::Hmac;
 use pbkdf2::pbkdf2;

@@ -3,12 +3,12 @@ use std::convert::{TryFrom as _, TryInto as _};
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
 
+use super::Argon2Parameters;
+use super::DEFAULT_PBKDF2_ITERATIONS;
+use super::DataType;
 use super::derive_encrypt;
 use super::key_derivation::{Argon2, DerivationParameters, Pbkdf2};
 use super::utils;
-use super::Argon2Parameters;
-use super::DataType;
-use super::DEFAULT_PBKDF2_ITERATIONS;
 use super::{
     ciphertext,
     ciphertext::{Ciphertext, CiphertextVersion},

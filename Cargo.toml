@@ -21,7 +21,7 @@ rust-argon2 = { version = "3.0", default-features = false }
 name = "devolutions-crypto"
 version.workspace = true
 authors = ["Mathieu Morrissette <mmorrissette@devolutions.net>", "Sebastien Duquette <sduquette@devolutions.net>"]
-edition = "2021"
+edition = "2024"
 readme = "README_RUST.md"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/Devolutions/devolutions-crypto"

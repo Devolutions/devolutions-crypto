@@ -2,7 +2,7 @@
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 
-use devolutions_crypto::key::{generate_keypair, KeyVersion};
+use devolutions_crypto::key::{KeyVersion, generate_keypair};
 
 #[derive(Arbitrary, Clone, Debug)]
 struct Input {

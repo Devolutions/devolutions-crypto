@@ -41,7 +41,7 @@ use wasm_bindgen::prelude::*;
 
 use zeroize::Zeroizing;
 
-use crate::key::{secret_key_from_raw, SecretKey};
+use crate::key::{SecretKey, secret_key_from_raw};
 
 #[cfg(feature = "fuzz")]
 use crate::Argon2Parameters;
@@ -200,8 +200,8 @@ pub fn derive_key(
 mod tests {
     use std::convert::TryFrom;
 
-    use crate::key::secret_key_from_raw;
     use crate::Argon2Parameters;
+    use crate::key::secret_key_from_raw;
 
     use super::*;
 
@@ -327,8 +327,8 @@ mod tests {
 
     #[test]
     fn validate_header_rejects_wrong_type() {
-        use crate::utils::validate_header;
         use crate::DataType;
+        use crate::utils::validate_header;
         let (_, params) = Pbkdf2::with_params(10)
             .derive_with_salt(b"pw", b"salt_16bytes!!!")
             .unwrap();

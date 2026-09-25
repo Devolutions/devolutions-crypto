@@ -292,12 +292,12 @@ pub use enums::{
 
 pub use argon2::Variant as Argon2Variant;
 pub use argon2::Version as Argon2Version;
-pub use argon2parameters::defaults as argon2parameters_defaults;
 pub use argon2parameters::Argon2Parameters;
 pub use argon2parameters::Argon2ParametersBuilder;
-pub use derive_encrypt::{encrypt_with_password, encrypt_with_password_and_aad, KdfEncryptedData};
+pub use argon2parameters::defaults as argon2parameters_defaults;
+pub use derive_encrypt::{KdfEncryptedData, encrypt_with_password, encrypt_with_password_and_aad};
 pub use error::{Error, Result};
-pub use key_derivation::{derive_key, Argon2, DerivationParameters, Pbkdf2};
+pub use key_derivation::{Argon2, DerivationParameters, Pbkdf2, derive_key};
 
 pub const DEFAULT_KEY_SIZE: usize = 32;
 pub const DEFAULT_PBKDF2_ITERATIONS: u32 = 600000;

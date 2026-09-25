@@ -2,7 +2,7 @@
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 
-use devolutions_crypto::key::{mix_key_exchange, PrivateKey, PublicKey};
+use devolutions_crypto::key::{PrivateKey, PublicKey, mix_key_exchange};
 
 #[derive(Arbitrary, Clone, Debug)]
 struct Input {

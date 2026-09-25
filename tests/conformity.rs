@@ -1,10 +1,10 @@
-use base64::{engine::general_purpose, Engine as _};
+use base64::{Engine as _, engine::general_purpose};
 use devolutions_crypto::{
+    Argon2Parameters, KdfEncryptedData,
     ciphertext::Ciphertext,
     key::{PrivateKey, SecretKey},
     password_hash::PasswordHash,
     utils::{derive_key_argon2, derive_key_pbkdf2},
-    Argon2Parameters, KdfEncryptedData,
 };
 
 use std::convert::TryFrom as _;

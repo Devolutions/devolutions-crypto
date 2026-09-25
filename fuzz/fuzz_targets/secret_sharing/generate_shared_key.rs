@@ -2,7 +2,7 @@
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 
-use devolutions_crypto::secret_sharing::{generate_shared_key, SecretSharingVersion};
+use devolutions_crypto::secret_sharing::{SecretSharingVersion, generate_shared_key};
 
 #[derive(Arbitrary, Clone, Debug)]
 struct Input {
