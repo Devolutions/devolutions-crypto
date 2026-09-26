@@ -41,5 +41,8 @@
     "esbuild@0.27.7": true,
     "lmdb@3.5.4": true,
     "msgpackr-extract@3.0.4": true
+  },
+  "engines": {
+    "npm": ">=11.17.0"
   }
 }
