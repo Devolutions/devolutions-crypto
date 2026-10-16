@@ -334,6 +334,10 @@ impl OnlineCiphertextV1Encryptor {
 
         let key = ephemeral_private_key.diffie_hellman(&public_key);
 
+        if !key.was_contributory() {
+            return Err(Error::InvalidData);
+        }
+
         // Generate a new nonce
         let mut nonce = [0u8; 20];
         rand::rngs::SysRng
@@ -389,11 +393,15 @@ impl OnlineCiphertextV1Decryptor {
         private_key: &PrivateKey,
         mut aad: Vec<u8>,
         header: OnlineCiphertextV1HeaderAsymmetric,
-    ) -> Self {
+    ) -> Result<Self> {
         // Perform a ECDH exchange as per ECIES
         let private_key = x25519_dalek::StaticSecret::from(private_key);
 
         let key = private_key.diffie_hellman(&header.public_key);
+
+        if !key.was_contributory() {
+            return Err(Error::InvalidData);
+        }
 
         // Derive the key
         let key = Zeroizing::new(blake3::derive_key(CONTEXT, key.as_bytes()));
@@ -406,11 +414,11 @@ impl OnlineCiphertextV1Decryptor {
         let mut header_bytes: Vec<u8> = header.borrow().into();
         aad.append(&mut header_bytes);
 
-        Self {
+        Ok(Self {
             header: OnlineCiphertextV1Header::Asymmetric(header),
             aad,
             cipher,
-        }
+        })
     }
 }
 

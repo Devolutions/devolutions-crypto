@@ -108,8 +108,15 @@ pub fn generate_keypair() -> KeyV1Pair {
     }
 }
 
-pub fn mix_key_exchange(private: &KeyV1Private, public: &KeyV1Public) -> Vec<u8> {
-    private.key.diffie_hellman(&public.key).as_bytes().to_vec()
+pub fn mix_key_exchange(private: &KeyV1Private, public: &KeyV1Public) -> Result<Vec<u8>> {
+    let shared = private.key.diffie_hellman(&public.key);
+
+    // Reject low-order public keys, which yield an all-zero shared secret
+    if !shared.was_contributory() {
+        return Err(Error::InvalidData);
+    }
+
+    Ok(shared.as_bytes().to_vec())
 }
 
 impl From<&KeyV1Public> for x25519_dalek::PublicKey {
