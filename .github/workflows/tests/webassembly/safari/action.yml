@@ -9,7 +9,7 @@ runs:
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         source $HOME/.cargo/env
-        cargo install wasm-pack
+        cargo install wasm-pack --locked
 
     - name: Unit tests
       working-directory: ./
