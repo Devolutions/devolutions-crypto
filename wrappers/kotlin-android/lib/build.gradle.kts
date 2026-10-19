@@ -25,8 +25,8 @@ java {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "17"
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -46,11 +46,15 @@ android {
 
     defaultConfig {
         minSdk = 21
+    }
+
+    testOptions {
         targetSdk = 34
     }
 
     lint {
         abortOnError = false
+        targetSdk = 34
     }
 }
 
