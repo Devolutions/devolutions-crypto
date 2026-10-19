@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased] -
 
+### Breaking Changes
+
+- The default Argon2id parameters (`Argon2Parameters::default()`, `Argon2::new()`, `derive_key` / `encrypt_with_password` with `Latest`) now use 19 MiB of memory (19456 KiB) instead of 4 MiB, matching the OWASP Password Storage Cheat Sheet minimum (m=19 MiB, t=2, p=1). Existing data is unaffected: the parameters are serialized alongside every derivation and are read back from there. Callers that rebuild parameters from the defaults instead of persisting the serialized `Argon2Parameters` / `DerivationParameters` must pin `memory = 4096` to keep deriving the same keys.
+
 ## [0.10.2] - 2026-09-14
 
 - Fix a double free in the C# wrapper
