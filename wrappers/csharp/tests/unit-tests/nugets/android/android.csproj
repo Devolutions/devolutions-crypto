@@ -28,6 +28,6 @@
 
   <ItemGroup>
     <PackageReference Include="Devolutions.Crypto.Core" Version="*" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.0.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.7.1" />
   </ItemGroup>
 </Project>
