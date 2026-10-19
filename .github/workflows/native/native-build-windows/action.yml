@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Download Config
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: config.txt
         path: ./wrappers/csharp
@@ -52,8 +52,9 @@ runs:
         dotnet build ./src/devolutions-crypto.csproj --framework netstandard2.0 -p:Version="$VERSION_MANAGED" --configuration Release --output ./dotnet-core/bin
         dotnet build ./src/devolutions-crypto.csproj --framework net48 -p:Version="$VERSION_MANAGED" --configuration Release --output ./dotnet-framework/bin
 
-    - uses: actions/upload-artifact@v4.3.6
+    - uses: actions/upload-artifact@v7
       with:
+        include-hidden-files: true
         name: native-windows
         path: |
           wrappers/csharp/windows/**

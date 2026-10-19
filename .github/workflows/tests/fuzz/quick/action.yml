@@ -62,8 +62,9 @@ runs:
 
     - name: Upload crash artifacts
       if: failure()
-      uses: actions/upload-artifact@v4.3.6
+      uses: actions/upload-artifact@v7
       with:
+        include-hidden-files: true
         name: fuzz-crash-artifacts
         path: fuzz/artifacts/
         if-no-files-found: ignore

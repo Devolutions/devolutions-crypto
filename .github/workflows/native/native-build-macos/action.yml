@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Download Config
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: config.txt
         path: ./wrappers/csharp
@@ -68,7 +68,8 @@ runs:
         mv wrappers/csharp/macos-temp/* wrappers/csharp/macos/macos/
         rmdir wrappers/csharp/macos-temp
 
-    - uses: actions/upload-artifact@v4.3.6
+    - uses: actions/upload-artifact@v7
       with:
+        include-hidden-files: true
         name: native-macos
         path: wrappers/csharp/macos/

@@ -3,8 +3,9 @@ description: This package the source code used for this build.
 runs:
   using: composite
   steps:
-  - uses: actions/upload-artifact@v4.3.6
+  - uses: actions/upload-artifact@v7
     with:
+      include-hidden-files: true
       name: source
       path: |
         **/*
