@@ -210,11 +210,11 @@ pub fn generate_keypair(version: KeyVersion) -> KeyPair {
 /// assert_eq!(bob_shared, alice_shared);
 /// ```
 pub fn mix_key_exchange(private_key: &PrivateKey, public_key: &PublicKey) -> Result<Vec<u8>> {
-    Ok(match (&private_key.payload, &public_key.payload) {
+    match (&private_key.payload, &public_key.payload) {
         (PrivateKeyPayload::V1(private_key), PublicKeyPayload::V1(public_key)) => {
             key_v1::mix_key_exchange(private_key, public_key)
         } //_ => Err(DevoCryptoError::InvalidDataType),
-    })
+    }
 }
 
 fn keypair_headers(version: KeyVersion) -> (Header<PrivateKey>, Header<PublicKey>) {

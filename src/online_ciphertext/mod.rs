@@ -128,7 +128,8 @@ impl OnlineCiphertextHeader {
         match self.payload {
             OnlineCiphertextHeaderPayload::V1(header) => match header {
                 OnlineCiphertextV1Header::Asymmetric(header) => {
-                    let cipher = OnlineCiphertextV1Decryptor::new_asymmetric(key, full_aad, header);
+                    let cipher =
+                        OnlineCiphertextV1Decryptor::new_asymmetric(key, full_aad, header)?;
 
                     Ok(OnlineCiphertextDecryptor::V1(cipher))
                 }

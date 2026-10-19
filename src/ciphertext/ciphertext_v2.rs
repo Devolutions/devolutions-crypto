@@ -191,6 +191,10 @@ impl CiphertextV2Asymmetric {
 
         let key = ephemeral_private_key.diffie_hellman(&public_key);
 
+        if !key.was_contributory() {
+            return Err(Error::InvalidData);
+        }
+
         let ciphertext = CiphertextV2Symmetric::encrypt(data, key.as_bytes(), aad, header)?;
 
         Ok(Self {
@@ -208,6 +212,10 @@ impl CiphertextV2Asymmetric {
         let private_key = StaticSecret::from(private_key);
 
         let key = private_key.diffie_hellman(&self.public_key);
+
+        if !key.was_contributory() {
+            return Err(Error::InvalidData);
+        }
 
         self.ciphertext.decrypt(key.as_bytes(), aad, header)
     }

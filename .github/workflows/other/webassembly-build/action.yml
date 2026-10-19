@@ -7,7 +7,7 @@ runs:
       shell: bash
       run: |
         rustup update
-        cargo install wasm-pack
+        cargo install wasm-pack --locked
 
     - uses: actions/setup-node@v4
       with:
