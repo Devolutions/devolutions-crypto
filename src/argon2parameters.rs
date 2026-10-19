@@ -23,7 +23,7 @@ pub mod defaults {
 
     pub const LENGTH: u32 = 32;
     pub const LANES: u32 = 1;
-    pub const MEMORY: u32 = 4096;
+    pub const MEMORY: u32 = 19456;
     pub const ITERATIONS: u32 = 2;
     pub const VARIANT: Variant = Variant::Argon2id;
     pub const VERSION: Version = Version::Version13;
@@ -105,13 +105,13 @@ impl Default for Argon2Parameters {
         Argon2Parameters {
             associated_data: Vec::new(),
             secret_key: Vec::new(),
-            length: 32,
-            lanes: 1,
-            memory: 4096,
-            iterations: 2,
-            variant: Variant::Argon2id,
-            version: Version::Version13,
-            dc_version: 1,
+            length: defaults::LENGTH,
+            lanes: defaults::LANES,
+            memory: defaults::MEMORY,
+            iterations: defaults::ITERATIONS,
+            variant: defaults::VARIANT,
+            version: defaults::VERSION,
+            dc_version: defaults::DC_VERSION,
             salt,
         }
     }

@@ -349,7 +349,7 @@ namespace Devolutions.Crypto.Tests
             Argon2Parameters defaultArgon2Parameters = Managed.GetDefaultArgon2Parameters();
 
             Assert.IsTrue(defaultArgon2Parameters != null);
-            Assert.IsTrue(defaultArgon2Parameters.Memory == 4096);
+            Assert.IsTrue(defaultArgon2Parameters.Memory == 19456);
         }
 
         [TestMethod]
