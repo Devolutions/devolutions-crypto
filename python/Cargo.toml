@@ -2,6 +2,9 @@
 name = "devolutions-crypto-python"
 version.workspace = true
 edition = "2024"
+description = "Python bindings for devolutions-crypto"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Devolutions/devolutions-crypto"
 
 [[bin]]
 name = "uniffi-bindgen"

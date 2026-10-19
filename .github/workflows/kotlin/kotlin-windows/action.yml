@@ -4,12 +4,12 @@ runs:
   using: composite
   steps:
     - name: Download Version File
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: config.txt
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v6
       with:
         distribution: 'temurin'
         java-version: '17'
@@ -34,7 +34,8 @@ runs:
 
 
     - name: Upload Kotlin package
-      uses: actions/upload-artifact@v4.3.6
+      uses: actions/upload-artifact@v7
       with:
+        include-hidden-files: true
         name: kotlin-windows
         path: ./wrappers/kotlin/lib/src/main/resources/

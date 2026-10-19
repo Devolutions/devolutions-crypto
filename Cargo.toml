@@ -24,7 +24,6 @@ authors = ["Mathieu Morrissette <mmorrissette@devolutions.net>", "Sebastien Duqu
 edition = "2024"
 readme = "README_RUST.md"
 license = "MIT OR Apache-2.0"
-homepage = "https://github.com/Devolutions/devolutions-crypto"
 repository = "https://github.com/Devolutions/devolutions-crypto"
 description = "An abstraction layer for the cryptography used by Devolutions"
 resolver = "2"

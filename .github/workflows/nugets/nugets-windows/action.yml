@@ -4,17 +4,17 @@ runs:
   using: composite
   steps:
     - name: Download Config
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: config.txt
         path: ./wrappers/csharp
 
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v7
       with:
         python-version: "3.7"
 
     - name: Download Native Libs
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         pattern: native-*
         merge-multiple: true
@@ -43,7 +43,8 @@ runs:
       shell: bash
       run: mv wrappers/csharp/nuget/dotnet-core/package/*.nupkg .
 
-    - uses: actions/upload-artifact@v4.3.6
+    - uses: actions/upload-artifact@v7
       with:
+        include-hidden-files: true
         name: nugets-windows
         path: ./*.nupkg
