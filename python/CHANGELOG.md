@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [0.10.3] - 2026-10-26
+
 ### Breaking changes
 
 - The default Argon2id parameters now use 19 MiB of memory (19456 KiB) instead of 4 MiB, matching the OWASP minimum. Existing data is unaffected since the parameters are serialized with each derivation.
+- Low-order X25519 public keys are now rejected.
 
 ## [2026.6.16] - 2026-06-16
 
