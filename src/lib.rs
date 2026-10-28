@@ -117,12 +117,14 @@
 //!
 //! Example with Argon2 (recommended):
 //! ```rust
+//! # #[cfg(not(feature = "fips"))] {
 //! use devolutions_crypto::key_derivation::Argon2;
 //! let password = b"a very strong password";
 //! let argon2 = Argon2::new();
 //! let (secret_key, params) = argon2.derive(password).expect("derivation should not fail");
 //! // Serialize params to re-derive later:
 //! let params_bytes: Vec<u8> = params.into();
+//! # }
 //! ```
 //!
 //! Example with PBKDF2:
@@ -165,6 +167,7 @@
 //! ciphertext, so callers only need to supply the original password to decrypt.
 //!
 //! ```rust
+//! # #[cfg(not(feature = "fips"))] {
 //! use std::convert::TryFrom as _;
 //! use devolutions_crypto::derive_encrypt::{encrypt_with_password, KdfEncryptedData};
 //! use devolutions_crypto::key_derivation::Argon2;
@@ -186,6 +189,7 @@
 //! let blob = KdfEncryptedData::try_from(blob_bytes.as_slice()).expect("deserialization shouldn't fail");
 //! let plaintext = blob.decrypt_with_password(password).expect("decryption shouldn't fail");
 //! assert_eq!(plaintext, b"secret data");
+//! # }
 //! ```
 //!
 //! ## PasswordHash
@@ -263,7 +267,27 @@
 //!  * Key exchange uses x25519, or ECDH over Curve25519
 //!  * Password Hashing uses PBKDF2-HMAC-SHA2-256
 //!  * Secret Sharing uses Shamir Secret sharing over GF256
+//!
+//! # FIPS mode
+//! Enabling the `fips` feature adds a version 3 of every data type except `OnlineCiphertext` and `Share`,
+//! backed by the FIPS 140-3 validated AWS-LC module (through `aws-lc-rs`):
+//!  * `Ciphertext` V3: AES-256-GCM (module-generated IV), with the key derived per message with HKDF-SHA256.
+//!  * Asymmetric `Ciphertext` V3: ephemeral-static ECDH over NIST P-256, then the symmetric V3 construction.
+//!  * `Key` V3: NIST P-256 keypairs and ECDH key exchange. `SecretKey` V3: 32 bytes from the FIPS DRBG.
+//!  * `SigningKey` and `Signature` V3: ECDSA over NIST P-256 with SHA-256.
+//!  * `PasswordHash` and `DerivationParameters` V3: PBKDF2-HMAC-SHA256.
+//!
+//! When the feature is enabled, `Latest` resolves to V3, all randomness comes from the module's DRBG,
+//! and the encryption, password hashing and key derivation functions refuse to produce data with the
+//! older, non-approved versions (`Error::NotFipsApproved`). Data produced with the older versions can
+//! still be decrypted and verified, so it can be migrated.
 #![allow(clippy::field_reassign_with_default)]
+
+#[cfg(all(feature = "fips", any(feature = "wbindgen", target_arch = "wasm32")))]
+compile_error!("The `fips` feature is not available on WebAssembly.");
+
+#[cfg(all(feature = "fips", feature = "fuzz"))]
+compile_error!("The `fips` feature cannot be combined with the `fuzz` feature.");
 
 mod argon2parameters;
 mod enums;
@@ -280,6 +304,9 @@ pub mod secret_sharing;
 pub mod signature;
 pub mod signing_key;
 pub mod utils;
+
+#[cfg(feature = "fips")]
+pub mod fips;
 
 use enums::{CiphertextSubtype, PasswordHashSubtype, ShareSubtype, SignatureSubtype};
 pub use header::{Header, HeaderType};

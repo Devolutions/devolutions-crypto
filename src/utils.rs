@@ -6,6 +6,7 @@ use base64::{
 };
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
+#[cfg(not(feature = "fips"))]
 use rand::TryRng;
 use sha2::Sha256;
 use subtle::ConstantTimeEq as _;
@@ -32,22 +33,33 @@ use super::Result;
 /// ```
 pub fn generate_key(length: usize) -> Result<Vec<u8>> {
     let mut key = vec![0u8; length];
-    rand::rngs::SysRng
-        .try_fill_bytes(&mut key)
-        .map_err(|_| Error::RandomError)?;
+    fill_random(&mut key)?;
     Ok(key)
 }
 
-/// Fills a fixed-size buffer directly from the operating system's CSPRNG.
+/// Fills `dest` from the CSPRNG. With the `fips` feature, this is the approved
+/// DRBG of the AWS-LC FIPS module; otherwise it is the operating system's CSPRNG.
+pub(crate) fn fill_random(dest: &mut [u8]) -> Result<()> {
+    #[cfg(feature = "fips")]
+    {
+        aws_lc_rs::rand::fill(dest).map_err(|_| Error::RandomError)
+    }
+    #[cfg(not(feature = "fips"))]
+    {
+        rand::rngs::SysRng
+            .try_fill_bytes(dest)
+            .map_err(|_| Error::RandomError)
+    }
+}
+
+/// Fills a fixed-size buffer directly from the CSPRNG (see [`fill_random`]).
 ///
 /// Used for private key generation: drawing the bytes straight from the OS
 /// avoids any intermediate userspace CSPRNG state that could be used to
 /// reconstruct the key. The buffer is zeroized on drop.
 pub(crate) fn random_bytes<const N: usize>() -> Result<Zeroizing<[u8; N]>> {
     let mut bytes = Zeroizing::new([0u8; N]);
-    rand::rngs::SysRng
-        .try_fill_bytes(bytes.as_mut_slice())
-        .map_err(|_| Error::RandomError)?;
+    fill_random(bytes.as_mut_slice())?;
     Ok(bytes)
 }
 

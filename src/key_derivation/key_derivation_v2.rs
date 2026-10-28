@@ -78,7 +78,11 @@ impl Argon2 {
 
     /// Derives the key using the configured Argon2 parameters.
     /// The salt is embedded in `Argon2Parameters` (generated at construction time when using `new()`).
+    ///
+    /// With the `fips` feature, Argon2 is not approved and this returns `Error::NotFipsApproved`.
     pub fn derive(&self, key: &[u8]) -> Result<(SecretKey, DerivationParameters)> {
+        KeyDerivationVersion::V2.resolve_approved()?;
+
         let v2 = KeyDerivationV2 {
             params: self.params.clone(),
         };

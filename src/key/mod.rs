@@ -39,6 +39,8 @@
 //! ```
 
 mod key_v1;
+#[cfg(feature = "fips")]
+mod key_v3;
 mod secret_key_v1;
 
 use super::DataType;
@@ -50,6 +52,11 @@ pub use super::KeyVersion;
 use super::Result;
 
 use key_v1::{KeyV1Private, KeyV1Public};
+#[cfg(feature = "fips")]
+pub(crate) use key_v3::{
+    KeyV3Private, KeyV3Public, PUBLIC_KEY_LENGTH as P256_PUBLIC_KEY_LENGTH,
+    public_from_agreement_key as p256_public_from_agreement_key,
+};
 use secret_key_v1::SecretKeyV1;
 
 use std::borrow::Borrow;
@@ -120,15 +127,22 @@ impl HeaderType for PrivateKey {
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum PrivateKeyPayload {
     V1(KeyV1Private),
+    #[cfg(feature = "fips")]
+    V3(KeyV3Private),
 }
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum PublicKeyPayload {
     V1(KeyV1Public),
+    #[cfg(feature = "fips")]
+    V3(KeyV3Public),
 }
 
 /// Generates a `KeyPair` to use in a key exchange or to encrypt data.
+///
+/// With the `fips` feature, `KeyVersion::Latest` generates a NIST P-256 (V3) keypair.
+/// `KeyVersion::V1` (X25519) can still be generated, but it is not FIPS approved.
 /// # Arguments
 ///  * `version` - Version of the key scheme to use. Use `KeyVersion::Latest` if you're not dealing with shared data.
 /// # Returns
@@ -142,14 +156,24 @@ enum PublicKeyPayload {
 pub fn generate_keypair(version: KeyVersion) -> KeyPair {
     let (private_header, public_header) = keypair_headers(version);
 
-    let (private_key, public_key) = match version {
-        KeyVersion::V1 | KeyVersion::Latest => {
+    let (private_key, public_key) = match private_header.version {
+        KeyVersion::V1 => {
             let keypair = key_v1::generate_keypair();
             (
                 PrivateKeyPayload::V1(keypair.private_key),
                 PublicKeyPayload::V1(keypair.public_key),
             )
         }
+        #[cfg(feature = "fips")]
+        KeyVersion::V3 => {
+            let keypair =
+                key_v3::generate_keypair().expect("the FIPS module key generation should not fail");
+            (
+                PrivateKeyPayload::V3(keypair.private_key),
+                PublicKeyPayload::V3(keypair.public_key),
+            )
+        }
+        KeyVersion::Latest => unreachable!("keypair_headers resolves the latest version"),
     };
 
     KeyPair {
@@ -213,7 +237,13 @@ pub fn mix_key_exchange(private_key: &PrivateKey, public_key: &PublicKey) -> Res
     match (&private_key.payload, &public_key.payload) {
         (PrivateKeyPayload::V1(private_key), PublicKeyPayload::V1(public_key)) => {
             key_v1::mix_key_exchange(private_key, public_key)
-        } //_ => Err(DevoCryptoError::InvalidDataType),
+        }
+        #[cfg(feature = "fips")]
+        (PrivateKeyPayload::V3(private_key), PublicKeyPayload::V3(public_key)) => {
+            key_v3::mix_key_exchange(private_key, public_key)
+        }
+        #[cfg(feature = "fips")]
+        _ => Err(Error::InconsistentVersion),
     }
 }
 
@@ -221,12 +251,9 @@ fn keypair_headers(version: KeyVersion) -> (Header<PrivateKey>, Header<PublicKey
     let mut private_header = Header::default();
     let mut public_header = Header::default();
 
-    match version {
-        KeyVersion::V1 | KeyVersion::Latest => {
-            private_header.version = KeyVersion::V1;
-            public_header.version = KeyVersion::V1;
-        }
-    }
+    let version = version.resolve_latest();
+    private_header.version = version;
+    public_header.version = version;
 
     (private_header, public_header)
 }
@@ -258,6 +285,8 @@ impl TryFrom<&[u8]> for PublicKey {
 
         let payload = match header.version {
             KeyVersion::V1 => PublicKeyPayload::V1(KeyV1Public::try_from(&data[Header::len()..])?),
+            #[cfg(feature = "fips")]
+            KeyVersion::V3 => PublicKeyPayload::V3(KeyV3Public::try_from(&data[Header::len()..])?),
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -294,6 +323,10 @@ impl TryFrom<&[u8]> for PrivateKey {
             KeyVersion::V1 => {
                 PrivateKeyPayload::V1(KeyV1Private::try_from(&data[Header::len()..])?)
             }
+            #[cfg(feature = "fips")]
+            KeyVersion::V3 => {
+                PrivateKeyPayload::V3(KeyV3Private::try_from(&data[Header::len()..])?)
+            }
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -305,6 +338,8 @@ impl From<PrivateKeyPayload> for Vec<u8> {
     fn from(data: PrivateKeyPayload) -> Self {
         match data {
             PrivateKeyPayload::V1(x) => x.into(),
+            #[cfg(feature = "fips")]
+            PrivateKeyPayload::V3(x) => x.into(),
         }
     }
 }
@@ -313,25 +348,64 @@ impl From<PublicKeyPayload> for Vec<u8> {
     fn from(data: PublicKeyPayload) -> Self {
         match data {
             PublicKeyPayload::V1(x) => x.into(),
+            #[cfg(feature = "fips")]
+            PublicKeyPayload::V3(x) => x.into(),
         }
     }
 }
 
+impl PublicKey {
+    /// Returns the X25519 key of a V1 public key.
+    pub(crate) fn to_x25519(&self) -> Result<x25519_dalek::PublicKey> {
+        match &self.payload {
+            PublicKeyPayload::V1(x) => Ok(x25519_dalek::PublicKey::from(x)),
+            #[cfg(feature = "fips")]
+            _ => Err(Error::InvalidDataType),
+        }
+    }
+
+    /// Returns the P-256 key of a V3 public key.
+    #[cfg(feature = "fips")]
+    pub(crate) fn to_p256(&self) -> Result<&KeyV3Public> {
+        match &self.payload {
+            PublicKeyPayload::V3(x) => Ok(x),
+            _ => Err(Error::InvalidDataType),
+        }
+    }
+}
+
+impl PrivateKey {
+    /// Returns the X25519 key of a V1 private key.
+    pub(crate) fn to_x25519(&self) -> Result<x25519_dalek::StaticSecret> {
+        match &self.payload {
+            PrivateKeyPayload::V1(x) => Ok(x25519_dalek::StaticSecret::from(x)),
+            #[cfg(feature = "fips")]
+            _ => Err(Error::InvalidDataType),
+        }
+    }
+
+    /// Returns the P-256 key of a V3 private key.
+    #[cfg(feature = "fips")]
+    pub(crate) fn to_p256(&self) -> Result<&KeyV3Private> {
+        match &self.payload {
+            PrivateKeyPayload::V3(x) => Ok(x),
+            _ => Err(Error::InvalidDataType),
+        }
+    }
+}
+
+// With the `fips` feature, a key can be a P-256 key, so these conversions are not infallible.
+#[cfg(not(feature = "fips"))]
 impl From<&PublicKey> for x25519_dalek::PublicKey {
     fn from(data: &PublicKey) -> Self {
-        match &data.payload {
-            PublicKeyPayload::V1(x) => Self::from(x),
-            //_ => Err(DevoCryptoError::InvalidDataType),
-        }
+        data.to_x25519().expect("only X25519 keys exist")
     }
 }
 
+#[cfg(not(feature = "fips"))]
 impl From<&PrivateKey> for x25519_dalek::StaticSecret {
     fn from(data: &PrivateKey) -> Self {
-        match &data.payload {
-            PrivateKeyPayload::V1(x) => Self::from(x),
-            //_ => Err(DevoCryptoError::InvalidDataType),
-        }
+        data.to_x25519().expect("only X25519 keys exist")
     }
 }
 
@@ -361,6 +435,9 @@ impl HeaderType for SecretKey {
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum SecretKeyPayload {
     V1(SecretKeyV1),
+    /// Same format as V1, generated by the FIPS module DRBG.
+    #[cfg(feature = "fips")]
+    V3(SecretKeyV1),
 }
 
 impl SecretKey {
@@ -368,6 +445,8 @@ impl SecretKey {
     pub fn as_bytes(&self) -> &[u8] {
         match &self.payload {
             SecretKeyPayload::V1(k) => k.as_bytes(),
+            #[cfg(feature = "fips")]
+            SecretKeyPayload::V3(k) => k.as_bytes(),
         }
     }
 }
@@ -376,9 +455,20 @@ impl SecretKey {
 /// Takes ownership of the `Zeroizing` wrapper to ensure the raw bytes are cleared on drop.
 pub(crate) fn secret_key_from_raw(bytes: Zeroizing<Vec<u8>>) -> Result<SecretKey> {
     let mut header: Header<SecretKey> = Header::default();
-    header.version = KeyVersion::V1;
-    let payload = SecretKeyPayload::V1(SecretKeyV1::try_from(bytes.as_slice())?);
-    Ok(SecretKey { header, payload })
+    header.version = KeyVersion::Latest.resolve_latest();
+    let key = SecretKeyV1::try_from(bytes.as_slice())?;
+    Ok(SecretKey {
+        payload: secret_key_payload(header.version, key),
+        header,
+    })
+}
+
+fn secret_key_payload(version: KeyVersion, key: SecretKeyV1) -> SecretKeyPayload {
+    match version {
+        #[cfg(feature = "fips")]
+        KeyVersion::V3 => SecretKeyPayload::V3(key),
+        _ => SecretKeyPayload::V1(key),
+    }
 }
 
 /// Generates a `SecretKey` for use with symmetric encryption.
@@ -394,16 +484,11 @@ pub(crate) fn secret_key_from_raw(bytes: Zeroizing<Vec<u8>>) -> Result<SecretKey
 /// ```
 pub fn generate_secret_key(version: KeyVersion) -> SecretKey {
     let mut header: Header<SecretKey> = Header::default();
-
-    match version {
-        KeyVersion::V1 | KeyVersion::Latest => {
-            header.version = KeyVersion::V1;
-        }
-    }
+    header.version = version.resolve_latest();
 
     SecretKey {
+        payload: secret_key_payload(header.version, SecretKeyV1::generate()),
         header,
-        payload: SecretKeyPayload::V1(SecretKeyV1::generate()),
     }
 }
 
@@ -434,6 +519,8 @@ impl TryFrom<&[u8]> for SecretKey {
 
         let payload = match header.version {
             KeyVersion::V1 => SecretKeyPayload::V1(SecretKeyV1::try_from(&data[Header::len()..])?),
+            #[cfg(feature = "fips")]
+            KeyVersion::V3 => SecretKeyPayload::V3(SecretKeyV1::try_from(&data[Header::len()..])?),
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -445,6 +532,8 @@ impl From<SecretKeyPayload> for Vec<u8> {
     fn from(data: SecretKeyPayload) -> Self {
         match data {
             SecretKeyPayload::V1(x) => x.into(),
+            #[cfg(feature = "fips")]
+            SecretKeyPayload::V3(x) => x.into(),
         }
     }
 }

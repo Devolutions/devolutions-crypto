@@ -42,6 +42,8 @@
 
 mod ciphertext_v1;
 mod ciphertext_v2;
+#[cfg(feature = "fips")]
+mod ciphertext_v3;
 
 use super::CiphertextSubtype;
 pub use super::CiphertextVersion;
@@ -55,6 +57,8 @@ use super::key::{PrivateKey, PublicKey, SecretKey};
 
 use ciphertext_v1::CiphertextV1;
 use ciphertext_v2::{CiphertextV2Asymmetric, CiphertextV2Symmetric};
+#[cfg(feature = "fips")]
+use ciphertext_v3::{CiphertextV3Asymmetric, CiphertextV3Symmetric};
 
 use std::borrow::Borrow;
 use std::convert::TryFrom;
@@ -85,6 +89,10 @@ enum CiphertextPayload {
     V1(CiphertextV1),
     V2Symmetric(CiphertextV2Symmetric),
     V2Asymmetric(CiphertextV2Asymmetric),
+    #[cfg(feature = "fips")]
+    V3Symmetric(CiphertextV3Symmetric),
+    #[cfg(feature = "fips")]
+    V3Asymmetric(CiphertextV3Asymmetric),
 }
 
 /// Returns a `Ciphertext` from cleartext data and a key.
@@ -159,15 +167,20 @@ pub fn encrypt_with_aad(
 
     header.data_subtype = CiphertextSubtype::Symmetric;
 
-    let payload = match version {
+    header.version = version.resolve_approved()?;
+
+    let payload = match header.version {
         CiphertextVersion::V1 => {
-            header.version = CiphertextVersion::V1;
             CiphertextPayload::V1(CiphertextV1::encrypt(data, key, aad, &header)?)
         }
-        CiphertextVersion::V2 | CiphertextVersion::Latest => {
-            header.version = CiphertextVersion::V2;
+        CiphertextVersion::V2 => {
             CiphertextPayload::V2Symmetric(CiphertextV2Symmetric::encrypt(data, key, aad, &header)?)
-        } //_ => return Err(DevoCryptoError::UnknownVersion),
+        }
+        #[cfg(feature = "fips")]
+        CiphertextVersion::V3 => {
+            CiphertextPayload::V3Symmetric(CiphertextV3Symmetric::encrypt(data, key, aad, &header)?)
+        }
+        CiphertextVersion::Latest => unreachable!("the version is resolved above"),
     };
 
     Ok(Ciphertext { header, payload })
@@ -229,13 +242,16 @@ pub fn encrypt_asymmetric_with_aad(
 
     header.data_subtype = CiphertextSubtype::Asymmetric;
 
-    let payload = match version {
-        CiphertextVersion::V2 | CiphertextVersion::Latest => {
-            header.version = CiphertextVersion::V2;
-            CiphertextPayload::V2Asymmetric(CiphertextV2Asymmetric::encrypt(
-                data, public_key, aad, &header,
-            )?)
-        }
+    header.version = version.resolve_approved()?;
+
+    let payload = match header.version {
+        CiphertextVersion::V2 => CiphertextPayload::V2Asymmetric(CiphertextV2Asymmetric::encrypt(
+            data, public_key, aad, &header,
+        )?),
+        #[cfg(feature = "fips")]
+        CiphertextVersion::V3 => CiphertextPayload::V3Asymmetric(CiphertextV3Asymmetric::encrypt(
+            data, public_key, aad, &header,
+        )?),
         _ => return Err(Error::UnknownVersion),
     };
 
@@ -361,6 +377,8 @@ impl Ciphertext {
         match &self.payload {
             CiphertextPayload::V1(x) => x.decrypt(key, aad, &self.header),
             CiphertextPayload::V2Symmetric(x) => x.decrypt(key, aad, &self.header),
+            #[cfg(feature = "fips")]
+            CiphertextPayload::V3Symmetric(x) => x.decrypt(key, aad, &self.header),
             _ => Err(Error::InvalidDataType),
         }
     }
@@ -414,6 +432,8 @@ impl Ciphertext {
     ) -> Result<Vec<u8>> {
         match &self.payload {
             CiphertextPayload::V2Asymmetric(x) => x.decrypt(private_key, aad, &self.header),
+            #[cfg(feature = "fips")]
+            CiphertextPayload::V3Asymmetric(x) => x.decrypt(private_key, aad, &self.header),
             CiphertextPayload::V1(_) => Err(Error::UnknownVersion),
             _ => Err(Error::InvalidDataType),
         }
@@ -501,6 +521,16 @@ impl TryFrom<&[u8]> for Ciphertext {
                     CiphertextV2Asymmetric::try_from(&data[Header::len()..])?,
                 ),
             },
+            #[cfg(feature = "fips")]
+            CiphertextVersion::V3 => match header.data_subtype {
+                CiphertextSubtype::Symmetric => CiphertextPayload::V3Symmetric(
+                    CiphertextV3Symmetric::try_from(&data[Header::len()..])?,
+                ),
+                CiphertextSubtype::Asymmetric => CiphertextPayload::V3Asymmetric(
+                    CiphertextV3Asymmetric::try_from(&data[Header::len()..])?,
+                ),
+                CiphertextSubtype::None => return Err(Error::UnknownSubtype),
+            },
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -514,6 +544,10 @@ impl From<CiphertextPayload> for Vec<u8> {
             CiphertextPayload::V1(x) => x.into(),
             CiphertextPayload::V2Symmetric(x) => x.into(),
             CiphertextPayload::V2Asymmetric(x) => x.into(),
+            #[cfg(feature = "fips")]
+            CiphertextPayload::V3Symmetric(x) => x.into(),
+            #[cfg(feature = "fips")]
+            CiphertextPayload::V3Asymmetric(x) => x.into(),
         }
     }
 }
@@ -559,6 +593,7 @@ fn encrypt_decrypt_aad_test() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn encrypt_decrypt_v1_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
     let data = "This is a very complex string of character that we need to encrypt".as_bytes();
@@ -575,6 +610,7 @@ fn encrypt_decrypt_v1_test() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn encrypt_decrypt_aad_v1_test() {
     let key = b"0123456789abcdefghijkl";
     let data = b"This is a very complex string of character that we need to encrypt";
@@ -600,6 +636,7 @@ fn encrypt_decrypt_aad_v1_test() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn encrypt_decrypt_v2_test() {
     let key = "0123456789abcdefghijkl".as_bytes();
     let data = "This is a very complex string of character that we need to encrypt".as_bytes();
@@ -616,6 +653,7 @@ fn encrypt_decrypt_v2_test() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn encrypt_decrypt_aad_v2_test() {
     let key = b"0123456789abcdefghijkl";
     let data = b"This is a very complex string of character that we need to encrypt";
@@ -708,6 +746,7 @@ fn asymmetric_aad_test() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn asymmetric_test_v2() {
     use super::key::{KeyVersion, generate_keypair};
 
@@ -733,6 +772,7 @@ fn asymmetric_test_v2() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn asymmetric_aad_test_v2() {
     use super::key::{KeyVersion, generate_keypair};
 
@@ -810,6 +850,7 @@ fn encrypt_decrypt_with_secret_key_aad() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn encrypt_decrypt_with_secret_key_v1() {
     use super::key::{KeyVersion, generate_secret_key};
 
@@ -828,6 +869,7 @@ fn encrypt_decrypt_with_secret_key_v1() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn encrypt_decrypt_with_secret_key_v2() {
     use super::key::{KeyVersion, generate_secret_key};
 

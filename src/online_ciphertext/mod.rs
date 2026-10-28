@@ -52,6 +52,7 @@
 //! in the [Key module](super::key).
 //!
 //! ```rust
+//! # #[cfg(not(feature = "fips"))] {
 //! use devolutions_crypto::key::{generate_keypair, KeyVersion, KeyPair};
 //! use devolutions_crypto::online_ciphertext::{
 //!     OnlineCiphertextEncryptor, OnlineCiphertextHeader, OnlineCiphertextVersion,
@@ -77,6 +78,7 @@
 //! decrypted.extend_from_slice(&decryptor.decrypt_last_chunk(&chunk2, b"").expect("decrypting the last chunk shouldn't fail"));
 //!
 //! assert_eq!(decrypted, b"0123456789abcdefthe last chunk");
+//! # }
 //! ```
 
 mod online_ciphertext_v1;

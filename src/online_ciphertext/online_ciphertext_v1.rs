@@ -327,7 +327,7 @@ impl OnlineCiphertextV1Encryptor {
         chunk_size: u32,
     ) -> Result<Self> {
         // Perform a ECDH exchange as per ECIES
-        let public_key = x25519_dalek::PublicKey::from(public_key);
+        let public_key = public_key.to_x25519()?;
 
         let ephemeral_private_key = StaticSecret::from(*crate::utils::random_bytes::<32>()?);
         let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
@@ -395,7 +395,7 @@ impl OnlineCiphertextV1Decryptor {
         header: OnlineCiphertextV1HeaderAsymmetric,
     ) -> Result<Self> {
         // Perform a ECDH exchange as per ECIES
-        let private_key = x25519_dalek::StaticSecret::from(private_key);
+        let private_key = private_key.to_x25519()?;
 
         let key = private_key.diffie_hellman(&header.public_key);
 

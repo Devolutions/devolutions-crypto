@@ -3,6 +3,7 @@
 //!
 //! # Example (Argon2 — default)
 //! ```rust
+//! # #[cfg(not(feature = "fips"))] {
 //! use devolutions_crypto::key_derivation::Argon2;
 //!
 //! let password = b"a very strong password";
@@ -10,6 +11,7 @@
 //! let (secret_key, params) = argon2.derive(password).expect("derivation should not fail");
 //! // Serialize params to re-derive later:
 //! let params_bytes: Vec<u8> = params.into();
+//! # }
 //! ```
 //!
 //! # Example (PBKDF2)
@@ -23,12 +25,16 @@
 
 mod key_derivation_v1;
 mod key_derivation_v2;
+#[cfg(feature = "fips")]
+mod key_derivation_v3;
 
 pub use key_derivation_v1::Pbkdf2;
 pub use key_derivation_v2::Argon2;
 
 use key_derivation_v1::KeyDerivationV1;
 use key_derivation_v2::KeyDerivationV2;
+#[cfg(feature = "fips")]
+use key_derivation_v3::KeyDerivationV3;
 
 use std::borrow::Borrow;
 use std::convert::TryFrom;
@@ -75,6 +81,8 @@ impl HeaderType for DerivationParameters {
 pub(super) enum DerivationParametersPayload {
     V1(KeyDerivationV1),
     V2(KeyDerivationV2),
+    #[cfg(feature = "fips")]
+    V3(KeyDerivationV3),
 }
 
 #[cfg(feature = "fuzz")]
@@ -122,6 +130,10 @@ impl TryFrom<&[u8]> for DerivationParameters {
             KeyDerivationVersion::V2 => {
                 DerivationParametersPayload::V2(KeyDerivationV2::try_from(&data[Header::len()..])?)
             }
+            #[cfg(feature = "fips")]
+            KeyDerivationVersion::V3 => {
+                DerivationParametersPayload::V3(KeyDerivationV3::try_from(&data[Header::len()..])?)
+            }
             KeyDerivationVersion::Latest => return Err(Error::UnknownVersion),
         };
 
@@ -134,6 +146,8 @@ impl From<DerivationParametersPayload> for Vec<u8> {
         match payload {
             DerivationParametersPayload::V1(v1) => Vec::from(&v1),
             DerivationParametersPayload::V2(v2) => Vec::from(&v2),
+            #[cfg(feature = "fips")]
+            DerivationParametersPayload::V3(v3) => Vec::from(&v3),
         }
     }
 }
@@ -141,12 +155,7 @@ impl From<DerivationParametersPayload> for Vec<u8> {
 impl DerivationParameters {
     /// Derives a [`SecretKey`] from `password` using these derivation parameters.
     pub fn derive(&self, password: &[u8]) -> Result<SecretKey> {
-        let raw = match &self.payload {
-            DerivationParametersPayload::V1(v1) => v1.derive(password),
-            DerivationParametersPayload::V2(v2) => v2.derive(password)?,
-        };
-
-        secret_key_from_raw(raw)
+        secret_key_from_raw(self.compute(password)?)
     }
 
     /// Re-derives raw bytes from a password using the stored algorithm and parameters.
@@ -154,7 +163,15 @@ impl DerivationParameters {
         match &self.payload {
             DerivationParametersPayload::V1(v1) => Ok(v1.derive(password)),
             DerivationParametersPayload::V2(v2) => v2.derive(password),
+            #[cfg(feature = "fips")]
+            DerivationParametersPayload::V3(v3) => Ok(v3.derive(password)),
         }
+    }
+
+    /// Returns an error if these parameters cannot be used to produce new data in FIPS mode.
+    /// Without the `fips` feature, every version is accepted.
+    pub(crate) fn ensure_fips_approved(&self) -> Result<()> {
+        self.header.version.resolve_approved().map(|_| ())
     }
 
     /// Returns the byte-length of the hash that [`compute`](Self::compute) will produce.
@@ -162,6 +179,8 @@ impl DerivationParameters {
         match &self.payload {
             DerivationParametersPayload::V1(_) => key_derivation_v1::KEY_LENGTH,
             DerivationParametersPayload::V2(v2) => v2.params.length as usize,
+            #[cfg(feature = "fips")]
+            DerivationParametersPayload::V3(_) => key_derivation_v3::KEY_LENGTH,
         }
     }
 }
@@ -170,6 +189,10 @@ impl DerivationParameters {
 ///
 /// * `KeyDerivationVersion::Latest` and `KeyDerivationVersion::V2` use **Argon2id** (recommended).
 /// * `KeyDerivationVersion::V1` uses **PBKDF2-HMAC-SHA256**.
+///
+/// With the `fips` feature, `KeyDerivationVersion::Latest` and `KeyDerivationVersion::V3` use
+/// **PBKDF2-HMAC-SHA256** computed by the FIPS module, and the other versions return
+/// `Error::NotFipsApproved`.
 ///
 /// A random salt is generated automatically; the returned [`DerivationParameters`] can be
 /// stored alongside the protected data so the same key can be reproduced later.
@@ -188,15 +211,19 @@ pub fn derive_key(
     password: &[u8],
     version: KeyDerivationVersion,
 ) -> Result<(SecretKey, DerivationParameters)> {
-    match version {
+    match version.resolve_approved()? {
         KeyDerivationVersion::V1 => Pbkdf2::new().derive(password),
-        KeyDerivationVersion::V2 | KeyDerivationVersion::Latest => Argon2::new().derive(password),
+        KeyDerivationVersion::V2 => Argon2::new().derive(password),
+        #[cfg(feature = "fips")]
+        KeyDerivationVersion::V3 => Pbkdf2::new().derive(password),
+        KeyDerivationVersion::Latest => unreachable!("the version is resolved above"),
     }
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
-#[cfg(test)]
+// These tests produce non-FIPS data, see tests/fips.rs for the FIPS equivalents
+#[cfg(all(test, not(feature = "fips")))]
 mod tests {
     use std::convert::TryFrom;
 

@@ -30,6 +30,8 @@ fn test_derive_key_argon2() {
 }
 
 #[test]
+// Produces derivation parameters that are not FIPS approved
+#[cfg(not(feature = "fips"))]
 fn test_derive_key_argon2_struct() {
     use devolutions_crypto::key_derivation::Argon2;
     let params = Argon2Parameters::try_from(
@@ -64,6 +66,8 @@ fn test_derive_key_default() {
 }
 
 #[test]
+// Produces derivation parameters that are not FIPS approved
+#[cfg(not(feature = "fips"))]
 fn test_derive_key_pbkdf2_struct_default() {
     use devolutions_crypto::key_derivation::Pbkdf2;
     let password = b"testpassword";
@@ -93,6 +97,8 @@ fn test_derive_key_iterations() {
 }
 
 #[test]
+// Produces derivation parameters that are not FIPS approved
+#[cfg(not(feature = "fips"))]
 fn test_derive_key_pbkdf2_struct_iterations() {
     use devolutions_crypto::key_derivation::Pbkdf2;
     let password = b"testPa$$";
@@ -124,6 +130,8 @@ fn test_derive_key_salt() {
 }
 
 #[test]
+// Produces derivation parameters that are not FIPS approved
+#[cfg(not(feature = "fips"))]
 fn test_derive_key_pbkdf2_struct_salt() {
     use devolutions_crypto::key_derivation::Pbkdf2;
     let password = b"testPa$$";

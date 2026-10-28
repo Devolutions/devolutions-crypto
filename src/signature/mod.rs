@@ -25,6 +25,8 @@
 //! assert!(!signature.verify(b"this is some wrong test data", &public_key));
 //! ```
 mod signature_v1;
+#[cfg(feature = "fips")]
+mod signature_v3;
 
 use super::DataType;
 use super::Error;
@@ -37,6 +39,8 @@ pub use super::SignatureVersion;
 use super::signing_key::{SigningKeyPair, SigningPublicKey};
 
 use signature_v1::SignatureV1;
+#[cfg(feature = "fips")]
+use signature_v3::SignatureV3;
 
 use std::borrow::Borrow;
 use std::convert::TryFrom;
@@ -65,15 +69,22 @@ impl HeaderType for Signature {
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum SignaturePayload {
     V1(SignatureV1),
+    #[cfg(feature = "fips")]
+    V3(SignatureV3),
 }
 
 /// Sign some data with a keypair so that anyone knowing the public part of it can verify the signature.
+///
+/// `SignatureVersion::Latest` selects the scheme matching the keypair. With the `fips` feature,
+/// that is ECDSA P-256 (V3) for a V3 keypair and Ed25519 (V1, not FIPS approved) for a V1 keypair.
 /// # Arguments
 ///  * `data` - The data you want to sign
 ///  * `keypair` - The keypair to use to sign the data. Note that the public part of the keypair is also required to sign the data.
 ///  * `version` - Version of the signature scheme to use. Use `SignatureVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns a `Signature` that can be used to verify if the data has been tempered with or if.
+/// # Panics
+/// Panics if `version` does not match the keypair version. Use [`try_sign`] to get an error instead.
 /// # Example
 /// ```rust
 /// use devolutions_crypto::signing_key::{generate_signing_keypair, SigningKeyVersion, SigningKeyPair};
@@ -83,16 +94,41 @@ enum SignaturePayload {
 /// let signature: Signature = sign(b"this is some test data", &keypair, SignatureVersion::Latest);
 /// ```
 pub fn sign(data: &[u8], keypair: &SigningKeyPair, version: SignatureVersion) -> Signature {
-    let mut header = Header::default();
+    try_sign(data, keypair, version).expect("the signature version must match the keypair")
+}
 
-    let payload = match version {
-        SignatureVersion::V1 | SignatureVersion::Latest => {
-            header.version = SignatureVersion::V1;
-            SignaturePayload::V1(SignatureV1::sign(data, keypair))
-        }
+/// Sign some data with a keypair, returning an error if `version` does not match the keypair.
+///
+/// `SignatureVersion::Latest` selects the scheme matching the keypair.
+/// # Example
+/// ```rust
+/// use devolutions_crypto::signing_key::{generate_signing_keypair, SigningKeyVersion};
+/// use devolutions_crypto::signature::{try_sign, SignatureVersion};
+///
+/// let keypair = generate_signing_keypair(SigningKeyVersion::Latest);
+/// let signature = try_sign(b"this is some test data", &keypair, SignatureVersion::Latest).unwrap();
+///
+/// assert!(signature.verify(b"this is some test data", &keypair.get_public_key()));
+/// ```
+pub fn try_sign(
+    data: &[u8],
+    keypair: &SigningKeyPair,
+    version: SignatureVersion,
+) -> Result<Signature> {
+    let mut header = Header::default();
+    header.version = match version {
+        SignatureVersion::Latest => keypair.signature_version(),
+        version => version,
     };
 
-    Signature { header, payload }
+    let payload = match header.version {
+        SignatureVersion::V1 => SignaturePayload::V1(SignatureV1::sign(data, keypair)?),
+        #[cfg(feature = "fips")]
+        SignatureVersion::V3 => SignaturePayload::V3(SignatureV3::sign(data, keypair)?),
+        SignatureVersion::Latest => unreachable!("the version is resolved above"),
+    };
+
+    Ok(Signature { header, payload })
 }
 
 impl Signature {
@@ -115,6 +151,8 @@ impl Signature {
     pub fn verify(&self, data: &[u8], public_key: &SigningPublicKey) -> bool {
         match &self.payload {
             SignaturePayload::V1(x) => x.verify(data, public_key),
+            #[cfg(feature = "fips")]
+            SignaturePayload::V3(x) => x.verify(data, public_key),
         }
     }
 }
@@ -144,6 +182,10 @@ impl TryFrom<&[u8]> for Signature {
             SignatureVersion::V1 => {
                 SignaturePayload::V1(SignatureV1::try_from(&data[Header::len()..])?)
             }
+            #[cfg(feature = "fips")]
+            SignatureVersion::V3 => {
+                SignaturePayload::V3(SignatureV3::try_from(&data[Header::len()..])?)
+            }
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -155,6 +197,8 @@ impl From<SignaturePayload> for Vec<u8> {
     fn from(data: SignaturePayload) -> Self {
         match data {
             SignaturePayload::V1(x) => x.into(),
+            #[cfg(feature = "fips")]
+            SignaturePayload::V3(x) => x.into(),
         }
     }
 }

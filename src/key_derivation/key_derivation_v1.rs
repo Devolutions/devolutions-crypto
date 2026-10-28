@@ -5,9 +5,7 @@ use std::io::{Cursor, Read, Write};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use zeroize::Zeroizing;
 
-use rand::TryRng;
-
-use crate::key::{SecretKey, secret_key_from_raw};
+use crate::key::SecretKey;
 use crate::utils::derive_key_pbkdf2;
 use crate::{DEFAULT_PBKDF2_ITERATIONS, Error, Header, KeyDerivationVersion, Result};
 
@@ -65,6 +63,10 @@ impl TryFrom<&[u8]> for KeyDerivationV1 {
 // ── Pbkdf2 ───────────────────────────────────────────────────────────────────
 
 /// Derives a key using PBKDF2-HMAC-SHA256 (V1).
+///
+/// With the `fips` feature, the derivation is computed by the FIPS module and produces V3
+/// parameters. The iteration count must then be at least 1000 and the salt at least 16 bytes,
+/// otherwise `Error::NotFipsApproved` is returned.
 pub struct Pbkdf2 {
     iterations: u32,
 }
@@ -86,9 +88,7 @@ impl Pbkdf2 {
     /// Derives the key using a randomly generated salt.
     pub fn derive(&self, key: &[u8]) -> Result<(SecretKey, DerivationParameters)> {
         let mut salt = vec![0u8; 16];
-        rand::rngs::SysRng
-            .try_fill_bytes(&mut salt)
-            .map_err(|_| Error::RandomError)?;
+        crate::utils::fill_random(&mut salt)?;
         self.derive_with_salt(key, &salt)
     }
 
@@ -98,22 +98,31 @@ impl Pbkdf2 {
         key: &[u8],
         salt: &[u8],
     ) -> Result<(SecretKey, DerivationParameters)> {
-        let params = KeyDerivationV1 {
-            iterations: self.iterations,
-            salt: salt.to_vec(),
-        };
-        let raw = params.derive(key);
-        let secret_key = secret_key_from_raw(raw)?;
-
-        let mut header: Header<DerivationParameters> = Header::default();
-        header.version = KeyDerivationVersion::V1;
-
-        let derivation_params = DerivationParameters {
-            header,
-            payload: DerivationParametersPayload::V1(params),
-        };
+        let derivation_params = self.build(salt.to_vec())?;
+        let secret_key = derivation_params.derive(key)?;
 
         Ok((secret_key, derivation_params))
+    }
+
+    fn build(&self, salt: Vec<u8>) -> Result<DerivationParameters> {
+        let mut header: Header<DerivationParameters> = Header::default();
+
+        #[cfg(not(feature = "fips"))]
+        let payload = {
+            header.version = KeyDerivationVersion::V1;
+            DerivationParametersPayload::V1(KeyDerivationV1 {
+                iterations: self.iterations,
+                salt,
+            })
+        };
+
+        #[cfg(feature = "fips")]
+        let payload = {
+            header.version = KeyDerivationVersion::V3;
+            DerivationParametersPayload::V3(super::KeyDerivationV3::new(self.iterations, salt)?)
+        };
+
+        Ok(DerivationParameters { header, payload })
     }
 
     /// Returns a `DerivationParameters` capturing the current PBKDF2 settings with a freshly
@@ -121,19 +130,8 @@ impl Pbkdf2 {
     /// Useful for passing custom parameters to [`crate::password_hash::hash_password_with_parameters`].
     pub fn parameters(self) -> Result<DerivationParameters> {
         let mut salt = vec![0u8; 16];
-        rand::rngs::SysRng
-            .try_fill_bytes(&mut salt)
-            .map_err(|_| Error::RandomError)?;
-        let v1 = KeyDerivationV1 {
-            iterations: self.iterations,
-            salt,
-        };
-        let mut header: Header<DerivationParameters> = Header::default();
-        header.version = KeyDerivationVersion::V1;
-        Ok(DerivationParameters {
-            header,
-            payload: DerivationParametersPayload::V1(v1),
-        })
+        crate::utils::fill_random(&mut salt)?;
+        self.build(salt)
     }
 }
 

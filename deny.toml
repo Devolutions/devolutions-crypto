@@ -38,6 +38,9 @@ confidence-threshold = 0.8
 # aren't accepted for every possible crate as with the normal allow list
 exceptions = [
     #{ allow = ["Zlib"], name = "adler32", version = "*" },
+    # AWS-LC, only pulled in by the `fips` feature
+    { allow = ["ISC", "OpenSSL"], crate = "aws-lc-fips-sys" },
+    { allow = ["ISC"], crate = "aws-lc-rs" },
 ]
 
 [licenses.private]

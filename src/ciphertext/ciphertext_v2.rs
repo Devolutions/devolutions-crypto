@@ -184,7 +184,7 @@ impl CiphertextV2Asymmetric {
         aad: &[u8],
         header: &Header<Ciphertext>,
     ) -> Result<Self> {
-        let public_key = x25519_dalek::PublicKey::from(public_key);
+        let public_key = public_key.to_x25519()?;
 
         let ephemeral_private_key = StaticSecret::from(*crate::utils::random_bytes::<32>()?);
         let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
@@ -209,7 +209,7 @@ impl CiphertextV2Asymmetric {
         aad: &[u8],
         header: &Header<Ciphertext>,
     ) -> Result<Vec<u8>> {
-        let private_key = StaticSecret::from(private_key);
+        let private_key = private_key.to_x25519()?;
 
         let key = private_key.diffie_hellman(&self.public_key);
 

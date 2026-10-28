@@ -51,6 +51,9 @@ pub enum CiphertextVersion {
     V1 = 1,
     /// Uses version 2: XChaCha20-Poly1305.
     V2 = 2,
+    /// Uses version 3 (FIPS): AES-256-GCM with an HKDF-SHA256 derived key and P-256 ECDH for asymmetric.
+    #[cfg(feature = "fips")]
+    V3 = 3,
 }
 
 /// The versions of the online encryption scheme to use.
@@ -81,6 +84,9 @@ pub enum PasswordHashVersion {
     V1 = 1,
     /// Uses version 2: Argon2id.
     V2 = 2,
+    /// Uses version 3 (FIPS): PBKDF2-HMAC-SHA256.
+    #[cfg(feature = "fips")]
+    V3 = 3,
 }
 
 /// The versions of the key scheme to use.
@@ -95,6 +101,9 @@ pub enum KeyVersion {
     Latest = 0,
     /// Uses version 1: Curve25519 keys and x25519 key exchange.
     V1 = 1,
+    /// Uses version 3 (FIPS): NIST P-256 keys and ECDH key exchange.
+    #[cfg(feature = "fips")]
+    V3 = 3,
 }
 
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
@@ -108,6 +117,9 @@ pub enum SigningKeyVersion {
     Latest = 0,
     /// Uses version 1: Ed25519.
     V1 = 1,
+    /// Uses version 3 (FIPS): ECDSA over NIST P-256 with SHA-256.
+    #[cfg(feature = "fips")]
+    V3 = 3,
 }
 
 /// The versions of the secret sharing scheme to use.
@@ -136,6 +148,9 @@ pub enum SignatureVersion {
     Latest = 0,
     /// Uses version 1: ed25519
     V1 = 1,
+    /// Uses version 3 (FIPS): ECDSA over NIST P-256 with SHA-256.
+    #[cfg(feature = "fips")]
+    V3 = 3,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
@@ -203,6 +218,9 @@ pub enum KeyDerivationVersion {
     V1 = 1,
     /// Uses version 2: Argon2id.
     V2 = 2,
+    /// Uses version 3 (FIPS): PBKDF2-HMAC-SHA256.
+    #[cfg(feature = "fips")]
+    V3 = 3,
 }
 
 /// The versions of the KDF-encrypt scheme to use.
@@ -235,4 +253,47 @@ pub enum KeyDerivationSubtype {
 pub enum KdfEncryptedDataSubtype {
     #[default]
     None = 0,
+}
+
+/// Version policy, the only place where the `fips` feature changes which versions are produced.
+///
+/// * `resolve_latest` maps `Latest` to the version produced by this build
+///   (`$default`, or `$fips` with the `fips` feature) and keeps explicit versions.
+/// * `resolve_approved` also rejects, with the `fips` feature, every version but `$fips`.
+///   It is used by the functions producing encrypted data, password hashes and derived keys.
+macro_rules! version_policy {
+    ($($ty:ident: $default:ident => $fips:ident),+ $(,)?) => {$(
+        impl $ty {
+            #[allow(dead_code)]
+            pub(crate) fn resolve_latest(self) -> Self {
+                match self {
+                    #[cfg(not(feature = "fips"))]
+                    Self::Latest => Self::$default,
+                    #[cfg(feature = "fips")]
+                    Self::Latest => Self::$fips,
+                    version => version,
+                }
+            }
+
+            #[allow(dead_code)]
+            pub(crate) fn resolve_approved(self) -> crate::Result<Self> {
+                match self.resolve_latest() {
+                    #[cfg(feature = "fips")]
+                    Self::$fips => Ok(Self::$fips),
+                    #[cfg(feature = "fips")]
+                    _ => Err(crate::Error::NotFipsApproved),
+                    #[cfg(not(feature = "fips"))]
+                    version => Ok(version),
+                }
+            }
+        }
+    )+};
+}
+
+version_policy! {
+    CiphertextVersion: V2 => V3,
+    PasswordHashVersion: V2 => V3,
+    KeyVersion: V1 => V3,
+    SigningKeyVersion: V1 => V3,
+    KeyDerivationVersion: V2 => V3,
 }

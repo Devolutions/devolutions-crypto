@@ -56,6 +56,7 @@ enum KdfEncryptedDataPayload {
 /// Returns a [`KdfEncryptedData`] blob containing the key derivation parameters and the ciphertext.
 /// # Example
 /// ```rust
+/// # #[cfg(not(feature = "fips"))] {
 /// use devolutions_crypto::derive_encrypt::encrypt_with_password;
 /// use devolutions_crypto::key_derivation::Argon2;
 /// use devolutions_crypto::CiphertextVersion;
@@ -64,6 +65,7 @@ enum KdfEncryptedDataPayload {
 /// let blob = encrypt_with_password(b"secret", b"password", params, CiphertextVersion::Latest).unwrap();
 /// let plaintext = blob.decrypt_with_password(b"password").unwrap();
 /// assert_eq!(plaintext, b"secret");
+/// # }
 /// ```
 pub fn encrypt_with_password(
     data: &[u8],
@@ -89,6 +91,10 @@ pub fn encrypt_with_password(
 ///  * `derivation_parameters` - Pre-built key derivation parameters (includes the salt). Use
 ///    [`Argon2::new().derive(password)`](crate::key_derivation::Argon2::derive) to generate them.
 ///  * `ciphertext_version` - Cipher to use. `CiphertextVersion::Latest` is recommended.
+///
+/// With the `fips` feature, `derivation_parameters` must be V3 parameters (from
+/// [`Pbkdf2`](crate::key_derivation::Pbkdf2)) and `ciphertext_version` must resolve to V3,
+/// otherwise `Error::NotFipsApproved` is returned.
 /// # Returns
 /// Returns a [`KdfEncryptedData`] blob containing the key derivation parameters and the ciphertext.
 pub fn encrypt_with_password_and_aad(
@@ -98,6 +104,8 @@ pub fn encrypt_with_password_and_aad(
     derivation_parameters: DerivationParameters,
     ciphertext_version: CiphertextVersion,
 ) -> Result<KdfEncryptedData> {
+    derivation_parameters.ensure_fips_approved()?;
+
     let mut header: Header<KdfEncryptedData> = Header::default();
     header.version = KdfEncryptedDataVersion::V1;
 
@@ -187,7 +195,8 @@ impl TryFrom<&[u8]> for KdfEncryptedData {
     }
 }
 
-#[cfg(test)]
+// These tests produce non-FIPS data, see tests/fips.rs for the FIPS equivalents
+#[cfg(all(test, not(feature = "fips")))]
 mod tests {
     use crate::Pbkdf2;
     use crate::key_derivation::Argon2;

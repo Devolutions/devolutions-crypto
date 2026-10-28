@@ -64,6 +64,9 @@ blake3 = { version = "1.8", features = ["zeroize"] }
 paste = "1.0.15"
 dyn-clone = "1.0"
 
+# FIPS 140-3 validated backend, only pulled in by the `fips` feature
+aws-lc-rs = { version = "1.18", default-features = false, features = ["alloc"], optional = true }
+
 [target.wasm32-unknown-unknown.dependencies]
 wasm-bindgen = { version = "0.2.100", optional = true }
 serde-wasm-bindgen = { version = "0.6.5", optional = true }
@@ -77,6 +80,7 @@ wasm-bindgen-test = "0.3"
 default = []
 fuzz = ["arbitrary", "blahaj/fuzzing"]
 wbindgen = ["wasm-bindgen", "serde-wasm-bindgen", "js-sys"]
+fips = ["dep:aws-lc-rs", "aws-lc-rs/fips"]
 
 [dependencies.getrandom_v02]
 package = "getrandom"

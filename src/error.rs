@@ -69,6 +69,10 @@ pub enum Error {
     /// The mutex is poisoned and cannot be locked: -44
     #[error("The mutex is poisoned and cannot be locked")]
     PoisonedMutex,
+    /// The requested algorithm is not FIPS approved and cannot be used to produce new data: -45
+    #[cfg(feature = "fips")]
+    #[error("The requested algorithm is not FIPS approved and cannot be used to produce new data")]
+    NotFipsApproved,
 }
 
 impl Error {
@@ -94,6 +98,8 @@ impl Error {
             Error::InconsistentVersion => -42,
             Error::InvalidChunkLength => -43,
             Error::PoisonedMutex => -44,
+            #[cfg(feature = "fips")]
+            Error::NotFipsApproved => -45,
         }
     }
 }
@@ -119,6 +125,20 @@ impl From<UnpadError> for Error {
 impl From<chacha20poly1305::aead::Error> for Error {
     fn from(_error: chacha20poly1305::aead::Error) -> Error {
         Error::InvalidMac
+    }
+}
+
+#[cfg(feature = "fips")]
+impl From<aws_lc_rs::error::Unspecified> for Error {
+    fn from(_error: aws_lc_rs::error::Unspecified) -> Self {
+        Error::CryptoError
+    }
+}
+
+#[cfg(feature = "fips")]
+impl From<aws_lc_rs::error::KeyRejected> for Error {
+    fn from(_error: aws_lc_rs::error::KeyRejected) -> Self {
+        Error::InvalidData
     }
 }
 

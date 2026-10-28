@@ -1,3 +1,6 @@
+// These tests target X25519 (Key V1, Ciphertext V2), which cannot be produced with the `fips` feature
+#![cfg(not(feature = "fips"))]
+
 use devolutions_crypto::Error;
 use devolutions_crypto::ciphertext::{Ciphertext, CiphertextVersion, encrypt_asymmetric};
 use devolutions_crypto::key::{KeyVersion, PublicKey, generate_keypair, mix_key_exchange};

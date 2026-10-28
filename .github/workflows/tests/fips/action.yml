@@ -1,0 +1,28 @@
+name: FIPS Tests
+description: Build and test the `fips` feature against the AWS-LC FIPS module
+runs:
+  using: composite
+  steps:
+    # The FIPS module build requires CMake and Go, both preinstalled on the Ubuntu runners
+    - name: Install rust
+      shell: bash
+      run: rustup update
+
+    - name: Check Clippy (fips feature)
+      working-directory: ./
+      shell: bash
+      run: cargo clippy -p devolutions-crypto --all-targets --features fips -- -D warnings
+
+    - name: Run tests (fips feature)
+      working-directory: ./
+      shell: bash
+      run: cargo test -p devolutions-crypto --features fips
+
+    - name: Check that only the FIPS module is linked
+      working-directory: ./
+      shell: bash
+      run: |
+        if cargo tree -p devolutions-crypto --features fips -e normal -i aws-lc-sys 2>/dev/null; then
+          echo "aws-lc-sys (non-FIPS) is in the dependency graph"
+          exit 1
+        fi

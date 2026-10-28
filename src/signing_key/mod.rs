@@ -22,6 +22,8 @@
 //! ```
 
 mod signing_key_v1;
+#[cfg(feature = "fips")]
+mod signing_key_v3;
 
 use super::DataType;
 use super::Error;
@@ -32,6 +34,8 @@ use super::Result;
 pub use super::SigningKeyVersion;
 
 use signing_key_v1::{SigningKeyV1Pair, SigningKeyV1Public};
+#[cfg(feature = "fips")]
+pub(crate) use signing_key_v3::{SigningKeyV3Pair, SigningKeyV3Public};
 
 use std::borrow::Borrow;
 use std::convert::TryFrom;
@@ -91,15 +95,22 @@ impl HeaderType for SigningKeyPair {
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum SigningKeyPairPayload {
     V1(SigningKeyV1Pair),
+    #[cfg(feature = "fips")]
+    V3(SigningKeyV3Pair),
 }
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum SigningPublicKeyPayload {
     V1(SigningKeyV1Public),
+    #[cfg(feature = "fips")]
+    V3(SigningKeyV3Public),
 }
 
 /// Generates a `SigningKeyPair` to use in a key exchange or to encrypt data.
+///
+/// With the `fips` feature, `SigningKeyVersion::Latest` generates an ECDSA P-256 (V3) keypair.
+/// `SigningKeyVersion::V1` (Ed25519) can still be generated, but it is not FIPS approved.
 /// # Arguments
 ///  * `version` - Version of the key scheme to use. Use `SigningKeyVersion::Latest` if you're not dealing with shared data.
 /// # Returns
@@ -113,19 +124,33 @@ enum SigningPublicKeyPayload {
 pub fn generate_signing_keypair(version: SigningKeyVersion) -> SigningKeyPair {
     let mut header = Header::default();
 
-    let payload = match version {
-        SigningKeyVersion::V1 | SigningKeyVersion::Latest => {
-            header.version = SigningKeyVersion::V1;
+    header.version = version.resolve_latest();
 
-            let keypair = signing_key_v1::generate_signing_keypair();
-            SigningKeyPairPayload::V1(keypair)
+    let payload = match header.version {
+        SigningKeyVersion::V1 => {
+            SigningKeyPairPayload::V1(signing_key_v1::generate_signing_keypair())
         }
+        #[cfg(feature = "fips")]
+        SigningKeyVersion::V3 => SigningKeyPairPayload::V3(
+            signing_key_v3::generate_signing_keypair()
+                .expect("the FIPS module key generation should not fail"),
+        ),
+        SigningKeyVersion::Latest => unreachable!("the version is resolved above"),
     };
 
     SigningKeyPair { header, payload }
 }
 
 impl SigningKeyPair {
+    /// The signature scheme matching this keypair.
+    pub(crate) fn signature_version(&self) -> crate::SignatureVersion {
+        match self.payload {
+            SigningKeyPairPayload::V1(_) => crate::SignatureVersion::V1,
+            #[cfg(feature = "fips")]
+            SigningKeyPairPayload::V3(_) => crate::SignatureVersion::V3,
+        }
+    }
+
     /// Gets the public part `SingingPublicKey` of a `SigningKeyPair`
     /// # Returns
     /// Returns a `SingingPublicKey` containingthe public key.
@@ -144,6 +169,12 @@ impl SigningKeyPair {
                 header.version = SigningKeyVersion::V1;
 
                 SigningPublicKeyPayload::V1(x.get_public_key())
+            }
+            #[cfg(feature = "fips")]
+            SigningKeyPairPayload::V3(x) => {
+                header.version = SigningKeyVersion::V3;
+
+                SigningPublicKeyPayload::V3(x.get_public_key())
             }
         };
 
@@ -179,6 +210,10 @@ impl TryFrom<&[u8]> for SigningPublicKey {
         let payload = match header.version {
             SigningKeyVersion::V1 => {
                 SigningPublicKeyPayload::V1(SigningKeyV1Public::try_from(&data[Header::len()..])?)
+            }
+            #[cfg(feature = "fips")]
+            SigningKeyVersion::V3 => {
+                SigningPublicKeyPayload::V3(SigningKeyV3Public::try_from(&data[Header::len()..])?)
             }
             _ => return Err(Error::UnknownVersion),
         };
@@ -216,6 +251,10 @@ impl TryFrom<&[u8]> for SigningKeyPair {
             SigningKeyVersion::V1 => {
                 SigningKeyPairPayload::V1(SigningKeyV1Pair::try_from(&data[Header::len()..])?)
             }
+            #[cfg(feature = "fips")]
+            SigningKeyVersion::V3 => {
+                SigningKeyPairPayload::V3(SigningKeyV3Pair::try_from(&data[Header::len()..])?)
+            }
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -227,6 +266,8 @@ impl From<SigningKeyPairPayload> for Vec<u8> {
     fn from(data: SigningKeyPairPayload) -> Self {
         match data {
             SigningKeyPairPayload::V1(x) => x.into(),
+            #[cfg(feature = "fips")]
+            SigningKeyPairPayload::V3(x) => x.into(),
         }
     }
 }
@@ -235,25 +276,64 @@ impl From<SigningPublicKeyPayload> for Vec<u8> {
     fn from(data: SigningPublicKeyPayload) -> Self {
         match data {
             SigningPublicKeyPayload::V1(x) => x.into(),
+            #[cfg(feature = "fips")]
+            SigningPublicKeyPayload::V3(x) => x.into(),
         }
     }
 }
 
+impl SigningPublicKey {
+    /// Returns the Ed25519 key of a V1 public key.
+    pub(crate) fn to_ed25519(&self) -> Result<ed25519_dalek::VerifyingKey> {
+        match &self.payload {
+            SigningPublicKeyPayload::V1(x) => Ok(ed25519_dalek::VerifyingKey::from(x)),
+            #[cfg(feature = "fips")]
+            _ => Err(Error::InvalidDataType),
+        }
+    }
+
+    /// Returns the ECDSA P-256 key of a V3 public key.
+    #[cfg(feature = "fips")]
+    pub(crate) fn to_p256(&self) -> Result<&SigningKeyV3Public> {
+        match &self.payload {
+            SigningPublicKeyPayload::V3(x) => Ok(x),
+            _ => Err(Error::InvalidDataType),
+        }
+    }
+}
+
+impl SigningKeyPair {
+    /// Returns the Ed25519 key of a V1 keypair.
+    pub(crate) fn to_ed25519(&self) -> Result<ed25519_dalek::SigningKey> {
+        match &self.payload {
+            SigningKeyPairPayload::V1(x) => Ok(ed25519_dalek::SigningKey::from(x)),
+            #[cfg(feature = "fips")]
+            _ => Err(Error::InvalidDataType),
+        }
+    }
+
+    /// Returns the ECDSA P-256 key of a V3 keypair.
+    #[cfg(feature = "fips")]
+    pub(crate) fn to_p256(&self) -> Result<&SigningKeyV3Pair> {
+        match &self.payload {
+            SigningKeyPairPayload::V3(x) => Ok(x),
+            _ => Err(Error::InvalidDataType),
+        }
+    }
+}
+
+// With the `fips` feature, a key can be an ECDSA key, so these conversions are not infallible.
+#[cfg(not(feature = "fips"))]
 impl From<&SigningPublicKey> for ed25519_dalek::VerifyingKey {
     fn from(data: &SigningPublicKey) -> Self {
-        match &data.payload {
-            SigningPublicKeyPayload::V1(x) => Self::from(x),
-            //_ => Err(DevoCryptoError::InvalidDataType),
-        }
+        data.to_ed25519().expect("only Ed25519 keys exist")
     }
 }
 
+#[cfg(not(feature = "fips"))]
 impl From<&SigningKeyPair> for ed25519_dalek::SigningKey {
     fn from(data: &SigningKeyPair) -> Self {
-        match &data.payload {
-            SigningKeyPairPayload::V1(x) => Self::from(x),
-            //_ => Err(DevoCryptoError::InvalidDataType),
-        }
+        data.to_ed25519().expect("only Ed25519 keys exist")
     }
 }
 

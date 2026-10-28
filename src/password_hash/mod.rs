@@ -63,6 +63,9 @@ impl HeaderType for PasswordHash {
 enum PasswordHashPayload {
     V1(PasswordHashV1),
     V2(PasswordHashV2),
+    /// Same layout as V2, with V3 (FIPS PBKDF2-HMAC-SHA256) derivation parameters.
+    #[cfg(feature = "fips")]
+    V3(PasswordHashV2),
 }
 
 /// Creates a `PasswordHash` containing the password verifier.
@@ -72,6 +75,9 @@ enum PasswordHashPayload {
 /// - `V2` / `Latest` (Argon2id): 64 MiB memory, 3 time iterations (OWASP recommendation).
 ///
 /// Use [`hash_password_with_parameters`] when you need to tune the algorithm parameters.
+///
+/// With the `fips` feature, `Latest` and `V3` use PBKDF2-HMAC-SHA256 computed by the FIPS module
+/// with [`DEFAULT_PBKDF2_ITERATIONS`] iterations, and the other versions return `Error::NotFipsApproved`.
 ///
 /// # Arguments
 ///  * `password` - The password to hash.
@@ -89,23 +95,25 @@ enum PasswordHashPayload {
 /// ```
 pub fn hash_password(password: &[u8], version: PasswordHashVersion) -> Result<PasswordHash> {
     let mut header = Header::default();
+    header.version = version.resolve_approved()?;
 
-    let payload = match version {
-        PasswordHashVersion::V1 => {
-            header.version = PasswordHashVersion::V1;
-            PasswordHashPayload::V1(PasswordHashV1::hash_password(
-                password,
-                DEFAULT_PBKDF2_ITERATIONS,
-            )?)
-        }
-        PasswordHashVersion::V2 | PasswordHashVersion::Latest => {
-            header.version = PasswordHashVersion::V2;
+    let payload = match header.version {
+        PasswordHashVersion::V1 => PasswordHashPayload::V1(PasswordHashV1::hash_password(
+            password,
+            DEFAULT_PBKDF2_ITERATIONS,
+        )?),
+        PasswordHashVersion::V2 => {
             let mut argon2_params = Argon2Parameters::default();
             argon2_params.memory = password_hash_v2::defaults::MEMORY_KIB;
             argon2_params.iterations = password_hash_v2::defaults::ITERATIONS;
             let params = Argon2::with_params(argon2_params).parameters();
             PasswordHashPayload::V2(PasswordHashV2::hash_password(password, params)?)
         }
+        #[cfg(feature = "fips")]
+        PasswordHashVersion::V3 => {
+            return hash_password_with_parameters(password, crate::Pbkdf2::new().parameters()?);
+        }
+        PasswordHashVersion::Latest => unreachable!("the version is resolved above"),
     };
 
     Ok(PasswordHash { header, payload })
@@ -117,8 +125,12 @@ pub fn hash_password(password: &[u8], version: PasswordHashVersion) -> Result<Pa
 /// `params`. Obtain fresh parameters via [`crate::key_derivation::Argon2::parameters`] or
 /// [`crate::key_derivation::Pbkdf2::parameters`].
 ///
+/// With the `fips` feature, only V3 parameters (from [`crate::key_derivation::Pbkdf2`]) are
+/// accepted, and other parameters return `Error::NotFipsApproved`.
+///
 /// # Example
 /// ```rust
+/// # #[cfg(not(feature = "fips"))] {
 /// use devolutions_crypto::password_hash::hash_password_with_parameters;
 /// use devolutions_crypto::key_derivation::Argon2;
 /// use devolutions_crypto::Argon2Parameters;
@@ -130,14 +142,24 @@ pub fn hash_password(password: &[u8], version: PasswordHashVersion) -> Result<Pa
 ///
 /// let hash = hash_password_with_parameters(b"pa$$word", params).expect("should not fail");
 /// assert!(hash.verify_password(b"pa$$word"));
+/// # }
 /// ```
 pub fn hash_password_with_parameters(
     password: &[u8],
     params: DerivationParameters,
 ) -> Result<PasswordHash> {
+    params.ensure_fips_approved()?;
+
     let mut header = Header::default();
-    header.version = PasswordHashVersion::V2;
-    let payload = PasswordHashPayload::V2(PasswordHashV2::hash_password(password, params)?);
+    header.version = PasswordHashVersion::Latest.resolve_latest();
+
+    let hash = PasswordHashV2::hash_password(password, params)?;
+    let payload = match header.version {
+        #[cfg(feature = "fips")]
+        PasswordHashVersion::V3 => PasswordHashPayload::V3(hash),
+        _ => PasswordHashPayload::V2(hash),
+    };
+
     Ok(PasswordHash { header, payload })
 }
 
@@ -161,6 +183,8 @@ impl PasswordHash {
         match &self.payload {
             PasswordHashPayload::V1(x) => x.verify_password(password),
             PasswordHashPayload::V2(x) => x.verify_password(password),
+            #[cfg(feature = "fips")]
+            PasswordHashPayload::V3(x) => x.verify_password(password),
         }
     }
 }
@@ -193,6 +217,14 @@ impl TryFrom<&[u8]> for PasswordHash {
             PasswordHashVersion::V2 => {
                 PasswordHashPayload::V2(PasswordHashV2::try_from(&data[Header::len()..])?)
             }
+            #[cfg(feature = "fips")]
+            PasswordHashVersion::V3 => {
+                let hash = PasswordHashV2::try_from(&data[Header::len()..])?;
+                if hash.params.ensure_fips_approved().is_err() {
+                    return Err(Error::InvalidData);
+                }
+                PasswordHashPayload::V3(hash)
+            }
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -205,6 +237,8 @@ impl From<PasswordHashPayload> for Vec<u8> {
         match data {
             PasswordHashPayload::V1(x) => x.into(),
             PasswordHashPayload::V2(x) => x.into(),
+            #[cfg(feature = "fips")]
+            PasswordHashPayload::V3(x) => x.into(),
         }
     }
 }
@@ -219,6 +253,7 @@ fn hash_password_test() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn password_v2_roundtrip_bytes() {
     let pass = b"pa$$w0rd";
 
@@ -235,6 +270,7 @@ fn password_v2_roundtrip_bytes() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn password_v1_roundtrip_bytes() {
     use crate::key_derivation::Pbkdf2;
 
