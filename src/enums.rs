@@ -7,6 +7,33 @@ use arbitrary::Arbitrary;
 #[cfg(feature = "wbindgen")]
 use wasm_bindgen::prelude::*;
 
+/// Declares a version enum whose FIPS variants only exist with the `fips` feature.
+/// `#[wasm_bindgen]` does not honor `cfg` on variants, so both shapes are generated.
+macro_rules! version_enum {
+    (
+        $(#[$meta:meta])*
+        pub enum $name:ident {
+            $($(#[$variant_meta:meta])* $variant:ident = $value:expr,)+
+        }
+        fips {
+            $($(#[$fips_meta:meta])* $fips:ident = $fips_value:expr,)+
+        }
+    ) => {
+        #[cfg(not(feature = "fips"))]
+        $(#[$meta])*
+        pub enum $name {
+            $($(#[$variant_meta])* $variant = $value,)+
+        }
+
+        #[cfg(feature = "fips")]
+        $(#[$meta])*
+        pub enum $name {
+            $($(#[$variant_meta])* $variant = $value,)+
+            $($(#[$fips_meta])* $fips = $fips_value,)+
+        }
+    };
+}
+
 /// The different data types.
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
@@ -37,23 +64,26 @@ pub enum DataType {
     KdfEncryptedData = 9,
 }
 
-/// The versions of the encryption scheme to use.
-#[cfg_attr(feature = "wbindgen", wasm_bindgen())]
-#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
-#[repr(u16)]
-#[derive(Default)]
-pub enum CiphertextVersion {
-    /// Uses the latest version.
-    #[default]
-    Latest = 0,
-    /// Uses version 1: AES256-CBC-HMAC-SHA2-256.
-    V1 = 1,
-    /// Uses version 2: XChaCha20-Poly1305.
-    V2 = 2,
-    /// Uses version 3 (FIPS): AES-256-GCM with an HKDF-SHA256 derived key and P-256 ECDH for asymmetric.
-    #[cfg(feature = "fips")]
-    V3 = 3,
+version_enum! {
+    /// The versions of the encryption scheme to use.
+    #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
+    #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+    #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+    #[repr(u16)]
+    #[derive(Default)]
+    pub enum CiphertextVersion {
+        /// Uses the latest version.
+        #[default]
+        Latest = 0,
+        /// Uses version 1: AES256-CBC-HMAC-SHA2-256.
+        V1 = 1,
+        /// Uses version 2: XChaCha20-Poly1305.
+        V2 = 2,
+    }
+    fips {
+        /// Uses version 3 (FIPS): AES-256-GCM with an HKDF-SHA256 derived key and P-256 ECDH for asymmetric.
+        V3 = 3,
+    }
 }
 
 /// The versions of the online encryption scheme to use.
@@ -70,56 +100,65 @@ pub enum OnlineCiphertextVersion {
     V1 = 1,
 }
 
-/// The versions of the password hashing scheme to use.
-#[cfg_attr(feature = "wbindgen", wasm_bindgen())]
-#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
-#[repr(u16)]
-#[derive(Default)]
-pub enum PasswordHashVersion {
-    /// Uses the latest version.
-    #[default]
-    Latest = 0,
-    /// Uses version 1: PBKDF2-HMAC-SHA2-256.
-    V1 = 1,
-    /// Uses version 2: Argon2id.
-    V2 = 2,
-    /// Uses version 3 (FIPS): PBKDF2-HMAC-SHA256.
-    #[cfg(feature = "fips")]
-    V3 = 3,
+version_enum! {
+    /// The versions of the password hashing scheme to use.
+    #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
+    #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+    #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+    #[repr(u16)]
+    #[derive(Default)]
+    pub enum PasswordHashVersion {
+        /// Uses the latest version.
+        #[default]
+        Latest = 0,
+        /// Uses version 1: PBKDF2-HMAC-SHA2-256.
+        V1 = 1,
+        /// Uses version 2: Argon2id.
+        V2 = 2,
+    }
+    fips {
+        /// Uses version 3 (FIPS): PBKDF2-HMAC-SHA256.
+        V3 = 3,
+    }
 }
 
-/// The versions of the key scheme to use.
-#[cfg_attr(feature = "wbindgen", wasm_bindgen())]
-#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
-#[repr(u16)]
-#[derive(Default)]
-pub enum KeyVersion {
-    /// Uses the latest version.
-    #[default]
-    Latest = 0,
-    /// Uses version 1: Curve25519 keys and x25519 key exchange.
-    V1 = 1,
-    /// Uses version 3 (FIPS): NIST P-256 keys and ECDH key exchange.
-    #[cfg(feature = "fips")]
-    V3 = 3,
+version_enum! {
+    /// The versions of the key scheme to use.
+    #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
+    #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+    #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+    #[repr(u16)]
+    #[derive(Default)]
+    pub enum KeyVersion {
+        /// Uses the latest version.
+        #[default]
+        Latest = 0,
+        /// Uses version 1: Curve25519 keys and x25519 key exchange.
+        V1 = 1,
+    }
+    fips {
+        /// Uses version 3 (FIPS): NIST P-256 keys and ECDH key exchange.
+        V3 = 3,
+    }
 }
 
-#[cfg_attr(feature = "wbindgen", wasm_bindgen())]
-#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
-#[repr(u16)]
-#[derive(Default)]
-pub enum SigningKeyVersion {
-    /// Uses the latest version.
-    #[default]
-    Latest = 0,
-    /// Uses version 1: Ed25519.
-    V1 = 1,
-    /// Uses version 3 (FIPS): ECDSA over NIST P-256 with SHA-256.
-    #[cfg(feature = "fips")]
-    V3 = 3,
+version_enum! {
+    #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
+    #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+    #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+    #[repr(u16)]
+    #[derive(Default)]
+    pub enum SigningKeyVersion {
+        /// Uses the latest version.
+        #[default]
+        Latest = 0,
+        /// Uses version 1: Ed25519.
+        V1 = 1,
+    }
+    fips {
+        /// Uses version 3 (FIPS): ECDSA over NIST P-256 with SHA-256.
+        V3 = 3,
+    }
 }
 
 /// The versions of the secret sharing scheme to use.
@@ -136,21 +175,24 @@ pub enum SecretSharingVersion {
     V1 = 1,
 }
 
-/// The versions of the secret sharing scheme to use.
-#[cfg_attr(feature = "wbindgen", wasm_bindgen())]
-#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
-#[repr(u16)]
-#[derive(Default)]
-pub enum SignatureVersion {
-    /// Uses the latest version.
-    #[default]
-    Latest = 0,
-    /// Uses version 1: ed25519
-    V1 = 1,
-    /// Uses version 3 (FIPS): ECDSA over NIST P-256 with SHA-256.
-    #[cfg(feature = "fips")]
-    V3 = 3,
+version_enum! {
+    /// The versions of the secret sharing scheme to use.
+    #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
+    #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+    #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+    #[repr(u16)]
+    #[derive(Default)]
+    pub enum SignatureVersion {
+        /// Uses the latest version.
+        #[default]
+        Latest = 0,
+        /// Uses version 1: ed25519
+        V1 = 1,
+    }
+    fips {
+        /// Uses version 3 (FIPS): ECDSA over NIST P-256 with SHA-256.
+        V3 = 3,
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
@@ -204,23 +246,26 @@ pub enum SignatureSubtype {
     None = 0,
 }
 
-/// The versions of the key derivation scheme to use.
-#[cfg_attr(feature = "wbindgen", wasm_bindgen())]
-#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
-#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
-#[repr(u16)]
-#[derive(Default)]
-pub enum KeyDerivationVersion {
-    /// Uses the latest version.
-    #[default]
-    Latest = 0,
-    /// Uses version 1: PBKDF2-HMAC-SHA256.
-    V1 = 1,
-    /// Uses version 2: Argon2id.
-    V2 = 2,
-    /// Uses version 3 (FIPS): PBKDF2-HMAC-SHA256.
-    #[cfg(feature = "fips")]
-    V3 = 3,
+version_enum! {
+    /// The versions of the key derivation scheme to use.
+    #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
+    #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+    #[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+    #[repr(u16)]
+    #[derive(Default)]
+    pub enum KeyDerivationVersion {
+        /// Uses the latest version.
+        #[default]
+        Latest = 0,
+        /// Uses version 1: PBKDF2-HMAC-SHA256.
+        V1 = 1,
+        /// Uses version 2: Argon2id.
+        V2 = 2,
+    }
+    fips {
+        /// Uses version 3 (FIPS): PBKDF2-HMAC-SHA256.
+        V3 = 3,
+    }
 }
 
 /// The versions of the KDF-encrypt scheme to use.
