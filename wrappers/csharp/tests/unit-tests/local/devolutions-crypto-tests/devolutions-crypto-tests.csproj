@@ -21,6 +21,11 @@
             <Link>DevolutionsCrypto.dll</Link>
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
+        <!-- With the `fips` feature on Windows, the AWS-LC FIPS module is a separate DLL -->
+        <Content Include="..\..\..\..\..\..\target\debug\build\aws-lc-fips-sys-*\out\build\artifacts\aws_lc_fips_*_crypto.dll">
+            <Link>%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
         <Content Include="..\..\..\..\..\..\target\debug\libdevolutions_crypto_ffi.so"
                  Condition="Exists('..\..\..\..\..\..\target\debug\libdevolutions_crypto_ffi.so')">
             <Link>libDevolutionsCrypto.so</Link>
