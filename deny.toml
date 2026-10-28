@@ -41,6 +41,8 @@ exceptions = [
     # AWS-LC, only pulled in by the `fips` feature
     { allow = ["ISC", "OpenSSL"], crate = "aws-lc-fips-sys" },
     { allow = ["ISC"], crate = "aws-lc-rs" },
+    # Build dependency of aws-lc-fips-sys (through bindgen and clang-sys)
+    { allow = ["ISC"], crate = "libloading" },
 ]
 
 [licenses.private]
