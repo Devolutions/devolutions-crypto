@@ -15,6 +15,7 @@
 //! ### Symmetric
 //!
 //! ```rust
+//! # #[cfg(not(feature = "fips"))] {
 //! use devolutions_crypto::utils::generate_key;
 //! use devolutions_crypto::online_ciphertext::{
 //!     OnlineCiphertextEncryptor, OnlineCiphertextHeader, OnlineCiphertextVersion,
@@ -44,6 +45,7 @@
 //! decrypted.extend_from_slice(&decryptor.decrypt_last_chunk(&chunk2, b"").expect("decrypting the last chunk shouldn't fail"));
 //!
 //! assert_eq!(decrypted, b"0123456789abcdefthe last chunk");
+//! # }
 //! ```
 //!
 //! ### Asymmetric
@@ -164,7 +166,7 @@ impl OnlineCiphertextEncryptor {
         let mut full_aad: Vec<u8> = header.borrow().into();
         full_aad.extend_from_slice(aad);
 
-        match version {
+        match version.resolve_approved()? {
             OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
                 let cipher = OnlineCiphertextV1Encryptor::new(key, full_aad, chunk_size)?;
 
@@ -187,7 +189,7 @@ impl OnlineCiphertextEncryptor {
         let mut full_aad: Vec<u8> = header.borrow().into();
         full_aad.extend_from_slice(aad);
 
-        match version {
+        match version.resolve_approved()? {
             OnlineCiphertextVersion::V1 | OnlineCiphertextVersion::Latest => {
                 let cipher =
                     OnlineCiphertextV1Encryptor::new_asymmetric(public_key, full_aad, chunk_size)?;

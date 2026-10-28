@@ -27,7 +27,9 @@ use devolutions_crypto::derive_encrypt::{KdfEncryptedData, encrypt_with_password
 use devolutions_crypto::key::{
     KeyVersion, PrivateKey, PublicKey, generate_keypair, generate_secret_key, mix_key_exchange,
 };
-use devolutions_crypto::key_derivation::{Argon2, DerivationParameters, Pbkdf2};
+use devolutions_crypto::key_derivation::{
+    Argon2, DerivationParameters, Pbkdf2, default_parameters,
+};
 use devolutions_crypto::password_hash::{
     PasswordHash, PasswordHashVersion, hash_password, hash_password_with_parameters,
 };
@@ -54,6 +56,57 @@ use std::sync::Mutex;
 use zeroize::Zeroizing;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+// Serialized sizes, header included.
+const HEADER_SIZE: usize = 8;
+const KEY_V1_PUBLIC_SIZE: usize = HEADER_SIZE + 32;
+#[cfg(feature = "fips")]
+const KEY_V3_PUBLIC_SIZE: usize = HEADER_SIZE + 65;
+const SIGNING_KEYPAIR_V1_SIZE: usize = HEADER_SIZE + 64;
+const SIGNING_KEYPAIR_V3_SIZE: usize = HEADER_SIZE + 32 + 65;
+const SIGNING_PUBLIC_V1_SIZE: usize = HEADER_SIZE + 32;
+const SIGNING_PUBLIC_V3_SIZE: usize = HEADER_SIZE + 65;
+
+/// Raw primitives that are not available with the `fips` feature.
+mod raw {
+    use devolutions_crypto::Result;
+
+    #[cfg(not(feature = "fips"))]
+    pub fn pbkdf2(key: &[u8], salt: &[u8], iterations: u32, length: usize) -> Result<Vec<u8>> {
+        Ok(devolutions_crypto::utils::derive_key_pbkdf2(
+            key, salt, iterations, length,
+        ))
+    }
+
+    #[cfg(feature = "fips")]
+    pub fn pbkdf2(_key: &[u8], _salt: &[u8], _iterations: u32, _length: usize) -> Result<Vec<u8>> {
+        Err(devolutions_crypto::Error::NotFipsApproved)
+    }
+
+    #[cfg(not(feature = "fips"))]
+    pub fn scrypt(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) -> Result<String> {
+        Ok(devolutions_crypto::utils::scrypt_simple(
+            password, salt, log_n, r, p,
+        ))
+    }
+
+    #[cfg(feature = "fips")]
+    pub fn scrypt(_password: &[u8], _salt: &[u8], _log_n: u8, _r: u32, _p: u32) -> Result<String> {
+        Err(devolutions_crypto::Error::NotFipsApproved)
+    }
+}
+
+/// Checks that the library was built with the `fips` feature and that the cryptographic
+/// module runs in FIPS mode.
+/// # Returns
+/// Returns 0 in FIPS mode, or `NotFipsApproved` (-45) otherwise.
+#[unsafe(no_mangle)]
+pub extern "C" fn EnsureFipsMode() -> i64 {
+    match devolutions_crypto::fips::ensure_fips_mode() {
+        Ok(()) => 0,
+        Err(e) => e.error_code(),
+    }
+}
 
 pub const PASSWORD_HASH_LATEST: u16 = 0;
 pub const PASSWORD_HASH_V1: u16 = 1;
@@ -205,14 +258,22 @@ pub unsafe extern "C" fn EncryptAsymmetric(
 /// Returns the length of the ciphertext to input as `result_length` in `Encrypt()`.
 #[unsafe(no_mangle)]
 pub extern "C" fn EncryptSize(data_length: usize, version: u16) -> i64 {
-    match version {
-        1 => {
+    let Ok(version) = CiphertextVersion::try_from(version) else {
+        return Error::UnknownVersion.error_code();
+    };
+
+    match version.resolve_latest() {
+        CiphertextVersion::V1 => {
             (8 + 16 + (data_length / 16 + 1) * 16 + 32) as i64 // Header + IV + data(padded to 16) + HMAC
         }
-        0 | 2 => {
+        CiphertextVersion::V2 => {
             (8 + 24 + data_length + 16) as i64 // Header + nonce + data + Poly1305 tag
         }
-        _ => Error::UnknownVersion.error_code(),
+        #[cfg(feature = "fips")]
+        CiphertextVersion::V3 => {
+            (8 + 32 + 12 + data_length + 16) as i64 // Header + salt + nonce + data + GCM tag
+        }
+        CiphertextVersion::Latest => unreachable!("the version is resolved above"),
     }
 }
 
@@ -223,9 +284,17 @@ pub extern "C" fn EncryptSize(data_length: usize, version: u16) -> i64 {
 /// Returns the length of the asymmetric ciphertext to input as `result_length` in `EncryptAsymmetric()`.
 #[unsafe(no_mangle)]
 pub extern "C" fn EncryptAsymmetricSize(data_length: usize, version: u16) -> i64 {
-    match version {
-        0 | 2 => {
+    let Ok(version) = CiphertextVersion::try_from(version) else {
+        return Error::UnknownVersion.error_code();
+    };
+
+    match version.resolve_latest() {
+        CiphertextVersion::V2 => {
             (8 + 32 + 24 + data_length + 16) as i64 // Header + public_key + nonce + data + Poly1305 tag
+        }
+        #[cfg(feature = "fips")]
+        CiphertextVersion::V3 => {
+            (8 + 65 + 32 + 12 + data_length + 16) as i64 // Header + P-256 public key + salt + nonce + data + GCM tag
         }
         _ => Error::UnknownVersion.error_code(),
     }
@@ -255,11 +324,12 @@ pub extern "C" fn DeriveEncryptSize(
         return ciphertext_size;
     }
 
-    let derivation_parameters_size: usize = match key_derivation_version {
-        KeyDerivationVersion::V1 => DeriveSecretKeyPbkdf2Size() as usize,
-        KeyDerivationVersion::V2 | KeyDerivationVersion::Latest => {
+    let derivation_parameters_size: usize = match key_derivation_version.resolve_latest() {
+        KeyDerivationVersion::V2 => {
             DeriveSecretKeyArgon2ParametersSize(GetDefaultArgon2ParametersSize() as usize) as usize
         }
+        // V1 and V3 are both PBKDF2 with the same layout
+        _ => DeriveSecretKeyPbkdf2Size() as usize,
     };
 
     // The length is calculated based on these values:
@@ -329,11 +399,9 @@ pub unsafe extern "C" fn DeriveEncryptData(
         let password = Zeroizing::new(slice::from_raw_parts(password, password_length).to_vec());
         let result = slice::from_raw_parts_mut(result, result_length);
 
-        let derivation_parameters = match key_derivation_version {
-            KeyDerivationVersion::Latest | KeyDerivationVersion::V2 => Argon2::new().parameters(),
-            KeyDerivationVersion::V1 => Pbkdf2::new()
-                .parameters()
-                .expect("default PKBDF2 parameters shouldn't fail"),
+        let derivation_parameters = match default_parameters(key_derivation_version) {
+            Ok(p) => p,
+            Err(e) => return e.error_code(),
         };
 
         match encrypt_with_password_and_aad(
@@ -695,7 +763,10 @@ pub unsafe extern "C" fn Sign(
                     Err(_) => return Error::UnknownVersion.error_code(),
                 };
 
-                let signature: Vec<u8> = signature::sign(data, &keypair, version).into();
+                let signature: Vec<u8> = match signature::try_sign(data, &keypair, version) {
+                    Ok(s) => s.into(),
+                    Err(e) => return e.error_code(),
+                };
 
                 result[0..signature.len()].copy_from_slice(&signature);
 
@@ -817,14 +888,19 @@ pub unsafe extern "C" fn HashPassword(
 /// Returns the length of the hash, or a negative error code for an unknown version.
 #[unsafe(no_mangle)]
 pub extern "C" fn HashPasswordLength(version: u16) -> i64 {
-    match version {
+    let Ok(version) = PasswordHashVersion::try_from(version) else {
+        return Error::UnknownVersion.error_code();
+    };
+
+    match version.resolve_latest() {
         // V1: PBKDF2 — fixed layout: 4 (iterations) + 32 (salt) + 32 (hash) = 68, plus 8-byte header
-        PASSWORD_HASH_V1 => 8 + 68,
-        // V2 / Latest: Argon2id — header + params_len field + DerivationParameters + hash
-        PASSWORD_HASH_LATEST | PASSWORD_HASH_V2 => {
-            8 + 4 + 8 + GetDefaultArgon2ParametersSize() + 32
-        }
-        _ => Error::UnknownVersion.error_code(),
+        PasswordHashVersion::V1 => 8 + 68,
+        // V2: Argon2id — header + params_len field + DerivationParameters + hash
+        PasswordHashVersion::V2 => 8 + 4 + 8 + GetDefaultArgon2ParametersSize() + 32,
+        // V3: PBKDF2 (FIPS) — header + params_len field + DerivationParameters + hash
+        #[cfg(feature = "fips")]
+        PasswordHashVersion::V3 => 8 + 4 + GetPbkdf2DerivationParametersSize() + 32,
+        PasswordHashVersion::Latest => unreachable!("the version is resolved above"),
     }
 }
 
@@ -955,7 +1031,7 @@ pub unsafe extern "C" fn VerifyPassword(
 ///    You can get the value by calling `GenerateKeyPairSize()` beforehand.
 ///  * `public` - Pointer to the buffer to write the public key to.
 ///  * `public_length` - Length of the buffer to write the public key to.
-///    You can get the value by calling `GenerateKeyPairSize()` beforehand.
+///    You can get the value by calling `GenerateKeyPairPublicSize()` beforehand.
 /// # Returns
 /// Returns 0 if the generation worked. If there is an error,
 ///     it will return the appropriate error code defined in DevoCryptoError.
@@ -974,7 +1050,7 @@ pub unsafe extern "C" fn GenerateKeyPair(
         };
 
         if private_length != GenerateKeyPairSize() as usize
-            || public_length != GenerateKeyPairSize() as usize
+            || public_length != GenerateKeyPairPublicSize() as usize
         {
             return Error::InvalidOutputLength.error_code();
         }
@@ -1083,7 +1159,18 @@ pub unsafe extern "C" fn GetSigningPublicKey(
 ///     and `public_length` in `GenerateKeyPair()`.
 #[unsafe(no_mangle)]
 pub extern "C" fn GenerateKeyPairSize() -> i64 {
-    8 + 32 // header + key length
+    8 + 32 // header + private key length (same for X25519 and P-256)
+}
+
+/// Size of the public key of the keypair generated by `GenerateKeyPair()`.
+/// Same as `GenerateKeyPairSize()` without the `fips` feature.
+#[unsafe(no_mangle)]
+pub extern "C" fn GenerateKeyPairPublicSize() -> i64 {
+    match KeyVersion::Latest.resolve_latest() {
+        #[cfg(feature = "fips")]
+        KeyVersion::V3 => KEY_V3_PUBLIC_SIZE as i64,
+        _ => KEY_V1_PUBLIC_SIZE as i64,
+    }
 }
 
 /// Generate a secret key for symmetric encryption.
@@ -1130,8 +1217,16 @@ pub extern "C" fn GenerateSecretKeySize() -> i64 {
 /// Returns the length of the keypair to input as `keypair_length`
 ///    in `GenerateSigningKeyPair()`.
 #[unsafe(no_mangle)]
-pub extern "C" fn GenerateSigningKeyPairSize(_version: u16) -> i64 {
-    8 + 64 // header + keypair length
+pub extern "C" fn GenerateSigningKeyPairSize(version: u16) -> i64 {
+    let Ok(version) = SigningKeyVersion::try_from(version) else {
+        return Error::UnknownVersion.error_code();
+    };
+
+    match version.resolve_latest() {
+        #[cfg(feature = "fips")]
+        SigningKeyVersion::V3 => SIGNING_KEYPAIR_V3_SIZE as i64,
+        _ => SIGNING_KEYPAIR_V1_SIZE as i64,
+    }
 }
 
 /// Get the size of the public key used for signing.
@@ -1139,8 +1234,12 @@ pub extern "C" fn GenerateSigningKeyPairSize(_version: u16) -> i64 {
 /// Returns the length of the public key to input as `public_length`
 ///    in `GetSigningPublicKey()`.
 #[unsafe(no_mangle)]
-pub extern "C" fn GetSigningPublicKeySize(_keypair: *const u8, _keypair_length: usize) -> i64 {
-    8 + 32 // header + public key length
+pub extern "C" fn GetSigningPublicKeySize(_keypair: *const u8, keypair_length: usize) -> i64 {
+    // The keypair length identifies its version
+    match keypair_length {
+        SIGNING_KEYPAIR_V3_SIZE => SIGNING_PUBLIC_V3_SIZE as i64,
+        _ => SIGNING_PUBLIC_V1_SIZE as i64,
+    }
 }
 
 /// Performs a key exchange.
@@ -2014,12 +2113,10 @@ pub unsafe extern "C" fn DeriveKeyPbkdf2(
         let key = slice::from_raw_parts(key, key_length);
         let result = slice::from_raw_parts_mut(result, result_length);
 
-        let native_result = Zeroizing::new(utils::derive_key_pbkdf2(
-            key,
-            salt,
-            niterations,
-            result_length,
-        ));
+        let native_result = match raw::pbkdf2(key, salt, niterations, result_length) {
+            Ok(x) => Zeroizing::new(x),
+            Err(e) => return e.error_code(),
+        };
         result.copy_from_slice(&native_result);
         0
     }
@@ -2401,7 +2498,10 @@ pub unsafe extern "C" fn ScryptSimple(
         let password = slice::from_raw_parts(password, password_length);
         let salt = slice::from_raw_parts(salt, salt_length);
 
-        let hash = utils::scrypt_simple(password, salt, log_n, r, p);
+        let hash = match raw::scrypt(password, salt, log_n, r, p) {
+            Ok(x) => x,
+            Err(e) => return e.error_code(),
+        };
 
         let output = slice::from_raw_parts_mut(output, output_length);
         output[..hash.len()].copy_from_slice(hash.as_bytes());
@@ -2730,7 +2830,7 @@ fn test_key_exchange_length() {
     let public_bob: Vec<u8> = bob_keypair.public_key.into();
 
     assert_eq!(GenerateKeyPairSize() as usize, private_bob.len());
-    assert_eq!(GenerateKeyPairSize() as usize, public_bob.len());
+    assert_eq!(GenerateKeyPairPublicSize() as usize, public_bob.len());
 
     let private_bob = PrivateKey::try_from(private_bob.as_slice()).unwrap();
     let public_bob = PublicKey::try_from(public_bob.as_slice()).unwrap();
@@ -2837,7 +2937,7 @@ fn test_derive_secret_key_pbkdf2() {
         DeriveSecretKeyPbkdf2(
             password.as_ptr(),
             password.len(),
-            10,
+            1000,
             sk_buf.as_mut_ptr(),
             sk_size,
             params_buf.as_mut_ptr(),
@@ -2869,7 +2969,7 @@ fn test_derive_secret_key_pbkdf2_deterministic() {
         let retval1 = DeriveSecretKeyPbkdf2(
             password.as_ptr(),
             password.len(),
-            10,
+            1000,
             sk1.as_mut_ptr(),
             sk_size,
             params1.as_mut_ptr(),
@@ -2878,7 +2978,7 @@ fn test_derive_secret_key_pbkdf2_deterministic() {
         let retval2 = DeriveSecretKeyPbkdf2(
             password.as_ptr(),
             password.len(),
-            10,
+            1000,
             sk2.as_mut_ptr(),
             sk_size,
             params2.as_mut_ptr(),
@@ -2895,6 +2995,7 @@ fn test_derive_secret_key_pbkdf2_deterministic() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn test_derive_secret_key_argon2() {
     let password = b"test_password";
     let argon2_params: Vec<u8> = (&Argon2Parameters::default()).into();
@@ -2941,7 +3042,7 @@ fn test_derive_secret_key_pbkdf2_with_salt() {
         let retval1 = DeriveSecretKeyPbkdf2WithSalt(
             password.as_ptr(),
             password.len(),
-            10,
+            1000,
             salt.as_ptr(),
             salt.len(),
             sk1.as_mut_ptr(),
@@ -2952,7 +3053,7 @@ fn test_derive_secret_key_pbkdf2_with_salt() {
         let retval2 = DeriveSecretKeyPbkdf2WithSalt(
             password.as_ptr(),
             password.len(),
-            10,
+            1000,
             salt.as_ptr(),
             salt.len(),
             sk2.as_mut_ptr(),

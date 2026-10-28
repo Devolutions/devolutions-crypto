@@ -211,11 +211,34 @@ pub fn derive_key(
     password: &[u8],
     version: KeyDerivationVersion,
 ) -> Result<(SecretKey, DerivationParameters)> {
+    let params = default_parameters(version)?;
+    Ok((params.derive(password)?, params))
+}
+
+/// Returns fresh `DerivationParameters` (with a random salt) using the default settings of
+/// the algorithm selected by `version`, without performing any derivation.
+///
+/// * `KeyDerivationVersion::Latest` and `KeyDerivationVersion::V2` use **Argon2id**.
+/// * `KeyDerivationVersion::V1` uses **PBKDF2-HMAC-SHA256**.
+///
+/// With the `fips` feature, `KeyDerivationVersion::Latest` and `KeyDerivationVersion::V3` use
+/// **PBKDF2-HMAC-SHA256** computed by the FIPS module, and the other versions return
+/// `Error::NotFipsApproved`.
+///
+/// # Example
+/// ```rust
+/// use devolutions_crypto::key_derivation::default_parameters;
+/// use devolutions_crypto::KeyDerivationVersion;
+///
+/// let params = default_parameters(KeyDerivationVersion::Latest).expect("parameters should not fail");
+/// let secret_key = params.derive(b"a very strong password").expect("derivation should not fail");
+/// ```
+pub fn default_parameters(version: KeyDerivationVersion) -> Result<DerivationParameters> {
     match version.resolve_approved()? {
-        KeyDerivationVersion::V1 => Pbkdf2::new().derive(password),
-        KeyDerivationVersion::V2 => Argon2::new().derive(password),
+        KeyDerivationVersion::V1 => Pbkdf2::new().parameters(),
+        KeyDerivationVersion::V2 => Ok(Argon2::new().parameters()),
         #[cfg(feature = "fips")]
-        KeyDerivationVersion::V3 => Pbkdf2::new().derive(password),
+        KeyDerivationVersion::V3 => Pbkdf2::new().parameters(),
         KeyDerivationVersion::Latest => unreachable!("the version is resolved above"),
     }
 }

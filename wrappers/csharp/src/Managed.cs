@@ -733,10 +733,8 @@ namespace Devolutions.Cryptography
         /// <returns>Returns the random public and private keys.</returns>
         public static KeyPair GenerateKeyPair()
         {
-            long keySize = Native.GenerateKeyPairSizeNative();
-
-            byte[] publicKey = new byte[keySize];
-            byte[] privateKey = new byte[keySize];
+            byte[] publicKey = new byte[Native.GenerateKeyPairPublicSizeNative()];
+            byte[] privateKey = new byte[Native.GenerateKeyPairSizeNative()];
 
             long res = Native.GenerateKeyPairNative(privateKey, (UIntPtr)privateKey.Length, publicKey, (UIntPtr)publicKey.Length);
 
@@ -1435,7 +1433,7 @@ namespace Devolutions.Cryptography
             }
             else
             {
-                // Default: Argon2id with default parameters (key_derivation_version = 0 = Latest)
+                // Default: latest key derivation (Argon2id, or PBKDF2 with a FIPS native library)
                 long resultLength = Native.DeriveEncryptSizeNative((UIntPtr)data.Length, 0, (ushort)cipherTextVersion);
 
                 if (resultLength < 0)

@@ -94,5 +94,11 @@ namespace Devolutions.Cryptography
         /// The mutex is poisoned and cannot be locked: -44
         /// </summary>
         PoisonedMutex = -44,
+
+        /// <summary>
+        /// The requested algorithm is not FIPS approved and cannot be used to produce new data,
+        /// or the native library is not running in FIPS mode: -45
+        /// </summary>
+        NotFipsApproved = -45,
     }
 }

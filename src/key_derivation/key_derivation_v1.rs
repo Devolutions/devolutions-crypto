@@ -6,7 +6,7 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use zeroize::Zeroizing;
 
 use crate::key::SecretKey;
-use crate::utils::derive_key_pbkdf2;
+use crate::utils::pbkdf2_hmac_sha256;
 use crate::{DEFAULT_PBKDF2_ITERATIONS, Error, Header, KeyDerivationVersion, Result};
 
 use super::{DerivationParameters, DerivationParametersPayload};
@@ -21,7 +21,7 @@ pub struct KeyDerivationV1 {
 
 impl KeyDerivationV1 {
     pub fn derive(&self, key: &[u8]) -> Zeroizing<Vec<u8>> {
-        Zeroizing::new(derive_key_pbkdf2(
+        Zeroizing::new(pbkdf2_hmac_sha256(
             key,
             &self.salt,
             self.iterations,

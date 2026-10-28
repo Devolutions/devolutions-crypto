@@ -69,8 +69,8 @@ pub enum Error {
     /// The mutex is poisoned and cannot be locked: -44
     #[error("The mutex is poisoned and cannot be locked")]
     PoisonedMutex,
-    /// The requested algorithm is not FIPS approved and cannot be used to produce new data: -45
-    #[cfg(feature = "fips")]
+    /// The requested algorithm is not FIPS approved and cannot be used to produce new data,
+    /// or the library is not running in FIPS mode: -45
     #[error("The requested algorithm is not FIPS approved and cannot be used to produce new data")]
     NotFipsApproved,
 }
@@ -98,7 +98,6 @@ impl Error {
             Error::InconsistentVersion => -42,
             Error::InvalidChunkLength => -43,
             Error::PoisonedMutex => -44,
-            #[cfg(feature = "fips")]
             Error::NotFipsApproved => -45,
         }
     }

@@ -390,6 +390,16 @@ namespace Devolutions.Cryptography
         }
 
         /// <summary>
+        /// Checks that the native library was built with the `fips` feature and that its
+        /// cryptographic module runs in FIPS mode.
+        /// </summary>
+        /// <returns>Returns true in FIPS mode.</returns>
+        public static bool IsFipsMode()
+        {
+            return Native.EnsureFipsModeNative() == 0;
+        }
+
+        /// <summary>
         /// Validate that the buffer is from the Devolutions Crypto Library.
         /// </summary>
         /// <param name="data">The buffer to validate.</param>

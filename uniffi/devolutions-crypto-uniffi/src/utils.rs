@@ -7,6 +7,8 @@ pub fn generate_key(length: u32) -> Result<Vec<u8>> {
     devolutions_crypto::utils::generate_key(length as usize)
 }
 
+// Not available with the `fips` feature, use `derive_secret_key_pbkdf2` instead
+#[cfg(not(feature = "fips"))]
 #[uniffi::export(default(iterations = 600000, length = 32))]
 pub fn derive_key_pbkdf2(
     key: Vec<u8>,
@@ -50,4 +52,11 @@ pub fn base64_encode_url(data: Vec<u8>) -> String {
 #[uniffi::export]
 pub fn base64_decode_url(data: &str) -> Result<Vec<u8>> {
     devolutions_crypto::utils::base64_decode_url(data)
+}
+
+/// Checks that the library was built with the `fips` feature and that the cryptographic
+/// module runs in FIPS mode. Returns `NotFipsApproved` otherwise.
+#[uniffi::export]
+pub fn ensure_fips_mode() -> Result<()> {
+    devolutions_crypto::fips::ensure_fips_mode()
 }

@@ -6,7 +6,7 @@ pub fn sign(data: Vec<u8>, keypair: Vec<u8>, version: Option<SignatureVersion>) 
     let version = version.unwrap_or(SignatureVersion::Latest);
     let keypair = keypair.as_slice().try_into()?;
 
-    Ok(devolutions_crypto::signature::sign(&data, &keypair, version).into())
+    Ok(devolutions_crypto::signature::try_sign(&data, &keypair, version)?.into())
 }
 
 #[uniffi::export]

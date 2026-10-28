@@ -64,6 +64,8 @@ pub(crate) fn random_bytes<const N: usize>() -> Result<Zeroizing<[u8; N]>> {
 }
 
 /// Derives a password or key into a new one using PBKDF2.
+///
+/// Not available with the `fips` feature, use [`crate::key_derivation::Pbkdf2`] instead.
 /// # Arguments
 ///  * `key` - The key or password to derive.
 ///  * `salt` - The cryptographic salt to be used to add randomness. Can be empty. Recommended size is 16 bytes.
@@ -82,7 +84,18 @@ pub(crate) fn random_bytes<const N: usize>() -> Result<Zeroizing<[u8; N]>> {
 ///
 /// assert_eq!(32, new_key.len());
 /// ```
+#[cfg(not(feature = "fips"))]
 pub fn derive_key_pbkdf2(key: &[u8], salt: &[u8], iterations: u32, length: usize) -> Vec<u8> {
+    pbkdf2_hmac_sha256(key, salt, iterations, length)
+}
+
+/// PBKDF2-HMAC-SHA256 outside of the FIPS module. Also used to re-derive keys from V1 parameters.
+pub(crate) fn pbkdf2_hmac_sha256(
+    key: &[u8],
+    salt: &[u8],
+    iterations: u32,
+    length: usize,
+) -> Vec<u8> {
     let mut new_key = vec![0u8; length];
     pbkdf2::<Hmac<Sha256>>(key, salt, iterations, &mut new_key)
         .expect("HMAC-SHA256 accepts keys of any length, so this cannot fail");
@@ -90,11 +103,14 @@ pub fn derive_key_pbkdf2(key: &[u8], salt: &[u8], iterations: u32, length: usize
 }
 
 /// Derives a password or key into a new one using Argon2.
+///
+/// With the `fips` feature, Argon2 is not approved and this returns `Error::NotFipsApproved`.
 /// # Arguments
 ///  * `key` - The key or password to derive.
 ///  * `parameters` - The `Argon2Parameters` to use.
 /// # Example
 /// ```
+/// # #[cfg(not(feature = "fips"))] {
 /// use devolutions_crypto::utils::{derive_key_argon2, generate_key};
 /// use devolutions_crypto::Argon2Parameters;
 /// let key = b"this is a secret password";
@@ -103,8 +119,10 @@ pub fn derive_key_pbkdf2(key: &[u8], salt: &[u8], iterations: u32, length: usize
 /// let new_key = derive_key_argon2(key, &parameters).expect("default parameters should not fail");
 ///
 /// assert_eq!(32, new_key.len());
+/// # }
 /// ```
 pub fn derive_key_argon2(key: &[u8], parameters: &Argon2Parameters) -> Result<Vec<u8>> {
+    crate::KeyDerivationVersion::V2.resolve_approved()?;
     parameters.compute(key)
 }
 
@@ -171,9 +189,12 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
 
 /// Temporarly binded here for a specific use case, don't rely on this.
 ///
+/// Not available with the `fips` feature.
+///
 /// Copied and modified from:
 /// <https://github.com/RustCrypto/password-hashing/blob/master/scrypt/src/simple.rs>
 /// Because rand is outdated, I cannot use the crate directly
+#[cfg(not(feature = "fips"))]
 pub fn scrypt_simple(password: &[u8], salt: &[u8], log_n: u8, r: u32, p: u32) -> String {
     use byteorder::{ByteOrder, LittleEndian};
 
@@ -279,6 +300,7 @@ fn test_generate_key() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn test_derive_key_pbkdf2() {
     let salt = b"salt";
     let key = b"key";
@@ -328,6 +350,7 @@ fn test_validate_header() {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn test_scrypt_simple() {
     // Regression vector: locks the scrypt output and the `$rscrypt$` format so any
     // future scrypt crate bump that changes the derived bytes is caught. This value

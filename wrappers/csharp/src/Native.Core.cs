@@ -103,6 +103,12 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "GenerateKeyPairSize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long GenerateKeyPairSizeNative();
 
+        [DllImport(LibName, EntryPoint = "GenerateKeyPairPublicSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GenerateKeyPairPublicSizeNative();
+
+        [DllImport(LibName, EntryPoint = "EnsureFipsMode", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long EnsureFipsModeNative();
+
         [DllImport(LibName, EntryPoint = "GenerateSecretKey", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long GenerateSecretKeyNative(byte[] result, UIntPtr resultLength);
 

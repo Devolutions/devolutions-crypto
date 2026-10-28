@@ -60,7 +60,7 @@ namespace Devolutions.Cryptography
     public enum PasswordHashVersion
     {
         /// <summary>
-        /// This is the latest version. (Currently Argon2id)
+        /// This is the latest version. (Currently Argon2id, or PBKDF2-HMAC-SHA256 (V3) with a FIPS native library)
         /// </summary>
         Latest = 0,
 
@@ -73,6 +73,11 @@ namespace Devolutions.Cryptography
         /// Argon2id.
         /// </summary>
         V2 = 2,
+
+        /// <summary>
+        /// PBKDF2-HMAC-SHA256 computed by the FIPS module. Requires a native library built with the `fips` feature.
+        /// </summary>
+        V3 = 3,
     }
 
     /// <summary>
@@ -82,7 +87,7 @@ namespace Devolutions.Cryptography
     public enum CipherTextVersion
     {
         /// <summary>
-        /// This is the latest version. (Currently XChaCha20Poly1305)
+        /// This is the latest version. (Currently XChaCha20Poly1305, or AES-256-GCM (V3) with a FIPS native library)
         /// </summary>
         Latest = 0,
 
@@ -100,6 +105,11 @@ namespace Devolutions.Cryptography
         /// XChaCha20Poly1305 with DeriveKey length fix
         /// </summary>
         V2_5 = 2,
+
+        /// <summary>
+        /// AES-256-GCM, and NIST P-256 for asymmetric encryption. Requires a native library built with the `fips` feature.
+        /// </summary>
+        V3 = 3,
     }
 
     /// <summary>
@@ -109,7 +119,7 @@ namespace Devolutions.Cryptography
     public enum SignatureVersion
     {
         /// <summary>
-        /// This is the latest version. (Currently ed25519)
+        /// This is the latest version. (Currently ed25519, or ECDSA P-256 (V3) with a FIPS native library)
         /// </summary>
         Latest = 0,
 
@@ -117,6 +127,11 @@ namespace Devolutions.Cryptography
         /// ed25519
         /// </summary>
         V1 = 1,
+
+        /// <summary>
+        /// ECDSA over NIST P-256 with SHA-256. Requires a native library built with the `fips` feature.
+        /// </summary>
+        V3 = 3,
     }
 
     /// <summary>

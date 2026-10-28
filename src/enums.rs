@@ -260,12 +260,34 @@ pub enum KdfEncryptedDataSubtype {
 /// * `resolve_latest` maps `Latest` to the version produced by this build
 ///   (`$default`, or `$fips` with the `fips` feature) and keeps explicit versions.
 /// * `resolve_approved` also rejects, with the `fips` feature, every version but `$fips`.
-///   It is used by the functions producing encrypted data, password hashes and derived keys.
+///   It is used by the functions producing encrypted data, password hashes, derived keys and shares.
+///
+/// Types without a FIPS version (`=> none`) cannot produce new data with the `fips` feature.
 macro_rules! version_policy {
+    ($($ty:ident: $default:ident => none),+ $(,)?) => {$(
+        impl $ty {
+            /// Returns the concrete version that `Latest` stands for, or `self`
+            /// if it is already a concrete version.
+            pub fn resolve_latest(self) -> Self {
+                match self {
+                    Self::Latest => Self::$default,
+                    version => version,
+                }
+            }
+
+            pub(crate) fn resolve_approved(self) -> crate::Result<Self> {
+                #[cfg(feature = "fips")]
+                return Err(crate::Error::NotFipsApproved);
+                #[cfg(not(feature = "fips"))]
+                Ok(self.resolve_latest())
+            }
+        }
+    )+};
     ($($ty:ident: $default:ident => $fips:ident),+ $(,)?) => {$(
         impl $ty {
-            #[allow(dead_code)]
-            pub(crate) fn resolve_latest(self) -> Self {
+            /// Returns the concrete version that `Latest` stands for in this build, or `self`
+            /// if it is already a concrete version.
+            pub fn resolve_latest(self) -> Self {
                 match self {
                     #[cfg(not(feature = "fips"))]
                     Self::Latest => Self::$default,
@@ -295,5 +317,11 @@ version_policy! {
     PasswordHashVersion: V2 => V3,
     KeyVersion: V1 => V3,
     SigningKeyVersion: V1 => V3,
+    SignatureVersion: V1 => V3,
     KeyDerivationVersion: V2 => V3,
+}
+
+version_policy! {
+    OnlineCiphertextVersion: V1 => none,
+    SecretSharingVersion: V1 => none,
 }

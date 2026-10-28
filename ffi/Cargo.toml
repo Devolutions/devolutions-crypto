@@ -7,6 +7,9 @@ edition = "2024"
 name = "devolutions_crypto_ffi"
 crate-type = ["cdylib", "staticlib"]
 
+[features]
+fips = ["devolutions-crypto/fips"]
+
 [dependencies]
 devolutions-crypto = { path = "../" }
 zeroize = "1"

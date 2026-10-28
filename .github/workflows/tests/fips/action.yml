@@ -11,12 +11,25 @@ runs:
     - name: Check Clippy (fips feature)
       working-directory: ./
       shell: bash
-      run: cargo clippy -p devolutions-crypto --all-targets --features fips -- -D warnings
+      run: |
+        for package in devolutions-crypto devolutions-crypto-ffi devolutions-crypto-uniffi; do
+          cargo clippy -p $package --all-targets --features fips -- -D warnings
+        done
 
     - name: Run tests (fips feature)
       working-directory: ./
       shell: bash
-      run: cargo test -p devolutions-crypto --features fips
+      run: |
+        cargo test -p devolutions-crypto --features fips
+        cargo test -p devolutions-crypto-ffi --features fips
+
+    # The rest of the C# suite asserts the default (non-FIPS) behavior
+    - name: Run C# FIPS tests
+      working-directory: ./
+      shell: bash
+      run: |
+        cargo build -p devolutions-crypto-ffi --features fips
+        dotnet test ./wrappers/csharp/tests/unit-tests/local/devolutions-crypto-tests/devolutions-crypto-tests.sln --filter "FullyQualifiedName~TestFips"
 
     - name: Check that only the FIPS module is linked
       working-directory: ./

@@ -26,6 +26,25 @@ pub use devolutions_crypto::{
     SignatureVersion, SigningKeyVersion,
 };
 
+/// Mirrors a version enum, whose FIPS variants only exist with the `fips` feature.
+/// `uniffi::remote` does not honor `cfg` on variants, so both shapes are generated.
+macro_rules! remote_version_enum {
+    ($name:ident { $($variant:ident),+ } fips { $($fips:ident),+ }) => {
+        #[cfg(not(feature = "fips"))]
+        #[uniffi::remote(Enum)]
+        pub enum $name {
+            $($variant),+
+        }
+
+        #[cfg(feature = "fips")]
+        #[uniffi::remote(Enum)]
+        pub enum $name {
+            $($variant,)+
+            $($fips),+
+        }
+    };
+}
+
 #[uniffi::remote(Enum)]
 pub enum DataType {
     None,
@@ -40,32 +59,13 @@ pub enum DataType {
     KdfEncryptedData,
 }
 
-#[uniffi::remote(Enum)]
-pub enum CiphertextVersion {
-    Latest,
-    V1,
-    V2,
-}
+remote_version_enum!(CiphertextVersion { Latest, V1, V2 } fips { V3 });
 
-#[uniffi::remote(Enum)]
-pub enum KeyVersion {
-    Latest,
-    V1,
-}
+remote_version_enum!(KeyVersion { Latest, V1 } fips { V3 });
 
-#[uniffi::remote(Enum)]
-pub enum KeyDerivationVersion {
-    Latest,
-    V1,
-    V2,
-}
+remote_version_enum!(KeyDerivationVersion { Latest, V1, V2 } fips { V3 });
 
-#[uniffi::remote(Enum)]
-pub enum PasswordHashVersion {
-    Latest,
-    V1,
-    V2,
-}
+remote_version_enum!(PasswordHashVersion { Latest, V1, V2 } fips { V3 });
 
 #[uniffi::remote(Enum)]
 pub enum SecretSharingVersion {
@@ -73,17 +73,9 @@ pub enum SecretSharingVersion {
     V1,
 }
 
-#[uniffi::remote(Enum)]
-pub enum SignatureVersion {
-    Latest,
-    V1,
-}
+remote_version_enum!(SignatureVersion { Latest, V1 } fips { V3 });
 
-#[uniffi::remote(Enum)]
-pub enum SigningKeyVersion {
-    Latest,
-    V1,
-}
+remote_version_enum!(SigningKeyVersion { Latest, V1 } fips { V3 });
 
 #[uniffi::remote(Enum)]
 pub enum KdfEncryptedDataVersion {
@@ -112,6 +104,7 @@ pub enum DevolutionsCryptoError {
     InconsistentVersion,
     InvalidChunkLength,
     PoisonedMutex,
+    NotFipsApproved,
 }
 
 #[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]

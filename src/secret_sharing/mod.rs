@@ -10,6 +10,7 @@
 //! the data. That data could also be an API key or password of a super admin account.
 //!
 //! ```rust
+//! # #[cfg(not(feature = "fips"))] {
 //! use devolutions_crypto::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion, Share};
 //!
 //! // You want a key of 32 bytes, split between 5 people, and I want a
@@ -18,6 +19,7 @@
 //!
 //! assert_eq!(shares.len(), 5);
 //! let key = join_shares(&shares[2..5]).expect("joining shouldn't fail with the right shares");
+//! # }
 //! ```
 
 mod secret_sharing_v1;
@@ -75,8 +77,10 @@ enum SharePayload {
 ///
 /// # Example
 /// ```
+/// # #[cfg(not(feature = "fips"))] {
 /// use devolutions_crypto::secret_sharing::{ generate_shared_key, SecretSharingVersion };
 /// let shares = generate_shared_key(5, 3, 32, SecretSharingVersion::Latest).unwrap();
+/// # }
 /// ```
 pub fn generate_shared_key(
     n_shares: u8,
@@ -86,7 +90,7 @@ pub fn generate_shared_key(
 ) -> Result<Vec<Share>> {
     let mut header = Header::default();
 
-    match version {
+    match version.resolve_approved()? {
         SecretSharingVersion::V1 | SecretSharingVersion::Latest => {
             header.version = SecretSharingVersion::V1;
 
@@ -110,12 +114,14 @@ pub fn generate_shared_key(
 ///
 /// # Example
 /// ```
+/// # #[cfg(not(feature = "fips"))] {
 /// use devolutions_crypto::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion};
 /// let shares = generate_shared_key(5, 3, 32, SecretSharingVersion::Latest).unwrap();
 ///
 /// assert_eq!(shares.len(), 5);
 ///
 /// let key = join_shares(&shares[2..5]).unwrap();
+/// # }
 /// ```
 pub fn join_shares<'a, I, J>(shares: I) -> Result<Vec<u8>>
 where
@@ -189,6 +195,7 @@ impl From<SharePayload> for Vec<u8> {
 }
 
 #[test]
+#[cfg(not(feature = "fips"))]
 fn secret_sharing_test() {
     let shares = generate_shared_key(5, 3, 32, SecretSharingVersion::Latest).unwrap();
 

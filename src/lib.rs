@@ -214,6 +214,7 @@
 //! the data. That data could also be an API key or password of a super admin account.
 //!
 //! ```rust
+//! # #[cfg(not(feature = "fips"))] {
 //! use devolutions_crypto::secret_sharing::{generate_shared_key, join_shares, SecretSharingVersion, Share};
 //!
 //! // You want a key of 32 bytes, split between 5 people, and I want a
@@ -222,6 +223,7 @@
 //!
 //! assert_eq!(shares.len(), 5);
 //! let key = join_shares(&shares[2..5]).expect("joining shouldn't fail with the right shares");
+//! # }
 //! ```
 //!
 //! ## Utils
@@ -246,6 +248,7 @@
 //! The library exposes raw methods for key derivation with argon2 and PBKDF2. We recommend using the managed [Key Derivation](#key-derivation) module.
 //!
 //! ```rust
+//! # #[cfg(not(feature = "fips"))] {
 //! use devolutions_crypto::utils::{generate_key, derive_key_pbkdf2};
 //! let key = b"this is a secret password";
 //! let salt = generate_key(16).expect("generate key shouldn't fail");;
@@ -255,6 +258,7 @@
 //! let new_key = derive_key_pbkdf2(key, &salt, iterations, length);
 //!
 //! assert_eq!(32, new_key.len());
+//! # }
 //! ```
 //!
 //!
@@ -305,7 +309,6 @@ pub mod signature;
 pub mod signing_key;
 pub mod utils;
 
-#[cfg(feature = "fips")]
 pub mod fips;
 
 use enums::{CiphertextSubtype, PasswordHashSubtype, ShareSubtype, SignatureSubtype};
@@ -324,7 +327,7 @@ pub use argon2parameters::Argon2ParametersBuilder;
 pub use argon2parameters::defaults as argon2parameters_defaults;
 pub use derive_encrypt::{KdfEncryptedData, encrypt_with_password, encrypt_with_password_and_aad};
 pub use error::{Error, Result};
-pub use key_derivation::{Argon2, DerivationParameters, Pbkdf2, derive_key};
+pub use key_derivation::{Argon2, DerivationParameters, Pbkdf2, default_parameters, derive_key};
 
 pub const DEFAULT_KEY_SIZE: usize = 32;
 pub const DEFAULT_PBKDF2_ITERATIONS: u32 = 600000;

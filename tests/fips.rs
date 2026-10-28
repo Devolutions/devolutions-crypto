@@ -20,7 +20,6 @@ use devolutions_crypto::signature::{Signature, SignatureVersion, sign, try_sign}
 use devolutions_crypto::signing_key::{
     SigningKeyPair, SigningKeyVersion, SigningPublicKey, generate_signing_keypair,
 };
-use devolutions_crypto::utils::derive_key_pbkdf2;
 use devolutions_crypto::{Error, KeyDerivationVersion};
 
 use std::convert::TryFrom;
@@ -491,10 +490,10 @@ fn key_derivation_v3_matches_pbkdf2_reference() {
         .derive_with_salt(password, &salt)
         .unwrap();
 
-    assert_eq!(
-        key.as_bytes(),
-        derive_key_pbkdf2(password, &salt, 1000, 32).as_slice()
-    );
+    let mut expected = [0u8; 32];
+    pbkdf2::pbkdf2::<hmac::Hmac<sha2::Sha256>>(password, &salt, 1000, &mut expected).unwrap();
+
+    assert_eq!(key.as_bytes(), expected.as_slice());
 }
 
 #[test]
@@ -668,4 +667,55 @@ fn legacy_asymmetric_and_password_hash_still_verify() {
 
     let hash = PasswordHash::try_from(general_purpose::STANDARD.decode("DQwDAAAAAQAQJwAAXCzLFoyeZhFSDYBAPiIWhCk04aoP/lalOoCl7D+skIY/i+3WT7dn6L8WvnfEq6flCd7i+IcKb3GEK4rCpzhDlw==").unwrap().as_slice()).unwrap();
     assert!(hash.verify_password(b"password1"));
+}
+
+#[test]
+fn out_of_scope_primitives_are_rejected() {
+    use devolutions_crypto::online_ciphertext::{
+        OnlineCiphertextEncryptor, OnlineCiphertextVersion,
+    };
+    use devolutions_crypto::secret_sharing::{SecretSharingVersion, generate_shared_key};
+
+    let key = devolutions_crypto::utils::generate_key(32).unwrap();
+    let legacy_keypair = generate_keypair(KeyVersion::V1);
+
+    assert!(matches!(
+        OnlineCiphertextEncryptor::new(&key, b"", 16, OnlineCiphertextVersion::Latest),
+        Err(Error::NotFipsApproved)
+    ));
+    assert!(matches!(
+        OnlineCiphertextEncryptor::new_asymmetric(
+            &legacy_keypair.public_key,
+            b"",
+            16,
+            OnlineCiphertextVersion::V1
+        ),
+        Err(Error::NotFipsApproved)
+    ));
+    assert!(matches!(
+        generate_shared_key(5, 3, 32, SecretSharingVersion::Latest),
+        Err(Error::NotFipsApproved)
+    ));
+    assert!(matches!(
+        devolutions_crypto::utils::derive_key_argon2(
+            b"password",
+            &devolutions_crypto::Argon2Parameters::default()
+        ),
+        Err(Error::NotFipsApproved)
+    ));
+}
+
+#[test]
+fn default_parameters_are_v3() {
+    let params: Vec<u8> = devolutions_crypto::default_parameters(KeyDerivationVersion::Latest)
+        .unwrap()
+        .into();
+    assert_eq!(version_of(&params), 3);
+
+    for version in [KeyDerivationVersion::V1, KeyDerivationVersion::V2] {
+        assert!(matches!(
+            devolutions_crypto::default_parameters(version),
+            Err(Error::NotFipsApproved)
+        ));
+    }
 }

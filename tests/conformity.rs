@@ -1,15 +1,22 @@
 use base64::{Engine as _, engine::general_purpose};
 use devolutions_crypto::{
-    Argon2Parameters, KdfEncryptedData,
+    KdfEncryptedData,
     ciphertext::Ciphertext,
     key::{PrivateKey, SecretKey},
     password_hash::PasswordHash,
+};
+
+#[cfg(not(feature = "fips"))]
+use devolutions_crypto::{
+    Argon2Parameters,
     utils::{derive_key_argon2, derive_key_pbkdf2},
 };
 
 use std::convert::TryFrom as _;
 
 #[test]
+// Uses a raw derivation function that is not available with the `fips` feature
+#[cfg(not(feature = "fips"))]
 fn test_derive_key_argon2() {
     let params = Argon2Parameters::try_from(
         general_purpose::STANDARD
@@ -52,6 +59,8 @@ fn test_derive_key_argon2_struct() {
 }
 
 #[test]
+// Uses a raw derivation function that is not available with the `fips` feature
+#[cfg(not(feature = "fips"))]
 fn test_derive_key_default() {
     let password = b"testpassword";
     let salt = b"";
@@ -83,6 +92,8 @@ fn test_derive_key_pbkdf2_struct_default() {
 }
 
 #[test]
+// Uses a raw derivation function that is not available with the `fips` feature
+#[cfg(not(feature = "fips"))]
 fn test_derive_key_iterations() {
     let password = b"testPa$$";
     let salt = b"";
@@ -114,6 +125,8 @@ fn test_derive_key_pbkdf2_struct_iterations() {
 }
 
 #[test]
+// Uses a raw derivation function that is not available with the `fips` feature
+#[cfg(not(feature = "fips"))]
 fn test_derive_key_salt() {
     let password = b"testPa$$";
     let salt = general_purpose::STANDARD
