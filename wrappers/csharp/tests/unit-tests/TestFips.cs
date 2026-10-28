@@ -27,6 +27,14 @@ namespace Devolutions.Crypto.Tests
         }
 
         [TestMethod]
+        public void FipsBuildIsInFipsMode()
+        {
+            RequireFipsBuild();
+
+            Assert.IsTrue(Utils.IsFipsMode());
+        }
+
+        [TestMethod]
         public void SymmetricV3()
         {
             RequireFipsBuild();
