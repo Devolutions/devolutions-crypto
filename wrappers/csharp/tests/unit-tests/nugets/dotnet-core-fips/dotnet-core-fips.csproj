@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>dotnet_core_fips</RootNamespace>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\TestData.cs" Link="TestData.cs" />
+    <Compile Include="..\..\TestFips.cs" Link="TestFips.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Devolutions.Crypto.Core.Fips" Version="*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.7.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.7.1" />
+  </ItemGroup>
+
+</Project>

@@ -86,6 +86,51 @@ jobs:
       - uses: actions/checkout@v6
       - uses: ./.github/workflows/nugets/nugets-windows
 
+  #### FIPS NATIVE AND NUGET BUILD ####
+  native_build_fips:
+    needs: [rust_code_format]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            runner: windows-2022
+          - rid: linux-x64
+            runner: ubuntu-22.04 # Ensure we build with the minimum supported sysroot
+          - rid: linux-arm64
+            runner: ubuntu-22.04-arm
+          - rid: osx-x64
+            runner: macos-15-intel
+          - rid: osx-arm64
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/workflows/native/native-build-fips
+        with:
+          rid: ${{ matrix.rid }}
+
+  nugets_fips:
+    needs: [native_build_fips, native_build_windows, setup_config]
+    runs-on: "windows-2022"
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/workflows/nugets/nugets-fips
+
+  tests_nuget_fips:
+    needs: [nugets_fips]
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [windows-2022, ubuntu-22.04, macos-15]
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/workflows/tests/csharp/fips
+
   #### WEB ASSEMBLY BUILD ####
   webassembly_build:
     needs: rust_code_format

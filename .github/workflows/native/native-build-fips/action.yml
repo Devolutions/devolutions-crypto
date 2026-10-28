@@ -1,0 +1,118 @@
+name: Native Build FIPS
+description: Builds the native library with the `fips` feature for one runtime identifier
+inputs:
+  rid:
+    description: .NET runtime identifier to build (win-x64, linux-x64, linux-arm64, osx-x64 or osx-arm64)
+    required: true
+runs:
+  using: composite
+  steps:
+    # The AWS-LC FIPS module build needs Go, CMake and libclang (and NASM on Windows)
+    - uses: actions/setup-go@v5
+      with:
+        go-version: stable
+        cache: false
+
+    - name: Install rust
+      shell: bash
+      run: |
+        if ! command -v rustup > /dev/null; then
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.cargo/bin:$PATH"
+        fi
+        rustup update
+
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake clang libclang-dev
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        choco install nasm -y --no-progress
+        "C:\Program Files\NASM" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+        "LIBCLANG_PATH=C:\Program Files\LLVM\bin" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+
+        # bindgen's clang needs the MSVC and Windows SDK headers
+        $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        cmd /c "`"$vs\VC\Auxiliary\Build\vcvars64.bat`" > nul && set" | ForEach-Object {
+          if ($_ -match '^(INCLUDE|LIB|LIBPATH)=(.*)$') { "$($Matches[1])=$($Matches[2])" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV }
+        }
+
+    - name: Unit tests
+      working-directory: ./
+      shell: bash
+      run: cargo test -p devolutions-crypto --features fips
+
+    - name: Build
+      working-directory: ./
+      shell: bash
+      run: cargo build -p devolutions-crypto-ffi --features fips --release
+
+    # On Windows and macOS the FIPS module is a separate shared library that ships next to ours.
+    # It must not be modified, or its integrity self-test fails.
+    - name: Stage native libraries
+      working-directory: ./
+      shell: bash
+      run: |
+        set -e
+        OUT=./wrappers/csharp/fips/${{ inputs.rid }}
+        mkdir -p $OUT
+        MODULE_DIR=$(ls -d target/release/build/aws-lc-fips-sys-*/out/build/artifacts 2>/dev/null | head -1 || true)
+
+        case "${{ runner.os }}" in
+          Windows)
+            cp target/release/devolutions_crypto_ffi.dll $OUT/DevolutionsCrypto.dll
+            cp $MODULE_DIR/aws_lc_fips_*_crypto.dll $OUT/
+            ;;
+          macOS)
+            cp target/release/libdevolutions_crypto_ffi.dylib $OUT/libDevolutionsCrypto.dylib
+            MODULE=$(find target/release/build/aws-lc-fips-sys-*/out -name 'libaws_lc_fips_*_crypto*.dylib' -type f | head -1)
+            MODULE_NAME=$(basename "$MODULE")
+            cp "$MODULE" $OUT/
+
+            # Load the module from the folder of our library
+            REFERENCE=$(otool -L $OUT/libDevolutionsCrypto.dylib | awk '{print $1}' | grep 'aws_lc_fips' | head -1)
+            install_name_tool -change "$REFERENCE" "@loader_path/$MODULE_NAME" $OUT/libDevolutionsCrypto.dylib
+            codesign --force --sign - $OUT/libDevolutionsCrypto.dylib
+            otool -L $OUT/libDevolutionsCrypto.dylib
+            ;;
+          Linux)
+            # The FIPS module is linked statically on Linux
+            cp target/release/libdevolutions_crypto_ffi.so $OUT/libDevolutionsCrypto.so
+            ;;
+        esac
+
+        ls -l $OUT
+
+    # Load the staged library from another folder and check that it runs in FIPS mode
+    - name: Smoke test
+      working-directory: ./
+      shell: bash
+      run: |
+        set -e
+        SMOKE=$(mktemp -d)
+        cp ./wrappers/csharp/fips/${{ inputs.rid }}/* "$SMOKE/"
+        if [ "${{ runner.os }}" = "Windows" ]; then SMOKE=$(cygpath -w "$SMOKE"); fi
+        PY=$(command -v python3 || command -v python)
+        "$PY" - "$SMOKE" <<'EOF'
+        import ctypes, os, sys
+
+        folder = sys.argv[1]
+        name = next(f for f in os.listdir(folder) if f.lower().startswith(("devolutionscrypto", "libdevolutionscrypto")))
+        library = ctypes.CDLL(os.path.join(folder, name))
+        library.EnsureFipsMode.restype = ctypes.c_int64
+        result = library.EnsureFipsMode()
+        print(f"{name}: EnsureFipsMode() = {result}")
+        sys.exit(0 if result == 0 else 1)
+        EOF
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: fips-native-${{ inputs.rid }}
+        path: wrappers/csharp/fips/**

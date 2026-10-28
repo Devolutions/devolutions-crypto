@@ -1,0 +1,41 @@
+﻿<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>Devolutions.Crypto.Core.Fips</id>
+        <version>$version$</version>
+        <authors>Devolutions Inc</authors>
+        <description>Devolutions Cryptographic Library For the .NET Core Platform, built with the AWS-LC FIPS 140-3 validated module (supported Windows x64, Linux x64/arm64, Mac x64/arm64)</description>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <copyright>Copyright 2022 @ Devolutions Inc</copyright>
+        <license type="expression">Apache-2.0 OR MIT</license>
+        <projectUrl>https://github.com/Devolutions/devolutions-crypto</projectUrl>
+    </metadata>
+    <files>
+
+    <!-- General Purpose Managed Library-->
+    <file src="../../dotnet-core/bin/Devolutions.Crypto.dll" target="lib/netstandard2.0/Devolutions.Crypto.dll" />
+    <file src="../../dotnet-core/bin/Devolutions.Crypto.pdb" target="lib/netstandard2.0/Devolutions.Crypto.pdb" />
+
+    <!-- .Net Framework Library-->
+    <file src="../../dotnet-framework/bin/Devolutions.Crypto.dll" target="lib/net48/Devolutions.Crypto.dll" />
+    <file src="../../dotnet-framework/bin/Devolutions.Crypto.pdb" target="lib/net48/Devolutions.Crypto.pdb" />
+
+    <!-- Windows Native Libraries: the AWS-LC FIPS module is a separate DLL.
+         The versioned module names use wildcards, which nuget.exe only expands in backslash paths. -->
+    <file src="../../fips/win-x64/DevolutionsCrypto.dll" target="runtimes/win-x64/native/DevolutionsCrypto.dll"/>
+    <file src="..\..\fips\win-x64\aws_lc_fips_*_crypto.dll" target="runtimes\win-x64\native\"/>
+
+    <!-- Linux Native Libraries: the AWS-LC FIPS module is linked statically -->
+    <file src="../../fips/linux-x64/libDevolutionsCrypto.so" target="runtimes/linux-x64/native/libDevolutionsCrypto.so"/>
+    <file src="../../fips/linux-arm64/libDevolutionsCrypto.so" target="runtimes/linux-arm64/native/libDevolutionsCrypto.so"/>
+
+    <!-- macOS Native Libraries: the AWS-LC FIPS module is a separate dylib -->
+    <file src="../../fips/osx-x64/libDevolutionsCrypto.dylib" target="runtimes/osx-x64/native/libDevolutionsCrypto.dylib"/>
+    <file src="..\..\fips\osx-x64\libaws_lc_fips_*_crypto*.dylib" target="runtimes\osx-x64\native\"/>
+    <file src="../../fips/osx-arm64/libDevolutionsCrypto.dylib" target="runtimes/osx-arm64/native/libDevolutionsCrypto.dylib"/>
+    <file src="..\..\fips\osx-arm64\libaws_lc_fips_*_crypto*.dylib" target="runtimes\osx-arm64\native\"/>
+
+    <!-- Required for Windows (.Net Framework) -->
+    <file src="Devolutions.Crypto.Core.Fips.targets" target="build/net48/Devolutions.Crypto.Core.Fips.targets"/>
+</files>
+</package>

@@ -17,6 +17,8 @@ wrappers/csharp/windows/
 wrappers/csharp/ios/
 wrappers/csharp/android/
 wrappers/csharp/linux/
+wrappers/csharp/fips/
+wrappers/csharp/nuget/dotnet-core-fips/package/
 wrappers/csharp/macos-full/
 wrappers/csharp/macos/
 wrappers/csharp/dotnet-core/

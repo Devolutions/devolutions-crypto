@@ -1,0 +1,28 @@
+name: Unit Tests FIPS Nuget
+description: This tests the Devolutions.Crypto.Core.Fips nuget package.
+runs:
+  using: composite
+  steps:
+    - name: Download Nuget
+      uses: actions/download-artifact@v8
+      with:
+        name: fips-nugets
+        path: ./wrappers/csharp/tests/unit-tests/nugets/FipsNugets
+
+    - name: Add local nuget source
+      shell: bash
+      run: |
+        SOURCE="$GITHUB_WORKSPACE/wrappers/csharp/tests/unit-tests/nugets/FipsNugets"
+        if [ "$RUNNER_OS" = "Windows" ]; then SOURCE=$(cygpath -w "$SOURCE"); fi
+        dotnet nuget add source "$SOURCE" -n LocalFipsPackages
+        dotnet nuget list source
+
+    # The tests are inconclusive unless the package loads a FIPS native library: count that as a failure
+    - name: Unit tests
+      working-directory: ./wrappers/csharp/tests/unit-tests/nugets
+      shell: bash
+      run: |
+        dotnet test ./dotnet-core-fips/dotnet-core-fips.csproj \
+          --filter "Name!=NonFipsBuildIsNotInFipsMode" \
+          --logger "console;verbosity=normal" \
+          -- MSTest.MapInconclusiveToFailed=true

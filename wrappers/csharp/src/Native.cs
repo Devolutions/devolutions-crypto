@@ -16,8 +16,14 @@ namespace Devolutions.Cryptography
     public static partial class Native
     {
 #if NETFRAMEWORK
+        // Resolves the dependencies of the loaded DLL (such as the AWS-LC FIPS module) from its own folder
+        private const uint LoadWithAlteredSearchPath = 0x00000008;
+
         [DllImport("Kernel32", SetLastError = true)]
         public static extern IntPtr LoadLibrary(string path);
+
+        [DllImport("Kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr LoadLibraryEx(string path, IntPtr file, uint flags);
 #endif
 
 #if !DEBUG
@@ -40,7 +46,7 @@ namespace Devolutions.Cryptography
                     "native",
                     "DevolutionsCrypto.dll");
 
-                if (LoadLibrary(path) == IntPtr.Zero)
+                if (LoadLibraryEx(path, IntPtr.Zero, LoadWithAlteredSearchPath) == IntPtr.Zero)
                 {
                     throw new DevolutionsCryptoException(ManagedError.NativeLibraryLoad, $"LoadLibrary failed for { path }");
                 }
