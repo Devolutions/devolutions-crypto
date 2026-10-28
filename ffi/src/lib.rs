@@ -1353,6 +1353,11 @@ pub unsafe extern "C" fn NewOnlineEncryptor(
             OnlineCiphertextEncryptor::new(key, aad, chunk_size, version)
         };
 
+        let encryptor = match encryptor {
+            Ok(e) => e,
+            Err(e) => return e.error_code(),
+        };
+
         let encryptor = Box::new(Mutex::new(encryptor));
 
         *output = Box::into_raw(encryptor) as *mut c_void;
