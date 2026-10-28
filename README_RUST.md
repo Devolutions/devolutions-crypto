@@ -260,3 +260,38 @@ As of the current version:
  * Password Hashing uses PBKDF2-HMAC-SHA2-256
  * Secret Sharing uses Shamir Secret sharing over GF256
 
+# FIPS mode
+Enabling the `fips` feature adds a version 3 of every data type except `OnlineCiphertext` and `Share`, backed by the AWS-LC FIPS 140-3 validated module (through `aws-lc-rs`):
+ * `Ciphertext` V3: AES-256-GCM (module-generated IV), with the key derived per message with HKDF-SHA256.
+ * Asymmetric `Ciphertext` V3: ephemeral-static ECDH over NIST P-256, then the symmetric V3 construction.
+ * `Key` V3: NIST P-256 keypairs and ECDH key exchange. `SecretKey` V3: 32 bytes from the FIPS DRBG.
+ * `SigningKey` and `Signature` V3: ECDSA over NIST P-256 with SHA-256.
+ * `PasswordHash` and `DerivationParameters` V3: PBKDF2-HMAC-SHA256.
+
+```toml
+[dependencies]
+devolutions-crypto = { version = "*", features = ["fips"] }
+```
+
+When the feature is enabled, `Latest` resolves to V3, all randomness comes from the module's DRBG,
+and encryption, password hashing, key derivation, online encryption and secret sharing refuse to produce
+data with the older, non-approved versions (`Error::NotFipsApproved`). `utils::derive_key_pbkdf2` and
+`utils::scrypt_simple` are not available. Data produced with the older versions can still be decrypted and
+verified, so it can be migrated. Without the feature, `Latest` still resolves to the previous versions.
+
+```rust
+use devolutions_crypto::ciphertext::{encrypt, CiphertextVersion};
+
+// Fails early if the module is not running in FIPS mode
+devolutions_crypto::fips::ensure_fips_mode().expect("the module should run in FIPS mode");
+
+let key = devolutions_crypto::utils::generate_key(32).unwrap();
+let ciphertext = encrypt(b"secret data", &key, CiphertextVersion::Latest).unwrap();
+
+// Older versions can no longer be produced
+assert!(encrypt(b"secret data", &key, CiphertextVersion::V2).is_err());
+```
+
+The feature is not available on WebAssembly. Building it requires CMake, Go and libclang, plus NASM on Windows.
+On Windows and macOS, the FIPS module is a separate shared library that must ship next to your binary.
+

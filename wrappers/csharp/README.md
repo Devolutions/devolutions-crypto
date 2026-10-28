@@ -190,3 +190,23 @@ As of the current version:
  * Password Hashing uses PBKDF2-HMAC-SHA2-256
  * Secret Sharing uses Shamir Secret sharing over GF256
 
+# FIPS mode
+The `Devolutions.Crypto.Core.Fips` package has the same API as `Devolutions.Crypto.Core`, with native libraries built with the AWS-LC FIPS 140-3 validated module. It supports Windows x64, Linux x64/arm64 and macOS x64/arm64. Reference one package or the other, not both.
+
+With this package:
+ * `Latest` resolves to the version 3 algorithms: AES-256-GCM (`CipherTextVersion.V3`), NIST P-256 key exchange and asymmetric encryption, ECDSA P-256 signatures (`SignatureVersion.V3`) and PBKDF2-HMAC-SHA256 password hashing (`PasswordHashVersion.V3`).
+ * Producing data with the older versions (V1/V2 encryption, Argon2, secret sharing, online encryption, `DeriveKeyPbkdf2`, `ScryptSimple`) throws a `DevolutionsCryptoException` with `NativeError.NotFipsApproved`.
+ * Data produced with the older versions can still be decrypted and verified, so it can be migrated.
+
+```csharp
+if (!Utils.IsFipsMode())
+{
+    throw new InvalidOperationException("The cryptographic module is not running in FIPS mode");
+}
+
+byte[] key = Managed.GenerateKey(32);
+byte[] encrypted = Managed.Encrypt(data, key); // CipherTextVersion.V3
+```
+
+On Windows, the FIPS module is a separate DLL (`aws_lc_fips_<version>_crypto.dll`), and on macOS a separate dylib, both shipped by the package next to the native library.
+
