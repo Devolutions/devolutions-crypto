@@ -28,6 +28,9 @@ use devolutions_crypto::key::{
     KeyVersion, PrivateKey, PublicKey, generate_keypair, generate_secret_key, mix_key_exchange,
 };
 use devolutions_crypto::key_derivation::{Argon2, DerivationParameters, Pbkdf2};
+use devolutions_crypto::key_encapsulation::{
+    EncapsulatedKey, KeyEncapsulationVersion, decapsulate, encapsulate,
+};
 use devolutions_crypto::password_hash::{
     PasswordHash, PasswordHashVersion, hash_password, hash_password_with_parameters,
 };
@@ -187,6 +190,10 @@ pub unsafe extern "C" fn EncryptAsymmetric(
                         let res: Zeroizing<Vec<u8>> = Zeroizing::new(res.into());
                         let length = res.len();
 
+                        if length > result.len() {
+                            return Error::InvalidOutputLength.error_code();
+                        }
+
                         result[0..length].copy_from_slice(&res);
                         length as i64
                     }
@@ -226,6 +233,9 @@ pub extern "C" fn EncryptAsymmetricSize(data_length: usize, version: u16) -> i64
     match version {
         0 | 2 => {
             (8 + 32 + 24 + data_length + 16) as i64 // Header + public_key + nonce + data + Poly1305 tag
+        }
+        3 => {
+            (8 + 1120 + 24 + data_length + 16) as i64 // Header + X-Wing ciphertext + nonce + data + Poly1305 tag
         }
         _ => Error::UnknownVersion.error_code(),
     }
@@ -993,6 +1003,92 @@ pub unsafe extern "C" fn GenerateKeyPair(
     }
 }
 
+/// Generate a key pair of a specific version. Version 1 is X25519 and is compatible with
+/// `MixKeyExchange()`. Version 2 is the post-quantum X-Wing hybrid (ML-KEM-768 + X25519) and
+/// must be used with `EncryptAsymmetric()` using ciphertext version 3, or with `Encapsulate()`.
+/// # Arguments
+///  * `private` - Pointer to the buffer to write the private key to.
+///  * `private_length` - Length of the buffer to write the private key to.
+///    You can get the value by calling `GenerateKeyPairPrivateSize()` beforehand.
+///  * `public` - Pointer to the buffer to write the public key to.
+///  * `public_length` - Length of the buffer to write the public key to.
+///    You can get the value by calling `GenerateKeyPairPublicSize()` beforehand.
+///  * `version` - Key version to use. Use 0 for the latest one.
+/// # Returns
+/// Returns 0 if the generation worked. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn GenerateKeyPairWithVersion(
+    private: *mut u8,
+    private_length: usize,
+    public: *mut u8,
+    public_length: usize,
+    version: u16,
+) -> i64 {
+    unsafe {
+        if private.is_null() || public.is_null() {
+            return Error::NullPointer.error_code();
+        };
+
+        let key_version = match KeyVersion::try_from(version) {
+            Ok(v) => v,
+            Err(_) => return Error::UnknownVersion.error_code(),
+        };
+
+        if private_length != GenerateKeyPairPrivateSize(version) as usize
+            || public_length != GenerateKeyPairPublicSize(version) as usize
+        {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let private = slice::from_raw_parts_mut(private, private_length);
+        let public = slice::from_raw_parts_mut(public, public_length);
+
+        let keypair = generate_keypair(key_version);
+
+        let priv_res: Zeroizing<Vec<u8>> = Zeroizing::new(keypair.private_key.into());
+        let pub_res: Zeroizing<Vec<u8>> = Zeroizing::new(keypair.public_key.into());
+
+        if priv_res.len() > private.len() || pub_res.len() > public.len() {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        public[0..pub_res.len()].copy_from_slice(&pub_res);
+        private[0..priv_res.len()].copy_from_slice(&priv_res);
+        0
+    }
+}
+
+/// Get the size of the private key for a given key version.
+/// # Arguments
+///  * `version` - Key version. Use 0 for the latest one.
+/// # Returns
+/// Returns the length to input as `private_length` in `GenerateKeyPairWithVersion()`.
+#[unsafe(no_mangle)]
+pub extern "C" fn GenerateKeyPairPrivateSize(version: u16) -> i64 {
+    match version {
+        0 | 1 => 8 + 32, // header + X25519 secret
+        2 => 8 + 32,     // header + X-Wing seed
+        _ => Error::UnknownVersion.error_code(),
+    }
+}
+
+/// Get the size of the public key for a given key version.
+/// # Arguments
+///  * `version` - Key version. Use 0 for the latest one.
+/// # Returns
+/// Returns the length to input as `public_length` in `GenerateKeyPairWithVersion()`.
+#[unsafe(no_mangle)]
+pub extern "C" fn GenerateKeyPairPublicSize(version: u16) -> i64 {
+    match version {
+        0 | 1 => 8 + 32,    // header + X25519 public key
+        2 => 8 + 1184 + 32, // header + ML-KEM-768 public key + X25519 public key
+        _ => Error::UnknownVersion.error_code(),
+    }
+}
+
 /// Generate a key pair to sign and verify data with.
 /// # Arguments
 ///  * `keypair` - Pointer to the buffer to write the keypair to.
@@ -1200,6 +1296,157 @@ pub unsafe extern "C" fn MixKeyExchange(
 #[unsafe(no_mangle)]
 pub extern "C" fn MixKeyExchangeSize() -> i64 {
     32
+}
+
+/// Encapsulate a fresh shared secret to a public key (key encapsulation mechanism).
+/// The `encapsulated` output must be sent to the owner of the private key, who can recover
+/// the same secret with `Decapsulate()`.
+/// # Arguments
+///  * `public_key` - Pointer to the recipient's public key. It must be a version 2 (X-Wing) key.
+///  * `public_key_length` - Length of the recipient's public key.
+///  * `encapsulated` - Pointer to the buffer to write the encapsulated key to.
+///  * `encapsulated_length` - Length of the buffer to write the encapsulated key to.
+///    You can get the value by calling `EncapsulateSize()` beforehand.
+///  * `secret` - Pointer to the buffer to write the shared secret key to.
+///  * `secret_length` - Length of the buffer to write the shared secret key to.
+///    You can get the value by calling `GenerateSecretKeySize()` beforehand.
+///  * `version` - Key encapsulation version to use. Use 0 for the latest one.
+/// # Returns
+/// Returns 0 if the operation worked. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn Encapsulate(
+    public_key: *const u8,
+    public_key_length: usize,
+    encapsulated: *mut u8,
+    encapsulated_length: usize,
+    secret: *mut u8,
+    secret_length: usize,
+    version: u16,
+) -> i64 {
+    unsafe {
+        if public_key.is_null() || encapsulated.is_null() || secret.is_null() {
+            return Error::NullPointer.error_code();
+        };
+
+        let version = match KeyEncapsulationVersion::try_from(version) {
+            Ok(v) => v,
+            Err(_) => return Error::UnknownVersion.error_code(),
+        };
+
+        if encapsulated_length != EncapsulateSize(version as u16) as usize
+            || secret_length != GenerateSecretKeySize() as usize
+        {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let public_key =
+            match PublicKey::try_from(slice::from_raw_parts(public_key, public_key_length)) {
+                Ok(k) => k,
+                Err(e) => return e.error_code(),
+            };
+
+        let encapsulated = slice::from_raw_parts_mut(encapsulated, encapsulated_length);
+        let secret = slice::from_raw_parts_mut(secret, secret_length);
+
+        match encapsulate(&public_key, version) {
+            Ok((encapsulated_key, secret_key)) => {
+                let encapsulated_bytes: Vec<u8> = encapsulated_key.into();
+                let secret_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(secret_key.into());
+
+                if encapsulated_bytes.len() > encapsulated.len()
+                    || secret_bytes.len() > secret.len()
+                {
+                    return Error::InvalidOutputLength.error_code();
+                }
+
+                encapsulated[0..encapsulated_bytes.len()].copy_from_slice(&encapsulated_bytes);
+                secret[0..secret_bytes.len()].copy_from_slice(&secret_bytes);
+                0
+            }
+            Err(e) => e.error_code(),
+        }
+    }
+}
+
+/// Get the size of an encapsulated key.
+/// # Arguments
+///  * `version` - Key encapsulation version. Use 0 for the latest one.
+/// # Returns
+/// Returns the length to input as `encapsulated_length` in `Encapsulate()`.
+#[unsafe(no_mangle)]
+pub extern "C" fn EncapsulateSize(version: u16) -> i64 {
+    match version {
+        0 | 1 => 8 + 1120, // header + X-Wing ciphertext
+        _ => Error::UnknownVersion.error_code(),
+    }
+}
+
+/// Recover the shared secret from an encapsulated key (key encapsulation mechanism).
+/// Note that a wrong private key does not return an error: the result is a different secret.
+/// # Arguments
+///  * `private_key` - Pointer to the private key. It must be a version 2 (X-Wing) key.
+///  * `private_key_length` - Length of the private key.
+///  * `encapsulated` - Pointer to the encapsulated key produced by `Encapsulate()`.
+///  * `encapsulated_length` - Length of the encapsulated key.
+///  * `secret` - Pointer to the buffer to write the shared secret key to.
+///  * `secret_length` - Length of the buffer to write the shared secret key to.
+///    You can get the value by calling `GenerateSecretKeySize()` beforehand.
+/// # Returns
+/// Returns 0 if the operation worked. If there is an error,
+///     it will return the appropriate error code defined in DevoCryptoError.
+/// # Safety
+/// This method is made to be called by C, so it is therefore unsafe. The caller should make sure it passes the right pointers and sizes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn Decapsulate(
+    private_key: *const u8,
+    private_key_length: usize,
+    encapsulated: *const u8,
+    encapsulated_length: usize,
+    secret: *mut u8,
+    secret_length: usize,
+) -> i64 {
+    unsafe {
+        if private_key.is_null() || encapsulated.is_null() || secret.is_null() {
+            return Error::NullPointer.error_code();
+        };
+
+        if secret_length != GenerateSecretKeySize() as usize {
+            return Error::InvalidOutputLength.error_code();
+        }
+
+        let private_key =
+            match PrivateKey::try_from(slice::from_raw_parts(private_key, private_key_length)) {
+                Ok(k) => k,
+                Err(e) => return e.error_code(),
+            };
+
+        let encapsulated = match EncapsulatedKey::try_from(slice::from_raw_parts(
+            encapsulated,
+            encapsulated_length,
+        )) {
+            Ok(k) => k,
+            Err(e) => return e.error_code(),
+        };
+
+        let secret = slice::from_raw_parts_mut(secret, secret_length);
+
+        match decapsulate(&private_key, &encapsulated) {
+            Ok(secret_key) => {
+                let secret_bytes: Zeroizing<Vec<u8>> = Zeroizing::new(secret_key.into());
+
+                if secret_bytes.len() > secret.len() {
+                    return Error::InvalidOutputLength.error_code();
+                }
+
+                secret[0..secret_bytes.len()].copy_from_slice(&secret_bytes);
+                0
+            }
+            Err(e) => e.error_code(),
+        }
+    }
 }
 
 /// Generates a secret key shared amongst multiple actor.
@@ -2647,6 +2894,156 @@ pub unsafe extern "C" fn Version(output: *mut u8, output_length: usize) -> i64 {
         output.copy_from_slice(VERSION.as_bytes());
 
         output.len() as i64
+    }
+}
+
+#[test]
+fn test_post_quantum_ffi() {
+    let private_size = GenerateKeyPairPrivateSize(2) as usize;
+    let public_size = GenerateKeyPairPublicSize(2) as usize;
+    assert_eq!(GenerateKeyPairPrivateSize(0), 40);
+    assert_eq!(GenerateKeyPairPublicSize(0), 40);
+    assert_eq!(
+        GenerateKeyPairPublicSize(3),
+        Error::UnknownVersion.error_code()
+    );
+
+    let mut private = vec![0u8; private_size];
+    let mut public = vec![0u8; public_size];
+    unsafe {
+        assert_eq!(
+            GenerateKeyPairWithVersion(
+                private.as_mut_ptr(),
+                private.len(),
+                public.as_mut_ptr(),
+                public.len(),
+                2
+            ),
+            0
+        );
+        // wrong sizes are rejected, not truncated
+        assert_eq!(
+            GenerateKeyPairWithVersion(
+                private.as_mut_ptr(),
+                private.len(),
+                public.as_mut_ptr(),
+                40,
+                2
+            ),
+            Error::InvalidOutputLength.error_code()
+        );
+    }
+
+    // Asymmetric V3
+    let data = b"post-quantum data";
+    let size = EncryptAsymmetricSize(data.len(), 3);
+    assert!(size > 0);
+    let mut ciphertext = vec![0u8; size as usize];
+    unsafe {
+        let written = EncryptAsymmetric(
+            data.as_ptr(),
+            data.len(),
+            public.as_ptr(),
+            public.len(),
+            std::ptr::null(),
+            0,
+            ciphertext.as_mut_ptr(),
+            ciphertext.len(),
+            3,
+        );
+        assert_eq!(written, size);
+
+        let mut plaintext = vec![0u8; ciphertext.len()];
+        let n = DecryptAsymmetric(
+            ciphertext.as_ptr(),
+            ciphertext.len(),
+            private.as_ptr(),
+            private.len(),
+            std::ptr::null(),
+            0,
+            plaintext.as_mut_ptr(),
+            plaintext.len(),
+        );
+        assert_eq!(&plaintext[..n as usize], data);
+
+        // V3 with a V1 public key must fail cleanly
+        let mut v1_private = vec![0u8; 40];
+        let mut v1_public = vec![0u8; 40];
+        assert_eq!(
+            GenerateKeyPairWithVersion(v1_private.as_mut_ptr(), 40, v1_public.as_mut_ptr(), 40, 1),
+            0
+        );
+        let written = EncryptAsymmetric(
+            data.as_ptr(),
+            data.len(),
+            v1_public.as_ptr(),
+            v1_public.len(),
+            std::ptr::null(),
+            0,
+            ciphertext.as_mut_ptr(),
+            ciphertext.len(),
+            3,
+        );
+        assert_eq!(written, Error::InvalidDataType.error_code());
+    }
+
+    // Key encapsulation
+    let encapsulated_size = EncapsulateSize(0) as usize;
+    assert_eq!(encapsulated_size, 1128);
+    let secret_size = GenerateSecretKeySize() as usize;
+    let mut encapsulated = vec![0u8; encapsulated_size];
+    let mut sender_secret = vec![0u8; secret_size];
+    let mut recipient_secret = vec![0u8; secret_size];
+    unsafe {
+        assert_eq!(
+            Encapsulate(
+                public.as_ptr(),
+                public.len(),
+                encapsulated.as_mut_ptr(),
+                encapsulated.len(),
+                sender_secret.as_mut_ptr(),
+                sender_secret.len(),
+                0
+            ),
+            0
+        );
+        assert_eq!(
+            Decapsulate(
+                private.as_ptr(),
+                private.len(),
+                encapsulated.as_ptr(),
+                encapsulated.len(),
+                recipient_secret.as_mut_ptr(),
+                recipient_secret.len()
+            ),
+            0
+        );
+        assert_eq!(sender_secret, recipient_secret);
+
+        assert_eq!(
+            Encapsulate(
+                public.as_ptr(),
+                public.len(),
+                encapsulated.as_mut_ptr(),
+                10,
+                sender_secret.as_mut_ptr(),
+                sender_secret.len(),
+                0
+            ),
+            Error::InvalidOutputLength.error_code()
+        );
+        assert_eq!(
+            Encapsulate(
+                public.as_ptr(),
+                public.len(),
+                encapsulated.as_mut_ptr(),
+                encapsulated.len(),
+                sender_secret.as_mut_ptr(),
+                sender_secret.len(),
+                9
+            ),
+            Error::UnknownVersion.error_code()
+        );
     }
 }
 

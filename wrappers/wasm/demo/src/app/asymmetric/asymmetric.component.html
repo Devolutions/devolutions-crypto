@@ -16,11 +16,22 @@
     <div class="card-body">
       <form [formGroup]="keypairGenerationForm" (ngSubmit)="generateKeypair()">
         <div class="field">
+          <label>Algorithm</label>
+          <select formControlName="keyAlgorithm">
+            <option value="x25519">X25519 (classic, default)</option>
+            <option value="xwing">X-Wing: ML-KEM-768 + X25519 (post-quantum)</option>
+          </select>
+        </div>
+        <div class="field">
           <button type="submit" class="btn btn-primary">Generate Key Pair</button>
         </div>
         <div class="field">
-          <span class="result-label">Result</span>
-          <textarea rows="3" formControlName="generationResult" placeholder="Key pair output"></textarea>
+          <span class="result-label">Private key</span>
+          <textarea rows="3" formControlName="generatedPrivateKey" placeholder="Private key output"></textarea>
+        </div>
+        <div class="field">
+          <span class="result-label">Public key</span>
+          <textarea rows="5" formControlName="generatedPublicKey" placeholder="Public key output"></textarea>
         </div>
       </form>
     </div>
@@ -62,6 +73,13 @@
           <input type="text" formControlName="publicKeyEncrypt" required placeholder="Paste public key">
         </div>
         <div class="field">
+          <label>Version</label>
+          <select formControlName="encryptVersion">
+            <option value="latest">Latest (X25519 key)</option>
+            <option value="v3">V3 (X-Wing post-quantum key)</option>
+          </select>
+        </div>
+        <div class="field">
           <button type="submit" class="btn btn-primary">Encrypt</button>
         </div>
         <div class="field">
@@ -90,6 +108,52 @@
         <div class="field">
           <span class="result-label">Result</span>
           <textarea rows="5" formControlName="decryptAsymmetricResult" placeholder="Decrypted output"></textarea>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Encapsulate (X-Wing)</div>
+    <div class="card-body">
+      <form [formGroup]="encapsulateForm" (ngSubmit)="encapsulate()">
+        <div class="field">
+          <label>Public key (X-Wing)</label>
+          <input type="text" formControlName="publicKeyEncapsulate" required placeholder="Paste X-Wing public key">
+        </div>
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Encapsulate</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Encapsulated key (send to the recipient)</span>
+          <textarea rows="5" formControlName="encapsulatedKeyResult" placeholder="Encapsulated key output"></textarea>
+        </div>
+        <div class="field">
+          <span class="result-label">Shared secret key (keep local)</span>
+          <textarea rows="3" formControlName="secretKeyEncapsulateResult" placeholder="Secret key output"></textarea>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Decapsulate (X-Wing)</div>
+    <div class="card-body">
+      <form [formGroup]="decapsulateForm" (ngSubmit)="decapsulate()">
+        <div class="field">
+          <label>Encapsulated key</label>
+          <input type="text" formControlName="encapsulatedKeyDecapsulate" required placeholder="Paste encapsulated key">
+        </div>
+        <div class="field">
+          <label>Private key (X-Wing)</label>
+          <input type="text" formControlName="privateKeyDecapsulate" required placeholder="Paste X-Wing private key">
+        </div>
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Decapsulate</button>
+        </div>
+        <div class="field">
+          <span class="result-label">Shared secret key</span>
+          <textarea rows="3" formControlName="secretKeyDecapsulateResult" placeholder="Secret key output"></textarea>
         </div>
       </form>
     </div>

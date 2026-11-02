@@ -103,6 +103,24 @@ namespace Devolutions.Cryptography
         [DllImport(LibName, EntryPoint = "GenerateKeyPairSize", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long GenerateKeyPairSizeNative();
 
+        [DllImport(LibName, EntryPoint = "GenerateKeyPairWithVersion", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GenerateKeyPairWithVersionNative(byte[] privateKey, UIntPtr privateKeySize, byte[] publicKey, UIntPtr publicKeySize, ushort version);
+
+        [DllImport(LibName, EntryPoint = "GenerateKeyPairPrivateSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GenerateKeyPairPrivateSizeNative(ushort version);
+
+        [DllImport(LibName, EntryPoint = "GenerateKeyPairPublicSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long GenerateKeyPairPublicSizeNative(ushort version);
+
+        [DllImport(LibName, EntryPoint = "Encapsulate", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long EncapsulateNative(byte[] publicKey, UIntPtr publicKeyLength, byte[] encapsulated, UIntPtr encapsulatedLength, byte[] secret, UIntPtr secretLength, ushort version);
+
+        [DllImport(LibName, EntryPoint = "EncapsulateSize", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long EncapsulateSizeNative(ushort version);
+
+        [DllImport(LibName, EntryPoint = "Decapsulate", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern long DecapsulateNative(byte[] privateKey, UIntPtr privateKeyLength, byte[] encapsulated, UIntPtr encapsulatedLength, byte[] secret, UIntPtr secretLength);
+
         [DllImport(LibName, EntryPoint = "GenerateSecretKey", CallingConvention = CallingConvention.Cdecl)]
         internal static extern long GenerateSecretKeyNative(byte[] result, UIntPtr resultLength);
 

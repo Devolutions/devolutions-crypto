@@ -3,6 +3,7 @@ mod ciphertext;
 mod derive_encrypt;
 mod key;
 mod key_derivation;
+mod key_encapsulation;
 mod password_hash;
 mod secret_sharing;
 mod signature;
@@ -14,6 +15,7 @@ pub use ciphertext::*;
 pub use derive_encrypt::*;
 pub use key::*;
 pub use key_derivation::*;
+pub use key_encapsulation::*;
 pub use password_hash::*;
 pub use secret_sharing::*;
 pub use signature::*;
@@ -22,8 +24,8 @@ pub use utils::*;
 
 pub use devolutions_crypto::{
     CiphertextVersion, DataType, Error as DevolutionsCryptoError, KdfEncryptedDataVersion,
-    KeyDerivationVersion, KeyVersion, PasswordHashVersion, Result, SecretSharingVersion,
-    SignatureVersion, SigningKeyVersion,
+    KeyDerivationVersion, KeyEncapsulationVersion, KeyVersion, PasswordHashVersion, Result,
+    SecretSharingVersion, SignatureVersion, SigningKeyVersion,
 };
 
 #[uniffi::remote(Enum)]
@@ -54,6 +56,12 @@ pub enum KeyVersion {
     Latest,
     V1,
     V2,
+}
+
+#[uniffi::remote(Enum)]
+pub enum KeyEncapsulationVersion {
+    Latest,
+    V1,
 }
 
 #[uniffi::remote(Enum)]

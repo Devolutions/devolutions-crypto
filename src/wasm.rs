@@ -18,6 +18,10 @@ use super::{
     key::{KeyVersion, PrivateKey, PublicKey, SecretKey},
 };
 use super::{
+    key_encapsulation,
+    key_encapsulation::{EncapsulatedKey, KeyEncapsulationVersion},
+};
+use super::{
     password_hash,
     password_hash::{PasswordHash, PasswordHashVersion},
 };
@@ -304,6 +308,57 @@ pub fn decrypt_with_secret_key(
 #[wasm_bindgen(js_name = "generateSigningKeyPair")]
 pub fn generate_signing_keypair(version: Option<SigningKeyVersion>) -> SigningKeyPair {
     signing_key::generate_signing_keypair(version.unwrap_or(SigningKeyVersion::Latest))
+}
+
+#[wasm_bindgen(inspectable)]
+#[derive(Clone)]
+pub struct EncapsulationResult {
+    encapsulated_key: Vec<u8>,
+    secret_key: SecretKey,
+}
+
+#[wasm_bindgen]
+impl EncapsulationResult {
+    #[wasm_bindgen(getter, js_name = "encapsulatedKey")]
+    pub fn encapsulated_key(&self) -> Vec<u8> {
+        self.encapsulated_key.clone()
+    }
+
+    #[wasm_bindgen(getter, js_name = "secretKey")]
+    pub fn secret_key(&self) -> SecretKey {
+        self.secret_key.clone()
+    }
+}
+
+/// Encapsulates a fresh shared secret to a version 2 (X-Wing) public key.
+#[wasm_bindgen]
+pub fn encapsulate(
+    public_key: &PublicKey,
+    version: Option<KeyEncapsulationVersion>,
+) -> Result<EncapsulationResult, JsValue> {
+    let (encapsulated_key, secret_key) = key_encapsulation::encapsulate(
+        public_key,
+        version.unwrap_or(KeyEncapsulationVersion::Latest),
+    )?;
+
+    Ok(EncapsulationResult {
+        encapsulated_key: encapsulated_key.into(),
+        secret_key,
+    })
+}
+
+/// Recovers the shared secret from an encapsulated key using a version 2 (X-Wing) private key.
+/// A wrong private key does not fail: it yields a different secret.
+#[wasm_bindgen]
+pub fn decapsulate(
+    private_key: &PrivateKey,
+    encapsulated_key: &[u8],
+) -> Result<SecretKey, JsValue> {
+    let encapsulated_key = EncapsulatedKey::try_from(encapsulated_key)?;
+    Ok(key_encapsulation::decapsulate(
+        private_key,
+        &encapsulated_key,
+    )?)
 }
 
 #[wasm_bindgen(js_name = "mixKeyExchange")]
