@@ -51,7 +51,49 @@ namespace Devolutions.Cryptography
         /// <summary>
         /// A blob containing key derivation parameters and an encrypted ciphertext.
         /// </summary>
-        KdfEncryptedData = 9
+        KdfEncryptedData = 9,
+
+        /// <summary>
+        /// A key encapsulation produced by <see cref="Managed.Encapsulate(byte[], KeyEncapsulationVersion)"/>.
+        /// </summary>
+        EncapsulatedKey = 10,
+    }
+
+    /// <summary>
+    /// Devolutions Crypto Asymmetric Key Version.
+    /// </summary>
+    public enum KeyVersion
+    {
+        /// <summary>
+        /// This is the latest classical version. (Currently X25519). Post-quantum keys are opt-in via <see cref="V2"/>.
+        /// </summary>
+        Latest = 0,
+
+        /// <summary>
+        /// X25519.
+        /// </summary>
+        V1 = 1,
+
+        /// <summary>
+        /// X-Wing hybrid post-quantum KEM (ML-KEM-768 + X25519).
+        /// </summary>
+        V2 = 2,
+    }
+
+    /// <summary>
+    /// Devolutions Crypto Key Encapsulation Version.
+    /// </summary>
+    public enum KeyEncapsulationVersion
+    {
+        /// <summary>
+        /// This is the latest version. (Currently X-Wing).
+        /// </summary>
+        Latest = 0,
+
+        /// <summary>
+        /// X-Wing hybrid post-quantum KEM (ML-KEM-768 + X25519), with HKDF-SHA-256 applied to the shared secret.
+        /// </summary>
+        V1 = 1,
     }
 
     /// <summary>
@@ -100,6 +142,11 @@ namespace Devolutions.Cryptography
         /// XChaCha20Poly1305 with DeriveKey length fix
         /// </summary>
         V2_5 = 2,
+
+        /// <summary>
+        /// X-Wing hybrid post-quantum KEM (ML-KEM-768 + X25519) with XChaCha20Poly1305. Requires a <see cref="KeyVersion.V2"/> key.
+        /// </summary>
+        V3 = 3,
     }
 
     /// <summary>

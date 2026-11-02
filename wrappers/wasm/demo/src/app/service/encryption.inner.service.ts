@@ -1,5 +1,5 @@
-import wasmInit, { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, SecretKey, Argon2Parameters, PasswordHashVersion, KeyDerivationResult, DerivationParameters } from '@devolutions/devolutions-crypto-web';
-export { CiphertextVersion, KeyVersion, KeyPair, PrivateKey, PublicKey, SecretKey, Argon2Parameters, PasswordHashVersion, KeyDerivationResult, DerivationParameters } from '@devolutions/devolutions-crypto-web';
+import wasmInit, { CiphertextVersion, KeyVersion, KeyEncapsulationVersion, EncapsulationResult, KeyPair, PrivateKey, PublicKey, SecretKey, Argon2Parameters, PasswordHashVersion, KeyDerivationResult, DerivationParameters } from '@devolutions/devolutions-crypto-web';
+export { CiphertextVersion, KeyVersion, KeyEncapsulationVersion, EncapsulationResult, KeyPair, PrivateKey, PublicKey, SecretKey, Argon2Parameters, PasswordHashVersion, KeyDerivationResult, DerivationParameters } from '@devolutions/devolutions-crypto-web';
 import * as devolutionsCrypto from '@devolutions/devolutions-crypto-web';
 
 // Initialize WASM before any functions are used
@@ -11,6 +11,14 @@ export function encrypt(data: Uint8Array, key: Uint8Array, version?: CiphertextV
 
 export function encryptAsymmetric(data: Uint8Array, publicKey: PublicKey, version?: CiphertextVersion): Uint8Array {
   return devolutionsCrypto.encryptAsymmetric(data, publicKey, undefined, version);
+}
+
+export function encapsulate(publicKey: PublicKey, version?: KeyEncapsulationVersion): EncapsulationResult {
+    return devolutionsCrypto.encapsulate(publicKey, version);
+}
+
+export function decapsulate(privateKey: PrivateKey, encapsulatedKey: Uint8Array): SecretKey {
+    return devolutionsCrypto.decapsulate(privateKey, encapsulatedKey);
 }
 
 export function decrypt(data: Uint8Array, key: Uint8Array): Uint8Array {

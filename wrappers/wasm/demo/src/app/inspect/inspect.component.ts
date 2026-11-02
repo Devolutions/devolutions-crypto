@@ -22,6 +22,7 @@ const DATA_TYPE_NAMES: Record<number, string> = {
   7: 'OnlineCiphertext',
   8: 'KeyDerivation',
   9: 'KdfEncryptedData',
+  10: 'EncapsulatedKey',
 };
 
 const SUBTYPE_NAMES: Record<number, Record<number, string>> = {
@@ -33,17 +34,19 @@ const SUBTYPE_NAMES: Record<number, Record<number, string>> = {
   6: { 0: 'None' },
   8: { 0: 'None' },
   9: { 0: 'None' },
+  10: { 0: 'None' },
 };
 
 const VERSION_NAMES: Record<number, Record<number, string>> = {
-  1: { 0: 'Latest', 1: 'V1 – Curve25519 / x25519' },
-  2: { 0: 'Latest', 1: 'V1 – AES256-CBC + HMAC-SHA256', 2: 'V2 – XChaCha20-Poly1305' },
+  1: { 0: 'Latest', 1: 'V1 – Curve25519 / x25519', 2: 'V2 – X-Wing (ML-KEM-768 + x25519)' },
+  2: { 0: 'Latest', 1: 'V1 – AES256-CBC + HMAC-SHA256', 2: 'V2 – XChaCha20-Poly1305', 3: 'V3 – X-Wing KEM + XChaCha20-Poly1305' },
   3: { 0: 'Latest', 1: 'V1 – PBKDF2-HMAC-SHA256', 2: 'V2 – Argon2id' },
   4: { 0: 'Latest', 1: 'V1 – Shamir Secret Sharing over GF256' },
   5: { 0: 'Latest', 1: 'V1 – Ed25519' },
   6: { 0: 'Latest', 1: 'V1 – Ed25519' },
   8: { 0: 'Latest', 1: 'V1 – PBKDF2-HMAC-SHA256', 2: 'V2 – Argon2id' },
   9: { 0: 'Latest', 1: 'V1 – DerivationParameters + Ciphertext' },
+  10: { 0: 'Latest', 1: 'V1 – X-Wing (ML-KEM-768 + x25519)' },
 };
 
 export interface PayloadField {
@@ -201,6 +204,8 @@ export class InspectComponent implements OnInit {
         return this.parseDerivationParametersPayload(payload, version, abs);
       case 9:
         return this.parseKdfEncryptedDataPayload(payload, abs);
+      case 10:
+        return this.parseEncapsulatedKeyPayload(payload, abs);
       default:
         return [
           {
@@ -257,6 +262,54 @@ export class InspectComponent implements OnInit {
         size: 32,
         hex: toHex(hmac),
         description: 'Authentication tag over header + IV + ciphertext (32 bytes)',
+      });
+      return fields;
+    }
+
+    if (version === 3) {
+      // V3 (asymmetric only): X-Wing KEM ciphertext(1120) + Nonce(24) + Ciphertext+Tag(var)
+      if (payload.length < 1160) {
+        fields.push({
+          name: 'Error',
+          offset: abs(0),
+          size: payload.length,
+          hex: toHex(payload),
+          description: `Payload too short for V3 asymmetric ciphertext (min 1160 bytes, got ${payload.length})`,
+        });
+        return fields;
+      }
+      const kemCt = payload.slice(0, 1120);
+      const nonce = payload.slice(1120, 1144);
+      const ctWithTag = payload.slice(1144);
+      const ct = ctWithTag.slice(0, ctWithTag.length - 16);
+      const tag = ctWithTag.slice(ctWithTag.length - 16);
+      fields.push({
+        name: 'KEM Ciphertext',
+        offset: abs(0),
+        size: 1120,
+        hex: toHex(kemCt, 32),
+        description: 'X-Wing ciphertext: ML-KEM-768 ciphertext (1088 bytes) + x25519 ephemeral public key (32 bytes)',
+      });
+      fields.push({
+        name: 'Nonce',
+        offset: abs(1120),
+        size: 24,
+        hex: toHex(nonce),
+        description: 'XChaCha20-Poly1305 nonce (24 bytes)',
+      });
+      fields.push({
+        name: 'Ciphertext',
+        offset: abs(1144),
+        size: ct.length,
+        hex: toHex(ct, 32),
+        description: `XChaCha20 encrypted data (${ct.length} bytes)`,
+      });
+      fields.push({
+        name: 'Auth Tag (Poly1305)',
+        offset: abs(1144 + ct.length),
+        size: 16,
+        hex: toHex(tag),
+        description: 'Poly1305 AEAD authentication tag (16 bytes)',
       });
       return fields;
     }
@@ -347,6 +400,21 @@ export class InspectComponent implements OnInit {
     }
 
     return fields;
+  }
+
+  private parseEncapsulatedKeyPayload(
+    payload: Uint8Array,
+    abs: (n: number) => number
+  ): PayloadField[] {
+    return [
+      {
+        name: 'KEM Ciphertext',
+        offset: abs(0),
+        size: payload.length,
+        hex: toHex(payload, 32),
+        description: `X-Wing ciphertext: ML-KEM-768 ciphertext (1088 bytes) + x25519 ephemeral public key (32 bytes) (${payload.length} bytes total)`,
+      },
+    ];
   }
 
   private parseKeyPayload(

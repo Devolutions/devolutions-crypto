@@ -752,6 +752,102 @@ namespace Devolutions.Cryptography
             };
         }
 
+        /// <summary>
+        /// Generates a pair of random public and private keys of the requested version.
+        /// </summary>
+        /// <param name="version">The key version. <see cref="KeyVersion.V2"/> generates an X-Wing post-quantum key pair.</param>
+        /// <returns>Returns the random public and private keys.</returns>
+        public static KeyPair GenerateKeyPair(KeyVersion version)
+        {
+            long privateSize = Native.GenerateKeyPairPrivateSizeNative((ushort)version);
+            if (privateSize < 0)
+            {
+                Utils.HandleError(privateSize);
+            }
+
+            long publicSize = Native.GenerateKeyPairPublicSizeNative((ushort)version);
+            if (publicSize < 0)
+            {
+                Utils.HandleError(publicSize);
+            }
+
+            byte[] privateKey = new byte[privateSize];
+            byte[] publicKey = new byte[publicSize];
+
+            long res = Native.GenerateKeyPairWithVersionNative(privateKey, (UIntPtr)privateKey.Length, publicKey, (UIntPtr)publicKey.Length, (ushort)version);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return new KeyPair()
+            {
+                PublicKey = publicKey,
+                PrivateKey = privateKey,
+            };
+        }
+
+        /// <summary>
+        /// Encapsulates a fresh shared secret to a public key (KEM). The secret can be recovered with <see cref="Decapsulate(byte[], byte[])"/>.
+        /// </summary>
+        /// <param name="publicKey">A <see cref="KeyVersion.V2"/> public key.</param>
+        /// <param name="version">The encapsulation version.</param>
+        /// <returns>Returns the encapsulated key to send to the recipient and the local shared secret.</returns>
+        public static EncapsulationResult Encapsulate(byte[] publicKey, KeyEncapsulationVersion version = KeyEncapsulationVersion.Latest)
+        {
+            if (publicKey == null)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            long encapsulatedSize = Native.EncapsulateSizeNative((ushort)version);
+            if (encapsulatedSize < 0)
+            {
+                Utils.HandleError(encapsulatedSize);
+            }
+
+            long secretSize = Native.GenerateSecretKeySizeNative();
+
+            byte[] encapsulated = new byte[encapsulatedSize];
+            byte[] secret = new byte[secretSize];
+
+            long res = Native.EncapsulateNative(publicKey, (UIntPtr)publicKey.Length, encapsulated, (UIntPtr)encapsulated.Length, secret, (UIntPtr)secret.Length, (ushort)version);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return new EncapsulationResult(encapsulated, new SecretKey(secret));
+        }
+
+        /// <summary>
+        /// Recovers the shared secret from an encapsulated key. A wrong private key does not raise an error; it yields a different secret.
+        /// </summary>
+        /// <param name="privateKey">The <see cref="KeyVersion.V2"/> private key matching the public key used to encapsulate.</param>
+        /// <param name="encapsulatedKey">The encapsulated key received from the sender.</param>
+        /// <returns>Returns the shared <see cref="SecretKey"/>.</returns>
+        public static SecretKey Decapsulate(byte[] privateKey, byte[] encapsulatedKey)
+        {
+            if (privateKey == null || encapsulatedKey == null)
+            {
+                throw new DevolutionsCryptoException(ManagedError.InvalidParameter);
+            }
+
+            long secretSize = Native.GenerateSecretKeySizeNative();
+            byte[] secret = new byte[secretSize];
+
+            long res = Native.DecapsulateNative(privateKey, (UIntPtr)privateKey.Length, encapsulatedKey, (UIntPtr)encapsulatedKey.Length, secret, (UIntPtr)secret.Length);
+
+            if (res < 0)
+            {
+                Utils.HandleError(res);
+            }
+
+            return new SecretKey(secret);
+        }
+
         internal static byte[] GenerateSecretKeyBytes()
         {
             long size = Native.GenerateSecretKeySizeNative();
