@@ -154,6 +154,10 @@ pub fn validate_header(data: &[u8], data_type: DataType) -> bool {
         DataType::KdfEncryptedData => {
             Header::<KdfEncryptedData>::try_from(&data[0..Header::len()]).is_ok()
         }
+        DataType::EncapsulatedKey => {
+            use super::key_encapsulation::EncapsulatedKey;
+            Header::<EncapsulatedKey>::try_from(&data[0..Header::len()]).is_ok()
+        }
     }
 }
 

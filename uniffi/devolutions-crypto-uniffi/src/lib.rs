@@ -38,6 +38,7 @@ pub enum DataType {
     OnlineCiphertext,
     KeyDerivation,
     KdfEncryptedData,
+    EncapsulatedKey,
 }
 
 #[uniffi::remote(Enum)]
@@ -45,12 +46,14 @@ pub enum CiphertextVersion {
     Latest,
     V1,
     V2,
+    V3,
 }
 
 #[uniffi::remote(Enum)]
 pub enum KeyVersion {
     Latest,
     V1,
+    V2,
 }
 
 #[uniffi::remote(Enum)]
