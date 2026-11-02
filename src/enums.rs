@@ -35,6 +35,8 @@ pub enum DataType {
     KeyDerivation = 8,
     /// A wrapped payload combining key derivation parameters and ciphertext.
     KdfEncryptedData = 9,
+    /// A wrapped KEM ciphertext produced by `key_encapsulation::encapsulate`.
+    EncapsulatedKey = 10,
 }
 
 /// The versions of the encryption scheme to use.
@@ -49,8 +51,11 @@ pub enum CiphertextVersion {
     Latest = 0,
     /// Uses version 1: AES256-CBC-HMAC-SHA2-256.
     V1 = 1,
-    /// Uses version 2: XChaCha20-Poly1305.
+    /// Uses version 2: XChaCha20-Poly1305. Asymmetric encryption uses an X25519 (`KeyVersion::V1`) key.
     V2 = 2,
+    /// Uses version 3: X-Wing (X25519 + ML-KEM-768) hybrid post-quantum KEM, HKDF-SHA-256 and XChaCha20-Poly1305.
+    /// Asymmetric only; requires a `KeyVersion::V2` key.
+    V3 = 3,
 }
 
 /// The versions of the online encryption scheme to use.
@@ -95,6 +100,9 @@ pub enum KeyVersion {
     Latest = 0,
     /// Uses version 1: Curve25519 keys and x25519 key exchange.
     V1 = 1,
+    /// Uses version 2: X-Wing (X25519 + ML-KEM-768) hybrid post-quantum KEM keys.
+    /// Usable with `CiphertextVersion::V3` and the `key_encapsulation` module, not with `mix_key_exchange`.
+    V2 = 2,
 }
 
 #[cfg_attr(feature = "wbindgen", wasm_bindgen())]
@@ -233,6 +241,29 @@ pub enum KeyDerivationSubtype {
 #[repr(u16)]
 #[derive(Default)]
 pub enum KdfEncryptedDataSubtype {
+    #[default]
+    None = 0,
+}
+
+/// The versions of the key encapsulation scheme to use.
+#[cfg_attr(feature = "wbindgen", wasm_bindgen())]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+#[repr(u16)]
+#[derive(Default)]
+pub enum KeyEncapsulationVersion {
+    /// Uses the latest version.
+    #[default]
+    Latest = 0,
+    /// Uses version 1: X-Wing (X25519 + ML-KEM-768) with HKDF-SHA-256. Requires a `KeyVersion::V2` key.
+    V1 = 1,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Zeroize, IntoPrimitive, TryFromPrimitive, Debug)]
+#[cfg_attr(feature = "fuzz", derive(Arbitrary))]
+#[repr(u16)]
+#[derive(Default)]
+pub enum EncapsulatedKeySubtype {
     #[default]
     None = 0,
 }

@@ -1,6 +1,9 @@
 use devolutions_crypto::Error;
 use devolutions_crypto::ciphertext::{Ciphertext, CiphertextVersion, encrypt_asymmetric};
 use devolutions_crypto::key::{KeyVersion, PublicKey, generate_keypair, mix_key_exchange};
+use devolutions_crypto::key_encapsulation::{
+    EncapsulatedKey, KeyEncapsulationVersion, decapsulate, encapsulate,
+};
 use devolutions_crypto::online_ciphertext::{
     OnlineCiphertextEncryptor, OnlineCiphertextHeader, OnlineCiphertextVersion,
 };
@@ -114,6 +117,55 @@ fn online_ciphertext_rejects_low_order_points() {
         let forged =
             OnlineCiphertextHeader::try_from(with_last_32(&header, point).as_slice()).unwrap();
         let result = forged.into_decryptor_asymmetric(&keypair.private_key, b"");
+        assert!(matches!(result, Err(Error::InvalidData)));
+    }
+}
+
+// X-Wing (KeyVersion::V2): the X25519 public key is the last 32 bytes of the encapsulation key,
+// and the X25519 ephemeral key is the last 32 bytes of the KEM ciphertext.
+const XWING_KEM_CIPHERTEXT_SIZE: usize = 1120;
+
+#[test]
+fn x_wing_public_key_rejects_low_order_points() {
+    let template: Vec<u8> = generate_keypair(KeyVersion::V2).public_key.into();
+
+    for point in &LOW_ORDER_POINTS {
+        let result = PublicKey::try_from(with_last_32(&template, point).as_slice());
+        assert!(matches!(result, Err(Error::InvalidData)));
+    }
+}
+
+#[test]
+fn decrypt_asymmetric_v3_rejects_low_order_points() {
+    let keypair = generate_keypair(KeyVersion::V2);
+    let ciphertext: Vec<u8> =
+        encrypt_asymmetric(b"data", &keypair.public_key, CiphertextVersion::V3)
+            .unwrap()
+            .into();
+
+    for point in &LOW_ORDER_POINTS {
+        // The X25519 ephemeral key ends the KEM ciphertext, which follows the 8-byte header
+        let mut forged = ciphertext.clone();
+        let end = 8 + XWING_KEM_CIPHERTEXT_SIZE;
+        forged[end - 32..end].copy_from_slice(point);
+
+        let forged = Ciphertext::try_from(forged.as_slice()).unwrap();
+        let result = forged.decrypt_asymmetric(&keypair.private_key);
+        assert!(matches!(result, Err(Error::InvalidData)));
+    }
+}
+
+#[test]
+fn decapsulate_rejects_low_order_points() {
+    let keypair = generate_keypair(KeyVersion::V2);
+    let (encapsulated, _) =
+        encapsulate(&keypair.public_key, KeyEncapsulationVersion::Latest).unwrap();
+    let encapsulated: Vec<u8> = encapsulated.into();
+
+    for point in &LOW_ORDER_POINTS {
+        let forged =
+            EncapsulatedKey::try_from(with_last_32(&encapsulated, point).as_slice()).unwrap();
+        let result = decapsulate(&keypair.private_key, &forged);
         assert!(matches!(result, Err(Error::InvalidData)));
     }
 }

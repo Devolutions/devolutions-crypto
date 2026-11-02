@@ -39,6 +39,7 @@
 //! ```
 
 mod key_v1;
+pub(crate) mod key_v2;
 mod secret_key_v1;
 
 use super::DataType;
@@ -50,6 +51,7 @@ pub use super::KeyVersion;
 use super::Result;
 
 use key_v1::{KeyV1Private, KeyV1Public};
+use key_v2::{KemCiphertext, KeyV2Private, KeyV2Public};
 use secret_key_v1::SecretKeyV1;
 
 use std::borrow::Borrow;
@@ -120,17 +122,21 @@ impl HeaderType for PrivateKey {
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum PrivateKeyPayload {
     V1(KeyV1Private),
+    V2(KeyV2Private),
 }
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
 enum PublicKeyPayload {
     V1(KeyV1Public),
+    V2(KeyV2Public),
 }
 
 /// Generates a `KeyPair` to use in a key exchange or to encrypt data.
 /// # Arguments
 ///  * `version` - Version of the key scheme to use. Use `KeyVersion::Latest` if you're not dealing with shared data.
+///    `KeyVersion::V2` generates a post-quantum X-Wing (X25519 + ML-KEM-768) keypair, usable with
+///    `CiphertextVersion::V3` and the `key_encapsulation` module but not with `mix_key_exchange`.
 /// # Returns
 /// Returns a `KeyPair` containing the private key and the public key.
 /// # Example
@@ -148,6 +154,13 @@ pub fn generate_keypair(version: KeyVersion) -> KeyPair {
             (
                 PrivateKeyPayload::V1(keypair.private_key),
                 PublicKeyPayload::V1(keypair.public_key),
+            )
+        }
+        KeyVersion::V2 => {
+            let keypair = key_v2::generate_keypair();
+            (
+                PrivateKeyPayload::V2(keypair.private_key),
+                PublicKeyPayload::V2(keypair.public_key),
             )
         }
     };
@@ -171,6 +184,8 @@ pub fn generate_keypair(version: KeyVersion) -> KeyPair {
 /// # Returns
 /// Returns a shared secret in the form of a `Vec<u8>`, which can then be used
 ///     as an encryption key between the two parties.
+/// Returns `Error::InvalidDataType` if either key is not a `KeyVersion::V1` key: X-Wing (`KeyVersion::V2`)
+///     keys are a KEM and cannot perform a non-interactive key exchange. Use the `key_encapsulation` module instead.
 /// # Example
 /// ```rust
 /// use std::convert::TryFrom as _;
@@ -213,7 +228,8 @@ pub fn mix_key_exchange(private_key: &PrivateKey, public_key: &PublicKey) -> Res
     match (&private_key.payload, &public_key.payload) {
         (PrivateKeyPayload::V1(private_key), PublicKeyPayload::V1(public_key)) => {
             key_v1::mix_key_exchange(private_key, public_key)
-        } //_ => Err(DevoCryptoError::InvalidDataType),
+        }
+        _ => Err(Error::InvalidDataType),
     }
 }
 
@@ -225,6 +241,10 @@ fn keypair_headers(version: KeyVersion) -> (Header<PrivateKey>, Header<PublicKey
         KeyVersion::V1 | KeyVersion::Latest => {
             private_header.version = KeyVersion::V1;
             public_header.version = KeyVersion::V1;
+        }
+        KeyVersion::V2 => {
+            private_header.version = KeyVersion::V2;
+            public_header.version = KeyVersion::V2;
         }
     }
 
@@ -258,6 +278,7 @@ impl TryFrom<&[u8]> for PublicKey {
 
         let payload = match header.version {
             KeyVersion::V1 => PublicKeyPayload::V1(KeyV1Public::try_from(&data[Header::len()..])?),
+            KeyVersion::V2 => PublicKeyPayload::V2(KeyV2Public::try_from(&data[Header::len()..])?),
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -294,6 +315,9 @@ impl TryFrom<&[u8]> for PrivateKey {
             KeyVersion::V1 => {
                 PrivateKeyPayload::V1(KeyV1Private::try_from(&data[Header::len()..])?)
             }
+            KeyVersion::V2 => {
+                PrivateKeyPayload::V2(KeyV2Private::try_from(&data[Header::len()..])?)
+            }
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -305,6 +329,7 @@ impl From<PrivateKeyPayload> for Vec<u8> {
     fn from(data: PrivateKeyPayload) -> Self {
         match data {
             PrivateKeyPayload::V1(x) => x.into(),
+            PrivateKeyPayload::V2(x) => x.into(),
         }
     }
 }
@@ -313,24 +338,52 @@ impl From<PublicKeyPayload> for Vec<u8> {
     fn from(data: PublicKeyPayload) -> Self {
         match data {
             PublicKeyPayload::V1(x) => x.into(),
+            PublicKeyPayload::V2(x) => x.into(),
         }
     }
 }
 
-impl From<&PublicKey> for x25519_dalek::PublicKey {
-    fn from(data: &PublicKey) -> Self {
-        match &data.payload {
-            PublicKeyPayload::V1(x) => Self::from(x),
-            //_ => Err(DevoCryptoError::InvalidDataType),
+impl PublicKey {
+    /// Returns the X25519 key of a `KeyVersion::V1` key, or `Error::InvalidDataType` for other versions.
+    pub(crate) fn as_x25519(&self) -> Result<x25519_dalek::PublicKey> {
+        match &self.payload {
+            PublicKeyPayload::V1(x) => Ok(x25519_dalek::PublicKey::from(x)),
+            _ => Err(Error::InvalidDataType),
+        }
+    }
+
+    /// Encapsulates to a `KeyVersion::V2` (X-Wing) key and returns the KEM ciphertext along with
+    /// HKDF-SHA-256(shared secret, `info`). Returns `Error::InvalidDataType` for other versions.
+    pub(crate) fn x_wing_encapsulate(
+        &self,
+        info: &[u8],
+    ) -> Result<(Box<KemCiphertext>, Zeroizing<[u8; 32]>)> {
+        match &self.payload {
+            PublicKeyPayload::V2(x) => Ok(x.encapsulate(info)),
+            _ => Err(Error::InvalidDataType),
         }
     }
 }
 
-impl From<&PrivateKey> for x25519_dalek::StaticSecret {
-    fn from(data: &PrivateKey) -> Self {
-        match &data.payload {
-            PrivateKeyPayload::V1(x) => Self::from(x),
-            //_ => Err(DevoCryptoError::InvalidDataType),
+impl PrivateKey {
+    /// Returns the X25519 secret of a `KeyVersion::V1` key, or `Error::InvalidDataType` for other versions.
+    pub(crate) fn as_x25519(&self) -> Result<x25519_dalek::StaticSecret> {
+        match &self.payload {
+            PrivateKeyPayload::V1(x) => Ok(x25519_dalek::StaticSecret::from(x)),
+            _ => Err(Error::InvalidDataType),
+        }
+    }
+
+    /// Decapsulates with a `KeyVersion::V2` (X-Wing) key and returns HKDF-SHA-256(shared secret, `info`).
+    /// Returns `Error::InvalidDataType` for other versions.
+    pub(crate) fn x_wing_decapsulate(
+        &self,
+        ciphertext: &KemCiphertext,
+        info: &[u8],
+    ) -> Result<Zeroizing<[u8; 32]>> {
+        match &self.payload {
+            PrivateKeyPayload::V2(x) => x.decapsulate(ciphertext, info),
+            _ => Err(Error::InvalidDataType),
         }
     }
 }
@@ -384,6 +437,7 @@ pub(crate) fn secret_key_from_raw(bytes: Zeroizing<Vec<u8>>) -> Result<SecretKey
 /// Generates a `SecretKey` for use with symmetric encryption.
 /// # Arguments
 ///  * `version` - Version of the key scheme to use. Use `KeyVersion::Latest` if you're not dealing with shared data.
+///    Secret keys only exist in version 1; `KeyVersion::V2` only applies to asymmetric keys and also yields a V1 secret key.
 /// # Returns
 /// Returns a `SecretKey` containing the raw key material.
 /// # Example
@@ -396,7 +450,7 @@ pub fn generate_secret_key(version: KeyVersion) -> SecretKey {
     let mut header: Header<SecretKey> = Header::default();
 
     match version {
-        KeyVersion::V1 | KeyVersion::Latest => {
+        KeyVersion::V1 | KeyVersion::V2 | KeyVersion::Latest => {
             header.version = KeyVersion::V1;
         }
     }
@@ -487,4 +541,95 @@ fn secret_key_wrong_length_rejected() {
     let short = [0u8; 4];
     let result = SecretKey::try_from(short.as_slice());
     assert!(matches!(result, Err(Error::InvalidLength)));
+}
+
+#[test]
+fn keypair_v2_roundtrip() {
+    let keypair = generate_keypair(KeyVersion::V2);
+    assert_eq!(keypair.private_key.header.version, KeyVersion::V2);
+    assert_eq!(keypair.public_key.header.version, KeyVersion::V2);
+
+    let private_bytes: Vec<u8> = keypair.private_key.into();
+    let public_bytes: Vec<u8> = keypair.public_key.into();
+    assert_eq!(private_bytes.len(), 8 + 32);
+    assert_eq!(public_bytes.len(), 8 + 1216);
+
+    let private_key = PrivateKey::try_from(private_bytes.as_slice()).unwrap();
+    let public_key = PublicKey::try_from(public_bytes.as_slice()).unwrap();
+    assert_eq!(private_key.header.version, KeyVersion::V2);
+    assert_eq!(public_key.header.version, KeyVersion::V2);
+
+    assert_eq!(Vec::<u8>::from(private_key), private_bytes);
+    assert_eq!(Vec::<u8>::from(public_key), public_bytes);
+}
+
+#[test]
+fn keypair_v2_private_key_debug_is_redacted() {
+    let keypair = generate_keypair(KeyVersion::V2);
+    let debug = format!("{:?}", keypair.private_key);
+    assert!(debug.contains("Private Key"));
+}
+
+#[test]
+fn keypair_v2_invalid_lengths_rejected() {
+    let keypair = generate_keypair(KeyVersion::V2);
+    let private_bytes: Vec<u8> = keypair.private_key.into();
+    let public_bytes: Vec<u8> = keypair.public_key.into();
+
+    assert!(matches!(
+        PrivateKey::try_from(&private_bytes[..private_bytes.len() - 1]),
+        Err(Error::InvalidLength)
+    ));
+    assert!(matches!(
+        PublicKey::try_from(&public_bytes[..public_bytes.len() - 1]),
+        Err(Error::InvalidLength)
+    ));
+
+    let mut longer = public_bytes.clone();
+    longer.push(0);
+    assert!(matches!(
+        PublicKey::try_from(longer.as_slice()),
+        Err(Error::InvalidLength)
+    ));
+}
+
+#[test]
+fn keypair_v2_invalid_ml_kem_public_key_rejected() {
+    let keypair = generate_keypair(KeyVersion::V2);
+    let mut public_bytes: Vec<u8> = keypair.public_key.into();
+
+    // The first 12-bit ML-KEM coefficient becomes 0xFFF, which is not reduced modulo q = 3329.
+    public_bytes[8] = 0xFF;
+    public_bytes[9] |= 0x0F;
+
+    assert!(matches!(
+        PublicKey::try_from(public_bytes.as_slice()),
+        Err(Error::InvalidData)
+    ));
+}
+
+#[test]
+fn mix_key_exchange_rejects_v2_keys() {
+    let v1 = generate_keypair(KeyVersion::V1);
+    let v2 = generate_keypair(KeyVersion::V2);
+
+    assert!(matches!(
+        mix_key_exchange(&v2.private_key, &v2.public_key),
+        Err(Error::InvalidDataType)
+    ));
+    assert!(matches!(
+        mix_key_exchange(&v1.private_key, &v2.public_key),
+        Err(Error::InvalidDataType)
+    ));
+    assert!(matches!(
+        mix_key_exchange(&v2.private_key, &v1.public_key),
+        Err(Error::InvalidDataType)
+    ));
+}
+
+#[test]
+fn latest_keypair_is_still_v1() {
+    let keypair = generate_keypair(KeyVersion::Latest);
+    assert_eq!(keypair.private_key.header.version, KeyVersion::V1);
+    assert_eq!(keypair.public_key.header.version, KeyVersion::V1);
 }

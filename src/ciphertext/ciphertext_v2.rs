@@ -90,6 +90,16 @@ impl CiphertextV2Symmetric {
         // Derive key
         let key = Zeroizing::new(CiphertextV2Symmetric::derive_key(key));
 
+        Self::encrypt_with_derived_key(data, &key, aad, header)
+    }
+
+    /// Encrypts with an already-derived 32-byte key, skipping the SHA-256 key derivation of `encrypt`.
+    pub(crate) fn encrypt_with_derived_key(
+        data: &[u8],
+        key: &[u8; 32],
+        aad: &[u8],
+        header: &Header<Ciphertext>,
+    ) -> Result<Self> {
         // Generate nonce
         let mut nonce_bytes = [0u8; 24];
 
@@ -125,6 +135,16 @@ impl CiphertextV2Symmetric {
         // Derive key
         let key = Zeroizing::new(CiphertextV2Symmetric::derive_key(key));
 
+        self.decrypt_with_derived_key(&key, aad, header)
+    }
+
+    /// Decrypts with an already-derived 32-byte key, skipping the SHA-256 key derivation of `decrypt`.
+    pub(crate) fn decrypt_with_derived_key(
+        &self,
+        key: &[u8; 32],
+        aad: &[u8],
+        header: &Header<Ciphertext>,
+    ) -> Result<Vec<u8>> {
         // Authenticate the header
         let mut mac_data: Zeroizing<Vec<u8>> = Zeroizing::new(header.into());
         mac_data.extend_from_slice(aad);
@@ -184,7 +204,7 @@ impl CiphertextV2Asymmetric {
         aad: &[u8],
         header: &Header<Ciphertext>,
     ) -> Result<Self> {
-        let public_key = x25519_dalek::PublicKey::from(public_key);
+        let public_key = public_key.as_x25519()?;
 
         let ephemeral_private_key = StaticSecret::from(*crate::utils::random_bytes::<32>()?);
         let ephemeral_public_key = x25519_dalek::PublicKey::from(&ephemeral_private_key);
@@ -209,7 +229,7 @@ impl CiphertextV2Asymmetric {
         aad: &[u8],
         header: &Header<Ciphertext>,
     ) -> Result<Vec<u8>> {
-        let private_key = StaticSecret::from(private_key);
+        let private_key = private_key.as_x25519()?;
 
         let key = private_key.diffie_hellman(&self.public_key);
 
