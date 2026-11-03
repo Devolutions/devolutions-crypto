@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+### Added
+
+- Post-quantum X-Wing support: `generate_keypair(KeyVersion.V2)`, `encrypt_asymmetric(..., CiphertextVersion.V3)`, and `encapsulate` / `decapsulate`.
+
 ## [0.10.3] - 2026-10-26
 
 ### Breaking changes

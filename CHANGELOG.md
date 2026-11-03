@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added
 
-- Post-quantum hybrid public-key cryptography using X-Wing (ML-KEM-768 + X25519): `KeyVersion::V2` key pairs, `CiphertextVersion::V3` asymmetric ciphertexts, and a new `key_encapsulation` module (`encapsulate` / `decapsulate`, `DataType::EncapsulatedKey`). This is opt-in: `Latest` still selects the existing versions.
+- Post-quantum hybrid public-key cryptography using X-Wing (ML-KEM-768 + X25519): `KeyVersion::V2` key pairs, `CiphertextVersion::V3` asymmetric ciphertexts, and a new `key_encapsulation` module (`encapsulate` / `decapsulate`, `DataType::EncapsulatedKey`). Available in the Rust, FFI/C#, uniffi (Python, Kotlin, Swift), WASM and CLI wrappers. This is opt-in: `Latest` still selects the existing versions.
 
 ## [0.10.3] - 2026-10-26
 

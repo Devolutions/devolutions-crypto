@@ -5,7 +5,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons';
 import * as functions from '../shared/shared.component';
 
-import { Argon2Parameters, CiphertextVersion, KeyPair, PrivateKey, PublicKey } from '@devolutions/devolutions-crypto-web';
+import { Argon2Parameters, CiphertextVersion, EncapsulationResult, KeyPair, PrivateKey, PublicKey, SecretKey } from '@devolutions/devolutions-crypto-web';
 
 type EncryptionServiceInner = typeof import('../service/encryption.inner.service');
 
@@ -19,6 +19,8 @@ export class AsymmetricComponent implements OnInit {
   faSyncAlt = faSyncAlt;
 
   keypairGenerationForm: FormGroup;
+  encapsulateForm: FormGroup;
+  decapsulateForm: FormGroup;
   mixKeyForm: FormGroup;
   encryptAsymmetricForm: FormGroup;
   decryptAsymmetricForm: FormGroup;
@@ -32,7 +34,21 @@ export class AsymmetricComponent implements OnInit {
     this.encoder = new TextEncoder();
 
     this.keypairGenerationForm = new FormGroup({
-      generationResult: new FormControl(''),
+      keyAlgorithm: new FormControl('x25519'),
+      generatedPrivateKey: new FormControl(''),
+      generatedPublicKey: new FormControl(''),
+    });
+
+    this.encapsulateForm = new FormGroup({
+      publicKeyEncapsulate: new FormControl(''),
+      encapsulatedKeyResult: new FormControl(''),
+      secretKeyEncapsulateResult: new FormControl('')
+    });
+
+    this.decapsulateForm = new FormGroup({
+      encapsulatedKeyDecapsulate: new FormControl(''),
+      privateKeyDecapsulate: new FormControl(''),
+      secretKeyDecapsulateResult: new FormControl('')
     });
 
     this.mixKeyForm = new FormGroup({
@@ -44,7 +60,7 @@ export class AsymmetricComponent implements OnInit {
     this.encryptAsymmetricForm = new FormGroup({
       textToEncrypt: new FormControl(''),
       publicKeyEncrypt: new FormControl(''),
-      encryptVersion: new FormControl(''),
+      encryptVersion: new FormControl('latest'),
       encryptAsymmetricResult: new FormControl('')
     });
 
@@ -110,16 +126,21 @@ export class AsymmetricComponent implements OnInit {
   async generateKeypair() {
     const service: EncryptionServiceInner = await this.encryptionService.innerModule;
 
-    const keypair: KeyPair = service.generateKeyPair(service.KeyVersion.Latest);
+    const keyVersion = this.keypairGenerationForm.value.keyAlgorithm === 'xwing'
+      ? service.KeyVersion.V2
+      : service.KeyVersion.Latest;
+    const keypair: KeyPair = service.generateKeyPair(keyVersion);
     const privateKey: PrivateKey = keypair.private;
     const publicKey: PublicKey = keypair.public;
     if (privateKey === null || publicKey === null) { return; }
 
     const privateKeyText: string = service.base64encode(privateKey.bytes);
     const publicKeyText: string = service.base64encode(publicKey.bytes);
-    const text = `Private key: ${privateKeyText}\n\nPublic key: ${publicKeyText}`;
 
-    this.keypairGenerationForm.setValue({ generationResult: text });
+    this.keypairGenerationForm.patchValue({
+      generatedPrivateKey: privateKeyText,
+      generatedPublicKey: publicKeyText
+    });
   }
 
   async mixKeys() {
@@ -157,14 +178,45 @@ export class AsymmetricComponent implements OnInit {
     const publicKey: PublicKey = service.PublicKey.fromBytes(publicKeyArray);
     const textToEncryptArray: Uint8Array = this.encoder.encode(textToEncrypt);
 
-    const version: CiphertextVersion = service.CiphertextVersion.Latest;
+    // A V3 ciphertext requires an X-Wing (post-quantum) public key.
+    const version: CiphertextVersion = this.encryptAsymmetricForm.value.encryptVersion === 'v3'
+      ? service.CiphertextVersion.V3
+      : service.CiphertextVersion.Latest;
     const encryptedText: Uint8Array = service.encryptAsymmetric(textToEncryptArray, publicKey, version);
 
-    this.encryptAsymmetricForm.setValue({
-      textToEncrypt,
-      publicKeyEncrypt,
-      encryptVersion: '',
+    this.encryptAsymmetricForm.patchValue({
       encryptAsymmetricResult: service.base64encode(encryptedText)
+    });
+  }
+
+  async encapsulate() {
+    const service: EncryptionServiceInner = await this.encryptionService.innerModule;
+
+    const publicKeyString: string = this.encapsulateForm.value.publicKeyEncapsulate;
+    if (publicKeyString === null || publicKeyString === '') { return; }
+
+    const publicKey: PublicKey = service.PublicKey.fromBytes(service.base64decode(publicKeyString.trim()));
+    const result: EncapsulationResult = service.encapsulate(publicKey);
+
+    this.encapsulateForm.patchValue({
+      encapsulatedKeyResult: service.base64encode(result.encapsulatedKey),
+      secretKeyEncapsulateResult: service.base64encode(result.secretKey.bytes)
+    });
+  }
+
+  async decapsulate() {
+    const service: EncryptionServiceInner = await this.encryptionService.innerModule;
+
+    const encapsulatedKey: string = this.decapsulateForm.value.encapsulatedKeyDecapsulate;
+    const privateKeyString: string = this.decapsulateForm.value.privateKeyDecapsulate;
+    if (encapsulatedKey === null || encapsulatedKey === '' ||
+        privateKeyString === null || privateKeyString === '') { return; }
+
+    const privateKey: PrivateKey = service.PrivateKey.fromBytes(service.base64decode(privateKeyString.trim()));
+    const secretKey: SecretKey = service.decapsulate(privateKey, service.base64decode(encapsulatedKey.trim()));
+
+    this.decapsulateForm.patchValue({
+      secretKeyDecapsulateResult: service.base64encode(secretKey.bytes)
     });
   }
 
