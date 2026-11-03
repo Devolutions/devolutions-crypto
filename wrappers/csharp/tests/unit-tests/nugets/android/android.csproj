@@ -24,6 +24,7 @@
     <Compile Include="..\..\TestNative.cs" Link="TestNative.cs" />
     <Compile Include="..\..\TestUtils.cs" Link="TestUtils.cs" />
     <Compile Include="..\..\TestLegacy.cs" Link="TestLegacy.cs" />
+    <Compile Include="..\..\PostQuantum.cs" Link="PostQuantum.cs" />
   </ItemGroup>
 
   <ItemGroup>

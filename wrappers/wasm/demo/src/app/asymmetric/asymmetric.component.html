@@ -16,8 +16,8 @@
     <div class="card-body">
       <form [formGroup]="keypairGenerationForm" (ngSubmit)="generateKeypair()">
         <div class="field">
-          <label>Algorithm</label>
-          <select formControlName="keyAlgorithm">
+          <label for="keyAlgorithm">Algorithm</label>
+          <select id="keyAlgorithm" formControlName="keyAlgorithm">
             <option value="x25519">X25519 (classic, default)</option>
             <option value="xwing">X-Wing: ML-KEM-768 + X25519 (post-quantum)</option>
           </select>
@@ -73,8 +73,8 @@
           <input type="text" formControlName="publicKeyEncrypt" required placeholder="Paste public key">
         </div>
         <div class="field">
-          <label>Version</label>
-          <select formControlName="encryptVersion">
+          <label for="encryptVersion">Version</label>
+          <select id="encryptVersion" formControlName="encryptVersion">
             <option value="latest">Latest (X25519 key)</option>
             <option value="v3">V3 (X-Wing post-quantum key)</option>
           </select>
