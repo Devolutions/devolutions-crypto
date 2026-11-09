@@ -5,7 +5,7 @@
 //! from the `EncapsulatedKey`. The resulting `SecretKey` can then be used with the symmetric
 //! `ciphertext` functions.
 //!
-//! This requires a `KeyVersion::V2` (X-Wing: X25519 + ML-KEM-768) keypair. Unlike `mix_key_exchange`,
+//! This requires a `KeyVersion::V2` keypair. Unlike `mix_key_exchange`,
 //! this is a one-way scheme: the sender must transmit the `EncapsulatedKey` to the recipient.
 //!
 //! ```rust

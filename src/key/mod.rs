@@ -135,7 +135,7 @@ enum PublicKeyPayload {
 /// Generates a `KeyPair` to use in a key exchange or to encrypt data.
 /// # Arguments
 ///  * `version` - Version of the key scheme to use. Use `KeyVersion::Latest` if you're not dealing with shared data.
-///    `KeyVersion::V2` generates a post-quantum X-Wing (X25519 + ML-KEM-768) keypair, usable with
+///    `KeyVersion::V2` generates a X-Wing keypair, usable with
 ///    `CiphertextVersion::V3` and the `key_encapsulation` module but not with `mix_key_exchange`.
 /// # Returns
 /// Returns a `KeyPair` containing the private key and the public key.

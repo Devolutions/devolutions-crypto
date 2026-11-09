@@ -184,7 +184,7 @@ pub fn encrypt_with_aad(
 ///  * `data` - The data to encrypt.
 ///  * `public_key` - The `PublicKey` to use. Use `generate_keypair` to generate a keypair.
 ///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
-///    `CiphertextVersion::V2` (and `Latest`) requires a `KeyVersion::V1` key; `CiphertextVersion::V3` (post-quantum) requires a `KeyVersion::V2` key.
+///    `CiphertextVersion::V2` (and `Latest`) requires a `KeyVersion::V1` key; `CiphertextVersion::V3` requires a `KeyVersion::V2` key.
 ///    A mismatched key returns `Error::InvalidDataType`.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
@@ -213,7 +213,7 @@ pub fn encrypt_asymmetric(
 ///  * `public_key` - The `PublicKey` to use. Use `generate_keypair` to generate a keypair.
 ///  * `aad` - Additionnal data to authenticate alongside the ciphertext.
 ///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
-///    `CiphertextVersion::V2` (and `Latest`) requires a `KeyVersion::V1` key; `CiphertextVersion::V3` (post-quantum) requires a `KeyVersion::V2` key.
+///    `CiphertextVersion::V2` (and `Latest`) requires a `KeyVersion::V1` key; `CiphertextVersion::V3` requires a `KeyVersion::V2` key.
 ///    A mismatched key returns `Error::InvalidDataType`.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.

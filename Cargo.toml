@@ -58,7 +58,7 @@ rust-argon2 = { workspace = true }
 
 ed25519-dalek = { version = "3", features = [ "rand_core" ] }
 x25519-dalek = { version = "3", features = [ "static_secrets" ] }
-# X-Wing hybrid KEM (X25519 + ML-KEM-768). Do not enable the `getrandom` feature:
+# Do not enable the `getrandom` feature:
 # randomness is supplied explicitly from the OS RNG.
 x-wing = { version = "0.1.1", default-features = false, features = ["zeroize"] }
 hkdf = "0.13"

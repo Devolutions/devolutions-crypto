@@ -53,7 +53,7 @@ pub enum CiphertextVersion {
     V1 = 1,
     /// Uses version 2: XChaCha20-Poly1305. Asymmetric encryption uses an X25519 (`KeyVersion::V1`) key.
     V2 = 2,
-    /// Uses version 3: X-Wing (X25519 + ML-KEM-768) hybrid post-quantum KEM, HKDF-SHA-256 and XChaCha20-Poly1305.
+    /// Uses version 3: X-Wing, HKDF-SHA-256 and XChaCha20-Poly1305.
     /// Asymmetric only; requires a `KeyVersion::V2` key.
     V3 = 3,
 }
@@ -100,7 +100,7 @@ pub enum KeyVersion {
     Latest = 0,
     /// Uses version 1: Curve25519 keys and x25519 key exchange.
     V1 = 1,
-    /// Uses version 2: X-Wing (X25519 + ML-KEM-768) hybrid post-quantum KEM keys.
+    /// Uses version 2: X-Wing (X25519 + ML-KEM-768) keys.
     /// Usable with `CiphertextVersion::V3` and the `key_encapsulation` module, not with `mix_key_exchange`.
     V2 = 2,
 }
