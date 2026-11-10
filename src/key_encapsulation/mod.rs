@@ -80,9 +80,8 @@ enum EncapsulatedKeyPayload {
 ///  * `version` - Version of the key encapsulation scheme to use. Use `KeyEncapsulationVersion::Latest` if you're not dealing with shared data.
 /// # Returns
 /// Returns the `EncapsulatedKey` to send to the recipient and the `SecretKey` it encapsulates.
-/// Returns `Error::InvalidDataType` if the public key is not a `KeyVersion::V2` key.
-/// # Panics
-/// Panics if the OS random number generator is unavailable, like `generate_keypair`.
+/// Returns `Error::InvalidDataType` if the public key is not a `KeyVersion::V2` key,
+/// or `Error::RandomError` if the OS random number generator is unavailable.
 /// # Example
 /// ```rust
 /// use devolutions_crypto::key::{generate_keypair, KeyVersion};

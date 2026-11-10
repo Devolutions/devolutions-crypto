@@ -6,12 +6,12 @@ use super::Error;
 use super::Result;
 
 use hkdf::Hkdf;
-use rand::rand_core::UnwrapErr;
+use rand::TryRng;
 use rand::rngs::SysRng;
 use sha2::Sha256;
 use x_wing::{
-    DecapsulationKeyRejectNonContrib, Decapsulator, Encapsulate, EncapsulationKey, KeyExport,
-    KeyInit, TryDecapsulate,
+    DecapsulationKeyRejectNonContrib, Decapsulator, EncapsulationKey, KeyExport, KeyInit,
+    TryDecapsulate,
 };
 use zeroize::Zeroizing;
 
@@ -88,16 +88,20 @@ impl KeyV2Public {
     /// Encapsulates a fresh shared secret to this key and derives a 32-byte key from it with
     /// HKDF-SHA-256 (no salt) using `info` as the label.
     ///
-    /// # Panics
-    /// Panics if the OS random number generator is unavailable, like `generate_keypair`.
-    pub fn encapsulate(&self, info: &[u8]) -> (Box<KemCiphertext>, Zeroizing<[u8; 32]>) {
-        let (ciphertext, shared_secret) = self.key.encapsulate_with_rng(&mut UnwrapErr(SysRng));
+    /// Returns `Error::RandomError` if the OS random number generator is unavailable.
+    pub fn encapsulate(&self, info: &[u8]) -> Result<(Box<KemCiphertext>, Zeroizing<[u8; 32]>)> {
+        let mut randomness = Zeroizing::new([0u8; x_wing::ENCAPSULATION_RANDOMNESS_SIZE]);
+        SysRng
+            .try_fill_bytes(randomness.as_mut_slice())
+            .map_err(|_| Error::RandomError)?;
+
+        let (ciphertext, shared_secret) = self.key.encapsulate_deterministic((&*randomness).into());
         let shared_secret = Zeroizing::new(shared_secret);
 
-        (
+        Ok((
             Box::new(ciphertext),
             derive_key(shared_secret.as_slice(), info),
-        )
+        ))
     }
 }
 

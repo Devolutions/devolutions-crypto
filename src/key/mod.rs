@@ -359,7 +359,7 @@ impl PublicKey {
         info: &[u8],
     ) -> Result<(Box<KemCiphertext>, Zeroizing<[u8; 32]>)> {
         match &self.payload {
-            PublicKeyPayload::V2(x) => Ok(x.encapsulate(info)),
+            PublicKeyPayload::V2(x) => x.encapsulate(info),
             _ => Err(Error::InvalidDataType),
         }
     }
