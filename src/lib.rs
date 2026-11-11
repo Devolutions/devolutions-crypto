@@ -259,6 +259,9 @@
 //!  * Symmetric cryptography uses XChaCha20Poly1305
 //!  * Asymmetric cryptography uses Curve25519.
 //!  * Asymmetric encryption uses ECIES.
+//!  * Post-quantum asymmetric encryption (opt-in, `KeyVersion::V2` + `CiphertextVersion::V3`) uses the
+//!    X-Wing hybrid KEM (X25519 + ML-KEM-768), HKDF-SHA-256 and XChaCha20Poly1305.
+//!  * Key encapsulation uses X-Wing with HKDF-SHA-256
 //!  * Key derivation uses Argon2 or PBKDF2
 //!  * Key exchange uses x25519, or ECDH over Curve25519
 //!  * Password Hashing uses PBKDF2-HMAC-SHA2-256
@@ -274,6 +277,7 @@ pub mod ciphertext;
 pub mod derive_encrypt;
 pub mod key;
 pub mod key_derivation;
+pub mod key_encapsulation;
 pub mod online_ciphertext;
 pub mod password_hash;
 pub mod secret_sharing;
@@ -281,13 +285,15 @@ pub mod signature;
 pub mod signing_key;
 pub mod utils;
 
-use enums::{CiphertextSubtype, PasswordHashSubtype, ShareSubtype, SignatureSubtype};
+use enums::{
+    CiphertextSubtype, EncapsulatedKeySubtype, PasswordHashSubtype, ShareSubtype, SignatureSubtype,
+};
 pub use header::{Header, HeaderType};
 
 pub use enums::{
-    CiphertextVersion, DataType, KdfEncryptedDataVersion, KeyDerivationVersion, KeySubtype,
-    KeyVersion, OnlineCiphertextVersion, PasswordHashVersion, SecretSharingVersion,
-    SignatureVersion, SigningKeyVersion,
+    CiphertextVersion, DataType, KdfEncryptedDataVersion, KeyDerivationVersion,
+    KeyEncapsulationVersion, KeySubtype, KeyVersion, OnlineCiphertextVersion, PasswordHashVersion,
+    SecretSharingVersion, SignatureVersion, SigningKeyVersion,
 };
 
 pub use argon2::Variant as Argon2Variant;

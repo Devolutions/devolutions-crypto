@@ -42,6 +42,7 @@
 
 mod ciphertext_v1;
 mod ciphertext_v2;
+mod ciphertext_v3;
 
 use super::CiphertextSubtype;
 pub use super::CiphertextVersion;
@@ -55,6 +56,7 @@ use super::key::{PrivateKey, PublicKey, SecretKey};
 
 use ciphertext_v1::CiphertextV1;
 use ciphertext_v2::{CiphertextV2Asymmetric, CiphertextV2Symmetric};
+use ciphertext_v3::CiphertextV3Asymmetric;
 
 use std::borrow::Borrow;
 use std::convert::TryFrom;
@@ -85,6 +87,7 @@ enum CiphertextPayload {
     V1(CiphertextV1),
     V2Symmetric(CiphertextV2Symmetric),
     V2Asymmetric(CiphertextV2Asymmetric),
+    V3Asymmetric(CiphertextV3Asymmetric),
 }
 
 /// Returns a `Ciphertext` from cleartext data and a key.
@@ -167,7 +170,9 @@ pub fn encrypt_with_aad(
         CiphertextVersion::V2 | CiphertextVersion::Latest => {
             header.version = CiphertextVersion::V2;
             CiphertextPayload::V2Symmetric(CiphertextV2Symmetric::encrypt(data, key, aad, &header)?)
-        } //_ => return Err(DevoCryptoError::UnknownVersion),
+        }
+        // V3 is asymmetric only.
+        CiphertextVersion::V3 => return Err(Error::UnknownVersion),
     };
 
     Ok(Ciphertext { header, payload })
@@ -179,6 +184,8 @@ pub fn encrypt_with_aad(
 ///  * `data` - The data to encrypt.
 ///  * `public_key` - The `PublicKey` to use. Use `generate_keypair` to generate a keypair.
 ///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
+///    `CiphertextVersion::V2` (and `Latest`) requires a `KeyVersion::V1` key; `CiphertextVersion::V3` requires a `KeyVersion::V2` key.
+///    A mismatched key returns `Error::InvalidDataType`.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
@@ -206,6 +213,8 @@ pub fn encrypt_asymmetric(
 ///  * `public_key` - The `PublicKey` to use. Use `generate_keypair` to generate a keypair.
 ///  * `aad` - Additionnal data to authenticate alongside the ciphertext.
 ///  * `version` - Version of the library to encrypt with. Use `CiphertextVersion::Latest` if you're not dealing with shared data.
+///    `CiphertextVersion::V2` (and `Latest`) requires a `KeyVersion::V1` key; `CiphertextVersion::V3` requires a `KeyVersion::V2` key.
+///    A mismatched key returns `Error::InvalidDataType`.
 /// # Returns
 /// Returns a `Ciphertext` containing the encrypted data.
 /// # Example
@@ -233,6 +242,12 @@ pub fn encrypt_asymmetric_with_aad(
         CiphertextVersion::V2 | CiphertextVersion::Latest => {
             header.version = CiphertextVersion::V2;
             CiphertextPayload::V2Asymmetric(CiphertextV2Asymmetric::encrypt(
+                data, public_key, aad, &header,
+            )?)
+        }
+        CiphertextVersion::V3 => {
+            header.version = CiphertextVersion::V3;
+            CiphertextPayload::V3Asymmetric(CiphertextV3Asymmetric::encrypt(
                 data, public_key, aad, &header,
             )?)
         }
@@ -414,6 +429,7 @@ impl Ciphertext {
     ) -> Result<Vec<u8>> {
         match &self.payload {
             CiphertextPayload::V2Asymmetric(x) => x.decrypt(private_key, aad, &self.header),
+            CiphertextPayload::V3Asymmetric(x) => x.decrypt(private_key, aad, &self.header),
             CiphertextPayload::V1(_) => Err(Error::UnknownVersion),
             _ => Err(Error::InvalidDataType),
         }
@@ -501,6 +517,12 @@ impl TryFrom<&[u8]> for Ciphertext {
                     CiphertextV2Asymmetric::try_from(&data[Header::len()..])?,
                 ),
             },
+            CiphertextVersion::V3 => match header.data_subtype {
+                CiphertextSubtype::Asymmetric => CiphertextPayload::V3Asymmetric(
+                    CiphertextV3Asymmetric::try_from(&data[Header::len()..])?,
+                ),
+                _ => return Err(Error::InvalidDataType),
+            },
             _ => return Err(Error::UnknownVersion),
         };
 
@@ -514,6 +536,7 @@ impl From<CiphertextPayload> for Vec<u8> {
             CiphertextPayload::V1(x) => x.into(),
             CiphertextPayload::V2Symmetric(x) => x.into(),
             CiphertextPayload::V2Asymmetric(x) => x.into(),
+            CiphertextPayload::V3Asymmetric(x) => x.into(),
         }
     }
 }
@@ -843,4 +866,191 @@ fn encrypt_decrypt_with_secret_key_v2() {
     let decrypted = encrypted.decrypt_with_secret_key(&key).unwrap();
 
     assert_eq!(decrypted, data);
+}
+
+#[test]
+fn asymmetric_v3_test() {
+    use super::key::{KeyVersion, generate_keypair};
+
+    let test_plaintext = b"this is a test data";
+
+    let keypair = generate_keypair(KeyVersion::V2);
+
+    let encrypted_data =
+        encrypt_asymmetric(test_plaintext, &keypair.public_key, CiphertextVersion::V3).unwrap();
+    assert_eq!(encrypted_data.header.version, CiphertextVersion::V3);
+    assert_eq!(
+        encrypted_data.header.data_subtype,
+        CiphertextSubtype::Asymmetric
+    );
+
+    let encrypted_data_vec: Vec<u8> = encrypted_data.into();
+
+    // Header + X-Wing ciphertext + nonce + data + Poly1305 tag
+    assert_eq!(
+        encrypted_data_vec.len(),
+        8 + 1120 + 24 + test_plaintext.len() + 16
+    );
+
+    let encrypted_data = Ciphertext::try_from(encrypted_data_vec.as_slice()).unwrap();
+
+    let decrypted_data = encrypted_data
+        .decrypt_asymmetric(&keypair.private_key)
+        .unwrap();
+
+    assert_eq!(decrypted_data, test_plaintext);
+
+    // A deserialized private key decrypts too.
+    let private_bytes: Vec<u8> = keypair.private_key.into();
+    let private_key = PrivateKey::try_from(private_bytes.as_slice()).unwrap();
+    assert_eq!(
+        encrypted_data.decrypt_asymmetric(&private_key).unwrap(),
+        test_plaintext
+    );
+}
+
+#[test]
+fn asymmetric_v3_aad_test() {
+    use super::key::{KeyVersion, generate_keypair};
+
+    let test_plaintext = b"this is a test data";
+    let aad = b"This is some public data that we want to authenticate";
+    let wrong_aad = b"this is some public data that we want to authenticate";
+
+    let keypair = generate_keypair(KeyVersion::V2);
+
+    let encrypted_data = encrypt_asymmetric_with_aad(
+        test_plaintext,
+        &keypair.public_key,
+        aad,
+        CiphertextVersion::V3,
+    )
+    .unwrap();
+
+    let encrypted_data_vec: Vec<u8> = encrypted_data.into();
+    let encrypted_data = Ciphertext::try_from(encrypted_data_vec.as_slice()).unwrap();
+
+    let decrypted_data = encrypted_data
+        .decrypt_asymmetric_with_aad(&keypair.private_key, aad)
+        .unwrap();
+    assert_eq!(decrypted_data, test_plaintext);
+
+    assert!(
+        encrypted_data
+            .decrypt_asymmetric_with_aad(&keypair.private_key, wrong_aad)
+            .is_err()
+    );
+    assert!(
+        encrypted_data
+            .decrypt_asymmetric(&keypair.private_key)
+            .is_err()
+    );
+}
+
+#[test]
+fn asymmetric_v3_wrong_key_or_tampering_fails() {
+    use super::key::{KeyVersion, generate_keypair};
+
+    let keypair = generate_keypair(KeyVersion::V2);
+    let other = generate_keypair(KeyVersion::V2);
+
+    let encrypted: Vec<u8> =
+        encrypt_asymmetric(b"data", &keypair.public_key, CiphertextVersion::V3)
+            .unwrap()
+            .into();
+
+    // ML-KEM implicit rejection: a wrong key yields a different AEAD key, so authentication fails.
+    let ciphertext = Ciphertext::try_from(encrypted.as_slice()).unwrap();
+    assert!(matches!(
+        ciphertext.decrypt_asymmetric(&other.private_key),
+        Err(Error::InvalidMac)
+    ));
+
+    // Flip a bit in the ML-KEM ciphertext, the nonce and the AEAD ciphertext.
+    for offset in [8, 8 + 1120, encrypted.len() - 1] {
+        let mut tampered = encrypted.clone();
+        tampered[offset] ^= 1;
+        let tampered = Ciphertext::try_from(tampered.as_slice()).unwrap();
+        assert!(tampered.decrypt_asymmetric(&keypair.private_key).is_err());
+    }
+}
+
+#[test]
+fn asymmetric_v3_key_version_mismatch() {
+    use super::key::{KeyVersion, generate_keypair};
+
+    let v1 = generate_keypair(KeyVersion::V1);
+    let v2 = generate_keypair(KeyVersion::V2);
+
+    // Encrypting with the wrong key version.
+    assert!(matches!(
+        encrypt_asymmetric(b"data", &v1.public_key, CiphertextVersion::V3),
+        Err(Error::InvalidDataType)
+    ));
+    assert!(matches!(
+        encrypt_asymmetric(b"data", &v2.public_key, CiphertextVersion::V2),
+        Err(Error::InvalidDataType)
+    ));
+    // `Latest` stays on V2, which requires a V1 key.
+    assert!(matches!(
+        encrypt_asymmetric(b"data", &v2.public_key, CiphertextVersion::Latest),
+        Err(Error::InvalidDataType)
+    ));
+
+    // Decrypting with the wrong key version.
+    let v2_ciphertext = encrypt_asymmetric(b"data", &v1.public_key, CiphertextVersion::V2).unwrap();
+    let v3_ciphertext = encrypt_asymmetric(b"data", &v2.public_key, CiphertextVersion::V3).unwrap();
+    assert!(matches!(
+        v2_ciphertext.decrypt_asymmetric(&v2.private_key),
+        Err(Error::InvalidDataType)
+    ));
+    assert!(matches!(
+        v3_ciphertext.decrypt_asymmetric(&v1.private_key),
+        Err(Error::InvalidDataType)
+    ));
+}
+
+#[test]
+fn symmetric_v3_rejected() {
+    assert!(matches!(
+        encrypt(b"data", b"key", CiphertextVersion::V3),
+        Err(Error::UnknownVersion)
+    ));
+}
+
+#[test]
+fn v3_non_asymmetric_subtype_rejected() {
+    use super::key::{KeyVersion, generate_keypair};
+
+    let keypair = generate_keypair(KeyVersion::V2);
+    let mut encrypted: Vec<u8> =
+        encrypt_asymmetric(b"data", &keypair.public_key, CiphertextVersion::V3)
+            .unwrap()
+            .into();
+
+    // Rewrite the subtype field (bytes 4..6) to Symmetric.
+    encrypted[4..6].copy_from_slice(&u16::from(CiphertextSubtype::Symmetric).to_le_bytes());
+
+    assert!(matches!(
+        Ciphertext::try_from(encrypted.as_slice()),
+        Err(Error::InvalidDataType)
+    ));
+}
+
+#[test]
+fn v3_truncated_rejected() {
+    use super::key::{KeyVersion, generate_keypair};
+
+    let keypair = generate_keypair(KeyVersion::V2);
+    let encrypted: Vec<u8> =
+        encrypt_asymmetric(b"data", &keypair.public_key, CiphertextVersion::V3)
+            .unwrap()
+            .into();
+
+    for len in [8, 8 + 1120, 8 + 1120 + 24] {
+        assert!(matches!(
+            Ciphertext::try_from(&encrypted[..len]),
+            Err(Error::InvalidLength)
+        ));
+    }
 }
