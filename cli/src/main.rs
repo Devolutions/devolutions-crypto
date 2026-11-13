@@ -19,7 +19,11 @@ enum Commands {
     Generate,
 
     /// Generate a random keypair
-    GenerateKeypair,
+    GenerateKeypair {
+        /// The key version. Use 2 for an X-Wing post-quantum keypair.
+        #[arg(short, long)]
+        version: Option<u16>,
+    },
 
     /// Generate secret key with parts shared accross multiple parties.
     #[command(arg_required_else_help = true)]
@@ -120,6 +124,27 @@ enum Commands {
         key: String,
     },
 
+    /// Encapsulate a fresh shared secret to a version 2 (X-Wing) public key
+    #[command(arg_required_else_help = true)]
+    Encapsulate {
+        /// The public key to encapsulate to
+        key: String,
+
+        /// The encapsulation version to use
+        #[arg(short, long)]
+        version: Option<u16>,
+    },
+
+    /// Recover a shared secret from an encapsulated key using a version 2 (X-Wing) private key
+    #[command(arg_required_else_help = true)]
+    Decapsulate {
+        /// The encapsulated key
+        data: String,
+
+        /// The private key to use
+        key: String,
+    },
+
     /// Hash a password
     #[command(arg_required_else_help = true)]
     HashPassword {
@@ -196,7 +221,7 @@ fn main() {
 
     match cli.command {
         Commands::Generate => generate_key(),
-        Commands::GenerateKeypair => generate_keypair(),
+        Commands::GenerateKeypair { version } => generate_keypair(version),
         Commands::GenerateArgon2Parameters {
             memory,
             lanes,
@@ -219,6 +244,8 @@ fn main() {
         }
         Commands::Decrypt { data, key } => decrypt(data, key),
         Commands::DecryptAsymmetric { data, key } => decrypt_asymmetric(data, key),
+        Commands::Encapsulate { key, version } => encapsulate(key, version),
+        Commands::Decapsulate { data, key } => decapsulate(data, key),
         Commands::HashPassword { password, params } => hash_password(password, params),
         Commands::VerifyPassword { password, hash } => verify_password(hash, password),
         Commands::MixKeyExchange { private, public } => mix_key_exchange(private, public),
@@ -354,6 +381,7 @@ fn detect_dc_type(bytes: &[u8]) -> String {
         Ok(DataType::Signature) => "Signature".to_string(),
         Ok(DataType::KeyDerivation) => "DerivationParameters".to_string(),
         Ok(DataType::KdfEncryptedData) => "KdfEncryptedData".to_string(),
+        Ok(DataType::EncapsulatedKey) => "EncapsulatedKey".to_string(),
         _ => "unknown".to_string(),
     }
 }
@@ -504,14 +532,79 @@ fn verify_password(hash: String, password: String) {
     println!("{}", hash.verify_password(password.as_bytes()));
 }
 
-fn generate_keypair() {
-    let keypair = devolutions_crypto::key::generate_keypair(Default::default());
+fn generate_keypair(version: Option<u16>) {
+    let version = devolutions_crypto::key::KeyVersion::try_from(version.unwrap_or(0))
+        .unwrap_or_else(|_| {
+            eprintln!("Error: 'version' - unknown key version.");
+            std::process::exit(1);
+        });
+    let keypair = devolutions_crypto::key::generate_keypair(version);
 
     println!(
         "Private Key: {}\nPublic Key: {}",
         base64_encode(&Vec::<u8>::from(keypair.private_key)),
         base64_encode(&Vec::<u8>::from(keypair.public_key))
     );
+}
+
+fn encapsulate(key: String, version: Option<u16>) {
+    use devolutions_crypto::key::PublicKey;
+    use devolutions_crypto::key_encapsulation::{KeyEncapsulationVersion, encapsulate};
+
+    let key_bytes = decode_base64_arg("key", &key);
+    let key = PublicKey::try_from(key_bytes.as_slice()).unwrap_or_else(|_| {
+        eprintln!(
+            "Error: 'key' - expected PublicKey, received {}.",
+            detect_dc_type(&key_bytes)
+        );
+        std::process::exit(1);
+    });
+
+    let version = KeyEncapsulationVersion::try_from(version.unwrap_or(0)).unwrap_or_else(|_| {
+        eprintln!("Error: 'version' - unknown encapsulation version.");
+        std::process::exit(1);
+    });
+
+    let (encapsulated, secret) = encapsulate(&key, version).unwrap_or_else(|e| {
+        eprintln!("Error: encapsulation failed: {}.", e);
+        std::process::exit(1);
+    });
+
+    println!(
+        "Encapsulated Key: {}\nSecret Key: {}",
+        base64_encode(&Vec::<u8>::from(encapsulated)),
+        base64_encode(&Vec::<u8>::from(secret))
+    );
+}
+
+fn decapsulate(data: String, key: String) {
+    use devolutions_crypto::key::PrivateKey;
+    use devolutions_crypto::key_encapsulation::{EncapsulatedKey, decapsulate};
+
+    let data_bytes = decode_base64_arg("data", &data);
+    let encapsulated = EncapsulatedKey::try_from(data_bytes.as_slice()).unwrap_or_else(|_| {
+        eprintln!(
+            "Error: 'data' - expected EncapsulatedKey, received {}.",
+            detect_dc_type(&data_bytes)
+        );
+        std::process::exit(1);
+    });
+
+    let key_bytes = decode_base64_arg("key", &key);
+    let key = PrivateKey::try_from(key_bytes.as_slice()).unwrap_or_else(|_| {
+        eprintln!(
+            "Error: 'key' - expected PrivateKey, received {}.",
+            detect_dc_type(&key_bytes)
+        );
+        std::process::exit(1);
+    });
+
+    let secret: devolutions_crypto::key::SecretKey = decapsulate(&key, &encapsulated)
+        .unwrap_or_else(|e| {
+            eprintln!("Error: decapsulation failed: {}.", e);
+            std::process::exit(1);
+        });
+    println!("{}", base64_encode(&Vec::<u8>::from(secret)));
 }
 
 fn mix_key_exchange(private: String, public: String) {

@@ -303,3 +303,24 @@ path = "fuzz_targets/derive_encrypt/decrypt_with_password.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "encapsulated_key_deserialization"
+path = "fuzz_targets/key_encapsulation/encapsulated_key_deserialization.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "encapsulate"
+path = "fuzz_targets/key_encapsulation/encapsulate.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "decapsulate"
+path = "fuzz_targets/key_encapsulation/decapsulate.rs"
+test = false
+doc = false
+bench = false
