@@ -9,7 +9,7 @@ runs:
         rustup update
         cargo install wasm-pack --locked
 
-    - uses: actions/setup-node@v7
+    - uses: actions/setup-node@v7.1.0
       with:
         node-version: 24
 
@@ -32,7 +32,7 @@ runs:
         npm install
         npm test
 
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@v7.0.2
       with:
         include-hidden-files: true
         name: wasm

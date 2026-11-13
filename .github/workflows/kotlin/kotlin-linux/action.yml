@@ -4,12 +4,12 @@ runs:
   using: composite
   steps:
     - name: Download Version File
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v8.0.2
       with:
         name: config.txt
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v6
+      uses: actions/setup-java@v6.1.0
       with:
         distribution: 'temurin'
         java-version: '17'
@@ -22,7 +22,7 @@ runs:
         echo "version=$version" >> $GITHUB_OUTPUT
 
     - name: Download Native Libs
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v8.0.2
       with:
         pattern: kotlin-*
         merge-multiple: true
@@ -131,14 +131,14 @@ runs:
 
 
     - name: Upload Kotlin JVM package
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@v7.0.2
       with:
         include-hidden-files: true
         name: kotlin-jvm
         path: ./wrappers/kotlin/lib/build
 
     - name: Upload Kotlin Android package
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@v7.0.2
       with:
         include-hidden-files: true
         name: kotlin-android

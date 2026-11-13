@@ -5,4 +5,8 @@ updates:
     schedule:
       interval: "daily"
     # Disable version updates, we only want security updates.
-    open-pull-requests-limit: 0
+    open-pull-requests-limit: 0  # Keeps workflow action versions and .github/workflows/actions.lock in sync.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

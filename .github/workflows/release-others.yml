@@ -40,15 +40,15 @@ jobs:
       id-token: write
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v6.1.0
 
     - name: Check out for Rust release
-      uses: actions/checkout@v6
+      uses: actions/checkout@v6.1.0
       with:
         path: ./rust-release/
 
     - name: Check out devolutions/actions
-      uses: actions/checkout@v6
+      uses: actions/checkout@v6.1.0
       with:
         path: ./.github/workflows
         ref: v1
@@ -112,7 +112,7 @@ jobs:
     - name: Authenticate with crates.io
       if: ${{ inputs.publish_crate_rust }}
       id: auth
-      uses: rust-lang/crates-io-auth-action@v1
+      uses: rust-lang/crates-io-auth-action@v1.0.6
 
     - name: Publish Rust Crate
       if: ${{ inputs.publish_crate_rust }}
@@ -131,7 +131,7 @@ jobs:
 
     - name: Setup Node
       if: ${{ inputs.publish_npm }}
-      uses: actions/setup-node@v7
+      uses: actions/setup-node@v7.1.0
       with:
         node-version: '24'
         registry-url: https://registry.npmjs.org
@@ -242,7 +242,7 @@ jobs:
 
     - name: Save BOM
       if: ${{ inputs.publish_sbom_rust }}
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@v7.0.2
       with:
         name: bom_devolutions_crypto_rust.xml
         path: ./bom.xml

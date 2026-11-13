@@ -2,12 +2,12 @@ name: Test Python Wheels for Linux
 runs:
   using: composite
   steps:
-    - uses: actions/setup-python@v7
+    - uses: actions/setup-python@v7.1.0
       with:
         python-version: "3.12"
 
     - name: Download Python Wheels
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v8.0.2
       with:
         name: python-wheels-linux
         path: ./wheels

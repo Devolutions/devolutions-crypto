@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - name: Download Config
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v8.0.2
       with:
         name: config.txt
         path: ./wrappers/csharp
