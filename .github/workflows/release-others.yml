@@ -40,15 +40,15 @@ jobs:
       id-token: write
 
     steps:
-    - uses: actions/checkout@v6.1.0
+    - uses: actions/checkout@v7.0.1
 
     - name: Check out for Rust release
-      uses: actions/checkout@v6.1.0
+      uses: actions/checkout@v7.0.1
       with:
         path: ./rust-release/
 
     - name: Check out devolutions/actions
-      uses: actions/checkout@v6.1.0
+      uses: actions/checkout@v7.0.1
       with:
         path: ./.github/workflows
         ref: v1
