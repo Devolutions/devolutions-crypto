@@ -20,10 +20,10 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v6.1.0
 
     - name: Check out devolutions/actions
-      uses: actions/checkout@v6
+      uses: actions/checkout@v6.1.0
       with:
         path: ./.github/workflows
         ref: v1
@@ -62,7 +62,7 @@ jobs:
 
     - name: NuGet login (OIDC)
       id: nuget-login
-      uses: NuGet/login@v1
+      uses: NuGet/login@v1.2.0
       with:
         user: ${{ secrets.NUGET_BOT_USERNAME }}
 
