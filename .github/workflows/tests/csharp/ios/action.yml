@@ -46,7 +46,10 @@ runs:
       shell: bash
       run: |
         dotnet build 2>&1 | tee build.log
-        dotnet build -t:Run -p:_DeviceName=:v2:udid="$IPHONE_16_SIM_UDID" 2>&1 | tee -a build.log || true
+        xcrun simctl boot "$IPHONE_16_SIM_UDID" 2>&1 | tee -a build.log || true
+        perl -e 'alarm 300; exec @ARGV' xcrun simctl bootstatus "$IPHONE_16_SIM_UDID" -b 2>&1 | tee -a build.log
+        xcrun simctl install "$IPHONE_16_SIM_UDID" bin/Debug/net10.0-ios/iossimulator-arm64/iOS.app 2>&1 | tee -a build.log
+        perl -e 'alarm 600; exec @ARGV' xcrun simctl launch --console "$IPHONE_16_SIM_UDID" com.companyname.iOS 2>&1 | tee -a build.log || true
 
     - name: Check fail
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets/iOS
