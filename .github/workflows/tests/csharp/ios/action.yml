@@ -44,7 +44,9 @@ runs:
     - name: Unit tests
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets/iOS
       shell: bash
-      run: dotnet build -t:run -p:_DeviceName=:v2:udid="$IPHONE_16_SIM_UDID" 2>&1 | tee build.log
+      run: |
+        dotnet build 2>&1 | tee build.log
+        dotnet build -t:Run -p:_DeviceName=:v2:udid="$IPHONE_16_SIM_UDID" 2>&1 | tee -a build.log
 
     - name: Check fail
       working-directory: ./wrappers/csharp/tests/unit-tests/nugets/iOS
