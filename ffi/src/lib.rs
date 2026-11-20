@@ -1600,6 +1600,11 @@ pub unsafe extern "C" fn NewOnlineEncryptor(
             OnlineCiphertextEncryptor::new(key, aad, chunk_size, version)
         };
 
+        let encryptor = match encryptor {
+            Ok(e) => e,
+            Err(e) => return e.error_code(),
+        };
+
         let encryptor = Box::new(Mutex::new(encryptor));
 
         *output = Box::into_raw(encryptor) as *mut c_void;
@@ -3366,4 +3371,41 @@ fn test_derive_secret_key_pbkdf2_with_salt() {
     let params = DerivationParameters::try_from(params1.as_slice())
         .expect("should parse as DerivationParameters");
     let _round_trip: Vec<u8> = params.into();
+}
+
+#[test]
+fn test_new_online_encryptor_unsupported_public_key() {
+    let private_size = GenerateKeyPairPrivateSize(2) as usize;
+    let public_size = GenerateKeyPairPublicSize(2) as usize;
+    let mut private = vec![0u8; private_size];
+    let mut public = vec![0u8; public_size];
+    let aad = [0u8; 0];
+    let mut handle: *mut c_void = std::ptr::null_mut();
+
+    unsafe {
+        assert_eq!(
+            GenerateKeyPairWithVersion(
+                private.as_mut_ptr(),
+                private.len(),
+                public.as_mut_ptr(),
+                public.len(),
+                2
+            ),
+            0
+        );
+
+        let result = NewOnlineEncryptor(
+            public.as_ptr(),
+            public.len(),
+            aad.as_ptr(),
+            0,
+            4096,
+            true,
+            0,
+            &mut handle,
+        );
+
+        assert!(result < 0);
+        assert!(handle.is_null());
+    }
 }
