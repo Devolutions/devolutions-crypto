@@ -50,7 +50,7 @@ jobs:
     runs-on: "ubuntu-22.04" # Ensure we build with the minimum supported sysroot
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/native/native-build-linux
 
   native_build_macos:
@@ -58,7 +58,7 @@ jobs:
     runs-on: "macos-15"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/native/native-build-macos
 
   native_build_ios:
@@ -66,7 +66,7 @@ jobs:
     runs-on: "macos-15"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/native/native-build-ios
 
   native_build_windows:
@@ -74,7 +74,7 @@ jobs:
     runs-on: "windows-2022"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/native/native-build-windows
 
   #### NUGET BUILD ####
@@ -83,7 +83,7 @@ jobs:
     runs-on: "windows-2022"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/nugets/nugets-windows
 
   #### WEB ASSEMBLY BUILD ####
@@ -92,7 +92,7 @@ jobs:
     runs-on: "ubuntu-22.04"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/other/webassembly-build
 
   #### WEB ASSEMBLY TEST ####
@@ -101,7 +101,7 @@ jobs:
     runs-on: "macos-15"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/tests/webassembly/safari
 
   #### TESTS NUGETS ####
@@ -110,7 +110,7 @@ jobs:
     runs-on: "windows-2022"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/tests/csharp/windows
 
   tests_nuget_macos:
@@ -118,14 +118,14 @@ jobs:
     runs-on: "macos-15"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/tests/csharp/macos
 
   tests_nuget_ios:
     needs: [nugets, setup_config]
     runs-on: "macos-26"
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
 
       - name: Set Xcode version
         run: |
@@ -139,7 +139,7 @@ jobs:
     runs-on: "ubuntu-22.04"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/tests/csharp/linux
 
 ##### SWIFT BUILD #####
@@ -148,7 +148,7 @@ jobs:
     runs-on: "macos-15"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/swift
 
 ##### KOTLIN BUILD #####
@@ -157,7 +157,7 @@ jobs:
     runs-on: "windows-2022"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/kotlin/kotlin-windows
 
   kotlin_macos:
@@ -165,7 +165,7 @@ jobs:
     runs-on: "macos-15"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/kotlin/kotlin-macos
 
   build_kotlin:
@@ -173,7 +173,7 @@ jobs:
     runs-on: "ubuntu-22.04"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/kotlin/kotlin-linux
 
   tests_nuget_android:
@@ -181,7 +181,7 @@ jobs:
     runs-on: "ubuntu-22.04"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/tests/csharp/android
 
   #### CODE FORMATTING ####
@@ -189,7 +189,7 @@ jobs:
     runs-on: "ubuntu-22.04"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/formatting/rust
 
   #### DEPENDENCY AUDIT ####
@@ -197,7 +197,7 @@ jobs:
     runs-on: "ubuntu-22.04"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
 
       - name: Install cargo-deny
         run: cargo install cargo-deny --locked
@@ -209,7 +209,7 @@ jobs:
   quick_fuzz:
     runs-on: "ubuntu-22.04"
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/tests/fuzz/quick
 
   csharp_code_format:
@@ -217,7 +217,7 @@ jobs:
     runs-on: "windows-2022"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/formatting/csharp
 
   #### PYTHON BUILD ####
@@ -225,21 +225,21 @@ jobs:
     runs-on: "ubuntu-22.04"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/python/build/linux
 
   build_python_macos:
     runs-on: "macos-15"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/python/build/macos
 
   build_python_windows:
     runs-on: "windows-2022"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/python/build/windows
 
   #### PYTHON TEST ####
@@ -248,7 +248,7 @@ jobs:
     runs-on: "ubuntu-22.04"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/tests/python/linux
 
   test_python_macos:
@@ -256,7 +256,7 @@ jobs:
     runs-on: "macos-15"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/tests/python/macos
 
   test_python_windows:
@@ -264,7 +264,7 @@ jobs:
     runs-on: "windows-2022"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/tests/python/windows
 
   #### PUBLISH SOURCE ####
@@ -272,5 +272,5 @@ jobs:
     runs-on: "ubuntu-22.04"
 
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
       - uses: $/.github/workflows/other/source-publish

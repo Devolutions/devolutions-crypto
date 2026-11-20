@@ -19,7 +19,7 @@ jobs:
   extended_fuzz:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6.1.0
+      - uses: actions/checkout@v7.0.1
 
       - name: Install Rust nightly
         run: |
